@@ -16,9 +16,6 @@ class Cours
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $nomCours = null;
-
     #[ORM\Column]
     private ?int $duree = null;
 
@@ -40,6 +37,10 @@ class Cours
     #[ORM\Column]
     private ?int $nbInscriptionMax = null;
 
+    #[ORM\ManyToOne(inversedBy: 'cours')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?TypeCours $TypeCours = null;
+
     public function __construct()
     {
         $this->user_list = new ArrayCollection();
@@ -48,18 +49,6 @@ class Cours
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getNomCours(): ?string
-    {
-        return $this->nomCours;
-    }
-
-    public function setNomCours(string $nomCours): self
-    {
-        $this->nomCours = $nomCours;
-
-        return $this;
     }
 
     public function getDuree(): ?int
@@ -161,4 +150,15 @@ class Cours
         return $this;
     }
 
+    public function getTypeCours(): ?TypeCours
+    {
+        return $this->TypeCours;
+    }
+
+    public function setTypeCours(?TypeCours $TypeCours): self
+    {
+        $this->TypeCours = $TypeCours;
+
+        return $this;
+    }
 }

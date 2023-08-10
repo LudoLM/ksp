@@ -10,15 +10,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/cours')]
+#[Route('/')]
 class CoursController extends AbstractController
 {
-    #[Route('/', name: 'cours_index', methods: ['GET'])]
-    public function index(CoursRepository $coursRepository): Response
+    #[Route('/', name: 'home', methods: ['GET'])]
+    public function index(): Response
     {
-        return $this->render('cours/index.html.twig', [
-            'cours' => $coursRepository->findAll(),
-        ]);
+        return $this->render('base.html.twig');
     }
 
     #[Route('/new', name: 'cours_new', methods: ['GET', 'POST'])]

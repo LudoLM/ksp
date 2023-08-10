@@ -31,7 +31,6 @@ class UserFixtures extends Fixture
         $user->setRoles(["ROLE_ADMIN"]);
         $user->setPassword($this->hasher->hashPassword($user, 'admin'));
         $user->setTelephone("0616666666");
-
         $manager->persist($user);
         $manager->flush();
 
