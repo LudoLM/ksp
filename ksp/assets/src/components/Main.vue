@@ -12,7 +12,7 @@
       <div id="infosPratiques" class="blocAside">
         <div class="titleColumn">Infos Pratiques</div>
         <p>Les cours de déroulent à : </p><br>
-          <b>{{ store.state.coordonnees.adresse}}</b><br>
+          <b>{{ store.state.coordonnees.adresse}}</b>
           <b>{{ store.getters.fullAdress}}</b>
         <p>Votre coach <br>
           <span>{{ store.state.coordonnees.name }}</span><br>
@@ -63,7 +63,7 @@ export default {
 
 <style lang="scss">
 
-$widthContent : 980px;
+$widthContent : 80%;
 $mainColor: #A289CC;
 
 main{
@@ -99,7 +99,6 @@ main{
     font-weight: 900;
     letter-spacing: -.5px;
     border: none;
-    background: linear-gradient(from(#b1ce46), to(#80a527));
     background: linear-gradient(#b1ce46, #80a527);
     border-radius: 5px;
     cursor: pointer;

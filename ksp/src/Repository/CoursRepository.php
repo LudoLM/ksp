@@ -63,4 +63,12 @@ class CoursRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function findCoursFiltered() : array
+    {
+        $qb = $this->createQueryBuilder('c');
+
+
+        return $qb->getQuery()->getResult();
+    }
 }

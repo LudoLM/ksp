@@ -31,7 +31,7 @@ class Cours
     #[ORM\Column]
     private ?int $tarif = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $Date_limite_inscription = null;
 
     #[ORM\Column]
@@ -40,6 +40,7 @@ class Cours
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
     private ?TypeCours $TypeCours = null;
+
 
     public function __construct()
     {

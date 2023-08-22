@@ -5,15 +5,15 @@ namespace App\DataFixtures;
 use App\Entity\Cours;
 use App\Enum\CoursEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 
-class CoursFixtures extends Fixture
+class CoursFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
-        /*$faker = Factory::create('fr_FR');
-        $sortie1 = Array();
+        $faker = Factory::create('fr_FR');
         for ($i = 1; $i < 30; $i++) {
             $cours[$i] = new Cours();
             $cours[$i]->setDateCours($faker->dateTimeBetween('-1 week', '+1 month'));
@@ -22,10 +22,15 @@ class CoursFixtures extends Fixture
             $cours[$i]->setNbInscriptionMax($faker->numberBetween(3, 10));
             $cours[$i]->setDescription("blabla");
             $cours[$i]->setTarif(20);
-            $cours[$i]->setTypeCours($this->getReference(CoursEnum::CIRCUIT_TRAINING->getValue()));
+            $cours[$i]->setTypeCours($this->getReference(TypeCoursFixtures::COURS[$faker->numberBetween(0, count(TypeCoursFixtures::COURS) -1)]));
             $manager->persist($cours[$i]);
         }
-        $manager->flush();*/
+        $manager->flush();
 
+    }
+
+    public function getDependencies()
+    {
+       return [TypeCoursFixtures::class];
     }
 }
