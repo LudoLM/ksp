@@ -1,8 +1,8 @@
-import { createStore } from 'vuex'
+import { defineStore } from 'pinia'
 
 // Créez votre store
-const store = createStore({
-  state: {
+export const infos = defineStore('coordonnees',{
+  state: () => ({
     coordonnees: {
       name: "Servane COSQUERIC",
       adresse: "3 rue de Rennes",
@@ -11,10 +11,22 @@ const store = createStore({
       mail: "contact@kine-sport-sante.fr",
       phone: "06 12 34 55 67"
     },
-  },
+  }),
   getters: {
     fullAddress: (state) => {
       return state.coordonnees.codePostal + " " + state.coordonnees.ville;
+    },
+    fullPhone: (state) => {
+      return state.coordonnees.phone;
+    },
+    fullMail: (state) => {
+      return state.coordonnees.mail;
+    },
+    fullName: (state) => {
+      return state.coordonnees.name;
+    },
+    address: (state) => {
+      return state.coordonnees.adresse;
     }
   },
   mutations: {},
@@ -22,5 +34,4 @@ const store = createStore({
   modules: {}
 })
 
-export default store;
 

@@ -16,7 +16,7 @@ class CoursController extends AbstractController
     #[Route('/', name: 'home', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('base.html.twig');
+        return $this->render('app.html.twig');
     }
 
     #[Route('/new', name: 'cours_new', methods: ['GET', 'POST'])]

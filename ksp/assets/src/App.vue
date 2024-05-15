@@ -1,9 +1,3 @@
-<template>
-  <Myheader/>
-  <Mymain/>
-  <Myfooter/>
-</template>
-
 <script>
 import Myheader from "./components/Header";
 import Mymain from "./components/Main";
@@ -18,6 +12,12 @@ export default {
   }
 }
 </script>
+
+<template>
+  <Myheader/>
+  <Mymain/>
+  <Myfooter/>
+</template>
 
 <style>
 

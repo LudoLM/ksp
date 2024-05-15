@@ -1,4 +1,5 @@
 import {createApp} from 'vue'
+import {createPinia} from "pinia";
 import {createRouter, createWebHistory} from 'vue-router'
 
 import Home from '../views/Home.vue'
@@ -8,6 +9,7 @@ import OthersClasses from '../views/OthersClasses.vue'
 import Inscriptions from '../views/Inscriptions.vue'
 import Schedule from '../views/Schedule.vue'
 import Contact from '../views/Contact.vue'
+import App from '../App.vue'
 
 
 const router = createRouter({
@@ -66,7 +68,6 @@ const router = createRouter({
     ]
 })
 
-const app = createApp({})
-app.use(router);
-
-export default router
+const appPinia = createPinia()
+const app = createApp(App).use(router).use(appPinia)
+app.mount('#app')

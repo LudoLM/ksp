@@ -12,12 +12,12 @@
       <div id="infosPratiques" class="blocAside">
         <div class="titleColumn">Infos Pratiques</div>
         <p>Les cours de déroulent à : </p><br>
-          <b>{{ store.state.coordonnees.adresse}}</b>
-          <b>{{ store.getters.fullAdress}}</b>
+          <b>{{ store.address}}</b>
+          <b>{{ store.fullAddress}}</b>
         <p>Votre coach <br>
-          <span>{{ store.state.coordonnees.name }}</span><br>
-          <i class="fas fa-phone-alt"></i><b>{{ store.state.coordonnees.phone}}</b><br>
-          <a :href="`mailto:` + store.state.mail ">{{ store.state.coordonnees.mail }}</a></p>
+          <span>{{ store.fullName }}</span><br>
+          <i class="fas fa-phone-alt"></i><b>{{ store.fullPhone}}</b><br>
+          <a :href="`mailto:` + store.fullMail ">{{ store.fullMail }}</a></p>
         <button>RESERVEZ VOS COURS</button>
       </div>
       <div id="atouts" class="blocAside">
@@ -40,9 +40,12 @@
   </main>
 </template>
 
+<script setup>
+import {infos} from "../store/index";
+const store = infos();
+</script>
 <script>
 
-import { useStore } from 'vuex'
 import Myasset from "./Atout";
 
 export default {
@@ -51,12 +54,6 @@ export default {
   components:{
     Myasset
   },
-  setup() {
-    const store = useStore()
-    return {
-      store
-    }
-  }
 
 }
 </script>
