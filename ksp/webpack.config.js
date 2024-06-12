@@ -1,4 +1,5 @@
 const Encore = require('@symfony/webpack-encore');
+const webpack = require('webpack');
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -45,6 +46,11 @@ Encore
     // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
     .enableVueLoader()
+    .addPlugin(new webpack.DefinePlugin({
+        '__VUE_OPTIONS_API__': JSON.stringify(true),
+        '__VUE_PROD_DEVTOOLS__': JSON.stringify(false),
+        '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(false)
+    }))
     .enableSassLoader()
 
     // configure Babel

@@ -1,4 +1,5 @@
 <script>
+import './assets/scss/style.scss';
 import Myheader from "./components/Header";
 import Mymain from "./components/Main";
 import Myfooter from "./components/Footer";

@@ -16,6 +16,13 @@
     },
     "dependencies": {
         "pinia": "^2.1.7",
-        "vue-router": "^4.3.2"
+        "vue-router": "^4.3.2",
+        "webpack": "^5.92.0"
+    },
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
     }
 }
