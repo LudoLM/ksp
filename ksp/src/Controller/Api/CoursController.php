@@ -24,32 +24,29 @@ class CoursController extends AbstractController
 
     public function __construct(
         private readonly CoursRepository $coursRepository,
-        private readonly DefaultContextService $defaultContextService
+        private readonly SerializerInterface $serializer
     )
     {
 
     }
 
     #[Route('api/getCours', name: 'cours_index', methods: ['GET'])]
-    public function coursIndex(Request $request, SerializerInterface $serializer): JsonResponse
+    public function coursIndex(Request $request): JsonResponse
     {
+        $cours = $this->coursRepository->findAllSortByDate();
+        $jsonCours = $this->serializer->serialize($cours, 'json', ['groups' => 'cours:read']);
 
-        $cours = $this->coursRepository->findAll();
-        $serializedCours = $this->defaultContextService->getDefaultContext($cours);
-
-        return new JsonResponse([
-            "cours" =>$serializedCours,
-        ]);
+        return new JsonResponse($jsonCours, 200, [], true);
     }
+
 
     #[Route('api/getCours/{id}', name: 'cours_show', methods: ['GET'])]
     public function coursFiltered(int $id): JsonResponse
     {
         $cours = $this->coursRepository->find($id);
+        $jsonCours = $this->serializer->serialize($cours, 'json', ['groups' => 'cours:read']);
 
-        $serializedCours = DefaultContext::getDefaultContext($cours);
-
-        return new JsonResponse($serializedCours);
+        return new JsonResponse($jsonCours);
     }
 
 }

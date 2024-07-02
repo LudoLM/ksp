@@ -11,14 +11,14 @@
       </select>
       <label for="dateCours">Date</label>
       <input type="date" name="dateCours" id="dateCours" v-model="selectedDate">
+      <button @click="resetInfos">Reset</button>
     </div>
+
     <div class="gridCards">
       <ul>
-        <div v-for="info in filteredInfos" :key="info.id">
-          <li>
-            <CoursCard :info="info" />
-          </li>
-        </div>
+        <li v-for="info in filteredInfos" :key="info.id">
+          <CoursCard :info="info" />
+        </li>
       </ul>
     </div>
   </div>
@@ -59,12 +59,18 @@ export default {
       return uniqueTypeCours;
     },
     filteredInfos() {
-      if (this.selectedCoursId === null) {
-        return this.infos;
+      let filtered = this.infos;
+
+      if (this.selectedCoursId !== null && this.selectedCoursId !== "0") {
+        filtered = filtered.filter(info => info.TypeCours.id === this.selectedCoursId);
       }
 
-      return this.infos.filter(info => info.TypeCours.id === this.selectedCoursId);
-    },
+      if (this.selectedDate) {
+        filtered = filtered.filter(info => info.dateCours >= this.selectedDate);
+      }
+
+      return filtered;
+    }
   },
   created() {
     this.fetchData();
@@ -74,12 +80,20 @@ export default {
       fetch("/api/getCours", { method: "GET" })
           .then(response => response.json())
           .then(data => {
-            this.infos = data.cours;
+            this.infos = data;
           })
           .catch(error => {
             console.error(error);
           });
     },
+    resetInfos() {
+      this.selectedCoursId = null;
+      this.selectedDate = '';
+    }
   }
 }
 </script>
+
+<style scoped>
+/* Ajoutez ici vos styles */
+</style>

@@ -15,6 +15,7 @@
         "webpack-notifier": "^1.15.0"
     },
     "dependencies": {
+        "@vueuse/core": "^10.11.0",
         "pinia": "^2.1.7",
         "vue-router": "^4.3.2",
         "webpack": "^5.92.0"
