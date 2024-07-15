@@ -25,14 +25,12 @@
 </template>
 
 <script>
-import HelloWorld from '../components/HelloWorld.vue'
 import CoursCard from "../components/CoursCard";
 
 export default {
   name: 'Home',
   components: {
     CoursCard,
-    HelloWorld
   },
   data() {
     return {
@@ -47,8 +45,8 @@ export default {
       const seenIds = new Set();
 
       for (const info of this.infos) {
-        if (info.TypeCours) {
-          const typeCours = info.TypeCours;
+        if (info.typeCours) {
+          const typeCours = info.typeCours;
           if (!seenIds.has(typeCours.id)) {
             seenIds.add(typeCours.id);
             uniqueTypeCours.push(typeCours);
@@ -62,7 +60,7 @@ export default {
       let filtered = this.infos;
 
       if (this.selectedCoursId !== null && this.selectedCoursId !== "0") {
-        filtered = filtered.filter(info => info.TypeCours.id === this.selectedCoursId);
+        filtered = filtered.filter(info => info.typeCours.id === this.selectedCoursId);
       }
 
       if (this.selectedDate) {
