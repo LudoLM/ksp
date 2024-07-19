@@ -9,16 +9,14 @@
           Le {{ formattedDate }} à {{ formattedHour }}
         </div>
         <div>
-          Durée: {{ info.duree }} mns
+          Durée: {{ info.duree }} minutes
         </div>
         <div class="card_ville">
           À : {{ info.description }}
         </div>
-      </div>
-      <div class="sortieCardBack">
-        <div class="card_infos_back">
-          <div class="buttons">
-          </div>
+        <div class="flex">
+          <router-link :to="{ name: 'CoursDetail', params: { id: info.id } }" class="mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">+ d'infos</router-link>
+          <button @click="subscription" class="mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">S'inscrire</button>
         </div>
       </div>
     </div>
@@ -29,8 +27,8 @@
 </template>
 
 <script setup>
-import {computed} from 'vue';
-import {useDateFormat} from '@vueuse/core';
+import { computed } from 'vue';
+import { useDateFormat } from '@vueuse/core';
 
 // Props
 const props = defineProps({
@@ -38,24 +36,19 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  computed: {
-    formattedDate: String,
-    formattedHour: String,
-  },
 });
 
 // Convertir la dateDebut en objet Date si ce n'est pas déjà le cas
-const dateDebut = computed(() => {
-  return new Date(props.info.dateCours);
-});
+const dateDebut = computed(() => new Date(props.info.dateCours));
 
 // Propriété calculée pour formater la date
-const formattedDate = computed(() => {
-  return useDateFormat(dateDebut.value, 'DD/MM/YYYY').value;
-});
-const formattedHour = computed(() => {
-  return useDateFormat(dateDebut.value, 'HH:mm').value;
-});
+const formattedDate = computed(() => useDateFormat(dateDebut.value, 'DD/MM/YYYY').value);
+const formattedHour = computed(() => useDateFormat(dateDebut.value, 'HH:mm').value);
+
+// Méthodes
+const subscription = () => {
+  console.log('subscription');
+};
 </script>
 
 <style lang="scss" scoped>
@@ -74,19 +67,8 @@ $mainColor: #A289CC;
   background: #fff;
 }
 
-.card_infos {
-  position: absolute;
-  width: 100%;
-  height: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 0.3s ease-in-out;
-  z-index: 1000;
+.buttons {
+  height: 25%;
 }
 
 .sortieCard_Wrapper:hover .card_infos {
@@ -106,35 +88,6 @@ $mainColor: #A289CC;
   top: 30px;
   right: -30px;
   transition: all 0.3s ease-in-out;
-}
-
-
-.buttons {
-  position: absolute;
-  width: 100%;
-  height: 200px;
-  bottom: -100px;
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  align-items: center;
-  transition: all 0.2s ease-in-out;
-  transition-delay: 0.2s;
-}
-
-.sortieCard_Wrapper:hover .buttons {
-  bottom: 0;
-}
-
-.buttons a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 35%;
-  height: 50px;
-  background: transparent;
-  color: #fff;
-  border: 2px solid #fff;
 }
 
 .card_infos_back {

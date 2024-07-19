@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route(path: "/", name:"api")]
+#[Route(path: "api/", name:"api")]
 class CoursController extends AbstractController
 {
 
@@ -30,7 +30,7 @@ class CoursController extends AbstractController
 
     }
 
-    #[Route('api/getCours', name: 'cours_index', methods: ['GET'])]
+    #[Route('getCours', name: 'cours_index', methods: ['GET'])]
     public function coursIndex(Request $request): JsonResponse
     {
         $cours = $this->coursRepository->findAllSortByDate();
@@ -40,7 +40,7 @@ class CoursController extends AbstractController
     }
 
 
-    #[Route('api/getCours/{id}', name: 'cours_show', methods: ['GET'])]
+    #[Route('getCours/{id}', name: 'cours_detail', methods: ['GET'])]
     public function coursFiltered(int $id): JsonResponse
     {
         $cours = $this->coursRepository->find($id);

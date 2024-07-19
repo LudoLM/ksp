@@ -16,16 +16,24 @@
 
     <div class="gridCards">
       <ul>
-        <li v-for="info in filteredInfos" :key="info.id">
+        <li v-for="info in paginatedInfos" :key="info.id">
           <CoursCard :info="info" />
         </li>
       </ul>
+    </div>
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1">Précédent</button>
+      <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">Suivant</button>
     </div>
   </div>
 </template>
 
 <script>
 import CoursCard from "../components/CoursCard";
+import { ref } from 'vue'
+
+const currentPage = ref(1)
 
 export default {
   name: 'Home',
@@ -36,7 +44,9 @@ export default {
     return {
       infos: [],
       selectedCoursId: null,
-      selectedDate: ''
+      selectedDate: '',
+      currentPage: 1,
+      itemsPerPage: 9
     }
   },
   computed: {
@@ -68,6 +78,14 @@ export default {
       }
 
       return filtered;
+    },
+    paginatedInfos() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredInfos.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredInfos.length / this.itemsPerPage);
     }
   },
   created() {
@@ -87,6 +105,16 @@ export default {
     resetInfos() {
       this.selectedCoursId = null;
       this.selectedDate = '';
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
     }
   }
 }
