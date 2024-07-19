@@ -90,16 +90,7 @@ main{
     }
   }
 
-  button{
-    padding: 12px;
-    color: #fff;
-    font-weight: 900;
-    letter-spacing: -.5px;
-    border: none;
-    background: linear-gradient(#b1ce46, #80a527);
-    border-radius: 5px;
-    cursor: pointer;
-  }
+
 
 
   #recherche{
