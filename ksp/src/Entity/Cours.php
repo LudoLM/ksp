@@ -202,9 +202,4 @@ class Cours
         $this->statusCours = $statusCours;
     }
 
-    #[Groups(['cours:read'])]
-    public function getStatusCoursCssClass(): string
-    {
-        return StatusCoursEnum::getCssClassByLibelle($this->statusCours->getLibelle());
-    }
 }

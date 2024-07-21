@@ -20,7 +20,7 @@
         </div>
       </div>
     </div>
-    <div :class="['card_status', info.statusCoursCssClass]">
+    <div :class="['card_status', colors[info.statusCours.libelle]]">
       {{ info.statusCours.libelle }}
     </div>
   </div>
@@ -30,6 +30,16 @@
 import { computed } from 'vue';
 import { useDateFormat } from '@vueuse/core';
 
+// set the deault colors
+const colors = {
+  'En cours': 'bg-lime-500',
+  'Ouvert': 'bg-red-500',
+  'Fermé': 'bg-blue-500',
+  'Annulé': 'bg-yellow-500',
+  'En création': 'bg-indigo-500',
+  'Passé': 'bg-amber-500',
+  'Archivé': 'bg-emerald-500',
+};
 // Props
 const props = defineProps({
   info: {
@@ -80,7 +90,6 @@ $mainColor: #A289CC;
   position: absolute;
   width: 100px;
   height: 40px;
-  background: $mainColor;
   color: #fff;
   display: flex;
   justify-content: center;
