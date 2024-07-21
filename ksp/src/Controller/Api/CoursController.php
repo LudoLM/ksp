@@ -35,7 +35,6 @@ class CoursController extends AbstractController
     {
         $cours = $this->coursRepository->findAllSortByDate();
         $jsonCours = $this->serializer->serialize($cours, 'json', ['groups' => 'cours:read']);
-
         return new JsonResponse($jsonCours, 200, [], true);
     }
 
