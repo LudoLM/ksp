@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -15,6 +16,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:index','user:detail', 'cours:index'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -30,9 +32,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:index', 'cours:detail'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:index', 'cours:detail'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255)]
@@ -47,7 +51,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 10)]
     private ?string $telephone = null;
 
-    #[ORM\ManyToMany(targetEntity: cours::class, inversedBy: 'user_list')]
+    #[ORM\ManyToMany(targetEntity: Cours::class, inversedBy: 'users')]
+    #[Groups(['user:detail'])]
     private Collection $cours_list;
 
     public function __construct()

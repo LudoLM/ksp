@@ -8,7 +8,6 @@
           <MyNavLinks direction="column"/>
         </div>
 
-
       </div>
       <div class="footer_column">
         <h4>Contact</h4>
@@ -45,6 +44,7 @@ export default {
     MyNavLinks
   }
 }
+
 </script>
 
 <style lang="scss">

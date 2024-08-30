@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
 class Cours
@@ -16,46 +17,53 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $duree = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?\DateTimeInterface $dateCours = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $tarif = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?\DateTimeInterface $dateLimiteInscription = null;
 
     #[ORM\Column]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $nbInscriptionMax = null;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?TypeCours $typeCours = null;
+
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?StatusCours $statusCours = null;
 
+
+
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'cours_list')]
+    #[Groups(['cours:index','cours:detail'])]
+    #[MaxDepth(1)]
+    private Collection $users;
     public function __construct()
     {
-        $this->user_list = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     /**
@@ -200,6 +208,41 @@ class Cours
     public function setStatusCours(?StatusCours $statusCours): void
     {
         $this->statusCours = $statusCours;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    /**
+     * @param Collection $users
+     */
+    public function setUsers(Collection $users): void
+    {
+        $this->users = $users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addCoursList($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeCoursList($this);
+        }
+
+        return $this;
     }
 
 }

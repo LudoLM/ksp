@@ -1,6 +1,9 @@
 import {createApp} from 'vue'
 import {createPinia} from "pinia";
 import {createRouter, createWebHistory} from 'vue-router'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 
 import Home from '../views/Home.vue'
 import About from '../views/About.vue'
@@ -11,6 +14,7 @@ import Schedule from '../views/Schedule.vue'
 import Contact from '../views/Contact.vue'
 import CoursDetail from '../views/CoursDetails.vue'
 import App from '../App.vue'
+
 
 
 
@@ -28,6 +32,11 @@ const router = createRouter({
     ],
 })
 
+const vuetify = createVuetify({
+    components,
+    directives,
+})
+
 const appPinia = createPinia()
-const app = createApp(App).use(router).use(appPinia)
+const app = createApp(App).use(router).use(appPinia).use(vuetify)
 app.mount('#app')

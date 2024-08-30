@@ -14,14 +14,14 @@ class TypeCours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?string $libelle = null;
 
-    #[ORM\OneToMany(mappedBy: 'TypeCours', targetEntity: Cours::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'typeCours', targetEntity: Cours::class, orphanRemoval: true)]
     private Collection $cours;
 
     public function __construct()

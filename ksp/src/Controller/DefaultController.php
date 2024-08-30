@@ -11,8 +11,7 @@ class DefaultController extends AbstractController
     #[Route(path: "/{route}", name:"vue_pages",requirements: ["route" => "^(?!login|logout).*$"])]
     public function index(): \Symfony\Component\HttpFoundation\Response
     {
-//dd('here');
-        return $this->render('app.html.twig');
+        return $this->render('app.html.twig', ['user' => $this->getUser()]);
     }
 
 }

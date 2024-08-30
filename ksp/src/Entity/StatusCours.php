@@ -14,17 +14,17 @@ class StatusCours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?string $libelle = null;
 
     /**
      * @var Collection<int, Cours>
      */
-    #[ORM\OneToMany(mappedBy: 'StatusCours', targetEntity: Cours::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'statusCours', targetEntity: Cours::class, orphanRemoval: true)]
     private Collection $cours;
 
     public function __construct()
