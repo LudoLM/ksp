@@ -10,6 +10,12 @@
       <p>Heure: {{ formattedHour }}</p>
       <p>Durée: {{ cours.duree }} minutes</p>
       <p>Description: {{ cours.description }}</p>
+      <p><strong>Liste des participants</strong></p>
+      <ul>
+        <li v-for="participant in cours.users" :key="participant.id">
+          - {{ participant.nom }} {{ participant.prenom }}
+        </li>
+      </ul>
     </div>
 
     <div v-else>

@@ -12,8 +12,8 @@
       <div id="infosPratiques" class="blocAside">
         <div class="titleColumn">Infos Pratiques</div>
         <p>Les cours de déroulent à : </p><br>
-          <b>{{ store.address}}</b>
-          <b>{{ store.fullAddress}}</b>
+        <b>{{ store.address}}</b>
+        <b>{{ store.fullAddress}}</b>
         <p>Votre coach <br>
           <span>{{ store.fullName }}</span><br>
           <i class="fas fa-phone-alt"></i><b>{{ store.fullPhone}}</b><br>
@@ -90,9 +90,6 @@ main{
     }
   }
 
-
-
-
   #recherche{
     display: flex;
     flex-direction: column;
@@ -122,7 +119,3 @@ main{
 
 
 </style>
-
-
-
-
