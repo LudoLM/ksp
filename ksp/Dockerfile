@@ -6,15 +6,15 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 RUN apt update && apt install -yqq nodejs npm
 
-COPY . /var/www/
+# Remontez d'un niveau pour copier le contenu de la racine du projet
+COPY ../ /var/www/
 
-COPY ./docker/apache.conf /etc/apache2/sites-available/000-default.conf
-
-RUN cd /var/www/ && \
-    composer install && \
-    npm install --force && \
-    npm run build
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
 WORKDIR /var/www/
+
+RUN composer install
+RUN npm install --force
+RUN npm run build
 
 EXPOSE 80
