@@ -3,49 +3,152 @@
     <div class="coursCard">
       <div class="card_infos">
         <div class="card_title">
-          <h3>{{ info.TypeCours.libelle }}</h3>
+          <h3>{{ info.typeCours.libelle }}</h3>
         </div>
         <div class="card_dateDebut">
-          Le {{ info.dateCours }}
+          Le {{ formattedDate }} à {{ formattedHour }}
         </div>
         <div>
-          Durée: {{ info.duree }} mns
+          Durée: {{ info.duree }} minutes
         </div>
         <div class="card_ville">
           À : {{ info.description }}
         </div>
+        <div>
+          {{ usersCount }} inscrits / {{ info.nbInscriptionMax }} places
+        </div>
+        <div class="flex">
+          <router-link :to="{ name: 'CoursDetail', params: { id: info.id } }" class="mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            + d'infos
+          </router-link>
+          <!-- Si l'utilisateur n'est pas connecté -->
+          <v-dialog v-model="loginDialog" max-width="500">
+            <template v-slot:activator="{ props: activatorProps }">
+              <v-btn
+                  v-if="!userId"
+                  v-bind="activatorProps"
+                  color="indigo"
+                  dark
+                  class="mt-3 mx-2"
+              >
+                S'inscrire
+              </v-btn>
+            </template>
+
+            <v-card>
+              <v-card-title class="text-h5">Connexion requise</v-card-title>
+              <v-card-text>
+                Veuillez vous authentifier pour vous inscrire à ce cours.
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn @click="redirectToLogin">Login</v-btn>
+                <v-btn color="blue darken-1" text @click="loginDialog = false">Fermer</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+          <!-- Si l'utilisateur est connecté -->
+          <v-btn v-if="userId && !isSubscribed && statusCours !=='Complet'" @click="handleSubscription" class="mt-3 mx-2" color="indigo" dark>
+            S'inscrire
+          </v-btn>
+          <v-btn v-if="userId && isSubscribed" @click="handleUnsubscription" class="mt-3 mx-2" color="indigo" dark>
+            Se désinscrire
+          </v-btn>
+        </div>
       </div>
-      <div class="sortieCardBack">
-        <div class="card_infos_back">
-
-
-          <div class="buttons">
-          </div>
-        </div>
-        </div>
-
+    </div>
+    <div :class="['card_status', colors[statusCours]]">
+      {{ statusCours }}
     </div>
   </div>
-
 </template>
 
-<script>
-export default {
-  name: "CoursCard",
-  props: {
-    info: {
-      type: Object,
-      required: true,
-    }
+<script setup>
+import { ref, computed, watch } from 'vue';
+import { useDateFormat } from '@vueuse/core';
+import { useUserStore } from "../store/user";
+import { useSubscription, useUnSubscription } from "../utils/useSubscribing";
+
+const userStore = useUserStore();
+const userId = userStore.getUserId;
+
+const emit = defineEmits(['subscriptionResponse']);
+
+// Couleurs par statut
+const colors = {
+  'En cours': 'bg-lime-500',
+  'Ouvert': 'bg-red-500',
+  'Complet': 'bg-blue-500',
+  'Annulé': 'bg-yellow-500',
+  'En création': 'bg-indigo-500',
+  'Passé': 'bg-amber-500',
+  'Archivé': 'bg-emerald-500',
+};
+
+// Props
+const props = defineProps({
+  info: {
+    type: Object,
+    required: true,
+  },
+});
+
+// État de la modale
+const loginDialog = ref(false);
+
+const redirectToLogin = () => {
+  window.location.href = '/login'; // Rediriger vers la route Symfony
+};
+
+// Formattage des dates
+const dateDebut = computed(() => new Date(props.info.dateCours));
+const formattedDate = computed(() => useDateFormat(dateDebut.value, 'DD/MM/YYYY').value);
+const formattedHour = computed(() => useDateFormat(dateDebut.value, 'HH:mm').value);
+
+// Initialiser le statut du cours comme réactif
+const statusCours = ref(props.info.statusCours.libelle);
+let usersCount = ref(props.info.users.length);
+
+// Vérifier si l'utilisateur est inscrit
+const isSubscribed = ref(props.info.users.some(user => user.id === userId));
+
+// Gestion de l'inscription
+const handleSubscription = async () => {
+  const success = await useSubscription(props.info.id);
+  if (success.reponse) {
+    isSubscribed.value = true;
+    statusCours.value = success.statusChange;
+    usersCount = success.usersCount;
+    emit('subscriptionResponse', {
+      type: 'success',
+      message: "Vous êtes inscrit à ce cours",
+    });
+  } else {
+    emit('subscriptionResponse', {
+      type: 'error',
+      message: "Vous n'avez pas pu être inscrit à ce cours",
+    });
   }
-}
+};
+
+// Gestion de la désinscription
+const handleUnsubscription = async () => {
+  const success = await useUnSubscription(props.info.id);
+  if (success.reponse) {
+    isSubscribed.value = false;
+    statusCours.value = success.statusChange;
+    usersCount = success.usersCount;
+    emit('subscriptionResponse', {
+      type: 'success',
+      message: "Vous vous êtes désinscrit de ce cours",
+    });
+  }
+};
 </script>
 
 <style lang="scss" scoped>
-
-$mainColor: #A289CC;
-
-.coursCard_Wrapper{
+.coursCard_Wrapper {
   width: 200px;
   height: 300px;
   position: relative;
@@ -54,103 +157,20 @@ $mainColor: #A289CC;
 .coursCard {
   width: 100%;
   height: 100%;
-  background-image: radial-gradient(circle at 28% 51%, rgba(206, 206, 206,0.03) 0%, rgba(206, 206, 206,0.03) 17%,transparent 17%, transparent 100%),radial-gradient(circle at 45% 10%, rgba(10, 10, 10,0.03) 0%, rgba(10, 10, 10,0.03) 45%,transparent 45%, transparent 100%),radial-gradient(circle at 48% 44%, rgba(74, 74, 74,0.03) 0%, rgba(74, 74, 74,0.03) 84%,transparent 84%, transparent 100%),radial-gradient(circle at 47% 50%, rgba(186, 186, 186,0.03) 0%, rgba(186, 186, 186,0.03) 23%,transparent 23%, transparent 100%),radial-gradient(circle at 29% 70%, rgba(9, 9, 9,0.03) 0%, rgba(9, 9, 9,0.03) 32%,transparent 32%, transparent 100%),radial-gradient(circle at 2% 75%, rgba(179, 179, 179,0.03) 0%, rgba(179, 179, 179,0.03) 19%,transparent 19%, transparent 100%),radial-gradient(circle at 2% 36%, rgba(26, 26, 26,0.03) 0%, rgba(26, 26, 26,0.03) 1%,transparent 1%, transparent 100%),radial-gradient(circle at 53% 70%, rgba(90, 90, 90,0.03) 0%, rgba(90, 90, 90,0.03) 55%,transparent 55%, transparent 100%),radial-gradient(circle at 28% 92%, rgba(31, 31, 31,0.03) 0%, rgba(31, 31, 31,0.03) 35%,transparent 35%, transparent 100%),linear-gradient(90deg, rgb(255,255,255),rgb(255,255,255));
-  background-size: 100%;
-  transition: all .1s ease-in-out;
-  position: relative;
-  overflow: hidden;
   font-family: poppins;
+  background: #fff;
 }
 
-.coursCard::after{
-  content: "";
+.card_status {
   position: absolute;
-  width: 150px;
-  height: 150px;
-  background: $mainColor;
-  border-radius: 50%;
-  top: -20%;
-  right: -30%;
-  transition: all .3s ease-in-out;
-  opacity: .8
-}
-
-.coursCard_Wrapper .coursCard:hover{
-  background-size: 150%;
-}
-
-.coursCard:hover::after{
-  width: 500px;
-  height: 500px;
-  top: -150%;
-  right: -30%;
-}
-
-
-.card_infos{
-  position: absolute;
-  width: 100%;
-  height: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  transition: all .3s ease-in-out;
-  z-index: 1000;
-}
-
-.sortieCard_Wrapper:hover .card_infos{
+  width: 100px;
+  height: 40px;
   color: #fff;
-  top: 30%;
-}
-
-.sortieCardBack{
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: #000;
-  bottom: -100%;
-  opacity: .6;
-  transition: all .3s ease-in-out;
-}
-
-.buttons{
-  position: absolute;
-  width: 100%;
-  height: 200px;
-  bottom: -100px;
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  align-items: center;
-  transition: all .2s ease-in-out;
-  transition-delay: .2s;
-}
-
-.sortieCard_Wrapper:hover .buttons{
-  bottom: 0;
-}
-
-.buttons a{
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 35%;
-  height: 50px;
-  background: transparent;
-  color: #fff;
-  border: 2px solid #fff;
+  top: 30px;
+  right: -30px;
+  transition: all 0.3s ease-in-out;
 }
-
-.card_infos_back{
-  color: #fff;
-}
-
-.sortieCard_Wrapper:hover .sortieCardBack{
-  bottom: 0;
-}
-
 </style>

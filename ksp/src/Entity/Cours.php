@@ -2,11 +2,14 @@
 
 namespace App\Entity;
 
+use App\Enum\StatusCoursEnum;
 use App\Repository\CoursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
 class Cours
@@ -14,152 +17,232 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $duree = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date_cours = null;
+    #[Groups(['cours:index', 'cours:detail'])]
+    private ?\DateTimeInterface $dateCours = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?string $description = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'cours_list')]
-    private Collection $user_list;
-
     #[ORM\Column]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $tarif = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $Date_limite_inscription = null;
+    #[Groups(['cours:index', 'cours:detail'])]
+    private ?\DateTimeInterface $dateLimiteInscription = null;
 
     #[ORM\Column]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?int $nbInscriptionMax = null;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?TypeCours $TypeCours = null;
+    #[Groups(['cours:index', 'cours:detail'])]
+    private ?TypeCours $typeCours = null;
 
 
+    #[ORM\ManyToOne(inversedBy: 'cours')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['cours:index', 'cours:detail'])]
+    private ?StatusCours $statusCours = null;
+
+
+
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'cours_list')]
+    #[Groups(['cours:index','cours:detail'])]
+    #[MaxDepth(1)]
+    private Collection $users;
     public function __construct()
     {
-        $this->user_list = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * @param int|null $id
+     */
+    public function setId(?int $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return int|null
+     */
     public function getDuree(): ?int
     {
         return $this->duree;
     }
 
-    public function setDuree(int $duree): self
+    /**
+     * @param int|null $duree
+     */
+    public function setDuree(?int $duree): void
     {
         $this->duree = $duree;
-
-        return $this;
     }
 
+    /**
+     * @return \DateTimeInterface|null
+     */
     public function getDateCours(): ?\DateTimeInterface
     {
-        return $this->date_cours;
+        return $this->dateCours;
     }
 
-    public function setDateCours(\DateTimeInterface $date_cours): self
+    /**
+     * @param \DateTimeInterface|null $dateCours
+     */
+    public function setDateCours(?\DateTimeInterface $dateCours): void
     {
-        $this->date_cours = $date_cours;
-
-        return $this;
+        $this->dateCours = $dateCours;
     }
 
+    /**
+     * @return string|null
+     */
     public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription(string $description): self
+    /**
+     * @param string|null $description
+     */
+    public function setDescription(?string $description): void
     {
         $this->description = $description;
-
-        return $this;
     }
 
     /**
-     * @return Collection<int, User>
+     * @return int|null
      */
-    public function getUserList(): Collection
-    {
-        return $this->user_list;
-    }
-
-    public function addUserList(User $userList): self
-    {
-        if (!$this->user_list->contains($userList)) {
-            $this->user_list->add($userList);
-            $userList->addCoursList($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserList(User $userList): self
-    {
-        if ($this->user_list->removeElement($userList)) {
-            $userList->removeCoursList($this);
-        }
-
-        return $this;
-    }
-
     public function getTarif(): ?int
     {
         return $this->tarif;
     }
 
-    public function setTarif(int $tarif): self
+    /**
+     * @param int|null $tarif
+     */
+    public function setTarif(?int $tarif): void
     {
         $this->tarif = $tarif;
-
-        return $this;
     }
 
+    /**
+     * @return \DateTimeInterface|null
+     */
     public function getDateLimiteInscription(): ?\DateTimeInterface
     {
-        return $this->Date_limite_inscription;
+        return $this->dateLimiteInscription;
     }
 
-    public function setDateLimiteInscription(?\DateTimeInterface $Date_limite_inscription): self
+    /**
+     * @param \DateTimeInterface|null $dateLimiteInscription
+     */
+    public function setDateLimiteInscription(?\DateTimeInterface $dateLimiteInscription): void
     {
-        $this->Date_limite_inscription = $Date_limite_inscription;
-
-        return $this;
+        $this->dateLimiteInscription = $dateLimiteInscription;
     }
 
+    /**
+     * @return int|null
+     */
     public function getNbInscriptionMax(): ?int
     {
         return $this->nbInscriptionMax;
     }
 
-    public function setNbInscriptionMax(int $nbInscriptionMax): self
+    /**
+     * @param int|null $nbInscriptionMax
+     */
+    public function setNbInscriptionMax(?int $nbInscriptionMax): void
     {
         $this->nbInscriptionMax = $nbInscriptionMax;
-
-        return $this;
     }
 
+    /**
+     * @return TypeCours|null
+     */
     public function getTypeCours(): ?TypeCours
     {
-        return $this->TypeCours;
+        return $this->typeCours;
     }
 
-    public function setTypeCours(?TypeCours $TypeCours): self
+    /**
+     * @param TypeCours|null $typeCours
+     */
+    public function setTypeCours(?TypeCours $typeCours): void
     {
-        $this->TypeCours = $TypeCours;
+        $this->typeCours = $typeCours;
+    }
+
+    /**
+     * @return StatusCours|null
+     */
+    public function getStatusCours(): ?StatusCours
+    {
+        return $this->statusCours;
+    }
+
+    /**
+     * @param StatusCours|null $statusCours
+     */
+    public function setStatusCours(?StatusCours $statusCours): void
+    {
+        $this->statusCours = $statusCours;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    /**
+     * @param Collection $users
+     */
+    public function setUsers(Collection $users): void
+    {
+        $this->users = $users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addCoursList($this);
+        }
 
         return $this;
     }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeCoursList($this);
+        }
+
+        return $this;
+    }
+
 }

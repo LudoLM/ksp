@@ -7,10 +7,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DefaultController extends AbstractController
 {
-    #[Route(path: '/home', name: 'app_home')]
+    // catch all routes and render the vue app except for the login, logout  and register routes
+    #[Route(path: "/{route}", name:"vue_pages",requirements: ["route" => "^(?!login|logout|register).*$"])]
     public function index(): \Symfony\Component\HttpFoundation\Response
     {
-        return $this->render('app.html.twig');
+        return $this->render('app.html.twig', ['user' => $this->getUser()]);
     }
 
 }

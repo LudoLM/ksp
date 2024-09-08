@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\TypeCoursRepository;
+use App\Repository\StatusCoursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
-#[ORM\Entity(repositoryClass: TypeCoursRepository::class)]
-class TypeCours
+#[ORM\Entity(repositoryClass: StatusCoursRepository::class)]
+class StatusCours
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -21,7 +21,10 @@ class TypeCours
     #[Groups(['cours:index', 'cours:detail'])]
     private ?string $libelle = null;
 
-    #[ORM\OneToMany(mappedBy: 'typeCours', targetEntity: Cours::class, orphanRemoval: true)]
+    /**
+     * @var Collection<int, Cours>
+     */
+    #[ORM\OneToMany(mappedBy: 'statusCours', targetEntity: Cours::class, orphanRemoval: true)]
     private Collection $cours;
 
     public function __construct()
@@ -39,7 +42,7 @@ class TypeCours
         return $this->libelle;
     }
 
-    public function setLibelle(string $libelle): self
+    public function setLibelle(string $libelle): static
     {
         $this->libelle = $libelle;
 
@@ -54,22 +57,22 @@ class TypeCours
         return $this->cours;
     }
 
-    public function addCour(Cours $cour): self
+    public function addCour(Cours $cour): static
     {
         if (!$this->cours->contains($cour)) {
             $this->cours->add($cour);
-            $cour->setTypeCours($this);
+            $cour->setStatusCours($this);
         }
 
         return $this;
     }
 
-    public function removeCour(Cours $cour): self
+    public function removeCour(Cours $cour): static
     {
         if ($this->cours->removeElement($cour)) {
             // set the owning side to null (unless already changed)
-            if ($cour->getTypeCours() === $this) {
-                $cour->setTypeCours(null);
+            if ($cour->getStatusCours() === $this) {
+                $cour->setStatusCours(null);
             }
         }
 
