@@ -25,7 +25,7 @@
           <v-dialog v-model="loginDialog" max-width="500">
             <template v-slot:activator="{ props: activatorProps }">
               <v-btn
-                  v-if="!userId"
+                  v-if="!userId && statusCours !=='Complet'"
                   v-bind="activatorProps"
                   color="indigo"
                   dark
