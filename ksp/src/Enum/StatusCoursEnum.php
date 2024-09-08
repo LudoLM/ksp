@@ -5,7 +5,7 @@ namespace App\Enum;
 enum StatusCoursEnum: string
 {
     case OUVERT = "Ouvert";
-    case FERME = "Fermé";
+    case COMPLET = "Complet";
     case ANNULE = "Annulé";
     case EN_CREATION = "En création";
     case EN_COURS = "En cours";

@@ -1,4 +1,8 @@
 <template>
+  <!-- Affichage d'un message de validation -->
+  <v-alert v-model="alertVisible" :type="alertType" dismissible>
+    {{ alertMessage }}
+  </v-alert>
   <div class="home">
     <h1>Kiné Sports Santé à Chavagne (35) : la méthode simple et efficace pour vous débarrasser de vos douleurs !</h1>
   </div>
@@ -17,7 +21,7 @@
     <div class="gridCards">
       <ul>
         <li v-for="info in paginatedInfos" :key="info.id">
-          <CoursCard :info="info" />
+          <CoursCard :info="info" @subscriptionResponse="handleSubscriptionResponse"/>
         </li>
       </ul>
     </div>
@@ -32,6 +36,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import CoursCard from "../components/CoursCard.vue";
+import {VAlert} from "vuetify/components";
 
 // Déclarations des refs et données
 const infos = ref([]);
@@ -54,6 +59,23 @@ const fetchData = async () => {
 onMounted(() => {
   fetchData();
 });
+
+// Déclaration des variables pour l'alerte
+const alertVisible = ref(false);
+const alertType = ref('success');
+const alertMessage = ref('');
+
+// Fonction pour gérer l'événement subscriptionResponse
+const handleSubscriptionResponse = ({ type, message }) => {
+  alertType.value = type;      // 'success' ou 'error'
+  alertMessage.value = message; // Message à afficher
+  alertVisible.value = true;    // Afficher l'alerte
+
+  // Masquer l'alerte après 3 secondes
+  setTimeout(() => {
+    alertVisible.value = false;
+  }, 3000);
+};
 
 // Propriétés calculées
 const uniqueTypeCours = computed(() => {
@@ -114,5 +136,14 @@ const prevPage = () => {
 </script>
 
 <style scoped>
-/* Ajoutez ici vos styles */
+
+  .v-alert {
+    opacity: .9;
+    position: fixed;
+    z-index: 10;
+    top: 5%;
+    left: 10%;
+    right: 10%;
+    height: 10%;
+  }
 </style>

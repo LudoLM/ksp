@@ -1,23 +1,25 @@
 
 export async function useSubscription(coursId) {
+    try {
+        const response = await fetch(`/api/addUser/${coursId}`, {
+            method: 'POST',
+        });
 
-        try {
-            const response = await fetch(`/api/addUser/${coursId}`, {
-                method: 'POST',
-            });
-
-            if (response.ok) {
-                console.log('Utilisateur ajouté au cours avec succès');
-                return true;
-            } else {
-                console.log('Échec de l\'ajout de l\'utilisateur au cours');
-                return false
-            }
-        } catch (error) {
-            console.error('Erreur:', error);
-            return false
+        if (response.ok) {
+            const result = await response.json();
+            console.log('Réponse du serveur:', "Utilisateur ajouté au cours");
+            return result;
+        } else {
+            const errorData = await response.json();
+            console.log('Erreur du serveur:', errorData);
+            return false;
         }
+    } catch (error) {
+        console.error('Erreur de réseau:', error);
+        return false;
+    }
 }
+
 
 
 export async function useUnSubscription(coursId) {
@@ -27,8 +29,9 @@ export async function useUnSubscription(coursId) {
         });
 
         if (response.ok) {
-            console.log('Utilisateur retiré du cours avec succès');
-            return true;
+            const result = await response.json();
+            console.log('Réponse du serveur:', "Utilisateur retiré du cours");
+            return result;
         } else {
             console.log('Échec du retrait de l\'utilisateur du cours');
             return false;
