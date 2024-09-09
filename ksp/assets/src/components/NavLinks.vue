@@ -12,8 +12,10 @@ export default {
   },
   computed: {
     routes() {
-      return this.$router.options.routes.filter(route => route.name !== 'CoursDetail');
+      // Utilise getRoutes() pour obtenir toutes les routes
+      return this.$router.getRoutes().filter(route => route.name !== 'CoursDetail' && route.name !== 'createCours');
     }
+
   }
 }
 </script>

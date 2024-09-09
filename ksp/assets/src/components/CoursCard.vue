@@ -49,7 +49,7 @@
           </v-dialog>
 
           <!-- Si l'utilisateur est connecté -->
-          <v-btn v-if="userId && !isSubscribed && statusCours !=='Complet'" @click="handleSubscription" class="mt-3 mx-2" color="indigo" dark>
+          <v-btn v-if="userId && !isSubscribed && statusCours !=='Complet' && statusCours !== 'En création'" @click="handleSubscription" class="mt-3 mx-2" color="indigo" dark>
             S'inscrire
           </v-btn>
           <v-btn v-if="userId && isSubscribed" @click="handleUnsubscription" class="mt-3 mx-2" color="indigo" dark>

@@ -4,6 +4,9 @@
     {{ alertMessage }}
   </v-alert>
   <div class="home">
+    <button>
+      <router-link to="/cours/add" class="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-500 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Ajouter un cours</router-link>
+    </button>
     <h1>Kiné Sports Santé à Chavagne (35) : la méthode simple et efficace pour vous débarrasser de vos douleurs !</h1>
   </div>
   <div class="container">
@@ -13,7 +16,7 @@
         <option value="0">Choisissez un cours</option>
         <option v-for="typeCours in uniqueTypeCours" :key="typeCours.id" :value="typeCours.id">{{ typeCours.libelle }}</option>
       </select>
-      <label for="dateCours">Date</label>
+      <label for="dateCours">A partir de</label>
       <input type="date" name="dateCours" id="dateCours" v-model="selectedDate">
       <button @click="resetInfos">Reset</button>
     </div>
