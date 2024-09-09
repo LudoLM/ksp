@@ -14,6 +14,7 @@ import Schedule from '../views/Schedule.vue'
 import Contact from '../views/Contact.vue'
 import CoursDetail from '../views/CoursDetails.vue'
 import App from '../App.vue'
+import CoursForm from "../views/CoursForm.vue";
 
 
 
@@ -29,6 +30,7 @@ const router = createRouter({
         { path: '/contact', name: 'Contact', component: Contact },
         { path: '/about', name: 'A propos', component: About },
         { path: '/coursDetails/:id', name: 'CoursDetail', component: CoursDetail },
+        {path: '/cours/add', name: 'createCours', component: CoursForm},
     ],
 })
 

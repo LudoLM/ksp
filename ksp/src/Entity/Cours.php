@@ -17,49 +17,48 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
     private ?int $duree = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
     private ?\DateTimeInterface $dateCours = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
     private ?int $tarif = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
     private ?\DateTimeInterface $dateLimiteInscription = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
     private ?int $nbInscriptionMax = null;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
     private ?TypeCours $typeCours = null;
 
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
     private ?StatusCours $statusCours = null;
 
 
 
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'cours_list')]
     #[Groups(['cours:index','cours:detail'])]
-    #[MaxDepth(1)]
     private Collection $users;
     public function __construct()
     {

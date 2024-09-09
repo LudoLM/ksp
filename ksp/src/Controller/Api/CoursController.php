@@ -3,17 +3,20 @@
 namespace App\Controller\Api;
 
 
+use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
-use App\Entity\StatusCours;
 use App\Enum\StatusCoursEnum;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
+use App\Repository\TypeCoursRepository;
 use App\Service\DefaultContext;
 use App\Service\UpdateStatusCours;
 use Doctrine\ORM\EntityManagerInterface;
+use phpDocumentor\Reflection\DocBlock\Serializer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -26,6 +29,7 @@ class CoursController extends AbstractController
         private readonly SerializerInterface $serializer,
         private readonly EntityManagerInterface $em,
         private readonly StatusCoursRepository $statusCoursRepository,
+        private readonly TypeCoursRepository $typeCoursRepository,
         private readonly UpdateStatusCours $updateStatusCours
     )
     {
@@ -97,5 +101,34 @@ class CoursController extends AbstractController
 
         // Retourne une réponse JSON pour indiquer que l'utilisateur a été supprimé avec succès
         return new JsonResponse(['reponse' => true, 'statusChange' => $statusChange, 'usersCount' => $usersCount], 200);
+    }
+
+    // Add route for create new cours
+    #[Route('cours/create', name: 'cours_create', methods: ['POST'])]
+    public function createCours(
+        Request $request,
+        #[MapRequestPayload(
+            serializationContext: [
+                'groups' => ['cours:create']
+            ]
+        )]
+        CreateCoursDTO $cours
+    ) : JsonResponse
+    {
+        $newCours = new Cours();
+        $newCours->setDuree($cours->dureeCours);
+        $newCours->setDateCours($cours->dateCours);
+        $newCours->setDescription($cours->description);
+        $newCours->setTarif($cours->tarif);
+        $newCours->setNbInscriptionMax($cours->nbInscriptionMax);
+        $newCours->setTypeCours($this->typeCoursRepository->find($cours->typeCours));
+        $newCours->setDateLimiteInscription($cours->dateLimiteInscription);
+        $newCours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::EN_CREATION->value]));
+
+
+        $this->em->persist($newCours);
+        $this->em->flush();
+
+        return new JsonResponse(['reponse' => true], 200);
     }
 }
