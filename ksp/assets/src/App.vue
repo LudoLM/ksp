@@ -17,13 +17,15 @@ export default {
   }
 }
 
-let scrollY = document.addEventListener('scroll', () => {
+//Calcul le scroll pr reduire la taille de la navbar
+document.addEventListener('scroll', () => {
   if (window.scrollY > document.querySelector('.nav_wrapper').offsetHeight) {
     document.querySelector('.nav_wrapper').classList.add('fixed');
   } else {
     document.querySelector('.nav_wrapper').classList.remove('fixed');
   }
 });
+
 </script>
 
 <template>

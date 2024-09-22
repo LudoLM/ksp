@@ -48,7 +48,7 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <button @click="redirectToLogin">Login</button>
-                <button color="blue darken-1" text @click="loginDialog = false">Fermer</button>
+                <button @click="loginDialog = false">Fermer</button>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
 import { useSubscription, useUnSubscription } from "../utils/useSubscribing";

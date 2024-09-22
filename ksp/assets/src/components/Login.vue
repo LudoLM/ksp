@@ -2,7 +2,6 @@
 import {ref, onMounted} from 'vue';
 import {useUserStore} from '../store/user';
 import {infos} from '../store/index';
-import MyNavLinks from './NavLinks.vue';
 
 // Initialize the stores
 const userStore = useUserStore();

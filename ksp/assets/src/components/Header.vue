@@ -1,21 +1,6 @@
 <template>
   <header>
-<!--    <div id="header_container">-->
-<!--      <div class="infos">-->
-<!--        <div id="compte">-->
-<!--          <span><i class="fas fa-user"></i></span>-->
-<!--          <span v-if="user">-->
-<!--            <a href="/logout" title="Logout">{{ user.prenom }}</a>-->
-<!--          </span>-->
-<!--          <span v-else>-->
-<!--            <a href="/login">Login</a>-->
-<!--          </span>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
-
     <div class="banner">
-
     </div>
   </header>
 </template>
@@ -24,7 +9,6 @@
 import {ref, onMounted} from 'vue';
 import {useUserStore} from '../store/user';
 import {infos} from '../store/index';
-import MyNavLinks from './NavLinks.vue';
 
 // Initialize the stores
 const userStore = useUserStore();
