@@ -1,38 +1,43 @@
 <template>
   <div class="coursCard_Wrapper">
     <div class="coursCard">
+      <div class="card_image">
+        <img :src="require(`../../images/photo${info.typeCours.id}.jpeg`)" alt="">
+      </div>
+
       <div class="card_infos">
+        <div class="card_dateDebut">
+          {{ capitalizedDate }}
+        </div>
         <div class="card_title">
           <h3>{{ info.typeCours.libelle }}</h3>
         </div>
-        <div class="card_dateDebut">
-          Le {{ formattedDate }} à {{ formattedHour }}
+        <div class="card_times">
+          {{ formattedHour }} - {{ info.duree }} mns
         </div>
-        <div>
-          Durée: {{ info.duree }} minutes
+        <div class="card_dispoRestantes">
+          <div class="quantity">
+            Dispo:&nbsp;<span class="infoRestante">{{ info.nbInscriptionMax - usersCount }}</span>
+          </div>
+          <div :class="isSubscribed ? 'isSubscribed' : 'invisible'">
+            Je participe
+          </div>
+
         </div>
-        <div class="card_ville">
-          À : {{ info.description }}
-        </div>
-        <div>
-          {{ usersCount }} inscrits / {{ info.nbInscriptionMax }} places
-        </div>
-        <div class="flex">
-          <router-link :to="{ name: 'CoursDetail', params: { id: info.id } }" class="mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+        <div class="flex justify-between mt-5">
+          <router-link :to="{ name: 'CoursDetail', params: { id: info.id } }" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             + d'infos
           </router-link>
           <!-- Si l'utilisateur n'est pas connecté -->
           <v-dialog v-model="loginDialog" max-width="500">
             <template v-slot:activator="{ props: activatorProps }">
-              <v-btn
+              <button
                   v-if="!userId && statusCours !=='Complet'"
                   v-bind="activatorProps"
-                  color="indigo"
-                  dark
-                  class="mt-3 mx-2"
+                  class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 S'inscrire
-              </v-btn>
+              </button>
             </template>
 
             <v-card>
@@ -42,19 +47,19 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn @click="redirectToLogin">Login</v-btn>
-                <v-btn color="blue darken-1" text @click="loginDialog = false">Fermer</v-btn>
+                <button @click="redirectToLogin">Login</button>
+                <button @click="loginDialog = false">Fermer</button>
               </v-card-actions>
             </v-card>
           </v-dialog>
 
           <!-- Si l'utilisateur est connecté -->
-          <v-btn v-if="userId && !isSubscribed && statusCours !=='Complet' && statusCours !== 'En création'" @click="handleSubscription" class="mt-3 mx-2" color="indigo" dark>
+          <button v-if="userId && !isSubscribed && statusCours !=='Complet' && statusCours !== 'En création'" @click="handleSubscription" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             S'inscrire
-          </v-btn>
-          <v-btn v-if="userId && isSubscribed" @click="handleUnsubscription" class="mt-3 mx-2" color="indigo" dark>
+          </button>
+          <button v-if="userId && isSubscribed" @click="handleUnsubscription" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             Se désinscrire
-          </v-btn>
+          </button>
         </div>
       </div>
     </div>
@@ -65,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
 import { useSubscription, useUnSubscription } from "../utils/useSubscribing";
@@ -78,12 +83,12 @@ const emit = defineEmits(['subscriptionResponse']);
 // Couleurs par statut
 const colors = {
   'En cours': 'bg-lime-500',
-  'Ouvert': 'bg-red-500',
+  'Ouvert': 'bg-emerald-500',
   'Complet': 'bg-blue-500',
   'Annulé': 'bg-yellow-500',
   'En création': 'bg-indigo-500',
-  'Passé': 'bg-amber-500',
-  'Archivé': 'bg-emerald-500',
+  'Passé': 'bg-red-500',
+  'Archivé': 'bg-amber-500',
 };
 
 // Props
@@ -103,8 +108,9 @@ const redirectToLogin = () => {
 
 // Formattage des dates
 const dateDebut = computed(() => new Date(props.info.dateCours));
-const formattedDate = computed(() => useDateFormat(dateDebut.value, 'DD/MM/YYYY').value);
-const formattedHour = computed(() => useDateFormat(dateDebut.value, 'HH:mm').value);
+const formattedDate = computed(() => useDateFormat(dateDebut.value, 'dddd D MMMM YYYY').value);
+const capitalizedDate = computed(() => formattedDate.value.charAt(0).toUpperCase() + formattedDate.value.slice(1));
+const formattedHour = computed(() => useDateFormat(dateDebut.value, 'H:mm').value);
 
 // Initialiser le statut du cours comme réactif
 const statusCours = ref(props.info.statusCours.libelle);
@@ -149,16 +155,37 @@ const handleUnsubscription = async () => {
 
 <style lang="scss" scoped>
 .coursCard_Wrapper {
-  width: 200px;
-  height: 300px;
+  min-width: 300px;
   position: relative;
+
 }
 
 .coursCard {
   width: 100%;
   height: 100%;
-  font-family: poppins;
   background: #fff;
+}
+
+.card_dateDebut {
+  font-style: italic;
+  font-weight: 900;
+  color: #000;
+}
+
+.card_image {
+  width: 100%;
+
+  overflow: hidden;
+  img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+  }
+}
+
+.card_infos {
+  height: 30%;
+  padding: 20px;
 }
 
 .card_status {
@@ -169,8 +196,43 @@ const handleUnsubscription = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  top: 30px;
-  right: -30px;
+  top: -10px;
+  right: 10px;
+  border-radius: 3px;
   transition: all 0.3s ease-in-out;
+}
+
+
+.card_title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  font-style: italic;
+  color: #5e2ca5;
+}
+
+.card_times {
+  font-weight: 100;
+  margin-bottom: 20px;
+}
+
+.card_dispoRestantes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: #838383;
+  font-weight: 100;
+
+  .isSubscribed{
+    color: red;
+    font-weight: normal;
+    font-style: italic;
+  }
+
+  .infoRestante {
+    font-weight: 500;
+    color: #5e2ca5;
+
+  }
+
 }
 </style>

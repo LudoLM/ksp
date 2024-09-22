@@ -2,14 +2,6 @@
   <footer>
     <div class="box_columns">
       <div class="footer_column">
-        <h4>Rubriques</h4>
-
-        <div class="links">
-          <MyNavLinks direction="column"/>
-        </div>
-
-      </div>
-      <div class="footer_column">
         <h4>Contact</h4>
         <div>{{ store.fullName }}</div>
         <b>{{ store.address }}</b><br>

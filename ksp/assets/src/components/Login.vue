@@ -1,10 +1,3 @@
-<template>
-  <header>
-    <div class="banner">
-    </div>
-  </header>
-</template>
-
 <script setup>
 import {ref, onMounted} from 'vue';
 import {useUserStore} from '../store/user';
@@ -38,15 +31,50 @@ onMounted(async () => {
 
 </script>
 
-<style lang="scss" scoped>
+<template>
+      <div id="header_container">
+        <div class="infos">
+          <div id="compte">
+            <span><i class="fas fa-user"></i></span>
+            <span v-if="user">
+              <a href="/logout" title="Logout">{{ user.prenom }}</a>
+            </span>
+            <span v-else>
+              <a href="/login">Login</a>
+            </span>
+          </div>
+        </div>
+      </div>
+</template>
 
-  .banner {
-    background: url("../../images/banner.jpg") no-repeat center center;
-    background-size: cover;
+<style scoped lang="scss">
+
+#header_container {
+
+  div {
     width: 100%;
-    height: 50vh;
-    display: flex;
-    justify-content: space-between;
-    position: relative;
+
+    img {
+      float: left;
+      margin-left: 15px;
+    }
   }
+
+  .infos {
+    display: flex;
+    flex-direction: column;
+    font-weight: 700;
+
+    #compte {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+      span {
+        margin-right: 10px;
+      }
+    }
+  }
+}
+
 </style>

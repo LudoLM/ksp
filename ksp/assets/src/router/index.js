@@ -6,9 +6,7 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
 import Home from '../views/Home.vue'
-import About from '../views/About.vue'
 import Schoolback from '../views/Schoolback.vue'
-import OthersClasses from '../views/OthersClasses.vue'
 import Inscriptions from '../views/Inscriptions.vue'
 import Schedule from '../views/Schedule.vue'
 import Contact from '../views/Contact.vue'
@@ -24,11 +22,9 @@ const router = createRouter({
     routes: [
         { path: '/', name: 'Accueil', component: Home },
         { path: '/schoolback', name: 'Ecole du dos', component: Schoolback },
-        { path: '/othersClasses', name: 'Autres cours', component: OthersClasses },
         { path: '/inscriptions', name: 'Inscriptions', component: Inscriptions },
         { path: '/schedule', name: 'Programme', component: Schedule },
         { path: '/contact', name: 'Contact', component: Contact },
-        { path: '/about', name: 'A propos', component: About },
         { path: '/coursDetails/:id', name: 'CoursDetail', component: CoursDetail },
         {path: '/cours/add', name: 'createCours', component: CoursForm},
     ],

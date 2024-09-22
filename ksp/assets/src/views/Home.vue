@@ -1,24 +1,25 @@
 <template>
-  <!-- Affichage d'un message de validation -->
-  <v-alert v-model="alertVisible" :type="alertType" dismissible>
-    {{ alertMessage }}
-  </v-alert>
-  <div class="home">
-    <button>
-      <router-link to="/cours/add" class="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-500 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Ajouter un cours</router-link>
-    </button>
-    <h1>Kiné Sports Santé à Chavagne (35) : la méthode simple et efficace pour vous débarrasser de vos douleurs !</h1>
-  </div>
   <div class="container">
-    <div id="form-wrapper" ref="form">
-      <label for="listeCours">Cours</label>
-      <select name="listeCours" id="listeCours" v-model="selectedCoursId">
-        <option value="0">Choisissez un cours</option>
-        <option v-for="typeCours in uniqueTypeCours" :key="typeCours.id" :value="typeCours.id">{{ typeCours.libelle }}</option>
-      </select>
-      <label for="dateCours">A partir de</label>
-      <input type="date" name="dateCours" id="dateCours" v-model="selectedDate">
-      <button @click="resetInfos">Reset</button>
+    <!-- Affichage d'un message de validation -->
+    <v-alert v-model="alertVisible" :type="alertType" dismissible>
+      {{ alertMessage }}
+    </v-alert>
+    <h1>prochains cours</h1>
+
+    <div class="buttonsFilters">
+      <div class="home">
+        <button>
+          <router-link to="/cours/add" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Ajouter un cours</router-link>
+        </button>
+      </div>
+      <CoursFilters
+          :uniqueTypeCours="uniqueTypeCours"
+          :selectedCoursId="selectedCoursId"
+          :selectedDate="selectedDate"
+          @update:selectedCoursId="updateSelectedCoursId"
+          @update:selectedDate="updateSelectedDate"
+          @resetInfos="resetInfos"
+      />
     </div>
 
     <div class="gridCards">
@@ -40,6 +41,7 @@
 import { ref, computed, onMounted } from 'vue';
 import CoursCard from "../components/CoursCard.vue";
 import {VAlert} from "vuetify/components";
+import CoursFilters from "../components/CoursFilters.vue";
 
 // Déclarations des refs et données
 const infos = ref([]);
@@ -80,7 +82,16 @@ const handleSubscriptionResponse = ({ type, message }) => {
   }, 3000);
 };
 
-// Propriétés calculées
+// Mise à jour des filtres lorsqu'un événement est reçu
+const updateSelectedCoursId = (value) => {
+  selectedCoursId.value = value;
+};
+
+const updateSelectedDate = (value) => {
+  selectedDate.value = value;
+};
+
+// Propriétés calculées pour filtrer et paginer les cours
 const uniqueTypeCours = computed(() => {
   const uniqueTypeCours = [];
   const seenIds = new Set();
@@ -138,7 +149,15 @@ const prevPage = () => {
 };
 </script>
 
+
 <style scoped>
+
+.buttonsFilters {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 5rem;
+}
 
   .v-alert {
     opacity: .9;
@@ -148,5 +167,12 @@ const prevPage = () => {
     left: 10%;
     right: 10%;
     height: 10%;
+  }
+
+  h1 {
+    font-size: 4rem;
+    font-weight: 900;
+    font-style: italic;
+    margin-bottom: 1rem;
   }
 </style>
