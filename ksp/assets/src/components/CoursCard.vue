@@ -28,6 +28,11 @@
           <router-link :to="{ name: 'CoursDetail', params: { id: info.id } }" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             + d'infos
           </router-link>
+          <!-- Si l'utilisateur est admin et le cours en creation -->
+          <button v-if="role === 'ROLE_ADMIN' && statusCours === 'En création'" @click="deleteCreation" class="w-6/12 mt-3 mx-2 block rounded-md bg-red-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Supprimer
+          </button>
+
           <!-- Si l'utilisateur n'est pas connecté -->
           <v-dialog v-model="loginDialog" max-width="500">
             <template v-slot:activator="{ props: activatorProps }">
@@ -47,8 +52,8 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <button @click="redirectToLogin">Login</button>
-                <button @click="loginDialog = false">Fermer</button>
+                <button @click="redirectToLogin" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Login</button>
+                <button @click="loginDialog = false" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Fermer</button>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -74,10 +79,12 @@ import { ref, computed } from 'vue';
 import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
 import { useSubscription, useUnSubscription } from "../utils/useSubscribing";
+import useGetElementsToken from "../utils/useGetElementsToken";
+import {useDeleteCours} from "../utils/useActionCours";
 
 const userStore = useUserStore();
-const userId = userStore.getUserId;
-
+const userId = userStore.userId;
+const role = ref(localStorage.getItem('token') ? useGetElementsToken().role : null);
 const emit = defineEmits(['subscriptionResponse']);
 
 // Couleurs par statut
@@ -122,7 +129,7 @@ const isSubscribed = ref(props.info.users.some(user => user.id === userId));
 // Gestion de l'inscription
 const handleSubscription = async () => {
   const success = await useSubscription(props.info.id);
-  if (success.reponse) {
+  if (success.response) {
     isSubscribed.value = true;
     statusCours.value = success.statusChange;
     usersCount = success.usersCount;
@@ -141,7 +148,7 @@ const handleSubscription = async () => {
 // Gestion de la désinscription
 const handleUnsubscription = async () => {
   const success = await useUnSubscription(props.info.id);
-  if (success.reponse) {
+  if (success.response) {
     isSubscribed.value = false;
     statusCours.value = success.statusChange;
     usersCount = success.usersCount;
@@ -151,14 +158,33 @@ const handleUnsubscription = async () => {
     });
   }
 };
+
+const deleteCreation = async () => {
+  const response = useDeleteCours(props.info.id);
+  console.log(response);
+
+
+  if (response.status === 200) {
+    emit('subscriptionResponse', {
+      type: 'success',
+      message: response.message,
+    });
+  } else {
+    emit('subscriptionResponse', {
+      type: 'error',
+      message: 'Le cours n\'a pas pu être supprimé',
+    });
+  }
+};
+
 </script>
 
 <style lang="scss" scoped>
 .coursCard_Wrapper {
   min-width: 300px;
   position: relative;
-
 }
+
 
 .coursCard {
   width: 100%;
@@ -174,8 +200,8 @@ const handleUnsubscription = async () => {
 
 .card_image {
   width: 100%;
-
   overflow: hidden;
+  position: relative;
   img {
     width: 100%;
     height: 300px;
@@ -233,6 +259,7 @@ const handleUnsubscription = async () => {
     color: #5e2ca5;
 
   }
+
 
 }
 </style>

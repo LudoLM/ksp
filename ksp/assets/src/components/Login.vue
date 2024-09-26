@@ -1,56 +1,53 @@
 <script setup>
-import {ref, onMounted} from 'vue';
-import {useUserStore} from '../store/user';
-import {infos} from '../store/index';
+import { computed, onMounted } from 'vue';
+import { useUserStore } from '../store/user';
+import { useRouter } from 'vue-router';
 
-// Initialize the stores
 const userStore = useUserStore();
-const store = infos();
-const user = ref(null);
+const router = useRouter();
 
-// Fetch user data only if already authenticated
-onMounted(async () => {
-  if (userStore.getIsAutenticated === false) {
-    try {
-      const response = await fetch('/api/user');
-      if (response.ok) {
-        user.value = await response.json();
-        userStore.setUser(user.value);
-        userStore.setIsAutenticated();
-      } else {
-        console.log('Not authenticated');
-      }
-    } catch (error) {
-      console.error('Error fetching user:', error);
-    }
-  }
-  else {
-    user.value = userStore.getUser;
+const userEmail = computed(() => userStore.userEmail);
+const userId = computed(() => userStore.userId);
+const userPrenom = computed(() => userStore.userPrenom);
+
+const logout = () => {
+  userStore.logout();
+  router.push('/');
+};
+
+onMounted(() => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    const payload = token.split('.')[1];
+    const decoded = atob(payload);
+    const data = JSON.parse(decoded);
+    userStore.setUserEmail(data.username);
+    userStore.setUserId(data.id);
+    userStore.setUserPrenom(data.prenom);
   }
 });
-
 </script>
 
+
 <template>
-      <div id="header_container">
-        <div class="infos">
-          <div id="compte">
-            <span><i class="fas fa-user"></i></span>
-            <span v-if="user">
-              <a href="/logout" title="Logout">{{ user.prenom }}</a>
-            </span>
-            <span v-else>
-              <a href="/login">Login</a>
-            </span>
-          </div>
-        </div>
+  <div id="header_container">
+    <div class="infos">
+      <div id="compte">
+        <span><i class="fas fa-user"></i></span>
+        <span v-if="userId">
+          <a @click="logout" title="Logout">{{ userPrenom }}</a>
+        </span>
+        <span v-else>
+          <a href="/login">Login</a>
+        </span>
       </div>
+    </div>
+  </div>
 </template>
 
+
 <style scoped lang="scss">
-
 #header_container {
-
   div {
     width: 100%;
 
@@ -76,5 +73,4 @@ onMounted(async () => {
     }
   }
 }
-
 </style>

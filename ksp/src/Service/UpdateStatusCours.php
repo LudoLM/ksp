@@ -13,16 +13,14 @@ class UpdateStatusCours
 
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly CoursRepository $coursRepository,
         private readonly StatusCoursRepository $statusCoursRepository
     )
     {
     }
 
-    public function updateStatusCours(): array
+    public function updateStatusCours($cours): array
     {
-        $cours = $this->coursRepository->findAllSortByDate();
-
+        $ouvert = $this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]);
         $archive = $this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ARCHIVE->value]);
         $enCours = $this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::EN_COURS->value]);
         $passe = $this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::PASSE->value]);
@@ -31,6 +29,11 @@ class UpdateStatusCours
         foreach ($cours as $cour) {
             $dateCours = $cour->getDateCours();
             $status = $cour->getStatusCours()->getLibelle();
+
+            //Potentiellement pas utile
+            if($cour->getNbInscriptionMax() > $cour->getUsers()->count() && $status !== StatusCoursEnum::EN_CREATION->value && $status !== StatusCoursEnum::ANNULE->value){
+                $cour->setStatusCours($ouvert);
+            }
 
             if (
                 $dateCours < new \DateTime() && $dateCours > new \DateTime('-1 month')

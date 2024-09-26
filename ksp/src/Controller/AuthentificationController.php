@@ -3,25 +3,22 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class AuthentificationController extends AbstractController
 {
-    #[Route(path: '/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    #[Route(path: '/login_check', name: 'app_login')]
+    public function login(AuthenticationUtils $authenticationUtils): JsonResponse
     {
-         if ($this->getUser()) {
-             return $this->redirectToRoute('vue_pages', ['route' => '']);
-         }
+      $user = $this->getUser();
 
-        // get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
-        // last username entered by the user
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
+      return new JsonResponse([
+          'email' => $user->getEmail(),
+          'roles' => $user->getRoles(),
+      ]);
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
@@ -29,4 +26,5 @@ class AuthentificationController extends AbstractController
     {
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
+
 }

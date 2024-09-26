@@ -3,10 +3,15 @@ export async function useSubscription(coursId) {
     try {
         const response = await fetch(`/api/addUser/${coursId}`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `bearer ${localStorage.getItem('token')}`
+            }
         });
 
         if (response.ok) {
             const result = await response.json();
+            console.log(result)
             console.log('Réponse du serveur:', "Utilisateur ajouté au cours");
             return result;
         } else {
@@ -26,6 +31,11 @@ export async function useUnSubscription(coursId) {
     try {
         const response = await fetch(`/api/removeUser/${coursId}`, {
             method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `bearer ${localStorage.getItem('token')}`
+            }
+
         });
 
         if (response.ok) {
