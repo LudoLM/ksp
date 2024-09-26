@@ -7,7 +7,7 @@ defineProps({
   uniqueTypeCours: {
     type: Array,
     required: true
-  }
+  },
 });
 
 // Déclare la fonction d'émission d'événements

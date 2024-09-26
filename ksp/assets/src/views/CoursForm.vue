@@ -1,10 +1,13 @@
 <script setup>
 import {onMounted, ref} from 'vue';
+import {useRouter} from 'vue-router';
+
+const router = useRouter();
 
 const typeCoursList = ref([]);
   const fetchData = async () => {
     try {
-      const response = await fetch("/api/getTypeCours", { method: "GET" });
+      const response = await fetch("/api/getTypeCours", { method: "GET", headers: { "Authorization": "Bearer " + localStorage.getItem("token") } });
       typeCoursList.value = await response.json();
       formData.value.typeCours = typeCoursList.value[0].id;
     } catch (error) {
@@ -43,24 +46,26 @@ const formData = ref({
       dateLimiteInscription: formData.value.dateLimiteInscription
     };
 
-    console.log(JSON.stringify(data));
     try {
       const response = await fetch("/api/cours/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify(data),
       });
       const responseData = await response.json();
-      console.log(responseData);
+      if (response.status === 200){
+        console.log("Cours créé avec succès:", responseData);
+        await router.push("/");
+      } else {
+        console.error("Erreur lors de la création du cours:", responseData);
+      }
     } catch (error) {
       console.error("Erreur lors de la création du cours:", error);
     }
   };
-
-
-
 </script>
 
 <template>

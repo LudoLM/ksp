@@ -8,8 +8,8 @@
 
     <div class="buttonsFilters">
       <div class="home">
-        <button>
-          <router-link to="/cours/add" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Ajouter un cours</router-link>
+        <button v-if="role === 'ROLE_ADMIN'" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <router-link to="/cours/add">Ajouter un cours</router-link>
         </button>
       </div>
       <CoursFilters
@@ -42,18 +42,28 @@ import { ref, computed, onMounted } from 'vue';
 import CoursCard from "../components/CoursCard.vue";
 import {VAlert} from "vuetify/components";
 import CoursFilters from "../components/CoursFilters.vue";
+import useGetElementsToken from "../utils/useGetElementsToken";
+import { useRoute } from "vue-router";
 
-// Déclarations des refs et données
 const infos = ref([]);
 const selectedCoursId = ref(null);
 const selectedDate = ref('');
 const currentPage = ref(1);
 const itemsPerPage = ref(9);
+const route = useRoute();
+const role = localStorage.getItem('token') ? useGetElementsToken().roles[0] : null;
+
 
 // Fetch des données au montage du composant
 const fetchData = async () => {
   try {
-    const response = await fetch("/api/getCours", { method: "GET" });
+    const response = await fetch("/api/getCours", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-ACCESS-TOKEN": role
+      },
+    });
     infos.value = await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des cours:", error);
@@ -62,6 +72,13 @@ const fetchData = async () => {
 
 // Appel de fetchData lors du montage
 onMounted(() => {
+  alertMessage.value = route.query.alertMessage || '';
+  alertType.value = route.query.alertType || 'success';
+  alertVisible.value = route.query.alertVisible || false;
+
+  setTimeout(() => {
+    alertVisible.value = false;
+  }, 3000);
   fetchData();
 });
 
@@ -72,9 +89,9 @@ const alertMessage = ref('');
 
 // Fonction pour gérer l'événement subscriptionResponse
 const handleSubscriptionResponse = ({ type, message }) => {
-  alertType.value = type;      // 'success' ou 'error'
-  alertMessage.value = message; // Message à afficher
-  alertVisible.value = true;    // Afficher l'alerte
+  alertType.value = type;
+  alertMessage.value = message;
+  alertVisible.value = true;
 
   // Masquer l'alerte après 3 secondes
   setTimeout(() => {

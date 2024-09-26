@@ -4,11 +4,9 @@ import Myheader from "./components/Header";
 import Mymain from "./components/Main";
 import Myfooter from "./components/Footer";
 import MyNavLinks from "./components/NavLinks.vue";
-import {store} from "core-js/internals/reflect-metadata";
 
 export default {
   name: 'App',
-  methods: {store},
   components: {
     MyNavLinks,
     Myheader,
@@ -30,7 +28,7 @@ document.addEventListener('scroll', () => {
 
 <template>
   <div class="nav_wrapper">
-    <MyNavLinks direction="row" :store="store"/>
+    <MyNavLinks direction="row"/>
   </div>
   <Myheader/>
   <Mymain/>

@@ -30,6 +30,4 @@ class CreateCoursDTO
     public ?\DateTimeInterface $dateLimiteInscription = null;
 }
 
-
-
 ?>
