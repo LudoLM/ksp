@@ -37,7 +37,7 @@
           <v-dialog v-model="loginDialog" max-width="500">
             <template v-slot:activator="{ props: activatorProps }">
               <button
-                  v-if="!userId && statusCours !=='Complet'"
+                  v-if="!userId && statusCours ==='Ouvert'"
                   v-bind="activatorProps"
                   class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
@@ -59,10 +59,10 @@
           </v-dialog>
 
           <!-- Si l'utilisateur est connecté -->
-          <button v-if="userId && !isSubscribed && statusCours !=='Complet' && statusCours !== 'En création'" @click="handleSubscription" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <button v-if="userId && !isSubscribed && statusCours ==='Ouvert'" @click="handleSubscription" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             S'inscrire
           </button>
-          <button v-if="userId && isSubscribed" @click="handleUnsubscription" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <button v-if="userId && isSubscribed && statusCours ==='Ouvert'" @click="handleUnsubscription" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             Se désinscrire
           </button>
         </div>
@@ -160,7 +160,7 @@ const handleUnsubscription = async () => {
 };
 
 const deleteCreation = async () => {
-  const response = useDeleteCours(props.info.id);
+  const response = await useDeleteCours(props.info.id);
   console.log(response);
 
 
@@ -257,7 +257,6 @@ const deleteCreation = async () => {
   .infoRestante {
     font-weight: 500;
     color: #5e2ca5;
-
   }
 
 

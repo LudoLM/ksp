@@ -6,9 +6,12 @@ import { useRouter } from 'vue-router';
 const userStore = useUserStore();
 const router = useRouter();
 
-const userEmail = computed(() => userStore.userEmail);
 const userId = computed(() => userStore.userId);
 const userPrenom = computed(() => userStore.userPrenom);
+
+const handleProfile = () => {
+  router.push('/profile');
+};
 
 const logout = () => {
   userStore.logout();
@@ -35,7 +38,12 @@ onMounted(() => {
       <div id="compte">
         <span><i class="fas fa-user"></i></span>
         <span v-if="userId">
-          <a @click="logout" title="Logout">{{ userPrenom }}</a>
+         <span class="profil">
+           <a @click="handleProfile" title="Mon profil">{{ userPrenom }}</a>
+         </span>
+         <span>
+           <a @click="logout" title="Logout">Logout</a>
+        </span>
         </span>
         <span v-else>
           <a href="/login">Login</a>
@@ -71,6 +79,12 @@ onMounted(() => {
         margin-right: 10px;
       }
     }
+  }
+
+  .profil {
+    border-right: 3px solid #000;
+    padding-right: 10px;
+    color: #5e2ca5;
   }
 }
 </style>

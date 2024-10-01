@@ -7,7 +7,16 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+h1 {
+  font-size: 4rem;
+  font-weight: 900;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
 
+a{
+  cursor: pointer;
+}
 
 .nav_wrapper {
   position: fixed;
@@ -156,5 +165,17 @@ footer{
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+// Messages d'alerte
+
+.v-alert {
+  opacity: .9;
+  position: fixed;
+  z-index: 10;
+  top: 5%;
+  left: 10%;
+  right: 10%;
+  height: 10%;
 }
 

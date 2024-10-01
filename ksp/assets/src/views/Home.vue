@@ -176,20 +176,5 @@ const prevPage = () => {
   margin-bottom: 5rem;
 }
 
-  .v-alert {
-    opacity: .9;
-    position: fixed;
-    z-index: 10;
-    top: 5%;
-    left: 10%;
-    right: 10%;
-    height: 10%;
-  }
 
-  h1 {
-    font-size: 4rem;
-    font-weight: 900;
-    font-style: italic;
-    margin-bottom: 1rem;
-  }
 </style>

@@ -74,6 +74,8 @@ class CoursController extends AbstractController
         }
 
         $usersCount = count($cours->getUsers());
+        $this->getUser()->setNombreCours($this->getUser()->getNombreCours() - 1);
+
 
         // Sauvegarde des modifications en base de données
         $this->em->persist($cours);
@@ -92,6 +94,7 @@ class CoursController extends AbstractController
         $statusChange = $cours->getStatusCours()->getLibelle();
         // Suppression de l'utilisateur du cours
         $cours->removeUser($user);
+        $this->getUser()->setNombreCours($this->getUser()->getNombreCours() + 1);
 
         if (count($cours->getUsers()) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));

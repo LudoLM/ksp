@@ -17,7 +17,7 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "user:detail"])]
     private ?int $id = null;
 
     #[ORM\Column]
@@ -25,7 +25,7 @@ class Cours
     private ?int $duree = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "user:detail"])]
     private ?\DateTimeInterface $dateCours = null;
 
     #[ORM\Column(length: 255)]
@@ -46,13 +46,13 @@ class Cours
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "user:detail"])]
     private ?TypeCours $typeCours = null;
 
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "user:detail"])]
     private ?StatusCours $statusCours = null;
 
 

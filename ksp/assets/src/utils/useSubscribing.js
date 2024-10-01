@@ -11,7 +11,6 @@ export async function useSubscription(coursId) {
 
         if (response.ok) {
             const result = await response.json();
-            console.log(result)
             console.log('Réponse du serveur:', "Utilisateur ajouté au cours");
             return result;
         } else {
@@ -27,7 +26,7 @@ export async function useSubscription(coursId) {
 
 
 
-export async function useUnSubscription(coursId) {
+export async function useUnSubscription(coursId, user) {
     try {
         const response = await fetch(`/api/removeUser/${coursId}`, {
             method: 'DELETE',
