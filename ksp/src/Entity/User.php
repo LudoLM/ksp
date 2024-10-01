@@ -23,6 +23,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:index','user:detail', 'cours:index'])]
     private ?int $id = null;
 
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
@@ -36,21 +37,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:index', 'cours:detail'])]
+    #[Groups(['user:detail', 'cours:detail'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:index', 'cours:detail'])]
+    #[Groups(['user:detail', 'cours:detail'])]
     private ?string $prenom = null;
 
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $adresse = null;
-
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $codePostal = null;
 
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $commune = null;
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 10)]
     #[Assert\NotBlank(message: "Le numéro de téléphone ne doit pas être vide.")]
     #[Assert\Regex(
@@ -59,13 +63,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private ?string $telephone = null;
 
-    #[ORM\ManyToMany(targetEntity: Cours::class, inversedBy: 'users')]
     #[Groups(['user:detail'])]
+    #[ORM\ManyToMany(targetEntity: Cours::class, inversedBy: 'users')]
     private Collection $cours_list;
+
+    #[Groups(['user:detail'])]
+    #[ORM\Column]
+    private ?int $nombreCours = null;
+
+    /**
+     * @var Collection<int, HistoriquePaiement>
+     */
+    #[Groups(['user:detail'])]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: HistoriquePaiement::class, orphanRemoval: true)]
+    private Collection $historiquePaiements;
+
 
     public function __construct()
     {
         $this->cours_list = new ArrayCollection();
+        $this->historiquePaiements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -248,4 +265,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getNombreCours(): ?int
+    {
+        return $this->nombreCours;
+    }
+
+    public function setNombreCours(int $nombreCours): static
+    {
+        $this->nombreCours = $nombreCours;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HistoriquePaiement>
+     */
+    public function getHistoriquePaiements(): Collection
+    {
+        return $this->historiquePaiements;
+    }
+
+    public function addHistoriquePaiement(HistoriquePaiement $historiquePaiement): static
+    {
+        if (!$this->historiquePaiements->contains($historiquePaiement)) {
+            $this->historiquePaiements->add($historiquePaiement);
+            $historiquePaiement->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHistoriquePaiement(HistoriquePaiement $historiquePaiement): static
+    {
+        if ($this->historiquePaiements->removeElement($historiquePaiement)) {
+            // set the owning side to null (unless already changed)
+            if ($historiquePaiement->getUser() === $this) {
+                $historiquePaiement->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
 }
