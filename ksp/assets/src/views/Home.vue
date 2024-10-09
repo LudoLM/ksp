@@ -7,11 +7,7 @@
     <h1>prochains cours</h1>
 
     <div class="buttonsFilters">
-      <div class="home">
-        <button v-if="role === 'ROLE_ADMIN'" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          <router-link to="/cours/add">Ajouter un cours</router-link>
-        </button>
-      </div>
+      <router-link to="/cours/add"><CustomButton v-if="role === 'ROLE_ADMIN'">Ajouter un cours</CustomButton></router-link>
       <CoursFilters
           :uniqueTypeCours="uniqueTypeCours"
           :selectedCoursId="selectedCoursId"
@@ -25,7 +21,12 @@
     <div class="gridCards">
       <ul>
         <li v-for="info in paginatedInfos" :key="info.id">
-          <CoursCard :info="info" @subscriptionResponse="handleSubscriptionResponse"/>
+          <CoursCard
+              :info="info"
+              @subscriptionResponse="handleSubscriptionResponse"
+              @deleteCoursResponse="handleDeleteCoursResponse"
+              @cancelCoursResponse="handleCancelCoursResponse"
+          />
         </li>
       </ul>
     </div>
@@ -44,6 +45,8 @@ import {VAlert} from "vuetify/components";
 import CoursFilters from "../components/CoursFilters.vue";
 import useGetElementsToken from "../utils/useGetElementsToken";
 import { useRoute } from "vue-router";
+import {useGetCours} from "../utils/useActionCours";
+import CustomButton from "../components/CustomButton.vue";
 
 const infos = ref([]);
 const selectedCoursId = ref(null);
@@ -54,22 +57,6 @@ const route = useRoute();
 const role = localStorage.getItem('token') ? useGetElementsToken().roles[0] : null;
 
 
-// Fetch des données au montage du composant
-const fetchData = async () => {
-  try {
-    const response = await fetch("/api/getCours", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "X-ACCESS-TOKEN": role
-      },
-    });
-    infos.value = await response.json();
-  } catch (error) {
-    console.error("Erreur lors de la récupération des cours:", error);
-  }
-};
-
 // Appel de fetchData lors du montage
 onMounted(() => {
   alertMessage.value = route.query.alertMessage || '';
@@ -79,7 +66,8 @@ onMounted(() => {
   setTimeout(() => {
     alertVisible.value = false;
   }, 3000);
-  fetchData();
+  useGetCours(role, infos);
+
 });
 
 // Déclaration des variables pour l'alerte
@@ -89,6 +77,31 @@ const alertMessage = ref('');
 
 // Fonction pour gérer l'événement subscriptionResponse
 const handleSubscriptionResponse = ({ type, message }) => {
+  alertType.value = type;
+  alertMessage.value = message;
+  alertVisible.value = true;
+
+  // Masquer l'alerte après 3 secondes
+  setTimeout(() => {
+    alertVisible.value = false;
+  }, 3000);
+};
+
+const handleDeleteCoursResponse = ({ type, message, id }) => {
+  alertType.value = type;
+  alertMessage.value = message;
+  alertVisible.value = true;
+
+  // Masquer l'alerte après 3 secondes
+  setTimeout(() => {
+    alertVisible.value = false;
+  }, 3000);
+
+  // Supprimer le cours de la liste
+  infos.value = infos.value.filter(info => info.id !== id);
+};
+
+const handleCancelCoursResponse = ({ type, message }) => {
   alertType.value = type;
   alertMessage.value = message;
   alertVisible.value = true;

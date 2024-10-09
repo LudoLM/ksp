@@ -1,8 +1,8 @@
 <template>
-  <div className="coursDetail">
+  <div class="coursDetail">
     <h2>Détails du cours</h2>
     <div>
-      <router-link :to="{ name: 'Accueil' }" class="mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Retour</router-link>
+        <router-link :to="{ name: 'Accueil' }"><CustomButton>Retour</CustomButton></router-link>
     </div>
     <div v-if="cours">
       <p>Type de cours: {{ cours.typeCours.libelle }}</p>
@@ -22,7 +22,7 @@
       <p>Chargement...</p>
     </div>
     <div>
-      <button @click="subscription" class="mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">S'inscrire</button>
+      <CustomButton @click="subscription">S'inscrire</CustomButton>
     </div>
   </div>
 </template>
@@ -31,22 +31,20 @@
 import {ref, computed, onMounted} from 'vue';
 import {useRoute} from 'vue-router';
 import {useDateFormat} from '@vueuse/core';
+import {useGetCoursById} from "../utils/useActionCours";
+import CustomButton from "../components/CustomButton.vue";
 
 const route = useRoute();
 const coursId = route.params.id;
 const cours = ref(null);
 
-const fetchCoursDetail = async () => {
-  try {
-    const response = await fetch(`/api/getCours/${coursId}`);
-    const data = await response.json();
-    cours.value = JSON.parse(data); // Parse JSON string into object
-  } catch (error) {
-    console.error('Error fetching cours details:', error);
-  }
-};
+const coursDetails = async () => {
+  const result = await useGetCoursById(coursId);
+  cours.value = JSON.parse(result);
+}
 
-onMounted(fetchCoursDetail);
+onMounted(coursDetails);
+
 
 const dateDebut = computed(() => new Date(cours.value?.dateCours));
 

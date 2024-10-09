@@ -19,6 +19,7 @@ import useGetElementsToken from "../utils/useGetElementsToken";
 import AcheterCours from "../views/AcheterCours.vue";
 import Merci from "../views/Merci.vue";
 import Profile from '../views/Profile.vue';
+import TypeCoursForm from "../views/TypeCoursForm.vue";
 
 
 
@@ -38,6 +39,9 @@ const router = createRouter({
         { path: '/cours/acheter', name: 'AcheterCours', component: AcheterCours},
         { path: '/merci', name: 'Merci', component: Merci},
         { path: '/profile', name: 'Profile', component: Profile},
+        { path: '/cours/edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
+        { path: '/coursType/add', name: 'CreateTypeCours', component: TypeCoursForm, meta: {requiresAdmin: true}},
+        { path: '/coursType/edit', name: 'EditTypeCours', component: TypeCoursForm, meta: {requiresAdmin: true}},
 
     ],
 })

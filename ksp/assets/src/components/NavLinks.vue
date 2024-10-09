@@ -27,7 +27,10 @@ export default {
           route.name !== 'Register' &&
           route.name !== 'AcheterCours' &&
           route.name !== 'Merci' &&
-          route.name !== 'Profile'
+          route.name !== 'Profile'&&
+          route.name !== 'EditCours' &&
+          route.name !== 'CreateTypeCours' &&
+          route.name !== 'EditTypeCours'
       );
     }
 
