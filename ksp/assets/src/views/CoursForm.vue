@@ -1,8 +1,17 @@
 <script setup>
 import {onMounted, ref} from 'vue';
-import {useRouter} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
+import CustomTextarea from "../components/CustomTextarea.vue";
+import CustomInput from "../components/CustomInput.vue";
+import CustomSelect from "../components/CustomSelect.vue";
+import CustomButton from "../components/CustomButton.vue";
 
 const router = useRouter();
+const origin = useRoute().params;
+const coursData = ref(null);
+const urlCreation = "/api/cours/create";
+const urlEdition = "/api/cours/edit/" + origin.id;
+
 
 const typeCoursList = ref([]);
   const fetchData = async () => {
@@ -17,6 +26,11 @@ const typeCoursList = ref([]);
 
   onMounted(() => {
     fetchData();
+
+    // Si on est sur la page d'édit
+    if (origin.id){
+      getCoursData();
+    }
   });
 
 const formData = ref({
@@ -27,85 +41,97 @@ const formData = ref({
       (new Date().getDate() < 10 ? '0' + new Date().getDate() : new Date().getDate()) + "T" +
       (new Date().getHours() < 10 ? '0' + new Date().getHours() : new Date().getHours()) + ":" +
       (new Date().getMinutes() < 10 ? '0' + new Date().getMinutes() : new Date().getMinutes()),
-  dureeCours: 90,
+  dureeCours: coursData.value ? coursData.value.dureeCours : 60,
   nbInscriptionMax: 12,
-  description: null,
-  tarif: 15
+  description: "Cours sympathique",
+  tarif: 15,
+  dateLimiteInscription:
+      new Date().getFullYear() + "-" +
+      (new Date().getMonth() < 10 ? '0' + new Date().getMonth() : new Date().getMonth()) + "-" +
+      (new Date().getDate() < 10 ? '0' + new Date().getDate() : new Date().getDate()) + "T" +
+      (new Date().getHours() < 10 ? '0' + new Date().getHours() : new Date().getHours()) + ":" +
+      (new Date().getMinutes() < 10 ? '0' + new Date().getMinutes() : new Date().getMinutes())
 });
 
-
+//Functions
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = {
-      typeCours: formData.value.typeCours,
+      typeCours: parseInt(formData.value.typeCours),
       dateCours: formData.value.dateCours,
-      dureeCours: formData.value.dureeCours,
-      nbInscriptionMax: formData.value.nbInscriptionMax,
+      dureeCours: parseInt(formData.value.dureeCours),
+      nbInscriptionMax: parseInt(formData.value.nbInscriptionMax),
       description: formData.value.description,
-      tarif: formData.value.tarif,
+      tarif: parseInt(formData.value.tarif),
       dateLimiteInscription: formData.value.dateLimiteInscription
     };
-
     try {
-      const response = await fetch("/api/cours/create", {
-        method: "POST",
+      const response = await fetch(origin.id ? urlEdition : urlCreation, {
+        method: origin.id ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify(data),
       });
-      const responseData = await response.json();
       if (response.status === 200){
-        console.log("Cours créé avec succès:", responseData);
         await router.push("/");
       } else {
-        console.error("Erreur lors de la création du cours:", responseData);
+        console.error("Erreur lors de la création du cours:", response);
       }
     } catch (error) {
       console.error("Erreur lors de la création du cours:", error);
     }
   };
+
+  const getCoursData = async () => {
+    try {
+      const response = await fetch("/api/getCours/" + origin.id, {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token")}}
+      );
+
+      const data = await response.json();
+      const coursData = JSON.parse(data);
+
+      formData.value.typeCours = coursData.typeCours.id;
+      formData.value.dateCours = coursData.dateCours ? coursData.dateCours.slice(0, 16) : formData.value.dateCours;
+      formData.value.dureeCours = coursData.duree;
+      formData.value.nbInscriptionMax = coursData.nbInscriptionMax;
+      formData.value.description = coursData.description;
+      formData.value.tarif = coursData.tarif;
+      formData.value.dateLimiteInscription = coursData.dateLimiteInscription ? coursData.dateLimiteInscription.slice(0, 16) : formData.value.dateLimiteInscription;
+
+
+    } catch (error) {
+      console.error("Erreur lors de la récupération du cours:", error);
+    }
+  };
+
 </script>
 
 <template>
   <div>
-    <h1 class="text-2xl font-semibold text-gray-800">Ajouter un cours</h1>
+    <h1>{{ origin.id ? "modifier" : "ajouter" }} un cours</h1>
+
+    <div class="buttonsFilters flex justify-start mb-10">
+      <router-link to="/coursType/add"><CustomButton>Ajouter un type de Cours</CustomButton></router-link>
+      <router-link to="/coursType/edit"><CustomButton>Modifier un type de Cours</CustomButton></router-link>
+    </div>
     <form>
-      <div class="mt-4">
-        <label for="typeCours" class="block text-sm font-medium text-gray-700">Type de cours</label>
-        <select id="typeCours" v-model="formData.typeCours" name="typeCours" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-          <option v-for="cours in typeCoursList" :key="cours.id" :value="cours.id">{{ cours.libelle }}</option>
-        </select>
+      <div class="grid grid-cols-2 gap-4">
+        <CustomSelect item="Type de cours" id="typeCours" v-model="formData.typeCours" :options="typeCoursList" required/>
+        <CustomInput item="Durée (minutes)" type="number" id="dureeCours" v-model="formData.dureeCours" required/>
+        <CustomInput item="Date" type="datetime-local" id="dateCours" v-model="formData.dateCours" required/>
+        <CustomInput item="Date limite d'inscription" type="datetime-local" id="dateLimiteInscription" v-model="formData.dateLimiteInscription" required/>
+        <CustomInput item="Nombre de places" type="number" id="description" v-model="formData.nbInscriptionMax" required/>
+        <CustomInput item="Tarif" type="number" id="tarif" v-model="formData.tarif" required/>
       </div>
-      <div class="mt-4">
-        <label for="dateCours" class="block text-sm font-medium text-gray-700">Date</label>
-        <input type="datetime-local" id="dateCours" v-model="formData.dateCours" name="dateCours" class="mt-1 block">
-      </div>
-      <div class="mt-4">
-        <label for="dureeCours" class="block text-sm font-medium text-gray-700">Durée (minutes)</label>
-        <input type="number" id="dureeCours" v-model="formData.dureeCours" name="dureeCours" class="mt-1 block">
-      </div>
-      <div class="mt-4">
-        <label for="nbInscriptionMax" class="block text-sm font-medium text-gray-700">Nombre de places</label>
-        <input type="number" id="nbInscriptionMax" v-model="formData.nbInscriptionMax" name="nbInscriptionMax" class="mt-1 block">
-      </div>
-      <div class="mt-4">
-        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-        <textarea id="description" v-model="formData.description" name="description" class="mt-1 block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
-      </div>
-      <div class="mt-4">
-        <label for="tarif" class="block text-sm font-medium text-gray-700">Tarif</label>
-        <input type="number" id="tarif" v-model="formData.tarif" name="tarif" class="mt-1 block">
-      </div>
-      <div class="mt-4">
-        <label for="dateLimiteInscription" class="block text-sm font-medium text-gray-700">Date limite d'inscription</label>
-        <input type="datetime-local" id="dateLimiteInscription" v-model="formData.dateLimiteInscription" name="dateLimiteInscription" class="mt-1 block">
-      </div>
-      <div class="mt-4">
-        <button type="submit" @click="handleSubmit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Ajouter
-        </button>
+        <CustomTextarea item="Description" id="description" v-model="formData.description" required class="w-full" />
+      <div class="mt-4 flex justify-center">
+        <CustomButton type="submit" @click="handleSubmit">
+          {{ origin.id ? "Modifier" : "Ajouter" }}
+        </CustomButton>
       </div>
     </form>
   </div>

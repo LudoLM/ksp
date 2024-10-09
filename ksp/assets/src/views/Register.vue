@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '../store/user';
+import CustomButton from "../components/CustomButton.vue";
+import CustomInput from "../components/CustomInput.vue";
 
 const route = useRouter();
 
@@ -58,111 +60,30 @@ const handleRegister = async () => {
   <div class="login-container w-full flex items-center justify-center">
     <form  @submit.prevent="handleRegister" class="bg-white p-8 rounded-lg shadow-lg w-full">
       <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">Créer un compte</h2>
-
       <div class="w-full flex justify-space-between gap-4">
         <div class="column">
-          <div class="form-group mb-4 w-50">
-            <label for="prenom" class="block text-gray-700 font-semibold mb-2">Prénom:</label>
-            <input
-                type="text"
-                id="prenom"
-                v-model="prenom"
-                required
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label for="nom" class="block text-gray-700 font-semibold mb-2">Nom:</label>
-            <input
-                type="text"
-                id="nom"
-                v-model="nom"
-                required
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label for="email" class="block text-gray-700 font-semibold mb-2">Email:</label>
-            <input
-                type="email"
-                id="email"
-                v-model="email"
-                required
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label for="password" class="block text-gray-700 font-semibold mb-2">Mot de passe:</label>
-            <input
-                type="password"
-                id="password"
-                v-model="password"
-                required
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <CustomInput item="Prénom" type="text" id="prenom" required v-model="prenom"/>
+          <CustomInput item="Nom" type="text" id="nom" required v-model="nom"/>
+          <CustomInput item="Email" type="email" id="email" required v-model="email"/>
+          <CustomInput item="Mot de passe" type="password" id="password" required v-model="password"/>
         </div>
         <div class="column">
-          <div class="form-group mb-4">
-            <label for="adresse" class="block text-gray-700 font-semibold mb-2">Adresse:</label>
-            <input
-                type="text"
-                id="adresse"
-                v-model="adresse"
-                required
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
 
-          <div class="form-group mb-4">
-            <label for="cp" class="block text-gray-700 font-semibold mb-2">Code Postal:</label>
-            <input
-                type="text"
-                id="cp"
-                v-model="cp"
-                required
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label for="ville" class="block text-gray-700 font-semibold mb-2">Ville:</label>
-            <input
-                type="text"
-                id="ville"
-                v-model="ville"
-                required
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label for="telephone" class="block text-gray-700 font-semibold mb-2">Téléphone:</label>
-            <input
-                type="text"
-                id="telephone"
-                v-model="telephone"
-                required
-                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <CustomInput item="email" type="text" id="adresse" required v-model="adresse"/>
+          <CustomInput item="Code Postal" type="text" id="cp" required v-model="cp"/>
+          <CustomInput item="Ville" type="text" id="ville" required v-model="ville"/>
+          <CustomInput item="Téléphone" type="text" id="telephone" required v-model="telephone"/>
         </div>
       </div>
       <div class="flex justify-center gap-4">
-        <button class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+        <CustomButton>
           <router-link to="/">
             Retour
           </router-link>
-        </button>
-        <button
-            type="submit"
-            class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        >
+        </CustomButton>
+        <CustomButton type="submit">
           S'inscrire
-        </button>
+        </CustomButton>
       </div>
     </form>
   </div>

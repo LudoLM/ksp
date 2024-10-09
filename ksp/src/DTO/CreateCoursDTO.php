@@ -24,10 +24,9 @@ class CreateCoursDTO
     public ?int $nbInscriptionMax = null;
 
     #[Groups('cours:create')]
-    public ?int $typeCours = null;  // ID du TypeCours
+    public ?int $typeCours = null;
 
     #[Groups('cours:create')]
     public ?\DateTimeInterface $dateLimiteInscription = null;
 }
-
 ?>

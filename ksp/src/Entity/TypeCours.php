@@ -14,15 +14,19 @@ class TypeCours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index' , "user:detail"])]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', "user:detail"])]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
     private ?string $libelle = null;
 
     #[ORM\OneToMany(mappedBy: 'typeCours', targetEntity: Cours::class, orphanRemoval: true)]
     private Collection $cours;
+
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', "user:detail"])]
+    #[ORM\Column(length: 255)]
+    private ?string $thumbnail = null;
 
     public function __construct()
     {
@@ -72,6 +76,18 @@ class TypeCours
                 $cour->setTypeCours(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getThumbnail(): ?string
+    {
+        return $this->thumbnail;
+    }
+
+    public function setThumbnail(string $thumbnail): static
+    {
+        $this->thumbnail = $thumbnail;
 
         return $this;
     }

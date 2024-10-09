@@ -1,5 +1,7 @@
 <script setup>
 
+import CustomButton from "../components/CustomButton.vue";
+
 const goingBack = () => {
   window.history.back();
 };
@@ -26,7 +28,7 @@ const goingBack = () => {
     </stripe-buy-button>
   </div>
   <div class="flex justify-center my-10">
-    <button @click="goingBack" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Retour</button>
+    <CustomButton @click="goingBack">Retour</CustomButton>
   </div>
 </template>
 

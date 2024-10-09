@@ -10,23 +10,19 @@ export async function useSubscription(coursId) {
         });
 
         if (response.ok) {
-            const result = await response.json();
-            console.log('Réponse du serveur:', "Utilisateur ajouté au cours");
-            return result;
+            return await response.json();
         } else {
             const errorData = await response.json();
-            console.log('Erreur du serveur:', errorData);
             return false;
         }
     } catch (error) {
-        console.error('Erreur de réseau:', error);
         return false;
     }
 }
 
 
 
-export async function useUnSubscription(coursId, user) {
+export async function useUnSubscription(coursId) {
     try {
         const response = await fetch(`/api/removeUser/${coursId}`, {
             method: 'DELETE',
@@ -38,15 +34,11 @@ export async function useUnSubscription(coursId, user) {
         });
 
         if (response.ok) {
-            const result = await response.json();
-            console.log('Réponse du serveur:', "Utilisateur retiré du cours");
-            return result;
+            return await response.json();
         } else {
-            console.log('Échec du retrait de l\'utilisateur du cours');
             return false;
         }
     } catch (error) {
-        console.error('Erreur:', error);
         return false;
     }
 }

@@ -8,8 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
 class Cours
@@ -17,42 +16,42 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "user:detail"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "cours:update", "user:detail"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?int $duree = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "user:detail"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "user:detail"])]
     private ?\DateTimeInterface $dateCours = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?int $tarif = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?\DateTimeInterface $dateLimiteInscription = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', "cours:create"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?int $nbInscriptionMax = null;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "user:detail"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "user:detail"])]
     private ?TypeCours $typeCours = null;
 
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "user:detail"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "user:detail"])]
     private ?StatusCours $statusCours = null;
 
 

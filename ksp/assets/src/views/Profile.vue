@@ -3,7 +3,7 @@
       <!-- Recap des infos ci-dessus de l'utilisateur avec tailwind -->
   <div class="flex flex-col items-center justify-center w-full">
     <div class="bg-white shadow-md rounded-lg p-8 m-4 w-full">
-      <h3>Coordonées</h3>
+      <h3>Coordonnées</h3>
       <div class="flex items-center justify-center mb-10">
         <div class="flex flex-col space-y-4 w-full">
           <div class="flex">
@@ -39,18 +39,18 @@
         </div>
         <div class="credits">
           <div class="creditsWrapper flex flex-col justify-center align-center">
-            <div class="quantityCredits flex justify-center">{{ user.nombreCours }}</div>
-            <div class="label flex justify-center">Dispo{{ user.nombreCours > 1 ? "s" : "" }}</div>
+            <div class="quantityCredits flex justify-center">{{ user.nombreCours }} cours</div>
+            <div class="label flex justify-center">dispo{{ user.nombreCours > 1 ? "s" : "" }}</div>
           </div>
         </div>
       </div>
       <div class="buttons w-full mt-4 flex justify-center gap-2">
-        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <CustomButton>
           Modifier
-        </button>
-        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="handleBuyCours">
+        </CustomButton>
+        <CustomButton @click="handleBuyCours">
           Acheter des cours
-        </button>
+        </CustomButton>
       </div>
     </div>
   </div>
@@ -77,9 +77,9 @@
             <td class="border px-4 py-2">{{ formatDateTime(cours.dateCours)[1] }}</td>
             <td class="border px-4 py-2">{{ cours.statusCours.libelle }}</td>
             <td class="border px-4 py-2">
-              <button @click="handleUnsubscription(cours.id)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              <CustomButton @click="handleUnsubscription(cours.id)">
                 Se désinscrire
-              </button>
+              </CustomButton>
             </td>
           </tr>
           </tbody>
@@ -118,6 +118,7 @@
 import { onMounted, ref } from "vue";
 import { useRouter } from 'vue-router';
 import { useUnSubscription } from "../utils/useSubscribing";
+import CustomButton from "../components/CustomButton.vue";
 
 const user = ref({});
 const router = useRouter();
@@ -132,7 +133,6 @@ const getUser = async () => {
   });
 
   user.value = await response.json();
-  console.log(user.value.historiquePaiements);
 };
 
 const handleBuyCours = () => {

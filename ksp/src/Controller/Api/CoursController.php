@@ -151,4 +151,55 @@ class CoursController extends AbstractController
 
         return new JsonResponse(['response' => true], 200);
     }
+
+    #[Route('cours/open/{id}', name: 'cours_open', methods: ['PUT'])]
+    public function openCours(Cours $cours): JsonResponse
+    {
+        $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
+
+        $this->em->persist($cours);
+        $this->em->flush();
+
+        return new JsonResponse(['response' => true, 'statusChange' => StatusCoursEnum::OUVERT->value], 200);
+    }
+
+    #[Route('cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
+    public function cancelCours(Cours $cours): JsonResponse
+    {
+        $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ANNULE->value]));
+
+        $this->em->persist($cours);
+        $this->em->flush();
+
+        return new JsonResponse(['response' => true, 'statusChange' => StatusCoursEnum::ANNULE->value], 200);
+    }
+
+
+    #[Route('cours/edit/{id}', name: 'cours_update', methods: ['PUT'])]
+    public function editCours(
+        Cours $cours,
+        #[MapRequestPayload(
+            serializationContext: [
+                'groups' => ['cours:create']
+            ]
+        )]
+        CreateCoursDTO $coursDTO
+    ) : JsonResponse
+    {
+        $cours->setDuree($coursDTO->dureeCours);
+        $cours->setDateCours($coursDTO->dateCours);
+        $cours->setDescription($coursDTO->description);
+        $cours->setTarif($coursDTO->tarif);
+        $cours->setNbInscriptionMax($coursDTO->nbInscriptionMax);
+        $cours->setTypeCours($this->typeCoursRepository->find($coursDTO->typeCours));
+        $cours->setDateLimiteInscription($coursDTO->dateLimiteInscription);
+        $cours->setStatusCours($cours->getStatusCours());
+
+
+        $this->em->persist($cours);
+        $this->em->flush();
+
+        return new JsonResponse(['response' => true], 200);
+    }
+
 }

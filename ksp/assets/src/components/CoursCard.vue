@@ -2,7 +2,7 @@
   <div class="coursCard_Wrapper">
     <div class="coursCard">
       <div class="card_image">
-        <img :src="require(`../../images/photo${info.typeCours.id}.jpeg`)" alt="">
+        <img :src="require(`../../images/uploads/${info.typeCours.thumbnail}`)" alt="">
       </div>
 
       <div class="card_infos">
@@ -22,49 +22,59 @@
           <div :class="isSubscribed ? 'isSubscribed' : 'invisible'">
             Je participe
           </div>
-
         </div>
-        <div class="flex justify-between mt-5">
-          <router-link :to="{ name: 'CoursDetail', params: { id: info.id } }" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            + d'infos
-          </router-link>
-          <!-- Si l'utilisateur est admin et le cours en creation -->
-          <button v-if="role === 'ROLE_ADMIN' && statusCours === 'En création'" @click="deleteCreation" class="w-6/12 mt-3 mx-2 block rounded-md bg-red-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Supprimer
-          </button>
+        <div class="min-h-24 grid items-end">
+          <div class="grid grid-cols-2">
+            <router-link :to="{ name: 'CoursDetail', params: { id: info.id }}" class="mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                + d'infos
+            </router-link>
+            <!-- Si l'utilisateur est admin et le cours en creation -->
+            <CustomButton v-if="role === 'ROLE_ADMIN' && statusCours === 'En création'" @click="openCreation">
+              Ouvrir
+            </CustomButton>
+            <CustomButton v-if="role === 'ROLE_ADMIN' && statusCours === 'En création'" @click="updateCreation">
+              Modifier
+            </CustomButton>
+            <CustomButton v-if="role === 'ROLE_ADMIN' && statusCours === 'En création'" @click="deleteCreation" :color="'red'">
+              Supprimer
+            </CustomButton>
+            <CustomButton v-if="role === 'ROLE_ADMIN' && (statusCours === 'Ouvert' || statusCours === 'Complet')" @click="cancelCours">
+              Annulé
+            </CustomButton>
 
-          <!-- Si l'utilisateur n'est pas connecté -->
-          <v-dialog v-model="loginDialog" max-width="500">
-            <template v-slot:activator="{ props: activatorProps }">
-              <button
-                  v-if="!userId && statusCours ==='Ouvert'"
-                  v-bind="activatorProps"
-                  class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                S'inscrire
-              </button>
-            </template>
+            <!-- Si l'utilisateur n'est pas connecté -->
+            <v-dialog v-model="loginDialog" max-width="500">
+              <template v-slot:activator="{ props: activatorProps }">
+                <CustomButton
+                    v-if="!userId && statusCours !=='Complet'"
+                    v-bind="activatorProps"
 
-            <v-card>
-              <v-card-title class="text-h5">Connexion requise</v-card-title>
-              <v-card-text>
-                Veuillez vous authentifier pour vous inscrire à ce cours.
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <button @click="redirectToLogin" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Login</button>
-                <button @click="loginDialog = false" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Fermer</button>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
+                >
+                  S'inscrire
+                </CustomButton>
+              </template>
 
-          <!-- Si l'utilisateur est connecté -->
-          <button v-if="userId && !isSubscribed && statusCours ==='Ouvert'" @click="handleSubscription" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            S'inscrire
-          </button>
-          <button v-if="userId && isSubscribed && statusCours ==='Ouvert'" @click="handleUnsubscription" class="w-6/12 mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Se désinscrire
-          </button>
+              <v-card>
+                <v-card-title class="text-h5">Connexion requise</v-card-title>
+                <v-card-text>
+                  Veuillez vous authentifier pour vous inscrire à ce cours.
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <CustomButton @click="redirectToLogin">Login</CustomButton>
+                  <CustomButton @click="loginDialog = false">Fermer</CustomButton>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+
+            <!-- Si l'utilisateur est connecté -->
+            <CustomButton v-if="userId && !isSubscribed && role !== 'ROLE_ADMIN' && statusCours !=='Complet' && statusCours !== 'En création'" @click="handleSubscription">
+              S'inscrire
+            </CustomButton>
+            <CustomButton v-if="userId && isSubscribed && role !== 'ROLE_ADMIN'" @click="handleUnsubscription">
+              Se désinscrire
+            </CustomButton>
+          </div>
         </div>
       </div>
     </div>
@@ -80,12 +90,19 @@ import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
 import { useSubscription, useUnSubscription } from "../utils/useSubscribing";
 import useGetElementsToken from "../utils/useGetElementsToken";
-import {useDeleteCours} from "../utils/useActionCours";
+import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
+import { defineProps, defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
+import CustomButton from "./CustomButton.vue";
+
+
 
 const userStore = useUserStore();
 const userId = userStore.userId;
-const role = ref(localStorage.getItem('token') ? useGetElementsToken().role : null);
-const emit = defineEmits(['subscriptionResponse']);
+const router = useRouter();
+const role = ref(localStorage.getItem('token') ? useGetElementsToken().roles[0] : null);
+
+const emit = defineEmits(['subscriptionResponse', 'deleteCoursResponse', 'cancelCoursResponse']);
 
 // Couleurs par statut
 const colors = {
@@ -160,19 +177,59 @@ const handleUnsubscription = async () => {
 };
 
 const deleteCreation = async () => {
-  const response = await useDeleteCours(props.info.id);
-  console.log(response);
+  const response = useDeleteCours(props.info.id);
+
+  if (response) {
+    emit('deleteCoursResponse', {
+      type: 'success',
+      message: "Le cours a été supprimé",
+      id: props.info.id
+    });
+  } else {
+    emit('deleteCoursResponse', {
+      type: 'error',
+      message: "Le cours n'a pas pu être supprimé",
+      id: props.info.id
+    });
+  }
+};
+
+const updateCreation = () => {
+  router.push({ name: 'EditCours', params: { id: props.info.id } });
+};
 
 
-  if (response.status === 200) {
+const cancelCours = async () => {
+  const response = await useCancelCours(props.info.id);
+  if (response) {
+    statusCours.value = response.statusChange;
+    emit('cancelCoursResponse', {
+      type: 'success',
+      message: "Le cours a été annulé",
+    });
+  } else {
+    emit('cancelCoursResponse', {
+      type: 'error',
+      message: "Le cours n'a pas pu être annulé",
+    });
+  }
+};
+
+
+// A revoir
+const openCreation = async () => {
+  const response = await useOpenCours(props.info.id);
+  if (response.response) {
+    statusCours.value = response.statusChange;
     emit('subscriptionResponse', {
       type: 'success',
-      message: response.message,
+      message: "Le cours est désormais ouvert",
     });
+
   } else {
     emit('subscriptionResponse', {
       type: 'error',
-      message: 'Le cours n\'a pas pu être supprimé',
+      message: 'Le cours n\'a pas pu être ouvert',
     });
   }
 };
@@ -257,6 +314,7 @@ const deleteCreation = async () => {
   .infoRestante {
     font-weight: 500;
     color: #5e2ca5;
+
   }
 
 
