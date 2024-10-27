@@ -18,13 +18,13 @@ class TypeCours
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', "user:detail"])]
     private ?string $libelle = null;
 
     #[ORM\OneToMany(mappedBy: 'typeCours', targetEntity: Cours::class, orphanRemoval: true)]
     private Collection $cours;
 
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', "user:detail"])]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
     #[ORM\Column(length: 255)]
     private ?string $thumbnail = null;
 

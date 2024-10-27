@@ -69,7 +69,7 @@ const handleRegister = async () => {
         </div>
         <div class="column">
 
-          <CustomInput item="email" type="text" id="adresse" required v-model="adresse"/>
+          <CustomInput item="Adresse" type="text" id="adresse" required v-model="adresse"/>
           <CustomInput item="Code Postal" type="text" id="cp" required v-model="cp"/>
           <CustomInput item="Ville" type="text" id="ville" required v-model="ville"/>
           <CustomInput item="Téléphone" type="text" id="telephone" required v-model="telephone"/>

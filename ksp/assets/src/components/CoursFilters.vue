@@ -45,7 +45,7 @@ const resetInfos = () => {
           id="listeCours"
           v-model="selectedCoursId"
       >
-        <option value="0">Choisissez un cours</option>
+        <option value="0">Tous les cours</option>
         <option v-for="typeCours in uniqueTypeCours" :key="typeCours.id" :value="typeCours.id">{{
             typeCours.libelle
           }}

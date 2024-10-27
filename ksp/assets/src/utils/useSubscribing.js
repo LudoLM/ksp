@@ -1,14 +1,13 @@
 
-export async function useSubscription(coursId) {
+export async function useSubscription(coursId,isAttente) {
     try {
-        const response = await fetch(`/api/addUser/${coursId}`, {
+        const response = await fetch(`/api/addUser/${coursId}/${isAttente}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('token')}`
             }
         });
-
         if (response.ok) {
             return await response.json();
         } else {

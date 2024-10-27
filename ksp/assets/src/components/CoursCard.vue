@@ -19,8 +19,8 @@
           <div class="quantity">
             Dispo:&nbsp;<span class="infoRestante">{{ info.nbInscriptionMax - usersCount }}</span>
           </div>
-          <div :class="isSubscribed ? 'isSubscribed' : 'invisible'">
-            Je participe
+          <div :class="isSubscribed || isUserAttente ? 'isSubscribed' : 'invisible'">
+            {{ isSubscribed ? 'Je participe' : 'En attente' }}
           </div>
         </div>
         <div class="min-h-24 grid items-end">
@@ -46,10 +46,8 @@
             <v-dialog v-model="loginDialog" max-width="500">
               <template v-slot:activator="{ props: activatorProps }">
                 <CustomButton
-                    v-if="!userId && statusCours !=='Complet'"
-                    v-bind="activatorProps"
-
-                >
+                    v-if="!userId && statusCours ==='Ouvert'"
+                    v-bind="activatorProps">
                   S'inscrire
                 </CustomButton>
               </template>
@@ -68,11 +66,17 @@
             </v-dialog>
 
             <!-- Si l'utilisateur est connecté -->
-            <CustomButton v-if="userId && !isSubscribed && role !== 'ROLE_ADMIN' && statusCours !=='Complet' && statusCours !== 'En création'" @click="handleSubscription">
+            <CustomButton v-if="userId && !isSubscribed && role !== 'ROLE_ADMIN' && statusCours === 'Ouvert'" @click="handleSubscription(false)">
               S'inscrire
             </CustomButton>
-            <CustomButton v-if="userId && isSubscribed && role !== 'ROLE_ADMIN'" @click="handleUnsubscription">
+            <CustomButton v-if="userId && isSubscribed && role !== 'ROLE_ADMIN'" @click="handleUnsubscription(false)">
               Se désinscrire
+            </CustomButton>
+            <CustomButton v-if="!isSubscribed && !isUserAttente && statusCours === 'Complet' && role !== 'ROLE_ADMIN'" @click="handleSubscription(true)">
+              Liste d'attente
+            </CustomButton>
+            <CustomButton v-if="userId && isUserAttente && statusCours === 'Complet' && role !== 'ROLE_ADMIN'" @click="handleUnsubscription(true)">
+              Retirer attente
             </CustomButton>
           </div>
         </div>
@@ -88,7 +92,7 @@
 import { ref, computed } from 'vue';
 import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
-import { useSubscription, useUnSubscription } from "../utils/useSubscribing";
+import {useSubscription, useUnSubscription} from "../utils/useSubscribing";
 import useGetElementsToken from "../utils/useGetElementsToken";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
 import { defineProps, defineEmits } from 'vue';
@@ -123,6 +127,8 @@ const props = defineProps({
   },
 });
 
+
+
 // État de la modale
 const loginDialog = ref(false);
 
@@ -138,16 +144,20 @@ const formattedHour = computed(() => useDateFormat(dateDebut.value, 'H:mm').valu
 
 // Initialiser le statut du cours comme réactif
 const statusCours = ref(props.info.statusCours.libelle);
-let usersCount = ref(props.info.users.length);
+let usersCount = ref(props.info.usersCours.filter(cours => cours.isEnAttente === false).length);
+
 
 // Vérifier si l'utilisateur est inscrit
-const isSubscribed = ref(props.info.users.some(user => user.id === userId));
+const isSubscribed = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === false));
+const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === true));
 
 // Gestion de l'inscription
-const handleSubscription = async () => {
-  const success = await useSubscription(props.info.id);
+const handleSubscription = async (isAttente) => {
+  const success = await useSubscription(props.info.id, isAttente);
   if (success.response) {
-    isSubscribed.value = true;
+    // Si l'utilisateur est en attente, on change la valeur de isUserAttente, sinon on change la valeur de isSubscribed
+    isUserAttente.value = !!isAttente;
+    isSubscribed.value = !isAttente;
     statusCours.value = success.statusChange;
     usersCount = success.usersCount;
     emit('subscriptionResponse', {
@@ -163,10 +173,10 @@ const handleSubscription = async () => {
 };
 
 // Gestion de la désinscription
-const handleUnsubscription = async () => {
+const handleUnsubscription = async (isAttente) => {
   const success = await useUnSubscription(props.info.id);
   if (success.response) {
-    isSubscribed.value = false;
+    isAttente ? isUserAttente.value = false : isSubscribed.value = false;
     statusCours.value = success.statusChange;
     usersCount = success.usersCount;
     emit('subscriptionResponse', {
@@ -175,6 +185,7 @@ const handleUnsubscription = async () => {
     });
   }
 };
+
 
 const deleteCreation = async () => {
   const response = useDeleteCours(props.info.id);
@@ -316,7 +327,5 @@ const openCreation = async () => {
     color: #5e2ca5;
 
   }
-
-
 }
 </style>

@@ -55,6 +55,7 @@ class AuthController extends AbstractController
         $user->setCodePostal($createUserDTO->cp);
         $user->setCommune($createUserDTO->commune);
         $user->setRoles(['ROLE_USER']);
+        $user->setNombreCours(0);
 
 
         $this->em->persist($user);
