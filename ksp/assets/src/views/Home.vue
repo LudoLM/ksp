@@ -189,5 +189,4 @@ const prevPage = () => {
   margin-bottom: 5rem;
 }
 
-
 </style>

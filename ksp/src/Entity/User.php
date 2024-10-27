@@ -64,10 +64,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $telephone = null;
 
     #[Groups(['user:detail'])]
-    #[ORM\ManyToMany(targetEntity: Cours::class, inversedBy: 'users')]
-    private Collection $cours_list;
-
-    #[Groups(['user:detail'])]
     #[ORM\Column]
     private ?int $nombreCours = null;
 
@@ -78,11 +74,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: HistoriquePaiement::class, orphanRemoval: true)]
     private Collection $historiquePaiements;
 
+    /**
+     * @var Collection<int, UsersCours>
+     */
+    #[Groups(['user:detail'])]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UsersCours::class, orphanRemoval: true)]
+    private Collection $usersCours;
+
 
     public function __construct()
     {
-        $this->cours_list = new ArrayCollection();
         $this->historiquePaiements = new ArrayCollection();
+        $this->usersCours = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -242,30 +245,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->getNom();  // or some string field in your Vegetal Entity
     }
 
-    /**
-     * @return Collection<int, cours>
-     */
-    public function getCoursList(): Collection
-    {
-        return $this->cours_list;
-    }
-
-    public function addCoursList(cours $coursList): self
-    {
-        if (!$this->cours_list->contains($coursList)) {
-            $this->cours_list->add($coursList);
-        }
-
-        return $this;
-    }
-
-    public function removeCoursList(cours $coursList): self
-    {
-        $this->cours_list->removeElement($coursList);
-
-        return $this;
-    }
-
     public function getNombreCours(): ?int
     {
         return $this->nombreCours;
@@ -302,6 +281,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($historiquePaiement->getUser() === $this) {
                 $historiquePaiement->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, <UsersCours>>
+     */
+    public function getUsersCours(): Collection
+    {
+        return $this->usersCours;
+    }
+
+    public function addUsersCour(UsersCours $usersCours): static
+    {
+        if (!$this->usersCours->contains($usersCours)) {
+            $this->usersCours->add($usersCours);
+            $usersCours->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsersCour(UsersCours $usersCours): static
+    {
+        if ($this->usersCours->removeElement($usersCours)) {
+            // set the owning side to null (unless already changed)
+            if ($usersCours->getUser() === $this) {
+                $usersCours->setUser(null);
             }
         }
 

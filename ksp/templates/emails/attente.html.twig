@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+</head>
+<body>
+<div class="body">
+    <div class="container">
+        <div class="header text-center">
+        </div>
+        <div class="content">
+            <p class="text-center">Bonjour {{ participant.prenom }}!</p>
+            <p class="block">
+{#              Le cours de {{ cours.typeCours.libelle}}  du {{ cours.date|date('d/m/Y') }} à {{ cours.heureDebut|date('H:i') }} a été annulé.#}
+              Une place pour le cours de {{ cours.typeCours.libelle}} est disponible.
+            </p>
+            <p>
+                RDV sur votre espace personnel pour vous inscrire.
+            </p>
+            <p>
+                Cordialement,
+                <br>
+                <br>
+                 {{ user.prenom }}
+        </div>
+    </div>
+</div>
+</body>
+</html>

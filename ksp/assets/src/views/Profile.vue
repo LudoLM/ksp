@@ -71,13 +71,13 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="(cours, index) in user.cours_list" :key="cours.id" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
-            <td class="border px-4 py-2">{{ cours.typeCours.libelle }}</td>
-            <td class="border px-4 py-2">{{ formatDateTime(cours.dateCours)[0] }}</td>
-            <td class="border px-4 py-2">{{ formatDateTime(cours.dateCours)[1] }}</td>
-            <td class="border px-4 py-2">{{ cours.statusCours.libelle }}</td>
+          <tr v-for="(coursArr, index) in coursFiltered" :key="coursArr.cours.id" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
+            <td class="border px-4 py-2">{{ coursArr.cours.typeCours.libelle }}</td>
+            <td class="border px-4 py-2">{{ formatDateTime(coursArr.cours.dateCours)[0] }}</td>
+            <td class="border px-4 py-2">{{ formatDateTime(coursArr.cours.dateCours)[1] }}</td>
+            <td class="border px-4 py-2">{{ coursArr.cours.statusCours.libelle }}</td>
             <td class="border px-4 py-2">
-              <CustomButton @click="handleUnsubscription(cours.id)">
+              <CustomButton @click="handleUnsubscription(coursArr.cours.id)">
                 Se désinscrire
               </CustomButton>
             </td>
@@ -98,6 +98,7 @@
             <th class="px-4 py-2">Heure</th>
             <th class="px-4 py-2">Nombre de cours</th>
             <th class="px-4 py-2">Montant</th>
+            <th class="px-4 py-2">Facture</th>
           </tr>
           </thead>
           <tbody>
@@ -106,6 +107,7 @@
               <td class="border px-4 py-2">{{ formatDateTime(paiement.date)[1] }}</td>
               <td class="border px-4 py-2">{{ paiement["pack"].nom }}</td>
               <td class="border px-4 py-2">{{ paiement["pack"].tarif / 100 }} €</td>
+              <td class="border px-4 py-2"><a href=""></a></td>
             </tr>
           </tbody>
         </table>
@@ -121,6 +123,7 @@ import { useUnSubscription } from "../utils/useSubscribing";
 import CustomButton from "../components/CustomButton.vue";
 
 const user = ref({});
+const coursFiltered = ref([]);
 const router = useRouter();
 
 const getUser = async () => {
@@ -133,6 +136,8 @@ const getUser = async () => {
   });
 
   user.value = await response.json();
+  // coursFiltered.value = user.value.usersCours.filter(coursArr => coursArr.isAttente === false);
+  coursFiltered.value = user.value.usersCours.filter(coursArr => coursArr.is_en_attente === false);
 };
 
 const handleBuyCours = () => {
@@ -145,7 +150,7 @@ const handleUnsubscription = async (coursId) => {
 
   if (success) {
     // Filtrer le cours désinscrit localement
-    user.value.cours_list = user.value.cours_list.filter(cours => cours.id !== coursId);
+    user.value.usersCours = user.value.usersCours.filter(coursArr => coursArr.cours.id !== coursId);
     user.value.nombreCours += 1;
   } else {
     console.error("Échec de la désinscription.");
