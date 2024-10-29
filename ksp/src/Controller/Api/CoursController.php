@@ -73,52 +73,63 @@ class CoursController extends AbstractController
     #[Route('addUser/{id}/{isAttente?}', name: 'cours_add_user', methods: ['POST'])]
     public function addUserToCours(Cours $cours, ?string $isAttente): JsonResponse
     {
-
         $user = $this->getUser();
-        $isAttente =  $isAttente === 'true' ? true : false;
+        $isAttente = $isAttente === 'true';
+        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
         $statusChange = $cours->getStatusCours()->getLibelle();
 
-        if (in_array($user->getId(), array_map(fn($usersCours) => $usersCours->getUser()->getId(), $user->getUsersCours()->toArray()))) {
-            foreach ($user->getUsersCours() as $usersCours) {
-                if ($usersCours->getUser()->getId() === $user->getId()) {
-                    $usersCours->setEnAttente(false);
-                }
-            }
+//      Si le cours n'est pas en attente mais complet
+        if ($usersCount >= $cours->getNbInscriptionMax() && !$isAttente ) {
+            return new JsonResponse([ 'success' => false, 'response' => "Le cours est complet", 'statusChange' => StatusCoursEnum::COMPLET->value, "usersCount" => $usersCount], 200);
         }
+
+//      Si le cours n'est pas complet, je vérifie si l'utilisateur est déjà inscrit ou en attente
+        $usersCoursFiltered = array_filter($cours->getUsersCours()->toArray(), function ($usersCours) use ($user) { return $usersCours->getUser() === $user;});
+
+//      Si l'utilisateur est déjà en attente, je le passe en inscrit
+        if(count($usersCoursFiltered) > 0) {
+            $usersCours = array_values($usersCoursFiltered)[0];
+            $usersCours->setEnAttente(false);
+            $usersCours->setCreatedAt(new \DateTimeImmutable());
+        }
+//      Si l'utilisateur n'est pas inscrit, je l'ajoute à la liste des participants
         else{
             $usersCours = new UsersCours();
             $usersCours->setUser($user);
+            $usersCours->setCreatedAt(new \DateTimeImmutable());
             $usersCours->setEnAttente($isAttente);
+            $cours->addUsersCours($usersCours);
         }
 
-
-        $usersCours->setCreatedAt(new \DateTimeImmutable());
-        $cours->addUsersCours($usersCours);
-
-        if (count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();})) >= $cours->getNbInscriptionMax()) {
+//      Si le cours est complet, je change le statut du cours
+        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
+        $isFull = $usersCount >= $cours->getNbInscriptionMax();
+        if ($isFull) {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::COMPLET->value]));
             $statusChange = StatusCoursEnum::COMPLET->value;
         }
 
+//       Si le cours n'est pas en attente alors on décrémente le nombre de cours de l'utilisateur
+        if (!$isAttente) {
+            $this->getUser()->setNombreCours($this->getUser()->getNombreCours() - 1);
+        }
 
-        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
-        $this->getUser()->setNombreCours($this->getUser()->getNombreCours() - 1);
 
-
-        // Sauvegarde des modifications en base de données
+//      Sauvegarde des modifications en base de données
         $this->em->persist($cours);
         $this->em->flush();
 
-        // Retourne une réponse JSON pour indiquer que l'utilisateur a été ajouté avec succès
-        return new JsonResponse(
-            ['response' => true, 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
+
+//      Retourne une réponse JSON pour indiquer que l'utilisateur a été ajouté avec succès
+        return new JsonResponse(['success' => true, 'response' => !$isAttente ? "Vous êtes bien inscrit au cours" : "Vous êtes sur la liste d'attente", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
     }
 
 
-    #[Route('removeUser/{id}', name: 'cours_remove_user')]
-    public function removeUserFromCours(Cours $cours): JsonResponse
+    #[Route('removeUser/{id}/{isAttente}', name: 'cours_remove_user')]
+    public function removeUserFromCours(Cours $cours, string $isAttente): JsonResponse
     {
         $user = $this->getUser();
+        $isAttente = $isAttente === 'true';
         $statusChange = $cours->getStatusCours()->getLibelle();
         // Suppression de l'utilisateur du cours
         foreach ($cours->getUsersCours() as $usersCours) {
@@ -126,28 +137,9 @@ class CoursController extends AbstractController
                 $cours->removeUsersCours($usersCours);
             }
         }
-        $this->getUser()->setNombreCours($this->getUser()->getNombreCours() + 1);
-
-//        Envoyer mail aux utilisateurs de la liste attente du cours
-//        if ($cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
-//            foreach ($cours->getUsersCours() as $participant) {
-//                if ($participant->isEnAttente()) {
-//                    $email = (new TemplatedEmail())
-//                        ->from('test@test.fr')
-//                        ->to('test@test.fr')
-//                        ->subject('Place disponible pour le cours de ' . $cours->getTypeCours()->getLibelle())
-//                        ->htmlTemplate('emails/attente.html.twig')
-//                        ->locale('fr')
-//                        ->context([
-//                            'cours' => $cours,
-//                            'participant' => $participant->getUser(),
-//                            'user' => $this->getUser()
-//                        ]);
-//                    $this->mailer->send($email);
-//                }
-//            }
-//        }
-
+        if(!$isAttente) {
+            $user->setNombreCours($user->getNombreCours() + 1);
+        }
 
         if(count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();})) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
 
@@ -162,7 +154,7 @@ class CoursController extends AbstractController
         $this->em->flush();
 
         // Retourne une réponse JSON pour indiquer que l'utilisateur a été supprimé avec succès
-        return new JsonResponse(['response' => true, 'statusChange' => $statusChange, 'usersCount' => $usersCount], 200);
+        return new JsonResponse(['success' => true, 'response' => !$isAttente ? 'Vous avez bien été supprimé du cours': 'Vous n\'êtes plus sur la liste d\'attente', 'statusChange' => $statusChange, 'usersCount' => $usersCount], 200);
     }
 
     // Add route for create new cours

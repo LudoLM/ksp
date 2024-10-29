@@ -117,13 +117,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import {computed, onMounted, ref} from "vue";
 import { useRouter } from 'vue-router';
 import { useUnSubscription } from "../utils/useSubscribing";
 import CustomButton from "../components/CustomButton.vue";
 
 const user = ref({});
-const coursFiltered = ref([]);
+const coursFiltered = computed(() =>
+    user.value.usersCours ? user.value.usersCours.filter(coursArr => !coursArr.isEnAttente) : []
+);
 const router = useRouter();
 
 const getUser = async () => {
@@ -136,8 +138,7 @@ const getUser = async () => {
   });
 
   user.value = await response.json();
-  // coursFiltered.value = user.value.usersCours.filter(coursArr => coursArr.isAttente === false);
-  coursFiltered.value = user.value.usersCours.filter(coursArr => coursArr.is_en_attente === false);
+
 };
 
 const handleBuyCours = () => {
@@ -146,9 +147,9 @@ const handleBuyCours = () => {
 
 // Fonction de désinscription
 const handleUnsubscription = async (coursId) => {
-  const success = await useUnSubscription(coursId, user);
+  const result = await useUnSubscription(coursId, false);
 
-  if (success) {
+  if (result.success) {
     // Filtrer le cours désinscrit localement
     user.value.usersCours = user.value.usersCours.filter(coursArr => coursArr.cours.id !== coursId);
     user.value.nombreCours += 1;

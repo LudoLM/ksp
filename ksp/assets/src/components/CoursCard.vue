@@ -153,35 +153,38 @@ const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === 
 
 // Gestion de l'inscription
 const handleSubscription = async (isAttente) => {
-  const success = await useSubscription(props.info.id, isAttente);
-  if (success.response) {
-    // Si l'utilisateur est en attente, on change la valeur de isUserAttente, sinon on change la valeur de isSubscribed
+  const result = await useSubscription(props.info.id, isAttente);
+  statusCours.value = result.statusChange;
+  usersCount.value = result.usersCount;
+
+  if (result.success) {
+    // Si inscription réussie
     isUserAttente.value = !!isAttente;
     isSubscribed.value = !isAttente;
-    statusCours.value = success.statusChange;
-    usersCount = success.usersCount;
     emit('subscriptionResponse', {
       type: 'success',
-      message: "Vous êtes inscrit à ce cours",
+      message: result.response
     });
   } else {
+    // Si inscription échouée
     emit('subscriptionResponse', {
       type: 'error',
-      message: "Vous n'avez pas pu être inscrit à ce cours",
+      message: result.response
     });
   }
 };
 
+
 // Gestion de la désinscription
 const handleUnsubscription = async (isAttente) => {
-  const success = await useUnSubscription(props.info.id);
-  if (success.response) {
+  const result = await useUnSubscription(props.info.id, isAttente);
+  if (result.success) {
     isAttente ? isUserAttente.value = false : isSubscribed.value = false;
-    statusCours.value = success.statusChange;
-    usersCount = success.usersCount;
+    statusCours.value = result.statusChange;
+    usersCount.value = result.usersCount;
     emit('subscriptionResponse', {
       type: 'success',
-      message: "Vous vous êtes désinscrit de ce cours",
+      message: result.response
     });
   }
 };
