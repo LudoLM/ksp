@@ -1,5 +1,5 @@
 
-export async function useSubscription(coursId,isAttente) {
+export async function useSubscription(coursId, isAttente) {
     try {
         const response = await fetch(`/api/addUser/${coursId}/${isAttente}`, {
             method: 'POST',
@@ -8,22 +8,25 @@ export async function useSubscription(coursId,isAttente) {
                 'Authorization': `bearer ${localStorage.getItem('token')}`
             }
         });
-        if (response.ok) {
-            return await response.json();
+
+        const data = await response.json();
+
+        if (data.success) {
+            return data;
         } else {
-            const errorData = await response.json();
-            return false;
+            throw data;
         }
     } catch (error) {
-        return false;
+        return error;
     }
 }
 
 
 
-export async function useUnSubscription(coursId) {
+
+export async function useUnSubscription(coursId, isAttente) {
     try {
-        const response = await fetch(`/api/removeUser/${coursId}`, {
+        const response = await fetch(`/api/removeUser/${coursId}/${isAttente}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -32,12 +35,13 @@ export async function useUnSubscription(coursId) {
 
         });
 
-        if (response.ok) {
-            return await response.json();
+        const data = await response.json();
+        if (data.success) {
+            return data;
         } else {
-            return false;
+            throw data;
         }
     } catch (error) {
-        return false;
+        return error;
     }
 }
