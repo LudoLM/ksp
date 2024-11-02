@@ -1,10 +1,9 @@
 <template>
-  <div class="coursCard_Wrapper">
-    <div class="coursCard">
+  <div class='coursCard_Wrapper'>
+    <div class='coursCard'>
       <div class="card_image">
         <img :src="require(`../../images/uploads/${info.typeCours.thumbnail}`)" alt="">
       </div>
-
       <div class="card_infos">
         <div class="card_dateDebut">
           {{ capitalizedDate }}
@@ -19,9 +18,9 @@
           <div class="quantity">
             Dispo:&nbsp;<span class="infoRestante">{{ info.nbInscriptionMax - usersCount }}</span>
           </div>
-          <div :class="isSubscribed || isUserAttente ? 'isSubscribed' : 'invisible'">
-            {{ isSubscribed ? 'Je participe' : 'En attente' }}
-          </div>
+<!--          <div :class="isSubscribed || isUserAttente ? 'isSubscribed' : 'invisible'">-->
+<!--            {{ isSubscribed ? 'Je participe' : 'En attente' }}-->
+<!--          </div>-->
         </div>
         <div class="min-h-24 grid items-end">
           <div class="grid grid-cols-2">
@@ -95,7 +94,6 @@ import { useUserStore } from "../store/user";
 import {useSubscription, useUnSubscription} from "../utils/useSubscribing";
 import useGetElementsToken from "../utils/useGetElementsToken";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
-import { defineProps, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
 import CustomButton from "./CustomButton.vue";
 
@@ -110,13 +108,13 @@ const emit = defineEmits(['subscriptionResponse', 'deleteCoursResponse', 'cancel
 
 // Couleurs par statut
 const colors = {
-  'En cours': 'bg-lime-500',
-  'Ouvert': 'bg-emerald-500',
-  'Complet': 'bg-blue-500',
-  'Annulé': 'bg-yellow-500',
-  'En création': 'bg-indigo-500',
-  'Passé': 'bg-red-500',
-  'Archivé': 'bg-amber-500',
+  'En cours': 'bg-lime-300',
+  'Ouvert': 'bg-emerald-300',
+  'Complet': 'bg-blue-300',
+  'Annulé': 'bg-yellow-300',
+  'En création': 'bg-purple-300',
+  'Passé': 'bg-red-300',
+  'Archivé': 'bg-stone-300',
 };
 
 // Props
@@ -275,7 +273,7 @@ const openCreation = async () => {
   position: relative;
   img {
     width: 100%;
-    height: 300px;
+    min-height: 300px;
     object-fit: cover;
   }
 }
@@ -312,18 +310,27 @@ const openCreation = async () => {
   margin-bottom: 20px;
 }
 
+.isSubscribed{
+  //color: red;
+  //font-weight: normal;
+  //font-style: italic;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+
+  p, h1, h2, h3, h4, h5, h6 {
+    color: white;
+  }
+}
+
 .card_dispoRestantes {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   color: #838383;
   font-weight: 100;
-
-  .isSubscribed{
-    color: red;
-    font-weight: normal;
-    font-style: italic;
-  }
 
   .infoRestante {
     font-weight: 500;

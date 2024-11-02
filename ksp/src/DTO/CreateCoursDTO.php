@@ -28,5 +28,42 @@ class CreateCoursDTO
 
     #[Groups('cours:create')]
     public ?\DateTimeInterface $dateLimiteInscription = null;
+
+    public function getDureeCours(): ?int
+    {
+        return $this->dureeCours;
+    }
+
+    public function getDateCours(): ?\DateTimeInterface
+    {
+        return $this->dateCours;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getTarif(): ?int
+    {
+        return $this->tarif;
+    }
+
+    public function getNbInscriptionMax(): ?int
+    {
+        return $this->nbInscriptionMax;
+    }
+
+    public function getTypeCours(): ?int
+    {
+        return $this->typeCours;
+    }
+
+    public function getDateLimiteInscription(): ?\DateTimeInterface
+    {
+        return $this->dateLimiteInscription;
+    }
+
+
 }
 ?>

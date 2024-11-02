@@ -1,28 +1,26 @@
 <template>
   <div class="coursDetail">
-    <h2>Détails du cours</h2>
-    <div>
-        <router-link :to="{ name: 'Accueil' }"><CustomButton>Retour</CustomButton></router-link>
-    </div>
-    <div v-if="cours">
-      <p>Type de cours: {{ cours.typeCours.libelle }}</p>
-      <p>Date: {{ formattedDate }}</p>
-      <p>Heure: {{ formattedHour }}</p>
-      <p>Durée: {{ cours.duree }} minutes</p>
-      <p>Description: {{ cours.description }}</p>
-      <p><strong>Liste des participants</strong></p>
-      <ul>
-        <li v-for="participant in cours.users" :key="participant.id">
-          - {{ participant.nom }} {{ participant.prenom }}
-        </li>
-      </ul>
-    </div>
-
-    <div v-else>
-      <p>Chargement...</p>
-    </div>
-    <div>
-      <CustomButton @click="subscription">S'inscrire</CustomButton>
+    <div class="container w-full">
+      <div v-if="cours" class="details_wrapper">
+        <div class="img_wrapper">
+          <img :src="require(`../../images/uploads/${cours.typeCours.thumbnail}`)" alt="">
+        </div>
+        <div class="infos_wrapper flex flex-col">
+          <p>Type de cours: {{ cours.typeCours.libelle }}</p>
+          <p>Date: {{ formattedDate }}</p>
+          <p>Heure: {{ formattedHour }}</p>
+          <p>Durée: {{ cours.duree }} minutes</p>
+          <p>Description: {{ cours.description }}</p>
+          <div class="button flex justify-center">
+            <div>
+              <CustomButton @click="subscription">S'inscrire</CustomButton>
+            </div>
+            <div>
+              <router-link :to="{ name: 'Accueil' }"><CustomButton>Retour</CustomButton></router-link>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -43,20 +41,41 @@ const coursDetails = async () => {
   cours.value = JSON.parse(result);
 }
 
+
 onMounted(coursDetails);
 
 
 const dateDebut = computed(() => new Date(cours.value?.dateCours));
-
 const formattedDate = computed(() => useDateFormat(dateDebut.value, 'DD/MM/YYYY').value);
 const formattedHour = computed(() => useDateFormat(dateDebut.value, 'HH:mm').value);
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+
 .coursDetail {
   background-color: #fff;
-  padding: 20px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
+.details_wrapper {
+  display: flex;
+  width: 100%; /* S'assurer que le conteneur utilise toute la largeur disponible */
+}
+
+.img_wrapper {
+  width: 80%;
+  flex-shrink: 0;
+}
+
+.img_wrapper img {
+  width: 100%; /* L'image prend toute la largeur de son conteneur */
+  height: auto; /* Garder le ratio de l'image */
+}
+
+.infos_wrapper {
+  width: 20%;
+  padding: 20px;
+}
+
 </style>

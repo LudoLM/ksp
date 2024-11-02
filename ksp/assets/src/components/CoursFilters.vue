@@ -1,6 +1,5 @@
 <script setup>
-import {ref, watch, defineEmits} from 'vue';
-import {defineProps} from 'vue';
+import {ref, watch} from 'vue';
 
 // Props : données passées depuis le parent
 defineProps({

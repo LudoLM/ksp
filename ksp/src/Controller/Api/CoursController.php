@@ -7,15 +7,19 @@ use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
 use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
+use App\Event\CancelCoursEvent;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
+use App\Serializer\CreateCoursDTOToCoursDenormalizer;
 use App\Service\UpdateStatusCours;
 use Doctrine\ORM\EntityManagerInterface;
 use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Bridge\Twig\Mime\BodyRenderer;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -24,6 +28,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -170,16 +175,9 @@ class CoursController extends AbstractController
         CreateCoursDTO $coursDTO
     ) : JsonResponse
     {
-        $newCours = new Cours();
-        $newCours->setDuree($coursDTO->dureeCours);
-        $newCours->setDateCours($coursDTO->dateCours);
-        $newCours->setDescription($coursDTO->description);
-        $newCours->setTarif($coursDTO->tarif);
-        $newCours->setNbInscriptionMax($coursDTO->nbInscriptionMax);
-        $newCours->setTypeCours($this->typeCoursRepository->find($coursDTO->typeCours));
-        $newCours->setDateLimiteInscription($coursDTO->dateLimiteInscription);
-        $newCours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::EN_CREATION->value]));
-        $this->em->persist($newCours);
+        $coursDTOSeriliazer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);
+        $cours = $coursDTOSeriliazer->denormalize($coursDTO, Cours::class);
+        $this->em->persist($cours);
         $this->em->flush();
 
         return new JsonResponse(['response' => true], 200);
@@ -208,29 +206,12 @@ class CoursController extends AbstractController
     }
 
     #[Route('cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
-    public function cancelCours(Cours $cours): JsonResponse
+    public function cancelCours(Cours $cours, EventDispatcherInterface $dispatcher): JsonResponse
     {
-        $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ANNULE->value]));
-        $this->em->persist($cours);
 
-        foreach ($cours->getUsersCours() as $participant){
-            $email = (new TemplatedEmail())
-                ->from('test@test.fr')
-                ->to('test@test.fr')
-                ->subject('Annulation du cours')
-                ->htmlTemplate('emails/cancel.html.twig')
-                ->locale('fr')
-                ->context([
-                    'cours' => $cours,
-                    'participant' => $participant->getUser(),
-                    'user' => $this->getUser()
-                ]);
-            $this->mailer->send($email);
-            $participant->getUser()->setNombreCours($participant->getUser()->getNombreCours() + 1);
-            $this->em->persist($participant->getUser());
-        }
+        $eventCours = new CancelCoursEvent($cours);
+        $dispatcher->dispatch($eventCours);
 
-        $this->em->flush();
 
         return new JsonResponse(['response' => true, 'statusChange' => StatusCoursEnum::ANNULE->value], 200);
     }
@@ -247,15 +228,8 @@ class CoursController extends AbstractController
         CreateCoursDTO $coursDTO
     ) : JsonResponse
     {
-        $cours->setDuree($coursDTO->dureeCours);
-        $cours->setDateCours($coursDTO->dateCours);
-        $cours->setDescription($coursDTO->description);
-        $cours->setTarif($coursDTO->tarif);
-        $cours->setNbInscriptionMax($coursDTO->nbInscriptionMax);
-        $cours->setTypeCours($this->typeCoursRepository->find($coursDTO->typeCours));
-        $cours->setDateLimiteInscription($coursDTO->dateLimiteInscription);
-        $cours->setStatusCours($cours->getStatusCours());
-
+        $coursDTOSeriliazer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);
+        $cours = $coursDTOSeriliazer->denormalize($coursDTO, Cours::class, context: ['object_to_populate' => $cours]);
 
         $this->em->persist($cours);
         $this->em->flush();
