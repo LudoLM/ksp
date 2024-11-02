@@ -24,19 +24,16 @@ export default {
 
 <style lang="scss">
 
-$widthContent : 80%;
 $mainColor: #A289CC;
 
 main{
-  width: $widthContent;
   display: flex;
   justify-content: center;
-  margin: 40px auto;
   flex-grow: 1;
+  margin-top: 123px;
 
   section{
     flex-grow: 1;
-    margin-left: 20px;
   }
 
   aside{

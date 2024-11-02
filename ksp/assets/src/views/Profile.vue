@@ -107,7 +107,8 @@
               <td class="border px-4 py-2">{{ formatDateTime(paiement.date)[1] }}</td>
               <td class="border px-4 py-2">{{ paiement["pack"].nom }}</td>
               <td class="border px-4 py-2">{{ paiement["pack"].tarif / 100 }} €</td>
-              <td class="border px-4 py-2"><a href=""></a></td>
+              <td class="border px-4 py-2"><a href=""></a><a href=""><img src="../../icons/download.svg"/></a></td>
+
             </tr>
           </tbody>
         </table>

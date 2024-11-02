@@ -36,18 +36,20 @@ onMounted(() => {
   <div id="header_container">
     <div class="infos">
       <div id="compte">
-        <span><i class="fas fa-user"></i></span>
-        <span v-if="userId">
-         <span class="profil">
-           <a @click="handleProfile" title="Mon profil">{{ userPrenom }}</a>
-         </span>
-         <span>
-           <a @click="logout" title="Logout">Logout</a>
-        </span>
-        </span>
-        <span v-else>
-          <a href="/login">Login</a>
-        </span>
+        <div v-if="userId" class="profil">
+           <span >
+             <a @click="handleProfile" title="Mon profil"><div class="user"><img src="../../icons/user.svg"/>{{ userPrenom }}</div></a>
+           </span>
+           <span>
+             <a @click="logout" title="Déconnexion"><div class="logout"><img src="../../icons/logout.svg"/></div></a>
+           </span>
+        </div>
+        <div v-else>
+          <div class="loginButtons">
+            <a href="/register"><div class="createCount">Créer un compte</div></a>
+            <a href="/login"><div class="identifier"><img src="../../icons/user.svg"/><span class="identifier_text">Me connecter</span></div></a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -58,11 +60,6 @@ onMounted(() => {
 #header_container {
   div {
     width: 100%;
-
-    img {
-      float: left;
-      margin-left: 15px;
-    }
   }
 
   .infos {
@@ -82,9 +79,96 @@ onMounted(() => {
   }
 
   .profil {
-    border-right: 3px solid #000;
-    padding-right: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 8px;
     color: #5e2ca5;
   }
+
+  .loginButtons{
+    display: flex;
+    gap: 10px;
+  }
+
+  .createCount, .user{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #5e2ca5;
+    border: 2px solid #5e2ca5;
+    border-radius: 5px;
+    width: 150px;
+    height: 50px;
+    font-weight: 400;
+    font-size: .8rem;
+  }
+
+  .identifier{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 150px;
+    height: 50px;
+    background: #5e2ca5;
+    border-radius: 5px;
+    color: #dfdfdf;
+    font-weight: 400;
+    font-size: .8rem;
+  }
+
+  .logout{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background: #5e2ca5;
+    border-radius: 5px;
+    color: #dfdfdf;
+    font-weight: 400;
+    font-size: .8rem;
+  }
+
+  .user{
+    border: none;
+
+    svg{
+     fill: #5e2ca5;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .createCount {
+      display: flex;
+    }
+    .identifier_text{
+      display: flex;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .createCount {
+      display: none;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .identifier {
+      width: 50px;
+    }
+    .identifier_text {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .createCount {
+      display: none;
+    }
+  }
+
 }
+
 </style>

@@ -1,10 +1,16 @@
 <template>
+  <div class="banner">
+    <Title_banner/>
+  </div>
   <div class="container">
     <!-- Affichage d'un message de validation -->
     <v-alert v-model="alertVisible" :type="alertType" dismissible>
       {{ alertMessage }}
     </v-alert>
-    <h1>prochains cours</h1>
+    <div class="title_wrapper">
+      <h2>prochains cours.</h2>
+    </div>
+
 
     <div class="buttonsFilters">
       <router-link to="/cours/add"><CustomButton v-if="role === 'ROLE_ADMIN'">Ajouter un cours</CustomButton></router-link>
@@ -47,6 +53,7 @@ import useGetElementsToken from "../utils/useGetElementsToken";
 import { useRoute } from "vue-router";
 import {useGetCours} from "../utils/useActionCours";
 import CustomButton from "../components/CustomButton.vue";
+import Title_banner from "../components/Title_banner.vue";
 
 const infos = ref([]);
 const selectedCoursId = ref(null);
@@ -182,6 +189,10 @@ const prevPage = () => {
 
 <style scoped>
 
+.container {
+  min-width: 100%;
+}
+
 .buttonsFilters {
   display: flex;
   justify-content: space-between;
@@ -189,4 +200,24 @@ const prevPage = () => {
   margin-bottom: 5rem;
 }
 
+.banner {
+  background: url("../../images/banner2.jpg") no-repeat center center;
+  background-size: cover;
+  width: 100%;
+  height: 50vh;
+  object-fit: cover;
+  max-height: 50vh;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.title_wrapper {
+  background: #fff;
+  padding: 20px;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  color: #fff;
+}
 </style>
