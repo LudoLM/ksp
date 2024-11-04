@@ -6,7 +6,7 @@ use App\DTO\CreateCoursDTO;
 use App\DTO\CreateTypeCoursDTO;
 use App\Entity\TypeCours;
 use App\Repository\TypeCoursRepository;
-use App\Service\FileUploader;
+use App\Service\FileUploaderService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;

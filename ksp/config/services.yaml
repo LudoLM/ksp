@@ -30,6 +30,6 @@ services:
             - { name: 'kernel.event_listener', event: 'lexik_jwt_authentication.on_jwt_created', method: 'onJWTCreated' }
 
 
-    App\Service\FileUploader:
+    App\Service\FileUploaderService:
         arguments:
             $targetDirectory: '%kernel.project_dir%/assets/images/uploads'

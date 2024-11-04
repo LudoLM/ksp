@@ -3,7 +3,9 @@
 namespace App\Controller\Api;
 
 use App\DTO\CreateUserDTO;
+use App\Entity\Cours;
 use App\Entity\User;
+use App\Serializer\CreateUserDTOToUserDenormalizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,6 +17,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Serializer\Serializer;
 
 #[Route(path: 'api/', name: 'api_')]
 class AuthController extends AbstractController
@@ -22,41 +25,19 @@ class AuthController extends AbstractController
 
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly JWTTokenManagerInterface $JWTManager,
-        private readonly TokenStorageInterface $tokenStorage
-    )
-    {
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly CreateUserDTOToUserDenormalizer $createUserDTOToUserDenormalizer
+    ) {
 
     }
 
     #[Route(path: 'register', name: 'app_register')]
     public function register(
-        Security $security,
-        Request $request,
-        #[MapRequestPayload] CreateUserDTO $createUserDTO,
+        #[MapRequestPayload] CreateUserDTO $createUserDTO
+    ): JsonResponse {
 
-    ): JsonResponse
-    {
-
-        $user = new User();
-        $user->setPrenom($createUserDTO->prenom);
-        $user->setNom($createUserDTO->nom);
-        $user->setEmail($createUserDTO->email);
-
-        // Hashage du mot de passe
-        $hashedPassword = $this->userPasswordHasher->hashPassword(
-            $user,
-            $createUserDTO->password
-        );
-        $user->setPassword($hashedPassword);
-        $user->setTelephone($createUserDTO->telephone);
-        $user->setAdresse($createUserDTO->adresse);
-        $user->setCodePostal($createUserDTO->cp);
-        $user->setCommune($createUserDTO->commune);
-        $user->setRoles(['ROLE_USER']);
-        $user->setNombreCours(0);
-
+        $user = $this->createUserDTOToUserDenormalizer->denormalize($createUserDTO, User::class);
 
         $this->em->persist($user);
         $this->em->flush();

@@ -1,13 +1,13 @@
 <?php
 
-// src/Service/FileUploader.php
+// src/Service/FileUploaderService.php
 namespace App\Service;
 
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-class FileUploader
+class FileUploaderService
 {
     public function __construct(
         private string $targetDirectory,
