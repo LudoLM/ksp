@@ -8,11 +8,12 @@ use App\Entity\Cours;
 use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
 use App\Event\CancelCoursEvent;
+use App\Event\DesistementEvent;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
 use App\Serializer\CreateCoursDTOToCoursDenormalizer;
-use App\Service\UpdateStatusCours;
+use App\Service\UpdateStatusCoursService;
 use Doctrine\ORM\EntityManagerInterface;
 use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Bridge\Twig\Mime\BodyRenderer;
@@ -23,9 +24,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Serializer;
@@ -43,8 +42,8 @@ class CoursController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly StatusCoursRepository $statusCoursRepository,
         private readonly TypeCoursRepository $typeCoursRepository,
-        private readonly UpdateStatusCours $updateStatusCours,
-        private readonly MailerInterface $mailer
+        private readonly UpdateStatusCoursService $updateStatusCours,
+        private readonly EventDispatcherInterface $dispatcher
     )
     {
 
@@ -146,15 +145,19 @@ class CoursController extends AbstractController
             $user->setNombreCours($user->getNombreCours() + 1);
         }
 
+//        Si le cours est complet et qu'il y a de la place, je change le statut du cours et envoie un mail aux personnes en attente
         if(count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();})) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
 
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
             $statusChange = StatusCoursEnum::OUVERT->value;
+            // Envoi d'un mail aux personnes en attente
+            $eventCours = new DesistementEvent($cours);
+            $this->dispatcher->dispatch($eventCours);
         }
 
         $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
 
-        // Sauvegarde des modifications en base de données
+//        // Sauvegarde des modifications en base de données
         $this->em->persist($cours);
         $this->em->flush();
 
@@ -206,11 +209,11 @@ class CoursController extends AbstractController
     }
 
     #[Route('cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
-    public function cancelCours(Cours $cours, EventDispatcherInterface $dispatcher): JsonResponse
+    public function cancelCours(Cours $cours): JsonResponse
     {
 
         $eventCours = new CancelCoursEvent($cours);
-        $dispatcher->dispatch($eventCours);
+        $this->dispatcher->dispatch($eventCours);
 
 
         return new JsonResponse(['response' => true, 'statusChange' => StatusCoursEnum::ANNULE->value], 200);

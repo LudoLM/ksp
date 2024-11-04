@@ -9,7 +9,7 @@ use App\Repository\StatusCoursRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 
-class UpdateStatusCours
+class UpdateStatusCoursService
 {
 
     public function __construct(
