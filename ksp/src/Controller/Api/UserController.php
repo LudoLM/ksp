@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Cours;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,6 +32,14 @@ class UserController extends AbstractController
 
         $jsonUser = $this->serializer->serialize($user, 'json', ['groups' => 'user:detail']);
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
+    }
+
+    #[Route('/api/usersNotInCours/{cours}', name: 'api_users', methods: ['GET'])]
+    public function getUsersData(UserRepository $userRepository, Cours $cours) : JsonResponse
+    {
+        $users = $userRepository->getLightUsersAll($cours);
+        $jsonUsers = $this->serializer->serialize($users, 'json', ['groups' => 'cours:index']);
+        return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
 }
