@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 
 use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
+use App\Entity\User;
 use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
 use App\Event\CancelCoursEvent;
@@ -12,25 +13,19 @@ use App\Event\DesistementEvent;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
+use App\Repository\UserRepository;
 use App\Serializer\CreateCoursDTOToCoursDenormalizer;
 use App\Service\UpdateStatusCoursService;
 use Doctrine\ORM\EntityManagerInterface;
-use phpDocumentor\Reflection\Types\Boolean;
-use Symfony\Bridge\Twig\Mime\BodyRenderer;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
+
 
 #[Route(path: "api/", name:"api")]
 class CoursController extends AbstractController
@@ -43,7 +38,8 @@ class CoursController extends AbstractController
         private readonly StatusCoursRepository $statusCoursRepository,
         private readonly TypeCoursRepository $typeCoursRepository,
         private readonly UpdateStatusCoursService $updateStatusCours,
-        private readonly EventDispatcherInterface $dispatcher
+        private readonly EventDispatcherInterface $dispatcher,
+        private readonly UserRepository $userRepository
     )
     {
 
@@ -74,13 +70,35 @@ class CoursController extends AbstractController
         return new JsonResponse($jsonCours);
     }
 
-    #[Route('addUser/{id}/{isAttente?}', name: 'cours_add_user', methods: ['POST'])]
-    public function addUserToCours(Cours $cours, ?string $isAttente): JsonResponse
+    #[Route('addUser', name: 'cours_add_user', methods: ['POST'])]
+    public function addUserToCours(Request $request): JsonResponse
     {
-        $user = $this->getUser();
-        $isAttente = $isAttente === 'true';
+        $data = json_decode($request->getContent(), true);
+        $user = $data['userId'] === null ? $this->getUser() : $this->userRepository->find($data['userId']);
+        $cours = $this->coursRepository->find($data['coursId']);
+        $isAttente = $data['isAttente'];
+
+//      Calcul du nombre de participants au cours
         $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
         $statusChange = $cours->getStatusCours()->getLibelle();
+
+//      Si l'admin ajoute un extra
+        if($user !== $this->getUser()) {
+            $usersCours = new UsersCours();
+            $usersCours->setUser($user);
+            $usersCours->setCreatedAt(new \DateTimeImmutable());
+            $usersCours->setEnAttente(false);
+            $cours->addUsersCours($usersCours);
+            $user->setNombreCours($user->getNombreCours() - 1);
+            $isFull = $usersCount + 1 >= $cours->getNbInscriptionMax();
+            if ($isFull) {
+                $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::COMPLET->value]));
+                $statusChange = StatusCoursEnum::COMPLET->value;
+            }
+            $this->em->persist($cours);
+            $this->em->flush();
+            return new JsonResponse(['success' => true, 'response' => $user->getPrenom() . " " . $user->getNom() ." a bien été ajouté au cours", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
+        }
 
 //      Si le cours n'est pas en attente mais complet
         if ($usersCount >= $cours->getNbInscriptionMax() && !$isAttente ) {
@@ -218,7 +236,6 @@ class CoursController extends AbstractController
 
         return new JsonResponse(['response' => true, 'statusChange' => StatusCoursEnum::ANNULE->value], 200);
     }
-
 
     #[Route('cours/edit/{id}', name: 'cours_update', methods: ['PUT'])]
     public function editCours(

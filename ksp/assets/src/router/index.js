@@ -51,6 +51,7 @@ const vuetify = createVuetify({
     directives,
 })
 
+
 // Garde de navigation globale
 router.beforeEach((to, from, next) => {
 

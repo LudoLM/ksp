@@ -15,12 +15,12 @@
           {{ formattedHour }} - {{ info.duree }} mns
         </div>
         <div class="card_dispoRestantes">
-          <div class="quantity">
-            Dispo:&nbsp;<span class="infoRestante">{{ info.nbInscriptionMax - usersCount }}</span>
+          <div :style="{ visibility: info.nbInscriptionMax - usersCount <= 3 ? 'visible' : 'hidden' }" class="quantity">
+            Dispo:&nbsp;<span class="infoRestante">{{ info.nbInscriptionMax - usersCount >= 0 ? info.nbInscriptionMax - usersCount : 0}}</span>
           </div>
-<!--          <div :class="isSubscribed || isUserAttente ? 'isSubscribed' : 'invisible'">-->
-<!--            {{ isSubscribed ? 'Je participe' : 'En attente' }}-->
-<!--          </div>-->
+          <div :class="isSubscribed || isUserAttente ? 'isSubscribed' : 'invisible'">
+            {{ isSubscribed ? 'Je participe' : 'En attente' }}
+          </div>
         </div>
         <div class="min-h-24 grid items-end">
           <div class="grid grid-cols-2">
@@ -38,40 +38,40 @@
               Supprimer
             </CustomButton>
             <CustomButton v-if="role === 'ROLE_ADMIN' && (statusCours === 'Ouvert' || statusCours === 'Complet')" @click="cancelCours">
-              Annulé
+              Annuler
             </CustomButton>
 
-            <!-- Si l'utilisateur n'est pas connecté -->
-            <v-dialog v-model="loginDialog" max-width="500">
-              <template v-slot:activator="{ props: activatorProps }">
-                <CustomButton
-                    v-if="!userId && statusCours ==='Ouvert'"
-                    v-bind="activatorProps">
-                  S'inscrire
-                </CustomButton>
-              </template>
+            <ModalAddExtra
+                v-if="role === 'ROLE_ADMIN' && (statusCours === 'Ouvert' || statusCours === 'Complet')"
+                v-model:isOpen="addExtraDialog"
+                title="Ajouter un extra"
+                message="Sélectionner l'extra à ajouter."
+                :cours= props.info.id
+                @subscriptionResponse="handleAddExtraResponse"
+            >
+              Ajouter un extra
+            </ModalAddExtra>
 
-              <v-card>
-                <v-card-title class="text-h5">Connexion requise</v-card-title>
-                <v-card-text>
-                  Veuillez vous authentifier pour vous inscrire à ce cours.
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <CustomButton @click="redirectToLogin">Login</CustomButton>
-                  <CustomButton @click="loginDialog = false">Fermer</CustomButton>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
 
-            <!-- Si l'utilisateur est connecté -->
+            <ModalConfirm
+                v-if="!userId && (statusCours === 'Ouvert' || statusCours === 'Complet')"
+                v-model:isOpen="loginDialog"
+                title="Connexion requise"
+                message="Veuillez vous authentifier pour vous inscrire à ce cours."
+                @login="redirectToLogin"
+            >
+              {{ statusCours === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
+            </ModalConfirm>
+
+
+<!--             Si l'utilisateur est connecté-->
             <CustomButton v-if="userId && !isSubscribed && role !== 'ROLE_ADMIN' && statusCours === 'Ouvert'" @click="handleSubscription(false)">
               S'inscrire
             </CustomButton>
             <CustomButton v-if="userId && isSubscribed && role !== 'ROLE_ADMIN'" @click="handleUnsubscription(false)">
               Se désinscrire
             </CustomButton>
-            <CustomButton v-if="!isSubscribed && !isUserAttente && statusCours === 'Complet' && role !== 'ROLE_ADMIN'" @click="handleSubscription(true)">
+            <CustomButton v-if="userId && !isSubscribed && !isUserAttente && statusCours === 'Complet' && role !== 'ROLE_ADMIN'" @click="handleSubscription(true)">
               Liste d'attente
             </CustomButton>
             <CustomButton v-if="userId && isUserAttente && statusCours === 'Complet' && role !== 'ROLE_ADMIN'" @click="handleUnsubscription(true)">
@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import {ref, computed} from 'vue';
 import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
 import {useSubscription, useUnSubscription} from "../utils/useSubscribing";
@@ -96,6 +96,8 @@ import useGetElementsToken from "../utils/useGetElementsToken";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
 import { useRouter } from 'vue-router';
 import CustomButton from "./CustomButton.vue";
+import ModalConfirm from "./Modal/ModalConfirm.vue";
+import ModalAddExtra from "./Modal/ModalAddExtra.vue";
 
 
 
@@ -103,7 +105,6 @@ const userStore = useUserStore();
 const userId = userStore.userId;
 const router = useRouter();
 const role = ref(localStorage.getItem('token') ? useGetElementsToken().roles[0] : null);
-
 const emit = defineEmits(['subscriptionResponse', 'deleteCoursResponse', 'cancelCoursResponse']);
 
 // Couleurs par statut
@@ -129,10 +130,12 @@ const props = defineProps({
 
 // État de la modale
 const loginDialog = ref(false);
+const addExtraDialog = ref(false);
 
 const redirectToLogin = () => {
   window.location.href = '/login'; // Rediriger vers la route Symfony
 };
+
 
 // Formattage des dates
 const dateDebut = computed(() => new Date(props.info.dateCours));
@@ -148,6 +151,25 @@ let usersCount = ref(props.info.usersCours.filter(cours => cours.isEnAttente ===
 // Vérifier si l'utilisateur est inscrit
 const isSubscribed = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === false));
 const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === true));
+
+const handleAddExtraResponse = ({ type, message, statusChange }) => {
+  if (type === 'success') {
+    emit('subscriptionResponse', {
+      type: type,
+      message: message,
+    });
+    console.log(type, statusChange, message);
+    statusCours.value = statusChange;
+    usersCount.value++;
+
+  } else {
+    emit('subscriptionResponse', {
+      type: type,
+      message: message,
+    });
+  }
+};
+
 
 // Gestion de l'inscription
 const handleSubscription = async (isAttente) => {
@@ -210,7 +232,6 @@ const updateCreation = () => {
   router.push({ name: 'EditCours', params: { id: props.info.id } });
 };
 
-
 const cancelCours = async () => {
   const response = await useCancelCours(props.info.id);
   if (response) {
@@ -253,7 +274,6 @@ const openCreation = async () => {
   min-width: 300px;
   position: relative;
 }
-
 
 .coursCard {
   width: 100%;
@@ -311,14 +331,14 @@ const openCreation = async () => {
 }
 
 .isSubscribed{
-  //color: red;
-  //font-weight: normal;
-  //font-style: italic;
-  position: absolute;
+  color: red;
+  font-weight: normal;
+  font-style: italic;
+ /* position: absolute;
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.7);
-  z-index: 1000;
+  z-index: 1000;*/
 
   p, h1, h2, h3, h4, h5, h6 {
     color: white;

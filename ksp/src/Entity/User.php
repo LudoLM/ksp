@@ -37,11 +37,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:detail', 'cours:detail'])]
+    #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:detail', 'cours:detail'])]
+    #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
     private ?string $prenom = null;
 
     #[Groups(['user:detail'])]
