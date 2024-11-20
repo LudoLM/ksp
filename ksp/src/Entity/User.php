@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -22,6 +23,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:index','user:detail', 'cours:index'])]
     private ?int $id = null;
 
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
@@ -35,21 +37,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:index', 'cours:detail'])]
+    #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:index', 'cours:detail'])]
+    #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
     private ?string $prenom = null;
 
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $adresse = null;
-
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $codePostal = null;
 
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $commune = null;
+    #[Groups(['user:detail'])]
     #[ORM\Column(length: 10)]
     #[Assert\NotBlank(message: "Le numéro de téléphone ne doit pas être vide.")]
     #[Assert\Regex(
@@ -58,13 +63,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private ?string $telephone = null;
 
-    #[ORM\ManyToMany(targetEntity: Cours::class, inversedBy: 'users')]
     #[Groups(['user:detail'])]
-    private Collection $cours_list;
+    #[ORM\Column]
+    private ?int $nombreCours = null;
+
+    /**
+     * @var Collection<int, HistoriquePaiement>
+     */
+    #[Groups(['user:detail'])]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: HistoriquePaiement::class, orphanRemoval: true)]
+    private Collection $historiquePaiements;
+
+    /**
+     * @var Collection<int, UsersCours>
+     */
+    #[Groups(['user:detail'])]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UsersCours::class, orphanRemoval: true)]
+    private Collection $usersCours;
+
 
     public function __construct()
     {
-        $this->cours_list = new ArrayCollection();
+        $this->historiquePaiements = new ArrayCollection();
+        $this->usersCours = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -92,6 +113,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
+    }
+
+
+    public function onJWTCreated(JWTCreatedEvent $event)
+    {
+        $payload = $event->getData();
+        $payload['id'] = $this->getId();
+        $payload['email'] = $this->getEmail();
+        $payload['prenom'] = $this->getPrenom();
+        $event->setData($payload);
     }
 
     /**
@@ -214,27 +245,76 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->getNom();  // or some string field in your Vegetal Entity
     }
 
-    /**
-     * @return Collection<int, cours>
-     */
-    public function getCoursList(): Collection
+    public function getNombreCours(): ?int
     {
-        return $this->cours_list;
+        return $this->nombreCours;
     }
 
-    public function addCoursList(cours $coursList): self
+    public function setNombreCours(int $nombreCours): static
     {
-        if (!$this->cours_list->contains($coursList)) {
-            $this->cours_list->add($coursList);
+        $this->nombreCours = $nombreCours;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HistoriquePaiement>
+     */
+    public function getHistoriquePaiements(): Collection
+    {
+        return $this->historiquePaiements;
+    }
+
+    public function addHistoriquePaiement(HistoriquePaiement $historiquePaiement): static
+    {
+        if (!$this->historiquePaiements->contains($historiquePaiement)) {
+            $this->historiquePaiements->add($historiquePaiement);
+            $historiquePaiement->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeCoursList(cours $coursList): self
+    public function removeHistoriquePaiement(HistoriquePaiement $historiquePaiement): static
     {
-        $this->cours_list->removeElement($coursList);
+        if ($this->historiquePaiements->removeElement($historiquePaiement)) {
+            // set the owning side to null (unless already changed)
+            if ($historiquePaiement->getUser() === $this) {
+                $historiquePaiement->setUser(null);
+            }
+        }
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, <UsersCours>>
+     */
+    public function getUsersCours(): Collection
+    {
+        return $this->usersCours;
+    }
+
+    public function addUsersCour(UsersCours $usersCours): static
+    {
+        if (!$this->usersCours->contains($usersCours)) {
+            $this->usersCours->add($usersCours);
+            $usersCours->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsersCour(UsersCours $usersCours): static
+    {
+        if ($this->usersCours->removeElement($usersCours)) {
+            // set the owning side to null (unless already changed)
+            if ($usersCours->getUser() === $this) {
+                $usersCours->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

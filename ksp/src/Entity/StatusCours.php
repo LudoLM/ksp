@@ -14,11 +14,11 @@ class StatusCours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "user:detail"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "user:detail"])]
     private ?string $libelle = null;
 
     /**

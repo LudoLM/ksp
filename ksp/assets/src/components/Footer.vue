@@ -2,14 +2,6 @@
   <footer>
     <div class="box_columns">
       <div class="footer_column">
-        <h4>Rubriques</h4>
-
-        <div class="links">
-          <MyNavLinks direction="column"/>
-        </div>
-
-      </div>
-      <div class="footer_column">
         <h4>Contact</h4>
         <div>{{ store.fullName }}</div>
         <b>{{ store.address }}</b><br>
@@ -33,20 +25,6 @@
 </template>
 
 <script setup>
-import {infos} from "../store/index";
-const store = infos();
+  import { infos } from "../store/index"; // Importation du store
+  const store = infos(); // Utilisation du store
 </script>
-<script>
-import MyNavLinks from "./NavLinks.vue"
-export default {
-  name: "Myfooter",
-  components: {
-    MyNavLinks
-  }
-}
-
-</script>
-
-<style lang="scss">
-
-</style>

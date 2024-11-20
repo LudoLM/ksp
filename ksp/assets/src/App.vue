@@ -1,21 +1,24 @@
 <script>
 import './assets/scss/style.scss';
-import Myheader from "./components/Header";
 import Mymain from "./components/Main";
 import Myfooter from "./components/Footer";
+import MyNavLinks from "./components/NavLinks.vue";
 
 export default {
   name: 'App',
   components: {
-    Myheader,
+    MyNavLinks,
     Mymain,
     Myfooter
   }
 }
+
 </script>
 
 <template>
-  <Myheader/>
+  <div class="nav_wrapper">
+    <MyNavLinks direction="row"/>
+  </div>
   <Mymain/>
   <Myfooter/>
 </template>

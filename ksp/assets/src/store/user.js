@@ -2,21 +2,34 @@ import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        user: null,
-        isAutenticated: false,
+        userEmail: null,
+        userId: null,
+        userPrenom: null,
     }),
     actions: {
-        setUser(user) {
-            this.user = user;
-        },
-        setIsAutenticated() {
-            this.isAutenticated = !this.isAutenticated;
+        setUserEmail(email) {
+            this.userEmail = email;
         },
 
+        setUserId(id) {
+            this.userId = id;
+        },
+
+        setUserPrenom(prenom) {
+            this.userPrenom = prenom;
+        },
+
+        logout() {
+            this.userEmail = null;
+            this.userId = null;
+            this.userPrenom = null;
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        },
     },
     getters: {
-        getUserId: (state) => state.user?.id,
-        getUser: (state) => state.user,
-        getIsAutenticated: (state) => state.isAutenticated
+        getUserId: (state) => state.userId,
+        getUserPrenom: (state) => state.userPrenom,
+        getUserEmail: (state) => state.userEmail,
     }
 });

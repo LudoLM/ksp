@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Cours;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -55,6 +56,27 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         $this->save($user, true);
     }
+
+
+    public function getLightUsersAll(Cours $cours): array
+    {
+
+        // Récupérer les IDs des utilisateurs déjà inscrits dans le cours
+        $usersCours = $cours->getUsersCours()
+            ->map(fn($userCours) => $userCours->getUser()->getId())
+            ->toArray();
+        $usersCours[] = 1; // Ajouter l'ID de l'admin pour ne pas l'afficher
+
+        return $this->createQueryBuilder('u')
+            ->select('NEW App\DTO\LightUserDTO(u.id, u.prenom, u.nom)')
+            ->andWhere('u.id NOT IN (:usersCours)')
+            ->setParameter('usersCours', $usersCours)
+            ->orderBy('u.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+
 
 //    /**
 //     * @return User[] Returns an array of User objects

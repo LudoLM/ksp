@@ -2,14 +2,13 @@
 
 namespace App\Entity;
 
-use App\Enum\StatusCoursEnum;
 use App\Repository\CoursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Doctrine\Common\Collections\Collection;
+
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
 class Cours
@@ -17,54 +16,54 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "cours:update", "user:detail"])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?int $duree = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "user:detail"])]
     private ?\DateTimeInterface $dateCours = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?int $tarif = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?\DateTimeInterface $dateLimiteInscription = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?int $nbInscriptionMax = null;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "user:detail"])]
     private ?TypeCours $typeCours = null;
 
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "user:detail"])]
     private ?StatusCours $statusCours = null;
 
 
+    #[ORM\OneToMany(mappedBy: 'cours', targetEntity: UsersCours::class, orphanRemoval: true, cascade: ["persist"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
+    private Collection $usersCours;
 
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'cours_list')]
-    #[Groups(['cours:index','cours:detail'])]
-    #[MaxDepth(1)]
-    private Collection $users;
     public function __construct()
     {
-        $this->users = new ArrayCollection();
+        $this->usersCours = new ArrayCollection();
     }
+
 
     /**
      * @return int|null
@@ -210,36 +209,32 @@ class Cours
         $this->statusCours = $statusCours;
     }
 
-    /**
-     * @return Collection
-     */
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
 
     /**
-     * @param Collection $users
+     * @return Collection<int, UsersCours>
      */
-    public function setUsers(Collection $users): void
+    public function getUsersCours(): Collection
     {
-        $this->users = $users;
+        return $this->usersCours;
     }
 
-    public function addUser(User $user): self
+    public function addUsersCours(UsersCours $usersCours): self
     {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->addCoursList($this);
+        if (!$this->usersCours->contains($usersCours)) {
+            $this->usersCours->add($usersCours);
+            $usersCours->setCours($this);
         }
 
         return $this;
     }
 
-    public function removeUser(User $user): self
+    public function removeUsersCours(UsersCours $usersCours): self
     {
-        if ($this->users->removeElement($user)) {
-            $user->removeCoursList($this);
+        if ($this->usersCours->removeElement($usersCours)) {
+            // set the owning side to null (unless already changed)
+            if ($usersCours->getCours() === $this) {
+                $usersCours->setCours(null);
+            }
         }
 
         return $this;

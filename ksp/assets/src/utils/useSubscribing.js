@@ -1,43 +1,48 @@
 
-export async function useSubscription(coursId) {
+export async function useSubscription(coursId, isAttente, userId = null) {
     try {
-        const response = await fetch(`/api/addUser/${coursId}`, {
+        const response = await fetch(`/api/addUser`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({coursId, isAttente, userId})
         });
 
-        if (response.ok) {
-            const result = await response.json();
-            console.log('Réponse du serveur:', "Utilisateur ajouté au cours");
-            return result;
+        const data = await response.json();
+
+        if (data.success) {
+            return data;
         } else {
-            const errorData = await response.json();
-            console.log('Erreur du serveur:', errorData);
-            return false;
+            throw data;
         }
     } catch (error) {
-        console.error('Erreur de réseau:', error);
-        return false;
+        return error;
     }
 }
 
 
 
-export async function useUnSubscription(coursId) {
+
+export async function useUnSubscription(coursId, isAttente) {
     try {
-        const response = await fetch(`/api/removeUser/${coursId}`, {
+        const response = await fetch(`/api/removeUser/${coursId}/${isAttente}`, {
             method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `bearer ${localStorage.getItem('token')}`
+            }
+
         });
 
-        if (response.ok) {
-            const result = await response.json();
-            console.log('Réponse du serveur:', "Utilisateur retiré du cours");
-            return result;
+        const data = await response.json();
+        if (data.success) {
+            return data;
         } else {
-            console.log('Échec du retrait de l\'utilisateur du cours');
-            return false;
+            throw data;
         }
     } catch (error) {
-        console.error('Erreur:', error);
-        return false;
+        return error;
     }
 }

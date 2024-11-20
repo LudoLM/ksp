@@ -80,4 +80,14 @@ class CoursRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
 
     }
+
+    public function findAllSortByDateForUsers()
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->where('c.statusCours = 1 OR c.statusCours = 2 OR c.statusCours = 3 OR c.statusCours = 5 OR c.statusCours = 6')
+            ->orderBy('c.dateCours', 'DESC');
+
+        return $qb->getQuery()->getResult();
+
+    }
 }

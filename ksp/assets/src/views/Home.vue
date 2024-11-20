@@ -1,27 +1,38 @@
 <template>
-  <!-- Affichage d'un message de validation -->
-  <v-alert v-model="alertVisible" :type="alertType" dismissible>
-    {{ alertMessage }}
-  </v-alert>
-  <div class="home">
-    <h1>Kiné Sports Santé à Chavagne (35) : la méthode simple et efficace pour vous débarrasser de vos douleurs !</h1>
+  <div class="banner">
+    <Title_banner/>
   </div>
   <div class="container">
-    <div id="form-wrapper" ref="form">
-      <label for="listeCours">Cours</label>
-      <select name="listeCours" id="listeCours" v-model="selectedCoursId">
-        <option value="0">Choisissez un cours</option>
-        <option v-for="typeCours in uniqueTypeCours" :key="typeCours.id" :value="typeCours.id">{{ typeCours.libelle }}</option>
-      </select>
-      <label for="dateCours">Date</label>
-      <input type="date" name="dateCours" id="dateCours" v-model="selectedDate">
-      <button @click="resetInfos">Reset</button>
+    <!-- Affichage d'un message de validation -->
+    <v-alert v-model="alertVisible" :type="alertType" dismissible>
+      {{ alertMessage }}
+    </v-alert>
+    <div class="title_wrapper">
+      <h2>prochains cours.</h2>
+    </div>
+
+
+    <div class="buttonsFilters">
+      <router-link to="/cours/add"><CustomButton v-if="role === 'ROLE_ADMIN'">Ajouter un cours</CustomButton></router-link>
+      <CoursFilters
+          :uniqueTypeCours="uniqueTypeCours"
+          :selectedCoursId="selectedCoursId"
+          :selectedDate="selectedDate"
+          @update:selectedCoursId="updateSelectedCoursId"
+          @update:selectedDate="updateSelectedDate"
+          @resetInfos="resetInfos"
+      />
     </div>
 
     <div class="gridCards">
       <ul>
         <li v-for="info in paginatedInfos" :key="info.id">
-          <CoursCard :info="info" @subscriptionResponse="handleSubscriptionResponse"/>
+          <CoursCard
+              :info="info"
+              @subscriptionResponse="handleSubscriptionResponse"
+              @deleteCoursResponse="handleDeleteCoursResponse"
+              @cancelCoursResponse="handleCancelCoursResponse"
+          />
         </li>
       </ul>
     </div>
@@ -37,27 +48,33 @@
 import { ref, computed, onMounted } from 'vue';
 import CoursCard from "../components/CoursCard.vue";
 import {VAlert} from "vuetify/components";
+import CoursFilters from "../components/CoursFilters.vue";
+import useGetElementsToken from "../utils/useGetElementsToken";
+import { useRoute } from "vue-router";
+import {useGetCours} from "../utils/useActionCours";
+import CustomButton from "../components/CustomButton.vue";
+import Title_banner from "../components/Title_banner.vue";
 
-// Déclarations des refs et données
 const infos = ref([]);
 const selectedCoursId = ref(null);
 const selectedDate = ref('');
 const currentPage = ref(1);
 const itemsPerPage = ref(9);
+const route = useRoute();
+const role = localStorage.getItem('token') ? useGetElementsToken().roles[0] : null;
 
-// Fetch des données au montage du composant
-const fetchData = async () => {
-  try {
-    const response = await fetch("/api/getCours", { method: "GET" });
-    infos.value = await response.json();
-  } catch (error) {
-    console.error("Erreur lors de la récupération des cours:", error);
-  }
-};
 
 // Appel de fetchData lors du montage
 onMounted(() => {
-  fetchData();
+  alertMessage.value = route.query.alertMessage || '';
+  alertType.value = route.query.alertType || 'success';
+  alertVisible.value = route.query.alertVisible || false;
+
+  setTimeout(() => {
+    alertVisible.value = false;
+  }, 3000);
+  useGetCours(role, infos);
+
 });
 
 // Déclaration des variables pour l'alerte
@@ -67,9 +84,9 @@ const alertMessage = ref('');
 
 // Fonction pour gérer l'événement subscriptionResponse
 const handleSubscriptionResponse = ({ type, message }) => {
-  alertType.value = type;      // 'success' ou 'error'
-  alertMessage.value = message; // Message à afficher
-  alertVisible.value = true;    // Afficher l'alerte
+  alertType.value = type;
+  alertMessage.value = message;
+  alertVisible.value = true;
 
   // Masquer l'alerte après 3 secondes
   setTimeout(() => {
@@ -77,7 +94,41 @@ const handleSubscriptionResponse = ({ type, message }) => {
   }, 3000);
 };
 
-// Propriétés calculées
+const handleDeleteCoursResponse = ({ type, message, id }) => {
+  alertType.value = type;
+  alertMessage.value = message;
+  alertVisible.value = true;
+
+  // Masquer l'alerte après 3 secondes
+  setTimeout(() => {
+    alertVisible.value = false;
+  }, 3000);
+
+  // Supprimer le cours de la liste
+  infos.value = infos.value.filter(info => info.id !== id);
+};
+
+const handleCancelCoursResponse = ({ type, message }) => {
+  alertType.value = type;
+  alertMessage.value = message;
+  alertVisible.value = true;
+
+  // Masquer l'alerte après 3 secondes
+  setTimeout(() => {
+    alertVisible.value = false;
+  }, 3000);
+};
+
+// Mise à jour des filtres lorsqu'un événement est reçu
+const updateSelectedCoursId = (value) => {
+  selectedCoursId.value = value;
+};
+
+const updateSelectedDate = (value) => {
+  selectedDate.value = value;
+};
+
+// Propriétés calculées pour filtrer et paginer les cours
 const uniqueTypeCours = computed(() => {
   const uniqueTypeCours = [];
   const seenIds = new Set();
@@ -135,15 +186,38 @@ const prevPage = () => {
 };
 </script>
 
+
 <style scoped>
 
-  .v-alert {
-    opacity: .9;
-    position: fixed;
-    z-index: 10;
-    top: 5%;
-    left: 10%;
-    right: 10%;
-    height: 10%;
-  }
+.container {
+  min-width: 100%;
+}
+
+.buttonsFilters {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 5rem;
+}
+
+.banner {
+  background: url("../../images/banner2.jpg") no-repeat center center;
+  background-size: cover;
+  width: 100%;
+  height: 50vh;
+  object-fit: cover;
+  max-height: 50vh;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.title_wrapper {
+  background: #fff;
+  padding: 20px;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  color: #fff;
+}
 </style>
