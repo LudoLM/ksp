@@ -7,7 +7,6 @@
 /.env.local.php
 /.env.*.local
 /.env.test
-/config/secrets/prod/prod.decrypt.private.php
 
 /public/bundles/
 /var/
@@ -29,3 +28,8 @@ yarn-error.log
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
+
+###> secrets ###
+/config/secrets/dev/dev.decrypt.private.php
+/config/secrets/prod/prod.decrypt.private.php
+###< secrets ###

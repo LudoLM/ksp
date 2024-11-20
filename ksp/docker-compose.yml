@@ -22,8 +22,6 @@ services:
     environment:
       PMA_HOST: database
       PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: root
     ports:
       - "8081:80"
 
