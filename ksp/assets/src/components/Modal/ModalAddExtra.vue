@@ -17,6 +17,7 @@
             :items="userOptions"
             item-title="nom"
             item-value="id"
+            bg-color="red"
             label="Utilisateur"
         ></v-select>
       </v-card-text>

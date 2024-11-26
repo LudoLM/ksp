@@ -1,24 +1,20 @@
-$widthContent: 80%;
-$mainColor: #A289CC;
-
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'adventor', sans-serif;
 }
 
 h1 {
-  font-size: 4rem;
+  font-size: 5vw;
   font-weight: 900;
-  font-style: italic;
 }
 
 h2 {
-  font-size: 3rem;
-  font-weight: 900;
-  font-style: italic;
+  font-size: 3.5rem;
+  font-weight: 400;
   color: #000;
 }
+
 
 a{
   cursor: pointer;
@@ -30,9 +26,9 @@ a{
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
+  z-index: 1000;
   color: #000;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.9);
   height: 123px;
   display: flex;
   justify-content: space-between;
@@ -46,6 +42,61 @@ a{
   height: 70px;
   background: rgba(255, 255, 255, 1);
 }
+
+
+.isSubscribed{
+
+
+  .isSubscribedTag{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-weight: 900;
+    z-index: 10;
+  }
+
+  .color-button{
+    background: #fff;
+    color: #222;
+  }
+
+  .coursCard {
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 10;
+    }
+  }
+
+  .card_infos {
+
+    h1, h2, h3, h4, h5, h6, p, button, div, span {
+      color: #fff;
+    }
+    .border {
+      background: #fff;
+    }
+    a {
+      border: 1px solid #fff;
+      color: #fff;
+    }
+    button {
+      background: #fff;
+      color: #222;
+    }
+
+    .infoRestante {
+      color: #fff;
+    }
+  }
+}
+
+
 
 .column {
   flex-direction: column;
@@ -102,59 +153,13 @@ a.router-link-exact-active {
   }
 }
 
-footer{
-  background-color: #EBECF3;
-  flex-basis: 250px;
-  width: 100%;
-  border-top: 3px solid #A289CC;
-  padding-bottom: 20px;
-}
 
-.box_columns{
-  margin: 0 auto;
-  width: 80%;
-  display: flex;
-  justify-content: space-around;
-
-  h4{
-    color:$mainColor;
-    text-transform: uppercase;
-    font-size: 1rem;
-    font-weight: 900;
-  }
-}
-.footer_column{
-  width: 25%;
-  padding: 0 3%;
-  li{
-    margin-bottom: 5px;
-  }
-}
-
-.links{
-  display: flex;
-  flex-direction: column;
-}
-
-.social{
-  width: 70%;
-  display: flex;
-
-  .fab{
-    flex-grow: 1;
-    font-size: 30px;
-    transition: color .2s ease-in-out;
-  }
-
-  .fab:hover{
-    color: #b1ce46;
-  }
-}
 
 /* ---------Grille Card---------------*/
 
 .gridCards ul{
   display: grid;
+  /*Probleme de responsive*/
   grid-template-columns: repeat( auto-fill, minmax(300px, 1fr));
   grid-gap: 50px;
   margin: 0;
@@ -172,7 +177,7 @@ footer{
 .v-alert {
   opacity: .9;
   position: fixed;
-  z-index: 10;
+  z-index: 1000;
   top: 5%;
   left: 10%;
   right: 10%;
