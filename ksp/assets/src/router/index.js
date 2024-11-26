@@ -47,6 +47,9 @@ const router = createRouter({
 })
 
 const vuetify = createVuetify({
+    theme: {
+        defaultTheme: 'light',
+    },
     components,
     directives,
 })

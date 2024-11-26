@@ -84,5 +84,6 @@ const resetInfos = () => {
   justify-content: flex-end;
   align-items: flex-end;
   gap: 2%;
+  margin: 0 100px;
 }
 </style>

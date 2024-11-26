@@ -1,14 +1,23 @@
 <template>
-  <div class="banner">
-    <Title_banner/>
-  </div>
   <div class="container">
     <!-- Affichage d'un message de validation -->
     <v-alert v-model="alertVisible" :type="alertType" dismissible>
       {{ alertMessage }}
     </v-alert>
+    <div class="banner">
+      <Title_banner/>
+    </div>
+    <div class="kspInfos bg-white">
+      <div class="image">
+        <img src="../../images/banner2.jpg" alt="salle de yoga">
+      </div>
+      <div class="accroche">
+        <h4>Soulagez vos douleurs et améliorez votre quotidien grâce à Kiné Sport Santé</h4>
+        <p>Des méthodes simples pour adopter de bonnes habitudes corporelles et prévenir les récidives.</p>
+      </div>
+    </div>
     <div class="title_wrapper">
-      <h2>prochains cours.</h2>
+      <h2>Les cours à venir.</h2>
     </div>
 
 
@@ -24,7 +33,7 @@
       />
     </div>
 
-    <div class="gridCards">
+    <div class="gridCards p-12">
       <ul>
         <li v-for="info in paginatedInfos" :key="info.id">
           <CoursCard
@@ -201,23 +210,94 @@ const prevPage = () => {
 }
 
 .banner {
-  background: url("../../images/banner2.jpg") no-repeat center center;
-  background-size: cover;
+  background: linear-gradient(#260959, #472371);
   width: 100%;
-  height: 50vh;
+  height: 70vh;
   object-fit: cover;
-  max-height: 50vh;
-  display: flex;
-  justify-content: space-between;
-  position: relative;
+  /*display: flex;
+  justify-content: space-between;*/
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .title_wrapper {
-  background: #fff;
-  padding: 20px;
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
   align-items: center;
   color: #fff;
+
+
+  h2 {
+    margin-left: 5rem;
+    color: #2e2e2e;
+    padding-bottom: 30px;
+    position: relative;
+    z-index: 2;
+
+    &::before {
+      content: '';
+      width: 25%;
+      height: 5px;
+      background: #472371;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+    }
+  }
 }
+
+.kspInfos {
+  position: relative;
+  margin-top: 40vh;
+  margin-bottom: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+
+  .image {
+    width: 50%;
+    height: 100%;
+
+    img {
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .accroche {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10%;
+    align-items: center;
+    width: 50%;
+    height: 100%;
+    padding: 10px 5vh;
+    letter-spacing: .5px;
+    line-height: 2;
+    font-weight: 400;
+    color: #515151;
+    text-align: center;
+
+    h4 {
+      font-size: 1.5vw;
+      font-weight: 900;
+    }
+
+    p {
+      font-size: 1vw;
+    }
+  }
+}
+
+
 </style>

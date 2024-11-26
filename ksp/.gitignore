@@ -7,7 +7,6 @@
 /.env.local.php
 /.env.*.local
 /.env.test
-
 /public/bundles/
 /var/
 /vendor/
