@@ -13,6 +13,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  error: {
+    type: String,
+    default: null,
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -27,7 +31,11 @@ const emit = defineEmits(['update:modelValue']);
         @input="emit('update:modelValue', $event.target.value)"
         class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
+    <div class="error-message text-red-500 text-sm h-4">
+      {{ error }}
+    </div>
   </div>
+  <!-- Affiche le message d'erreur s'il est présent -->
 </template>
 
 <style scoped lang="scss">

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TypeCoursRepository::class)]
 class TypeCours
@@ -19,6 +20,7 @@ class TypeCours
 
     #[ORM\Column(length: 255)]
     #[Groups(['cours:index', 'cours:detail', 'type_cours:index', "user:detail"])]
+    #[Assert\NotBlank(message: "Le nom ne peut pas être vide.")]
     private ?string $libelle = null;
 
     #[ORM\OneToMany(mappedBy: 'typeCours', targetEntity: Cours::class, orphanRemoval: true)]
@@ -26,6 +28,7 @@ class TypeCours
 
     #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "L'image ne peut pas être vide.")]
     private ?string $thumbnail = null;
 
     public function __construct()

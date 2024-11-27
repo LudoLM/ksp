@@ -18,6 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(path: 'api/', name: 'api_')]
 class AuthController extends AbstractController
@@ -34,10 +35,24 @@ class AuthController extends AbstractController
 
     #[Route(path: 'register', name: 'app_register')]
     public function register(
-        #[MapRequestPayload] CreateUserDTO $createUserDTO
+        #[MapRequestPayload] CreateUserDTO $createUserDTO,
+        ValidatorInterface $validator
     ): JsonResponse {
 
         $user = $this->createUserDTOToUserDenormalizer->denormalize($createUserDTO, User::class);
+        // Valider l'entité User
+        $violations = $validator->validate($user);
+
+        if (count($violations) > 0) {
+            $errors = [];
+            foreach ($violations as $violation) {
+                $errors[] = [
+                    $violation->getPropertyPath() =>  $violation->getMessage(),
+                ];
+            }
+
+            return new JsonResponse(['errors' => $errors], 400);
+        }
 
         $this->em->persist($user);
         $this->em->flush();

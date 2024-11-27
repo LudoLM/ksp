@@ -5,12 +5,23 @@ import CustomTextarea from "../components/CustomTextarea.vue";
 import CustomInput from "../components/CustomInput.vue";
 import CustomSelect from "../components/CustomSelect.vue";
 import CustomButton from "../components/CustomButton.vue";
+import {useValidationForm} from "../utils/useValidationForm";
 
 const router = useRouter();
 const origin = useRoute().params;
 const coursData = ref(null);
 const urlCreation = "/api/cours/create";
 const urlEdition = "/api/cours/edit/" + origin.id;
+const errors = ref(
+  {
+    typeCours: null,
+    dateCours: null,
+    dureeCours: null,
+    nbInscriptionMax: null,
+    description: null,
+    dateLimiteInscription: null,
+  },
+)
 
 
 const typeCoursList = ref([]);
@@ -44,7 +55,6 @@ const formData = ref({
   dureeCours: coursData.value ? coursData.value.dureeCours : 60,
   nbInscriptionMax: 12,
   description: "Cours sympathique",
-  tarif: 15,
   dateLimiteInscription:
       new Date().getFullYear() + "-" +
       (new Date().getMonth() < 10 ? '0' + new Date().getMonth() : new Date().getMonth()) + "-" +
@@ -62,7 +72,6 @@ const formData = ref({
       dureeCours: parseInt(formData.value.dureeCours),
       nbInscriptionMax: parseInt(formData.value.nbInscriptionMax),
       description: formData.value.description,
-      tarif: parseInt(formData.value.tarif),
       dateLimiteInscription: formData.value.dateLimiteInscription
     };
     try {
@@ -70,10 +79,14 @@ const formData = ref({
         method: origin.id ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json",
           "Authorization": "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify(data),
       });
+      if (!response.ok) {
+        await useValidationForm(response, errors);
+      }
       if (response.status === 200){
         await router.push("/");
       } else {
@@ -99,7 +112,6 @@ const formData = ref({
       formData.value.dureeCours = coursData.duree;
       formData.value.nbInscriptionMax = coursData.nbInscriptionMax;
       formData.value.description = coursData.description;
-      formData.value.tarif = coursData.tarif;
       formData.value.dateLimiteInscription = coursData.dateLimiteInscription ? coursData.dateLimiteInscription.slice(0, 16) : formData.value.dateLimiteInscription;
 
 
@@ -120,14 +132,13 @@ const formData = ref({
     </div>
     <form>
       <div class="grid grid-cols-2 gap-4">
-        <CustomSelect item="Type de cours" id="typeCours" v-model="formData.typeCours" :options="typeCoursList" required/>
-        <CustomInput item="Durée (minutes)" type="number" id="dureeCours" v-model="formData.dureeCours" required/>
-        <CustomInput item="Date" type="datetime-local" id="dateCours" v-model="formData.dateCours" required/>
-        <CustomInput item="Date limite d'inscription" type="datetime-local" id="dateLimiteInscription" v-model="formData.dateLimiteInscription" required/>
-        <CustomInput item="Nombre de places" type="number" id="description" v-model="formData.nbInscriptionMax" required/>
-        <CustomInput item="Tarif" type="number" id="tarif" v-model="formData.tarif" required/>
+        <CustomSelect item="Type de cours" id="typeCours" :error="errors.typeCours" v-model="formData.typeCours" :options="typeCoursList" required/>
+        <CustomInput item="Durée (minutes)" type="number" id="dureeCours" :error="errors.dureeCours" v-model="formData.dureeCours" required/>
+        <CustomInput item="Date" type="datetime-local" id="dateCours" dureeCours :error="errors.dateCours" v-model="formData.dateCours" required/>
+        <CustomInput item="Date limite d'inscription" type="datetime-local" id="dateLimiteInscription" :error="errors.dateLimiteInscription" v-model="formData.dateLimiteInscription" required/>
+        <CustomInput item="Nombre de places" type="number" id="description" :error="errors.nbInscriptionMax" v-model="formData.nbInscriptionMax" required/>
       </div>
-        <CustomTextarea item="Description" id="description" v-model="formData.description" required class="w-full" />
+        <CustomTextarea item="Description" id="description" v-model="formData.description" :error="errors.description" required class="w-full" />
       <div class="mt-4 flex justify-center">
         <CustomButton type="submit" @click="handleSubmit">
           {{ origin.id ? "Modifier" : "Ajouter" }}
