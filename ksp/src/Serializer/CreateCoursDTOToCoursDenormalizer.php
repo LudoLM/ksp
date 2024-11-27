@@ -35,7 +35,6 @@ class CreateCoursDTOToCoursDenormalizer implements DenormalizerInterface
         $cours->setDuree($data->getDureeCours());
         $cours->setDateCours($data->getDateCours());
         $cours->setDescription($data->getDescription());
-        $cours->setTarif($data->getTarif());
         $cours->setNbInscriptionMax($data->getNbInscriptionMax());
         $cours->setTypeCours($this->typeCoursRepository->find($data->getTypeCours()));
         $cours->setDateLimiteInscription($data->getDateLimiteInscription());

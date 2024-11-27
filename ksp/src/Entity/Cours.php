@@ -31,10 +31,6 @@ class Cours
     #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?string $description = null;
 
-    #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
-    private ?int $tarif = null;
-
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?\DateTimeInterface $dateLimiteInscription = null;
@@ -129,21 +125,6 @@ class Cours
         $this->description = $description;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getTarif(): ?int
-    {
-        return $this->tarif;
-    }
-
-    /**
-     * @param int|null $tarif
-     */
-    public function setTarif(?int $tarif): void
-    {
-        $this->tarif = $tarif;
-    }
 
     /**
      * @return \DateTimeInterface|null

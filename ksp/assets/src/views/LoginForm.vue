@@ -23,7 +23,9 @@ const handleLogin = async () => {
     });
 
     if (!response.ok) {
-      throw new Error('Erreur de connexion');
+      const responseError = await response.json();
+
+      throw new Error(responseError.message);
     }
 
     const data = await response.json();
@@ -55,12 +57,12 @@ const handleLogin = async () => {
 
       <CustomInput item="Email" type="text" id="username" v-model="username" required/>
       <CustomInput item="Mot de passe" type="password" id="password" v-model="password" required/>
+      <p v-if="error" class="error-message">{{ error }}</p>
       <div class="flex justify-center gap-4">
         <CustomButton type="submit">Login</CustomButton>
         <CustomButton @click.prevent="router.push('/register')">Créer un compte</CustomButton>
       </div>
     </form>
-    <p v-if="error" class="error-message">{{ error }}</p>
 
   </div>
 

@@ -25,7 +25,7 @@ class CreateUserDTOToUserDenormalizer implements DenormalizerInterface
     {
         /** @var \App\DTO\CreateUserDTO $data */
         if (!$data instanceof CreateUserDTO) {
-            throw new \Exception('Expected instance of CreateUserDTO');
+            throw new \Exception('Instance de CreateUserDTO attendue');
         }
         if (array_key_exists('object_to_populate', $context) &&  $context['object_to_populate'] instanceof User) {
             $user = $context['object_to_populate'];

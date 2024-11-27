@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 class TypeCoursController extends AbstractController
@@ -46,6 +47,7 @@ class TypeCoursController extends AbstractController
     public function typeCoursCreate(
         Request $request,
         EntityManagerInterface $em,
+        ValidatorInterface $validator
     ): JsonResponse {
         $nom = $request->request->get('nom');
         $image = $request->files->get('image');
@@ -53,12 +55,24 @@ class TypeCoursController extends AbstractController
         $typeCours = new TypeCours();
         $typeCours->setLibelle($nom);
 
+        $violations = $validator->validate($typeCours);
+
+        if (count($violations) > 0) {
+            $errors = [];
+            foreach ($violations as $violation) {
+                $errors[] = [
+                    $violation->getPropertyPath() =>  $violation->getMessage(),
+                ];
+            }
+            return new JsonResponse(['errors' => $errors], 400);
+        }
+
         if ($image instanceof UploadedFile) {
             $fileName = "thumbnail-" . uniqid() . "." . $image->guessExtension();
             $image->move($this->getParameter('kernel.project_dir') . "/assets/images/uploads", $fileName);
             $typeCours->setThumbnail($fileName);
         } else {
-            return new JsonResponse(['error' => 'Image non valide'], 400);
+            return new JsonResponse(['thumbnail' => 'Image non valide'], 400);
         }
 
         $em->persist($typeCours);
