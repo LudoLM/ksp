@@ -151,9 +151,15 @@
       <path value="$PROJECT_DIR$/ksp/vendor/symfony/asset" />
       <path value="$PROJECT_DIR$/ksp/vendor/symfony/stimulus-bundle" />
       <path value="$PROJECT_DIR$/ksp/vendor/symfony/translation" />
+      <path value="$PROJECT_DIR$/ksp/vendor/lcobucci/clock" />
+      <path value="$PROJECT_DIR$/ksp/vendor/lcobucci/jwt" />
+      <path value="$PROJECT_DIR$/ksp/vendor/lexik/jwt-authentication-bundle" />
+      <path value="$PROJECT_DIR$/ksp/vendor/namshi/jose" />
+      <path value="$PROJECT_DIR$/ksp/vendor/stripe/stripe-php" />
+      <path value="$PROJECT_DIR$/ksp/vendor/symfony/apache-pack" />
     </include_path>
   </component>
-  <component name="PhpProjectSharedConfiguration" php_language_level="8.1">
+  <component name="PhpProjectSharedConfiguration" php_language_level="8.2">
     <option name="suggestChangeDefaultLanguageLevel" value="false" />
   </component>
   <component name="PhpStanOptionsConfiguration">
