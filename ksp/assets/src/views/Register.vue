@@ -4,6 +4,7 @@ import { useUserStore } from '../store/user';
 import CustomButton from "../components/CustomButton.vue";
 import CustomInput from "../components/CustomInput.vue";
 import {useValidationForm} from "../utils/useValidationForm";
+import {ref} from "vue";
 
 const route = useRouter();
 
@@ -48,7 +49,7 @@ const handleRegister = async () => {
     });
 
     if (!response.ok) {
-       useValidationForm(response, errors);
+       await useValidationForm(response, errors);
     }
 
     const data = await response.json();
