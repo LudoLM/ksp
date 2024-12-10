@@ -17,6 +17,7 @@ use App\Repository\UserRepository;
 use App\Serializer\CreateCoursDTOToCoursDenormalizer;
 use App\Service\UpdateStatusCoursService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -37,28 +38,74 @@ class CoursController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly StatusCoursRepository $statusCoursRepository,
         private readonly TypeCoursRepository $typeCoursRepository,
-        private readonly UpdateStatusCoursService $updateStatusCours,
         private readonly EventDispatcherInterface $dispatcher,
         private readonly UserRepository $userRepository
     )
     {
 
     }
-
     #[Route('getCours', name: 'cours_index', methods: ['GET'])]
     public function coursIndex(Request $request): JsonResponse
     {
         $role = $request->headers->get("X-ACCESS-TOKEN");
-        if ($role === 'ROLE_ADMIN') {
-            $cours = $this->coursRepository->findAllSortByDate();
-        } else {
-            $cours = $this->coursRepository->findAllSortByDateForUsers();
-        }
-        $cours = $this->updateStatusCours->updateStatusCours($cours);
+        $currentPage = (int)($request->query->get('page', 1)); // Valeur par défaut 1
+        $maxPerPage = (int)($request->query->get('maxPerPage', 10)); // Valeur par défaut 10
 
-        $jsonCours = $this->serializer->serialize($cours, 'json', ['groups' => 'cours:index']);
-        return new JsonResponse($jsonCours, 200, [], true);
+        $typeCoursId = $request->query->get('typeCours') ==="null" ? null : $request->query->get('typeCours') ?? null;
+        $dateCoursStr = $request->query->get('dateCours')  ==="null" ? null : $request->query->get('dateCours') ?? null;
+        $statusCoursId = $request->query->get('statusCours') ==="null" ? null : $request->query->get('statusCours') ?? null;
+
+
+        // Récupérer l'entité TypeCours si `typeCours` est fourni
+        $typeCours = null;
+        if ($typeCoursId) {
+            $typeCours = $this->typeCoursRepository->findOneBy(['id' => $typeCoursId]);
+        }
+
+        // Convertir la chaîne de date en \DateTime si `dateCours` est fourni
+        $dateCours = null;
+        if ($dateCoursStr) {
+            try {
+                $dateCours = new \DateTime($dateCoursStr);
+            } catch (\Exception $e) {
+                return new JsonResponse(['error' => 'Invalid date format'], 400);
+            }
+        }
+
+        $statusCours = null;
+        if ($statusCoursId) {
+            $statusCours = $this->statusCoursRepository->findOneBy(['id' => $statusCoursId]);
+        }
+
+
+        // Appeler le repository avec la pagination et les filtres
+        $coursPaginator = $this->coursRepository->findAllSortByDate($currentPage, $maxPerPage, $typeCours, $dateCours, $statusCours);
+
+        // Récupérer les cours
+        $cours = iterator_to_array($coursPaginator);
+
+
+        // Calculer les métadonnées de pagination
+        $totalItems = count($coursPaginator);
+        $totalPages = ceil($totalItems / $maxPerPage);
+
+        // Préparer la réponse
+        $responseData = [
+            'data' => $cours,
+            'pagination' => [
+                'currentPage' => $currentPage,
+                'maxPerPage' => $maxPerPage,
+                'totalItems' => $totalItems,
+                'totalPages' => $totalPages,
+            ],
+        ];
+
+
+        $responseData = $this->serializer->serialize($responseData, 'json', ['groups' => 'cours:index']);
+
+        return new JsonResponse($responseData, 200);
     }
+
 
 
     #[Route('getCours/{id}', name: 'cours_detail', methods: ['GET'])]
@@ -196,6 +243,7 @@ class CoursController extends AbstractController
         CreateCoursDTO $coursDTO
     ) : JsonResponse
     {
+
         $coursDTOSeriliazer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);
         $cours = $coursDTOSeriliazer->denormalize($coursDTO, Cours::class);
         $this->em->persist($cours);

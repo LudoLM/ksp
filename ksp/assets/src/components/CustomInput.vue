@@ -33,4 +33,10 @@ export default {
 
 <style scoped lang="scss">
 
+input {
+  border-radius: 0;
+  border: 2px solid #000;
+  background: #fff;
+}
+
 </style>

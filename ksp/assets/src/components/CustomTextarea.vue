@@ -39,5 +39,9 @@ const emit = defineEmits(['update:modelValue']);
 </template>
 
 <style scoped lang="scss">
-
+  textarea {
+    border-radius: 0;
+    border: 1px solid #000;
+    background: #fff;
+  }
 </style>
