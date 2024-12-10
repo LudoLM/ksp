@@ -3,8 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Cours;
+use App\Entity\StatusCours;
+use App\Entity\TypeCours;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @extends ServiceEntityRepository<Cours>
@@ -72,22 +76,53 @@ class CoursRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findAllSortByDate()
-    {
+    public function findAllSortByDate(
+        int $currentPage,
+        int $maxPerPage,
+        ?TypeCours $typeCours,
+        ?\DateTime $dateCours,
+        ?StatusCours $statusCours
+    ): Paginator {
+
+
+        // Construire le QueryBuilder
         $qb = $this->createQueryBuilder('c')
-        ->orderBy('c.dateCours', 'DESC');
-
-        return $qb->getQuery()->getResult();
-
-    }
-
-    public function findAllSortByDateForUsers()
-    {
-        $qb = $this->createQueryBuilder('c')
-            ->where('c.statusCours = 1 OR c.statusCours = 2 OR c.statusCours = 3 OR c.statusCours = 5 OR c.statusCours = 6')
             ->orderBy('c.dateCours', 'DESC');
 
-        return $qb->getQuery()->getResult();
 
+        // Ajouter les filtres dynamiques
+        if ($typeCours !== null) {
+            $qb->andWhere('c.typeCours = :typeCours')
+                ->setParameter('typeCours', $typeCours);
+        }
+
+        if ($dateCours !== null) {
+            $qb->andWhere('c.dateCours > :dateCours')
+                ->setParameter('dateCours', $dateCours);
+        }
+
+        if ($statusCours !== null) {
+            $qb->andWhere('c.statusCours = :statusCours')
+                ->setParameter('statusCours', $statusCours);
+        }
+
+        // Ajouter la pagination
+        $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
+            ->setMaxResults($maxPerPage);
+
+        // Retourner un Paginator
+        return new Paginator($qb->getQuery());
+    }
+
+    public function findAllSortByDateForUsers(int $currentPage, int $maxPerPage): Paginator
+    {
+
+        return new Paginator($this->createQueryBuilder('c')
+            ->where('c.statusCours = 1 OR c.statusCours = 2 OR c.statusCours = 3 OR c.statusCours = 5 OR c.statusCours = 6')
+            ->orderBy('c.dateCours', 'DESC')
+            ->setFirstResult(($currentPage - 1) * $maxPerPage)
+            ->setMaxResults($maxPerPage)
+            ->getQuery()
+        );
     }
 }

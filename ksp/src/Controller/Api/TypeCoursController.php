@@ -26,7 +26,7 @@ class TypeCoursController extends AbstractController
     {
     }
 
-    #[Route('/api/getTypeCours', name: 'type_cours_index', methods: ['GET'])]
+    #[Route('/api/getTypesCours', name: 'type_cours_index', methods: ['GET'])]
     public function typeCoursIndex(): JsonResponse
     {
         $typeCours = $this->typeCoursRepository->findAll();

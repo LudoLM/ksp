@@ -138,7 +138,7 @@ const redirectToLogin = () => {
 };
 
 
-// Formattage des dates
+// Formatage des dates
 const dateDebut = computed(() => new Date(props.info.dateCours));
 const formattedDate = computed(() => useDateFormat(dateDebut.value, 'dddd D MMMM YYYY').value);
 const capitalizedDate = computed(() => formattedDate.value.charAt(0).toUpperCase() + formattedDate.value.slice(1));

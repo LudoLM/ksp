@@ -1,3 +1,8 @@
+*{
+  box-sizing: border-box;
+}
+
+
 body {
   margin: 0;
   padding: 0;
@@ -158,6 +163,7 @@ a.router-link-exact-active {
 /* ---------Grille Card---------------*/
 
 .gridCards ul{
+  max-width: 1924px;
   display: grid;
   /*Probleme de responsive*/
   grid-template-columns: repeat( auto-fill, minmax(300px, 1fr));
