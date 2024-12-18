@@ -1,4 +1,4 @@
-export async function useGetCours(role, infos,  currentPage, maxPerPage, totalItems, selectedTypeCours, selectedDate, selectedStatusId, totalPages) {
+export async function useGetCours(isAdminPath, infos,  currentPage, maxPerPage, totalItems, selectedTypeCours, selectedDate, selectedStatusId, totalPages) {
     try {
 
         const response = await fetch("/api/getCours?page="
@@ -6,12 +6,12 @@ export async function useGetCours(role, infos,  currentPage, maxPerPage, totalIt
             + maxPerPage.value + "&typeCours="
             + selectedTypeCours.value + "&dateCours="
             + selectedDate.value + "&statusCours="
-            + selectedStatusId.value
+            + selectedStatusId.value + "&isAdminPath="
+            + isAdminPath
             , {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "X-ACCESS-TOKEN": role
             },
         });
         const result = JSON.parse(await response.json());

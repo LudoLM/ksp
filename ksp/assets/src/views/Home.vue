@@ -4,25 +4,14 @@
     <v-alert v-model="alertVisible" :type="alertType" dismissible>
       {{ alertMessage }}
     </v-alert>
-    <div class="banner">
-      <Title_banner/>
-    </div>
-    <div class="kspInfos bg-white">
-      <div class="image">
-        <img src="../../images/banner2.jpg" alt="salle de yoga">
-      </div>
-      <div class="accroche">
-        <h4>Soulagez vos douleurs et améliorez votre quotidien grâce à Kiné Sport Santé</h4>
-        <p>Des méthodes simples pour adopter de bonnes habitudes corporelles et prévenir les récidives.</p>
-      </div>
-    </div>
+   <HeroBanner v-if="!isAdminPath"/>
     <div class="title_wrapper">
-      <h2>Les cours à venir.</h2>
+      <h2>{{ title }}</h2>
     </div>
 
 
     <div class="buttonsFilters">
-      <router-link to="/cours/add"><CustomButton v-if="role === 'ROLE_ADMIN'">Ajouter un cours</CustomButton></router-link>
+      <router-link :to="{name: 'CreateCours'}"><CustomButton v-if="isAdminPath">Ajouter un cours</CustomButton></router-link>
       <CoursFilters
           :uniqueTypeCours="uniqueTypeCoursList"
           :uniqueStatusCours="uniqueStatusCoursList"
@@ -37,16 +26,18 @@
     </div>
 
     <div class="gridCards p-12">
-      <ul>
+      <ul v-if="totalItems > 0">
         <li v-for="info in infos" :key="info.id">
           <CoursCard
               :info="info"
+              :isAdminPath="isAdminPath"
               @subscriptionResponse="handleSubscriptionResponse"
               @deleteCoursResponse="handleDeleteCoursResponse"
               @cancelCoursResponse="handleCancelCoursResponse"
           />
         </li>
       </ul>
+      <p v-else class="flex justify-center font-bold">Il n'y a pas de cours correspondant à la recherche</p>
     </div>
     <div class="pagination">
       <CustomButton :class="currentPage === 1 ? 'invisible' : 'visible'" :color="'gray'" @click="prevPage" :disabled="currentPage === 1">Précédent</CustomButton>
@@ -61,11 +52,10 @@ import { ref, onMounted } from 'vue';
 import CoursCard from "../components/CoursCard.vue";
 import {VAlert} from "vuetify/components";
 import CoursFilters from "../components/CoursFilters.vue";
-import useGetElementsToken from "../utils/useGetElementsToken";
 import { useRoute } from "vue-router";
 import {useGetCours, useGetStatusCours, useGetTypesCours} from "../utils/useActionCours";
 import CustomButton from "../components/CustomButton.vue";
-import Title_banner from "../components/Title_banner.vue";
+import HeroBanner from "../components/user/HeroBanner.vue";
 
 const infos = ref([]);
 const selectedCoursId = ref(null);
@@ -75,38 +65,33 @@ const currentPage = ref(1);
 const uniqueTypeCoursList = ref([]);
 const uniqueStatusCoursList = ref([]);
 const route = useRoute();
-const role = localStorage.getItem('token') ? useGetElementsToken().roles[0] : null;
 const totalItems = ref(0);
 const maxPerPage = ref(window.innerWidth > 1460 ? 20 : window.innerWidth > 1110 ? 12 : 10);
-const totalPages = ref(0);
+const totalPages = ref(1);
+const isAdminPath = route.path.startsWith('/admin');
+const title = isAdminPath ? 'Liste des cours' : 'Les cours à venir';
+
 
 // Appel de fetchData lors du montage
 onMounted(async () => {
   alertMessage.value = route.query.alertMessage || '';
   alertType.value = route.query.alertType || 'success';
-  alertVisible.value = route.query.alertVisible || false;
+  alertVisible.value = route.query.alertVisible === 'true';
 
   setTimeout(() => {
     alertVisible.value = false;
   }, 3000);
 
-
-  await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   uniqueTypeCoursList.value = await useGetTypesCours();
   uniqueStatusCoursList.value = await useGetStatusCours();
-  if(role !== 'ROLE_ADMIN') uniqueStatusCoursList.value =
+  if(isAdminPath) uniqueStatusCoursList.value =
       uniqueStatusCoursList.value.filter(
       status => status.id !== 6 && status.id !== 7 && status.id !== 4
   );
 
-
-
-  // window.addEventListener('resize', () => {
-  //   maxPerPage.value = window.innerWidth > 1460 ? 20 : window.innerWidth > 1110 ? 12 : 10;
-  //   useGetCours(role, infos, currentPage, maxPerPage, totalItems);
-  // });
-
 });
+
 
 
 
@@ -157,44 +142,23 @@ const handleCancelCoursResponse = ({ type, message }) => {
 const updateSelectedCoursList = async (value) => {
   selectedCoursId.value = value;
   currentPage.value = 1;
-  await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
 const updateSelectedDateList = async (value) => {
   selectedDate.value = value;
   currentPage.value = 1;
-  await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
 const updateStatusCoursList = async (value) => {
   selectedStatusId.value = value;
   currentPage.value = 1;
-  await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
-/*const filteredInfos = computed(() => {
-  let filtered = infos.value;
 
-  if (selectedCoursId.value !== null && selectedCoursId.value !== "0") {
-    filtered = filtered.filter(info => info.typeCours.id === selectedCoursId.value);
-  }
-
-  if (selectedDate.value) {
-    filtered = filtered.filter(info => info.dateCours >= selectedDate.value);
-  }
-
-  return filtered;
-});*/
-
-/*const paginatedInfos = computed(() => {
-  const start = (currentPage.value - 1) * maxPerPage.value;
-  const end = start + maxPerPage.value;
-  return filteredInfos.value.slice(start, end);
-});*/
-
-
-
-// Méthodes
+// Méthodes pour la pagination
 const resetInfos = () => {
   selectedCoursId.value = null;
   selectedDate.value = '';
@@ -202,14 +166,14 @@ const resetInfos = () => {
 const nextPage = async () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
-    await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+    await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   }
 };
 
 const prevPage = async () => {
   if (currentPage.value > 1) {
     currentPage.value--;
-    await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+    await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   }
 };
 </script>
@@ -228,17 +192,6 @@ const prevPage = async () => {
   margin-bottom: 5rem;
 }
 
-.banner {
-  background: linear-gradient(#260959, #472371);
-  width: 100%;
-  height: 70vh;
-  object-fit: cover;
-  /*display: flex;
-  justify-content: space-between;*/
-  position: absolute;
-  top: 0;
-  right: 0;
-}
 
 .title_wrapper {
   display: flex;
@@ -281,55 +234,7 @@ const prevPage = async () => {
     }
 }
 
-.kspInfos {
-  position: relative;
-  margin-top: 40vh;
-  margin-bottom: 150px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50vh;
 
-  .image {
-    width: 50%;
-    height: 100%;
-
-    img {
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
-    }
-  }
-
-  .accroche {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 10%;
-    align-items: center;
-    width: 50%;
-    height: 100%;
-    padding: 10px 5vh;
-    letter-spacing: .5px;
-    line-height: 2;
-    font-weight: 400;
-    color: #515151;
-    text-align: center;
-
-    h4 {
-      font-size: 1.5vw;
-      font-weight: 900;
-    }
-
-    p {
-      font-size: 1vw;
-    }
-  }
-}
 
 
 </style>

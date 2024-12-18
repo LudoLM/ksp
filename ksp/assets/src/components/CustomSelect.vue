@@ -24,7 +24,8 @@ const emit = defineEmits(['update:modelValue']);
         @change="emit('update:modelValue', $event.target.value)"
         class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
-      <option value="0"> {{ id }}</option>
+
+      <option value="0" v-if="id"> {{ id }}</option>
       <option v-for="cours in options" :key="cours.id" :value="cours.id">{{ cours.libelle }}</option>
     </select>
   </div>

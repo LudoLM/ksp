@@ -34,7 +34,7 @@ export default {
   computed: {
     routes() {
       return this.$router.getRoutes().filter(route =>
-          !['CoursDetail', 'CreateCours', 'Login', 'Register', 'AcheterCours', 'Merci', 'Profile', 'EditCours', 'CreateTypeCours', 'EditTypeCours'].includes(route.name)
+          !['CoursDetail', 'CreateCours', 'Login', 'Register', 'AcheterCours', 'Merci', 'Profile', 'EditCours', 'CreateTypeCours', 'EditTypeCours', 'admin', 'Dashboard','CoursAdmin'].includes(route.name)
       );
     }
   },
@@ -63,27 +63,58 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+
+#nav_links {
+  display: flex;
+  justify-content: space-around;
+  height: 100%;
+  align-items: center;
+  font-size: 12px;
+}
+
+
+a.router-link-exact-active {
+  font-weight: 700;
+  color: #4f2794;
+}
+
+#nav_links a {
+
+  height: 40%;
+  font-weight: 900;
+  font-size: 1rem;
+  text-decoration: none;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &.router-link-exact-active {
+    color: #4f2794;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #4f2794;
+    transition: width .3s ease-in-out;
+  }
+
+
+  &:hover::after{
+    width: 100%;
+  }
+}
+
 .logo {
   width: 210px;
   min-width: 150px;
 }
-
-/*.nav_wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  color: #000;
-  background: rgba(255, 255, 255, 0.7);
-  height: 123px;
-  display: flex;
-  justify-content: space-between;
-  gap: 2%;
-  align-items: center;
-  padding: 0 2%;
-  transition: all .3s ease-in-out;
-}*/
 
 .fixed{
   height: 70px;

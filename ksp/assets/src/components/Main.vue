@@ -4,21 +4,9 @@
   </main>
 </template>
 
-<script setup>
-import {infos} from "../store/index";
-const store = infos();
-</script>
 <script>
-
-import Myasset from "./Atout";
-
 export default {
-
   name: "Mymain",
-  components:{
-    Myasset
-  },
-
 }
 </script>
 

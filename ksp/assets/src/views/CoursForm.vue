@@ -6,6 +6,7 @@ import CustomInput from "../components/CustomInput.vue";
 import CustomSelect from "../components/CustomSelect.vue";
 import CustomButton from "../components/CustomButton.vue";
 import {useValidationForm} from "../utils/useValidationForm";
+import {useGetTypesCours} from "../utils/useActionCours";
 
 const router = useRouter();
 const origin = useRoute().params;
@@ -27,8 +28,7 @@ const errors = ref(
 const typeCoursList = ref([]);
   const fetchData = async () => {
     try {
-      const response = await fetch("/api/getTypeCours", { method: "GET", headers: { "Authorization": "Bearer " + localStorage.getItem("token") } });
-      typeCoursList.value = await response.json();
+      typeCoursList.value = await useGetTypesCours();
       formData.value.typeCours = typeCoursList.value[0].id;
     } catch (error) {
       console.error("Erreur lors de la récupération des cours:", error);
@@ -46,26 +46,19 @@ const typeCoursList = ref([]);
 
 const formData = ref({
   typeCours: null,
-  dateCours:
-      new Date().getFullYear() + "-" +
-      (new Date().getMonth() < 10 ? '0' + new Date().getMonth() : new Date().getMonth()) + "-" +
-      (new Date().getDate() < 10 ? '0' + new Date().getDate() : new Date().getDate()) + "T" +
-      (new Date().getHours() < 10 ? '0' + new Date().getHours() : new Date().getHours()) + ":" +
-      (new Date().getMinutes() < 10 ? '0' + new Date().getMinutes() : new Date().getMinutes()),
+  dateCours: new Date().toISOString().slice(0, 16),
   dureeCours: coursData.value ? coursData.value.dureeCours : 60,
   nbInscriptionMax: 12,
   description: "Cours sympathique",
-  dateLimiteInscription:
-      new Date().getFullYear() + "-" +
-      (new Date().getMonth() < 10 ? '0' + new Date().getMonth() : new Date().getMonth()) + "-" +
-      (new Date().getDate() < 10 ? '0' + new Date().getDate() : new Date().getDate()) + "T" +
-      (new Date().getHours() < 10 ? '0' + new Date().getHours() : new Date().getHours()) + ":" +
-      (new Date().getMinutes() < 10 ? '0' + new Date().getMinutes() : new Date().getMinutes())
+  dateLimiteInscription: new Date().toISOString().slice(0, 16),
 });
 
-//Functions
   const handleSubmit = async (event) => {
+
+
+      console.log("formData", formData.value);
     event.preventDefault();
+
     const data = {
       typeCours: parseInt(formData.value.typeCours),
       dateCours: formData.value.dateCours,
@@ -74,6 +67,7 @@ const formData = ref({
       description: formData.value.description,
       dateLimiteInscription: formData.value.dateLimiteInscription
     };
+
     try {
       const response = await fetch(origin.id ? urlEdition : urlCreation, {
         method: origin.id ? "PUT" : "POST",
@@ -88,7 +82,7 @@ const formData = ref({
         await useValidationForm(response, errors);
       }
       if (response.status === 200){
-        await router.push("/");
+        await router.push({name: "CoursAdmin", query: {alertMessage: "Cours ajouté avec succès", alertType: "success", alertVisible: true}});
       } else {
         console.error("Erreur lors de la création du cours:", response);
       }
@@ -109,7 +103,7 @@ const formData = ref({
 
       formData.value.typeCours = coursData.typeCours.id;
       formData.value.dateCours = coursData.dateCours ? coursData.dateCours.slice(0, 16) : formData.value.dateCours;
-      formData.value.dureeCours = coursData.duree;
+      formData.value.dureeCours = coursData.dureeCours;
       formData.value.nbInscriptionMax = coursData.nbInscriptionMax;
       formData.value.description = coursData.description;
       formData.value.dateLimiteInscription = coursData.dateLimiteInscription ? coursData.dateLimiteInscription.slice(0, 16) : formData.value.dateLimiteInscription;
@@ -127,13 +121,13 @@ const formData = ref({
     <h1>{{ origin.id ? "modifier" : "ajouter" }} un cours</h1>
 
     <div class="buttonsFilters flex justify-start mb-10">
-      <router-link to="/coursType/add"><CustomButton>Ajouter un type de Cours</CustomButton></router-link>
-      <router-link to="/coursType/edit"><CustomButton>Modifier un type de Cours</CustomButton></router-link>
+      <router-link :to="{name: 'CreateTypeCours'}"><CustomButton>Ajouter un type de Cours</CustomButton></router-link>
+      <router-link :to="{name: 'EditTypeCours'}"><CustomButton>Modifier un type de Cours</CustomButton></router-link>
     </div>
     <form>
       <div class="grid grid-cols-2 gap-4">
         <CustomSelect item="Type de cours" id="typeCours" :error="errors.typeCours" v-model="formData.typeCours" :options="typeCoursList" required/>
-        <CustomInput item="Durée (minutes)" type="number" id="dureeCours" :error="errors.dureeCours" v-model="formData.dureeCours" required/>
+        <CustomInput item="Durée (minutes)" type="Number" id="dureeCours" :error="errors.dureeCours" v-model="formData.dureeCours" required/>
         <CustomInput item="Date" type="datetime-local" id="dateCours" dureeCours :error="errors.dateCours" v-model="formData.dateCours" required/>
         <CustomInput item="Date limite d'inscription" type="datetime-local" id="dateLimiteInscription" :error="errors.dateLimiteInscription" v-model="formData.dateLimiteInscription" required/>
         <CustomInput item="Nombre de places" type="number" id="description" :error="errors.nbInscriptionMax" v-model="formData.nbInscriptionMax" required/>

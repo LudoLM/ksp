@@ -47,6 +47,7 @@ Encore
     .enableSourceMaps(!Encore.isProduction())
     // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
+    .enableTypeScriptLoader()
     .enableVueLoader(() => {}, { runtimeCompilerBuild: true })
     .addPlugin(new webpack.DefinePlugin({
         '__VUE_OPTIONS_API__': JSON.stringify(true),
