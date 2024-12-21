@@ -1,7 +1,8 @@
 <template>
-  <div class='coursCard_Wrapper'>
-    <div class='coursCard'>
+  <div :class="isSubscribed ? 'isSubscribed coursCard_Wrapper' : 'coursCard_Wrapper'">
+  <div class='coursCard'>
       <div class="card_image">
+        <div :class="isSubscribed ? 'isSubscribedTag' : 'hidden'">Je participe</div>
         <img :src="require(`../../images/uploads/${info.typeCours.thumbnail}`)" alt="">
       </div>
       <div class="card_infos">
@@ -18,13 +19,13 @@
           <div :style="{ visibility: info.nbInscriptionMax - usersCount <= 3 ? 'visible' : 'hidden' }" class="quantity">
             Dispo:&nbsp;<span class="infoRestante">{{ info.nbInscriptionMax - usersCount >= 0 ? info.nbInscriptionMax - usersCount : 0}}</span>
           </div>
-          <div :class="isSubscribed || isUserAttente ? 'isSubscribed' : 'invisible'">
-            {{ isSubscribed ? 'Je participe' : 'En attente' }}
+          <div :class="isUserAttente ? 'isUserAttente' : 'invisible'">
+            En attente
           </div>
         </div>
         <div class="min-h-24 grid items-end">
           <div class="grid grid-cols-2">
-            <router-link :to="{ name: 'CoursDetail', params: { id: info.id }}" class="mt-3 mx-2 block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            <router-link :to="{ name: 'CoursDetail', params: { id: info.id }}" class="mt-3 mx-2 block px-3 py-2 text-center text-sm font-semibold text-violet-600 border-2 border-violet-600">
                 + d'infos
             </router-link>
             <!-- Si l'utilisateur est admin et le cours en creation -->
@@ -49,7 +50,7 @@
                 :cours= props.info.id
                 @subscriptionResponse="handleAddExtraResponse"
             >
-              Ajouter un extra
+              Ajouter extra
             </ModalAddExtra>
 
 
@@ -137,7 +138,7 @@ const redirectToLogin = () => {
 };
 
 
-// Formattage des dates
+// Formatage des dates
 const dateDebut = computed(() => new Date(props.info.dateCours));
 const formattedDate = computed(() => useDateFormat(dateDebut.value, 'dddd D MMMM YYYY').value);
 const capitalizedDate = computed(() => formattedDate.value.charAt(0).toUpperCase() + formattedDate.value.slice(1));
@@ -272,13 +273,36 @@ const openCreation = async () => {
 <style lang="scss" scoped>
 .coursCard_Wrapper {
   min-width: 300px;
+  min-height: 600px;
   position: relative;
+  background: #fff;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 30%;
+    height: 15%;
+    background: #5e2ca5;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 30%;
+    height: 15%;
+    background: #5e2ca5;
+    z-index: -1;
+  }
 }
 
 .coursCard {
   width: 100%;
   height: 100%;
-  background: #fff;
+  position: relative;
 }
 
 .card_dateDebut {
@@ -292,15 +316,18 @@ const openCreation = async () => {
   overflow: hidden;
   position: relative;
   img {
-    width: 100%;
-    min-height: 300px;
+    height: 300px;
     object-fit: cover;
   }
 }
 
 .card_infos {
-  height: 30%;
+  width: 100%;
+  height: 300px;
   padding: 20px;
+  top: 300px;
+  position: absolute;
+  z-index: 100;
 }
 
 .card_status {
@@ -315,6 +342,7 @@ const openCreation = async () => {
   right: 10px;
   border-radius: 3px;
   transition: all 0.3s ease-in-out;
+  z-index: 11;
 }
 
 
@@ -330,15 +358,11 @@ const openCreation = async () => {
   margin-bottom: 20px;
 }
 
-.isSubscribed{
+.isUserAttente{
   color: red;
   font-weight: normal;
   font-style: italic;
- /* position: absolute;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.7);
-  z-index: 1000;*/
+
 
   p, h1, h2, h3, h4, h5, h6 {
     color: white;

@@ -1,9 +1,10 @@
 <script setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '../store/user';
 import CustomButton from "../components/CustomButton.vue";
 import CustomInput from "../components/CustomInput.vue";
+import {useValidationForm} from "../utils/useValidationForm";
+import {ref} from "vue";
 
 const route = useRouter();
 
@@ -15,6 +16,16 @@ const adresse = ref('');
 const cp = ref('');
 const ville = ref('');
 const telephone = ref('');
+const errors = ref({
+  prenom: null,
+  nom: null,
+  email: null,
+  password: null,
+  adresse: null,
+  cp: null,
+  ville: null,
+  telephone: null,
+});
 const userStore = useUserStore();
 
 const handleRegister = async () => {
@@ -23,6 +34,7 @@ const handleRegister = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
         prenom: prenom.value,
@@ -37,7 +49,7 @@ const handleRegister = async () => {
     });
 
     if (!response.ok) {
-      throw new Error('Erreur de création de compte');
+       await useValidationForm(response, errors);
     }
 
     const data = await response.json();
@@ -54,6 +66,7 @@ const handleRegister = async () => {
   }
 };
 
+
 </script>
 
 <template>
@@ -62,17 +75,16 @@ const handleRegister = async () => {
       <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">Créer un compte</h2>
       <div class="w-full flex justify-space-between gap-4">
         <div class="column">
-          <CustomInput item="Prénom" type="text" id="prenom" required v-model="prenom"/>
-          <CustomInput item="Nom" type="text" id="nom" required v-model="nom"/>
-          <CustomInput item="Email" type="email" id="email" required v-model="email"/>
-          <CustomInput item="Mot de passe" type="password" id="password" required v-model="password"/>
+          <CustomInput item="Prénom" type="text" id="prenom" :error="errors.prenom" required v-model="prenom"/>
+          <CustomInput item="Nom" type="text" id="nom" :error="errors.nom" required v-model="nom"/>
+          <CustomInput item="Email" type="email" id="email" :error="errors.email" required v-model="email"/>
+          <CustomInput item="Mot de passe" type="password" id="password" :error="errors.password" required v-model="password"/>
         </div>
         <div class="column">
-
-          <CustomInput item="Adresse" type="text" id="adresse" required v-model="adresse"/>
-          <CustomInput item="Code Postal" type="text" id="cp" required v-model="cp"/>
-          <CustomInput item="Ville" type="text" id="ville" required v-model="ville"/>
-          <CustomInput item="Téléphone" type="text" id="telephone" required v-model="telephone"/>
+          <CustomInput item="Adresse" type="text" id="adresse" :error="errors.adresse" required v-model="adresse"/>
+          <CustomInput item="Code Postal" type="text" id="cp" :error="errors.cp" required v-model="cp"/>
+          <CustomInput item="Ville" type="text" id="ville" :error="errors.ville" required v-model="ville"/>
+          <CustomInput item="Téléphone" type="text" id="telephone" :error="errors.telephone" required v-model="telephone"/>
         </div>
       </div>
       <div class="flex justify-center gap-4">

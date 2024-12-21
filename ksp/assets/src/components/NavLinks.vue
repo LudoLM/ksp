@@ -68,12 +68,12 @@ export default {
   min-width: 150px;
 }
 
-.nav_wrapper {
+/*.nav_wrapper {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
+  z-index: 1000;
   color: #000;
   background: rgba(255, 255, 255, 0.7);
   height: 123px;
@@ -83,7 +83,7 @@ export default {
   align-items: center;
   padding: 0 2%;
   transition: all .3s ease-in-out;
-}
+}*/
 
 .fixed{
   height: 70px;

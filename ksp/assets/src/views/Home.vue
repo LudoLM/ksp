@@ -1,32 +1,44 @@
 <template>
-  <div class="banner">
-    <Title_banner/>
-  </div>
   <div class="container">
     <!-- Affichage d'un message de validation -->
     <v-alert v-model="alertVisible" :type="alertType" dismissible>
       {{ alertMessage }}
     </v-alert>
+    <div class="banner">
+      <Title_banner/>
+    </div>
+    <div class="kspInfos bg-white">
+      <div class="image">
+        <img src="../../images/banner2.jpg" alt="salle de yoga">
+      </div>
+      <div class="accroche">
+        <h4>Soulagez vos douleurs et améliorez votre quotidien grâce à Kiné Sport Santé</h4>
+        <p>Des méthodes simples pour adopter de bonnes habitudes corporelles et prévenir les récidives.</p>
+      </div>
+    </div>
     <div class="title_wrapper">
-      <h2>prochains cours.</h2>
+      <h2>Les cours à venir.</h2>
     </div>
 
 
     <div class="buttonsFilters">
       <router-link to="/cours/add"><CustomButton v-if="role === 'ROLE_ADMIN'">Ajouter un cours</CustomButton></router-link>
       <CoursFilters
-          :uniqueTypeCours="uniqueTypeCours"
+          :uniqueTypeCours="uniqueTypeCoursList"
+          :uniqueStatusCours="uniqueStatusCoursList"
           :selectedCoursId="selectedCoursId"
           :selectedDate="selectedDate"
-          @update:selectedCoursId="updateSelectedCoursId"
-          @update:selectedDate="updateSelectedDate"
+          :selectedStatusId="selectedStatusId"
+          @update:selectedCoursId="updateSelectedCoursList"
+          @update:selectedDate="updateSelectedDateList"
+          @update:selectedStatusId="updateStatusCoursList"
           @resetInfos="resetInfos"
       />
     </div>
 
-    <div class="gridCards">
+    <div class="gridCards p-12">
       <ul>
-        <li v-for="info in paginatedInfos" :key="info.id">
+        <li v-for="info in infos" :key="info.id">
           <CoursCard
               :info="info"
               @subscriptionResponse="handleSubscriptionResponse"
@@ -37,35 +49,39 @@
       </ul>
     </div>
     <div class="pagination">
-      <button class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800" @click="prevPage" :disabled="currentPage === 1">Précédent</button>
+      <CustomButton :class="currentPage === 1 ? 'invisible' : 'visible'" :color="'gray'" @click="prevPage" :disabled="currentPage === 1">Précédent</CustomButton>
       <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-      <button class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800" @click="nextPage" :disabled="currentPage === totalPages">Suivant</button>
+      <CustomButton :class="currentPage === totalPages ? 'invisible' : 'visible'" :color="'gray'" @click="nextPage" :disabled="currentPage === totalPages">Suivant</CustomButton>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import CoursCard from "../components/CoursCard.vue";
 import {VAlert} from "vuetify/components";
 import CoursFilters from "../components/CoursFilters.vue";
 import useGetElementsToken from "../utils/useGetElementsToken";
 import { useRoute } from "vue-router";
-import {useGetCours} from "../utils/useActionCours";
+import {useGetCours, useGetStatusCours, useGetTypesCours} from "../utils/useActionCours";
 import CustomButton from "../components/CustomButton.vue";
 import Title_banner from "../components/Title_banner.vue";
 
 const infos = ref([]);
 const selectedCoursId = ref(null);
-const selectedDate = ref('');
+const selectedDate = ref(null);
+const selectedStatusId = ref(null);
 const currentPage = ref(1);
-const itemsPerPage = ref(9);
+const uniqueTypeCoursList = ref([]);
+const uniqueStatusCoursList = ref([]);
 const route = useRoute();
 const role = localStorage.getItem('token') ? useGetElementsToken().roles[0] : null;
-
+const totalItems = ref(0);
+const maxPerPage = ref(window.innerWidth > 1460 ? 20 : window.innerWidth > 1110 ? 12 : 10);
+const totalPages = ref(0);
 
 // Appel de fetchData lors du montage
-onMounted(() => {
+onMounted(async () => {
   alertMessage.value = route.query.alertMessage || '';
   alertType.value = route.query.alertType || 'success';
   alertVisible.value = route.query.alertVisible || false;
@@ -73,9 +89,26 @@ onMounted(() => {
   setTimeout(() => {
     alertVisible.value = false;
   }, 3000);
-  useGetCours(role, infos);
+
+
+  await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  uniqueTypeCoursList.value = await useGetTypesCours();
+  uniqueStatusCoursList.value = await useGetStatusCours();
+  if(role !== 'ROLE_ADMIN') uniqueStatusCoursList.value =
+      uniqueStatusCoursList.value.filter(
+      status => status.id !== 6 && status.id !== 7 && status.id !== 4
+  );
+
+
+
+  // window.addEventListener('resize', () => {
+  //   maxPerPage.value = window.innerWidth > 1460 ? 20 : window.innerWidth > 1110 ? 12 : 10;
+  //   useGetCours(role, infos, currentPage, maxPerPage, totalItems);
+  // });
 
 });
+
+
 
 // Déclaration des variables pour l'alerte
 const alertVisible = ref(false);
@@ -119,31 +152,27 @@ const handleCancelCoursResponse = ({ type, message }) => {
   }, 3000);
 };
 
+
 // Mise à jour des filtres lorsqu'un événement est reçu
-const updateSelectedCoursId = (value) => {
+const updateSelectedCoursList = async (value) => {
   selectedCoursId.value = value;
+  currentPage.value = 1;
+  await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
-const updateSelectedDate = (value) => {
+const updateSelectedDateList = async (value) => {
   selectedDate.value = value;
+  currentPage.value = 1;
+  await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
-// Propriétés calculées pour filtrer et paginer les cours
-const uniqueTypeCours = computed(() => {
-  const uniqueTypeCours = [];
-  const seenIds = new Set();
+const updateStatusCoursList = async (value) => {
+  selectedStatusId.value = value;
+  currentPage.value = 1;
+  await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+};
 
-  infos.value.forEach(info => {
-    if (info.typeCours && !seenIds.has(info.typeCours.id)) {
-      seenIds.add(info.typeCours.id);
-      uniqueTypeCours.push(info.typeCours);
-    }
-  });
-
-  return uniqueTypeCours;
-});
-
-const filteredInfos = computed(() => {
+/*const filteredInfos = computed(() => {
   let filtered = infos.value;
 
   if (selectedCoursId.value !== null && selectedCoursId.value !== "0") {
@@ -155,33 +184,32 @@ const filteredInfos = computed(() => {
   }
 
   return filtered;
-});
+});*/
 
-const paginatedInfos = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
+/*const paginatedInfos = computed(() => {
+  const start = (currentPage.value - 1) * maxPerPage.value;
+  const end = start + maxPerPage.value;
   return filteredInfos.value.slice(start, end);
-});
+});*/
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredInfos.value.length / itemsPerPage.value);
-});
+
 
 // Méthodes
 const resetInfos = () => {
   selectedCoursId.value = null;
   selectedDate.value = '';
 };
-
-const nextPage = () => {
+const nextPage = async () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
+    await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   }
 };
 
-const prevPage = () => {
+const prevPage = async () => {
   if (currentPage.value > 1) {
     currentPage.value--;
+    await useGetCours(role, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   }
 };
 </script>
@@ -201,23 +229,107 @@ const prevPage = () => {
 }
 
 .banner {
-  background: url("../../images/banner2.jpg") no-repeat center center;
-  background-size: cover;
+  background: linear-gradient(#260959, #472371);
   width: 100%;
-  height: 50vh;
+  height: 70vh;
   object-fit: cover;
-  max-height: 50vh;
-  display: flex;
-  justify-content: space-between;
-  position: relative;
+  /*display: flex;
+  justify-content: space-between;*/
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .title_wrapper {
-  background: #fff;
-  padding: 20px;
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
   align-items: center;
   color: #fff;
+
+
+  h2 {
+    margin-left: 5rem;
+    color: #2e2e2e;
+    padding-bottom: 30px;
+    position: relative;
+    z-index: 2;
+
+    &::before {
+      content: '';
+      width: 25%;
+      height: 5px;
+      background: #472371;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+    }
+  }
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 5rem;
+  margin-bottom: 5rem;
+  padding: 0 5rem;
+    button {
+      width: 200px;
+    }
+}
+
+.kspInfos {
+  position: relative;
+  margin-top: 40vh;
+  margin-bottom: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+
+  .image {
+    width: 50%;
+    height: 100%;
+
+    img {
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .accroche {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10%;
+    align-items: center;
+    width: 50%;
+    height: 100%;
+    padding: 10px 5vh;
+    letter-spacing: .5px;
+    line-height: 2;
+    font-weight: 400;
+    color: #515151;
+    text-align: center;
+
+    h4 {
+      font-size: 1.5vw;
+      font-weight: 900;
+    }
+
+    p {
+      font-size: 1vw;
+    }
+  }
+}
+
+
 </style>

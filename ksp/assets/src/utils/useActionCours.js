@@ -1,13 +1,24 @@
-export async function useGetCours(role, infos) {
+export async function useGetCours(role, infos,  currentPage, maxPerPage, totalItems, selectedTypeCours, selectedDate, selectedStatusId, totalPages) {
     try {
-        const response = await fetch("/api/getCours", {
+
+        const response = await fetch("/api/getCours?page="
+            + currentPage.value + "&maxPerPage="
+            + maxPerPage.value + "&typeCours="
+            + selectedTypeCours.value + "&dateCours="
+            + selectedDate.value + "&statusCours="
+            + selectedStatusId.value
+            , {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "X-ACCESS-TOKEN": role
             },
         });
-        infos.value = await response.json();
+        const result = JSON.parse(await response.json());
+        infos.value = result.data;
+        currentPage.value = result.pagination.currentPage;
+        totalItems.value = result.pagination.totalItems;
+        totalPages.value = result.pagination.totalPages;
     } catch (error) {
         console.error("Erreur lors de la récupération des cours:", error);
     }
@@ -21,6 +32,44 @@ export async function useGetCoursById(coursId) {
         } catch (error) {
             console.error('Error fetching cours details:', error);
         }
+}
+
+
+export async function useGetTypesCours() {
+    try {
+        const response = await fetch('/api/getTypesCours', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return await response.json();
+
+
+    } catch (error) {
+        console.error('Erreur:', error);
+        return false;
+    }
+}
+
+export async function useGetStatusCours() {
+
+    try {
+        const response = await fetch('/api/getStatusCours', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+
+            },
+        });
+
+        return await response.json();
+
+    } catch (error) {
+        console.error('Erreur:', error);
+        return false;
+    }
 }
 
 

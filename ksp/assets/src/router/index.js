@@ -42,11 +42,13 @@ const router = createRouter({
         { path: '/cours/edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
         { path: '/coursType/add', name: 'CreateTypeCours', component: TypeCoursForm, meta: {requiresAdmin: true}},
         { path: '/coursType/edit', name: 'EditTypeCours', component: TypeCoursForm, meta: {requiresAdmin: true}},
-
     ],
 })
 
 const vuetify = createVuetify({
+    theme: {
+        defaultTheme: 'light',
+    },
     components,
     directives,
 })

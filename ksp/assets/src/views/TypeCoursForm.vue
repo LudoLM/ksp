@@ -4,6 +4,7 @@ import CustomButton from "../components/CustomButton.vue";
 import CustomInput from "../components/CustomInput.vue";
 import CustomSelect from "../components/CustomSelect.vue";
 import { useRouter } from 'vue-router';
+import {useValidationForm} from "../utils/useValidationForm";
 
 
 const formData = ref({
@@ -21,6 +22,11 @@ const imagePreview = ref(null);
 const urlCreation = "/api/typeCours/create";
 const urlEdition = "/api/typeCours/edit/";
 
+const errors = ref({
+  libelle: null,
+  thumbnail: null,
+});
+
 // Fonction pour capturer le fichier
 const onFileChange = (event) => {
   const file = event.target.files[0];
@@ -32,7 +38,7 @@ const onFileChange = (event) => {
 
 const onTypeCoursChange = (event) => {
   typeCoursId.value = event.target.value;
-  const selectedCours = typeCoursList.value.find(cours => cours.id == typeCoursId.value);
+  const selectedCours = typeCoursList.value.find(cours => cours.id === typeCoursId.value);
   if (selectedCours) {
     formData.value.nom = selectedCours.libelle;
     formData.value.image = null;
@@ -83,7 +89,10 @@ const handleSubmit = async (event) => {
     body: data
   });
 
-  await response.json();
+  if (!response.ok) {
+    await useValidationForm(response, errors);
+  }
+  console.log(errors)
   router.go(-1);
 
 };
@@ -110,6 +119,7 @@ const handleSubmit = async (event) => {
           id="nouveauNom"
           v-model="formData.nom"
           class="w-full"
+          :error="errors.libelle"
           required
       />
 
@@ -119,6 +129,7 @@ const handleSubmit = async (event) => {
           id="image"
           @change="onFileChange"
           class="w-full"
+          :error="errors.thumbnail"
       />
 
       <div v-if="imagePreview">

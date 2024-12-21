@@ -8,6 +8,7 @@ use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class UpdateStatusCoursService
 {
@@ -19,7 +20,7 @@ class UpdateStatusCoursService
     {
     }
 
-    public function updateStatusCours($cours): array
+    public function updateStatusCours($cours): Paginator
     {
         $ouvert = $this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]);
         $archive = $this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ARCHIVE->value]);
