@@ -28,31 +28,28 @@
             <router-link :to="{ name: 'CoursDetail', params: { id: info.id }}" class="mt-3 mx-2 block px-3 py-2 text-center text-sm font-semibold text-violet-600 border-2 border-violet-600">
                 + d'infos
             </router-link>
-            <!-- Si l'utilisateur est admin et le cours en creation -->
-            <CustomButton v-if="role === 'ROLE_ADMIN' && statusCours === 'En création'" @click="openCreation">
-              Ouvrir
-            </CustomButton>
-            <CustomButton v-if="role === 'ROLE_ADMIN' && statusCours === 'En création'" @click="updateCreation">
-              Modifier
-            </CustomButton>
-            <CustomButton v-if="role === 'ROLE_ADMIN' && statusCours === 'En création'" @click="deleteCreation" :color="'red'">
-              Supprimer
-            </CustomButton>
-            <CustomButton v-if="role === 'ROLE_ADMIN' && (statusCours === 'Ouvert' || statusCours === 'Complet')" @click="cancelCours">
-              Annuler
-            </CustomButton>
 
-            <ModalAddExtra
-                v-if="role === 'ROLE_ADMIN' && (statusCours === 'Ouvert' || statusCours === 'Complet')"
-                v-model:isOpen="addExtraDialog"
-                title="Ajouter un extra"
-                message="Sélectionner l'extra à ajouter."
-                :cours= props.info.id
-                @subscriptionResponse="handleAddExtraResponse"
-            >
-              Ajouter extra
-            </ModalAddExtra>
 
+            <ButtonsCardAdmin v-if="isAdminPath"
+                :statusCours="statusCours"
+                :coursId="info.id"
+                @cancelCours="cancelCours"
+                @deleteCreation="deleteCreation"
+                @updateCreation="updateCreation"
+                @openCreation="openCreation"
+                @handleAddExtraResponse="handleAddExtraResponse"
+
+            />
+
+            <ButtonsCardUser v-if="!isAdminPath"
+                :userId="userId"
+                :statusCours="statusCours"
+                :isSubscribed="isSubscribed"
+                :isUserAttente="isUserAttente"
+                @handleSubscription="handleSubscription"
+                @handleUnsubscription="handleUnsubscription"
+
+            />
 
             <ModalConfirm
                 v-if="!userId && (statusCours === 'Ouvert' || statusCours === 'Complet')"
@@ -64,20 +61,6 @@
               {{ statusCours === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
             </ModalConfirm>
 
-
-<!--             Si l'utilisateur est connecté-->
-            <CustomButton v-if="userId && !isSubscribed && role !== 'ROLE_ADMIN' && statusCours === 'Ouvert'" @click="handleSubscription(false)">
-              S'inscrire
-            </CustomButton>
-            <CustomButton v-if="userId && isSubscribed && role !== 'ROLE_ADMIN'" @click="handleUnsubscription(false)">
-              Se désinscrire
-            </CustomButton>
-            <CustomButton v-if="userId && !isSubscribed && !isUserAttente && statusCours === 'Complet' && role !== 'ROLE_ADMIN'" @click="handleSubscription(true)">
-              Liste d'attente
-            </CustomButton>
-            <CustomButton v-if="userId && isUserAttente && statusCours === 'Complet' && role !== 'ROLE_ADMIN'" @click="handleUnsubscription(true)">
-              Retirer attente
-            </CustomButton>
           </div>
         </div>
       </div>
@@ -93,20 +76,16 @@ import {ref, computed} from 'vue';
 import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
 import {useSubscription, useUnSubscription} from "../utils/useSubscribing";
-import useGetElementsToken from "../utils/useGetElementsToken";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
 import { useRouter } from 'vue-router';
-import CustomButton from "./CustomButton.vue";
-import ModalConfirm from "./Modal/ModalConfirm.vue";
-import ModalAddExtra from "./Modal/ModalAddExtra.vue";
-
-
+import ModalConfirm from "./modal/ModalConfirm.vue";
+import ButtonsCardAdmin from "./admin/ButtonsCardAdmin.vue";
+import ButtonsCardUser from "./user/ButtonsCardUser.vue";
 
 const userStore = useUserStore();
 const userId = userStore.userId;
 const router = useRouter();
-const role = ref(localStorage.getItem('token') ? useGetElementsToken().roles[0] : null);
-const emit = defineEmits(['subscriptionResponse', 'deleteCoursResponse', 'cancelCoursResponse']);
+const emit = defineEmits(['subscriptionResponse', 'deleteCoursResponse', 'cancelCoursResponse', 'handleSubscription', 'handleUnsubscription']);
 
 // Couleurs par statut
 const colors = {
@@ -125,13 +104,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  isAdminPath: {
+    type: Boolean,
+    default: false,
+  }
 });
-
-
 
 // État de la modale
 const loginDialog = ref(false);
-const addExtraDialog = ref(false);
 
 const redirectToLogin = () => {
   window.location.href = '/login'; // Rediriger vers la route Symfony
@@ -159,7 +139,6 @@ const handleAddExtraResponse = ({ type, message, statusChange }) => {
       type: type,
       message: message,
     });
-    console.log(type, statusChange, message);
     statusCours.value = statusChange;
     usersCount.value++;
 

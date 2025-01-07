@@ -49,11 +49,17 @@ class TypeCoursController extends AbstractController
         EntityManagerInterface $em,
         ValidatorInterface $validator
     ): JsonResponse {
-        $nom = $request->request->get('nom');
+        $nom = $request->request->get('nom') === "null" ? "" : $request->request->get('nom');
         $image = $request->files->get('image');
 
         $typeCours = new TypeCours();
         $typeCours->setLibelle($nom);
+
+        if ($image instanceof UploadedFile) {
+            $fileName = "thumbnail-" . uniqid() . "." . $image->guessExtension();
+            $image->move($this->getParameter('kernel.project_dir') . "/assets/images/uploads", $fileName);
+            $typeCours->setThumbnail($fileName);
+        }
 
         $violations = $validator->validate($typeCours);
 
@@ -65,14 +71,6 @@ class TypeCoursController extends AbstractController
                 ];
             }
             return new JsonResponse(['errors' => $errors], 400);
-        }
-
-        if ($image instanceof UploadedFile) {
-            $fileName = "thumbnail-" . uniqid() . "." . $image->guessExtension();
-            $image->move($this->getParameter('kernel.project_dir') . "/assets/images/uploads", $fileName);
-            $typeCours->setThumbnail($fileName);
-        } else {
-            return new JsonResponse(['thumbnail' => 'Image non valide'], 400);
         }
 
         $em->persist($typeCours);

@@ -47,7 +47,7 @@ class CoursController extends AbstractController
     #[Route('getCours', name: 'cours_index', methods: ['GET'])]
     public function coursIndex(Request $request): JsonResponse
     {
-        $role = $request->headers->get("X-ACCESS-TOKEN");
+        $isAdminPath = $request->query->get('isAdminPath') === 'true';
         $currentPage = (int)($request->query->get('page', 1)); // Valeur par défaut 1
         $maxPerPage = (int)($request->query->get('maxPerPage', 10)); // Valeur par défaut 10
 
@@ -79,7 +79,12 @@ class CoursController extends AbstractController
 
 
         // Appeler le repository avec la pagination et les filtres
-        $coursPaginator = $this->coursRepository->findAllSortByDate($currentPage, $maxPerPage, $typeCours, $dateCours, $statusCours);
+
+        if($isAdminPath) {
+            $coursPaginator = $this->coursRepository->findAllSortByDate($currentPage, $maxPerPage, $typeCours, $dateCours, $statusCours);
+        } else {
+            $coursPaginator = $this->coursRepository->findAllSortByDateForUsers($currentPage, $maxPerPage, $typeCours, $dateCours, $statusCours);
+        }
 
         // Récupérer les cours
         $cours = iterator_to_array($coursPaginator);
@@ -234,7 +239,6 @@ class CoursController extends AbstractController
     #[Route('cours/create', name: 'cours_create', methods: ['POST'])]
     #IsGranted("ROLE_ADMIN")
     public function createCours(
-        Request $request,
         #[MapRequestPayload(
             serializationContext: [
                 'groups' => ['cours:create']

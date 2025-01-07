@@ -15,7 +15,7 @@ class CreateCoursDTO
     public ?int $dureeCours = null;
 
     #[Assert\NotBlank(message: "La date du cours ne peut pas être vide.")]
-    /*#[Assert\GreaterThanOrEqual('today', message: "La date du cours doit être supérieure ou égale à la date du jour.")]*/
+    #[Assert\GreaterThanOrEqual('today', message: "La date du cours doit être supérieure ou égale à la date du jour.")]
     #[Groups('cours:create')]
     public ?\DateTimeInterface $dateCours = null;
 

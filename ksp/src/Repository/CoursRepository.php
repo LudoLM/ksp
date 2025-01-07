@@ -71,8 +71,6 @@ class CoursRepository extends ServiceEntityRepository
     public function findCoursFiltered() : array
     {
         $qb = $this->createQueryBuilder('c');
-
-
         return $qb->getQuery()->getResult();
     }
 
@@ -85,10 +83,8 @@ class CoursRepository extends ServiceEntityRepository
     ): Paginator {
 
 
-        // Construire le QueryBuilder
         $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'DESC');
-
 
         // Ajouter les filtres dynamiques
         if ($typeCours !== null) {
@@ -114,15 +110,41 @@ class CoursRepository extends ServiceEntityRepository
         return new Paginator($qb->getQuery());
     }
 
-    public function findAllSortByDateForUsers(int $currentPage, int $maxPerPage): Paginator
-    {
 
-        return new Paginator($this->createQueryBuilder('c')
-            ->where('c.statusCours = 1 OR c.statusCours = 2 OR c.statusCours = 3 OR c.statusCours = 5 OR c.statusCours = 6')
+    public function findAllSortByDateForUsers(
+        int $currentPage,
+        int $maxPerPage,
+        ?TypeCours $typeCours,
+        ?\DateTime $dateCours,
+        ?StatusCours $statusCours
+    ): Paginator {
+
+
+        $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'DESC')
-            ->setFirstResult(($currentPage - 1) * $maxPerPage)
-            ->setMaxResults($maxPerPage)
-            ->getQuery()
-        );
+            ->where('c.statusCours = 1 OR c.statusCours = 2 OR c.statusCours = 3 OR c.statusCours = 5');
+
+        // Ajouter les filtres dynamiques
+        if ($typeCours !== null) {
+            $qb->andWhere('c.typeCours = :typeCours')
+                ->setParameter('typeCours', $typeCours);
+        }
+
+        if ($dateCours !== null) {
+            $qb->andWhere('c.dateCours > :dateCours')
+                ->setParameter('dateCours', $dateCours);
+        }
+
+        if ($statusCours !== null) {
+            $qb->andWhere('c.statusCours = :statusCours')
+                ->setParameter('statusCours', $statusCours);
+        }
+
+        // Ajouter la pagination
+        $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
+            ->setMaxResults($maxPerPage);
+
+        // Retourner un Paginator
+        return new Paginator($qb->getQuery());
     }
 }

@@ -40,7 +40,7 @@ class AuthController extends AbstractController
     ): JsonResponse {
 
         $user = $this->createUserDTOToUserDenormalizer->denormalize($createUserDTO, User::class);
-        // Valider l'entité User
+        // Valider l'entité user
         $violations = $validator->validate($user);
 
         if (count($violations) > 0) {

@@ -21,13 +21,14 @@ export default {
     item: String,
     type: String,
     id: String,
-    modelValue: String,
+    modelValue: [String, Number, Date],
     error: {
       type: String,
       default: null,
     },
   },
 };
+
 </script>
 
 
