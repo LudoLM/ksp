@@ -25,8 +25,6 @@ onMounted(async () => {
     <h1>Liste de cours</h1>
 
 
-
-
 </template>
 
 <style scoped lang="scss">

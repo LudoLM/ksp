@@ -40,4 +40,29 @@ class HistoriquePaiementRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+
+    public function findQuantityOfEachPacksPerMonth($startDate, $endDate): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = '
+        SELECT p.id, p.nom AS name, p.tarif AS price, COUNT(hp.id) AS quantity,
+               MONTH(hp.date) AS month, YEAR(hp.date) AS year
+        FROM historique_paiement hp
+        LEFT JOIN pack p ON hp.pack_id = p.id
+        WHERE hp.date >= :startDate AND hp.date <= :endDate
+        GROUP BY p.id, year, month
+        ORDER BY year ASC, month ASC, quantity DESC
+    ';
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->executeQuery([
+            'startDate' => $startDate->format('Y-m-d H:i:s'),
+            'endDate' => $endDate->format('Y-m-d H:i:s'),
+        ]);
+
+        return $result->fetchAllAssociative();
+    }
+
+
+
 }

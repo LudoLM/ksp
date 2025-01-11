@@ -34,7 +34,7 @@ export default {
   computed: {
     routes() {
       return this.$router.getRoutes().filter(route =>
-          !['CoursDetail', 'CreateCours', 'Login', 'Register', 'AcheterCours', 'Merci', 'Profile', 'EditCours', 'CreateTypeCours', 'EditTypeCours', 'admin', 'Dashboard','CoursAdmin'].includes(route.name)
+          !['CoursDetail', 'CreateCours', 'Login', 'Register', 'AcheterCours', 'Merci', 'Profile', 'EditCours', 'CreateTypeCours', 'EditTypeCours', 'admin', 'Dashboard','CoursAdmin', 'DataStats'].includes(route.name)
       );
     }
   },

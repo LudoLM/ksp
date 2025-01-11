@@ -193,34 +193,6 @@ const prevPage = async () => {
 }
 
 
-.title_wrapper {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  color: #fff;
-
-
-  h2 {
-    margin-left: 5rem;
-    color: #2e2e2e;
-    padding-bottom: 30px;
-    position: relative;
-    z-index: 2;
-
-    &::before {
-      content: '';
-      width: 25%;
-      height: 5px;
-      background: #472371;
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 10000;
-    }
-  }
-}
-
 .pagination {
   display: flex;
   justify-content: center;
