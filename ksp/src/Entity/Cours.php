@@ -16,7 +16,7 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "cours:update", "user:detail"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "cours:update", "user:detail", "cours_filling:index"])]
     private ?int $id = null;
 
     #[ORM\Column]
@@ -24,7 +24,7 @@ class Cours
     private ?int $duree = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "user:detail"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", "user:detail", 'cours_filling:index'])]
     private ?\DateTimeInterface $dateCours = null;
 
     #[ORM\Column(length: 255)]
@@ -36,7 +36,7 @@ class Cours
     private ?\DateTimeInterface $dateLimiteInscription = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", 'cours_filling:index'])]
     private ?int $nbInscriptionMax = null;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
@@ -52,7 +52,7 @@ class Cours
 
 
     #[ORM\OneToMany(mappedBy: 'cours', targetEntity: UsersCours::class, orphanRemoval: true, cascade: ["persist"])]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
+    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", 'cours_filling:index'])]
     private Collection $usersCours;
 
     public function __construct()

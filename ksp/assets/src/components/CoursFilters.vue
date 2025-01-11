@@ -4,7 +4,6 @@ import CustomSelect from "./CustomSelect.vue";
 import CustomInput from "./CustomInput.vue";
 import CustomButton from "./CustomButton.vue";
 
-// Props : données passées depuis le parent
 defineProps({
   uniqueTypeCours: {
     type: Array,

@@ -16,11 +16,11 @@ class Pack
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['user:detail'])]
+    #[Groups(['user:detail', 'historique_paiements:index'])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[Groups(['user:detail'])]
+    #[Groups(['user:detail', 'historique_paiements:index'])]
     #[ORM\Column]
     private ?float $tarif = null;
 

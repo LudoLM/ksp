@@ -118,9 +118,11 @@ const formData = ref({
 
 <template>
   <div>
-    <h1>{{ origin.id ? "modifier" : "ajouter" }} un cours</h1>
+      <div class="title_wrapper">
+          <h2>{{ origin.id ? "Modifier" : "Ajouter" }} un cours</h2>
+      </div>
 
-    <div class="buttonsFilters flex justify-start mb-10">
+    <div class="buttonsFilters flex justify-start">
       <router-link :to="{name: 'CreateTypeCours'}"><CustomButton>Ajouter un type de Cours</CustomButton></router-link>
       <router-link :to="{name: 'EditTypeCours'}"><CustomButton>Modifier un type de Cours</CustomButton></router-link>
     </div>

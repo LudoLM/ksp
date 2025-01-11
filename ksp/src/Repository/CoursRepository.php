@@ -147,4 +147,20 @@ class CoursRepository extends ServiceEntityRepository
         // Retourner un Paginator
         return new Paginator($qb->getQuery());
     }
+
+
+    public function getCoursFilling()
+    {
+        return $this->createQueryBuilder('c')
+            ->select('NEW App\DTO\CoursFillingDTO(
+            c.id,
+            c.dateCours,
+            c.nbInscriptionMax,
+            COUNT(u.id)
+        )')
+            ->leftJoin('c.usersCours', 'u')
+            ->groupBy('c.id')
+            ->getQuery()
+            ->getResult();
+    }
 }

@@ -111,7 +111,10 @@ const handleSubmit = async (event) => {
 </script>
 
 <template>
-  <h1>{{ origin === "EditTypeCours" ? "modifier" : "ajouter" }} un type de cours</h1>
+
+    <div class="title_wrapper">
+        <h2>{{ origin === "EditTypeCours" ? "Modifier" : "Ajouter" }} un type de cours</h2>
+    </div>
 
   <form @submit="handleSubmit" enctype="multipart/form-data">
     <div class="grid grid-cols-2 gap-4">

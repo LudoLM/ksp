@@ -95,6 +95,10 @@ export async function useDeleteCours(coursId) {
     }
 }
 
+/**
+ * Récupère la liste des packs disponibles.
+ * @returns {Promise<Object[]>} - Une promesse résolue avec la liste des packs.
+ */
 export async function useGetPacks() {
     try {
         const response = await fetch('/api/packs', {

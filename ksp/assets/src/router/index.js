@@ -13,6 +13,7 @@ import Profile from '../views/Profile.vue';
 import TypeCoursForm from "../views/TypeCoursForm.vue";
 import DefaultLayout from "../layouts/DefaultLayout.vue";
 import AdminLayout from "../layouts/AdminLayout.vue";
+import DataStats from "../views/admin/DataStats.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -48,6 +49,7 @@ const router = createRouter({
                 { path: 'coursType/add', name: 'CreateTypeCours', component: TypeCoursForm, meta: {requiresAdmin: true}},
                 { path: 'coursType/edit', name: 'EditTypeCours', component: TypeCoursForm, meta: {requiresAdmin: true}},
                 { path: 'cours/add', name: 'CreateCours', component: CoursForm, meta: {requiresAdmin: true}},
+                { path: 'dataStats', name: 'DataStats', component: DataStats, meta: {requiresAdmin: true}},
             ]
         }
     ],

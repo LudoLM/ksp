@@ -309,4 +309,12 @@ class CoursController extends AbstractController
         return new JsonResponse(['response' => true], 200);
     }
 
+    #[Route('getCoursFilling', name: 'cours_filling', methods: ['GET'])]
+    public function getCoursFilling(): JsonResponse
+    {
+       $coursFilling = $this->coursRepository->getCoursFilling();
+       $jsonCoursFillings = $this->serializer->serialize($coursFilling, 'json', ['groups' => 'cours_filling:index']);
+        return new JsonResponse($jsonCoursFillings, 200);
+    }
+
 }

@@ -13,17 +13,7 @@
 
       <!-- ===== Main Content Start ===== -->
       <main>
-        <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-<!--          <div class="layout">
-
-            <router-link
-                v-for="route in adminRoutes"
-                :key="route.path"
-                :to="`/admin/${route.path}`"
-            >
-              <v-list-item>{{ route.name }}</v-list-item>
-            </router-link>
-          </div>-->
+        <div class="w-5/6 mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
           <router-view/>
         </div>
       </main>

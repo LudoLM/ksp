@@ -26,7 +26,7 @@ class HistoriquePaiement
     #[Groups(['user:detail'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
-    #[Groups(['user:detail'])]
+    #[Groups(['user:detail', 'historique_paiements:index'])]
     #[ORM\ManyToOne(inversedBy: 'historiquePaiements')]
     private ?Pack $pack = null;
 

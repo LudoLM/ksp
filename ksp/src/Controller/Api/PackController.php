@@ -20,17 +20,18 @@ use Symfony\Component\Routing\Attribute\Route;
 class PackController extends AbstractController
 {
 
-//    #[Route('packs', name: 'packs_index', methods: ['GET'])]
-//    public function index(PackRepository $packRepository)
-//    {
-//        $packs = $packRepository->findAll();
-//        return $this->json($packs);
-//    }
-//
-//    public function show(Pack $pack)
-//    {
-//        return $this->json($pack);
-//    }
+    #[Route('packs', name: 'packs_list', methods: ['GET'])]
+    public function index(PackRepository $packRepository)
+    {
+        $packs = $packRepository->findAll();
+
+        return $this->json($packs);
+    }
+
+    public function show(Pack $pack)
+    {
+        return $this->json($pack);
+    }
 
     #[Route('merci/{id}', name: 'merci', methods: ['POST'])]
     public function merci(
