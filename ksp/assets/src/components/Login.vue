@@ -13,6 +13,14 @@ const handleProfile = () => {
   router.push('/profile');
 };
 
+const handleRegister = () => {
+    router.push('/register');
+};
+
+const handleLogin = () => {
+    router.push('/login');
+};
+
 const logout = () => {
   userStore.logout();
   router.push('/');
@@ -46,8 +54,8 @@ onMounted(() => {
         </div>
         <div v-else>
           <div class="loginButtons">
-            <a href="/register"><div class="createCount">Créer un compte</div></a>
-            <a href="/login"><div class="identifier"><img src="../../icons/user.svg"/><span class="identifier_text">Me connecter</span></div></a>
+            <a class="createCount" @click="handleRegister">"Créer un compte</a>
+            <a class="identifier" @click="handleLogin"><img src="../../icons/user.svg"/><span class="identifier_text">Me connecter</span></a>
           </div>
         </div>
       </div>

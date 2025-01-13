@@ -12,8 +12,6 @@ import useGetElementsToken from "../utils/useGetElementsToken";
 import Profile from '../views/Profile.vue';
 import TypeCoursForm from "../views/TypeCoursForm.vue";
 import DefaultLayout from "../layouts/DefaultLayout.vue";
-import AdminLayout from "../layouts/AdminLayout.vue";
-import DataStats from "../views/admin/DataStats.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -39,17 +37,24 @@ const router = createRouter({
         },
         {
             path: '/admin',
-            component: AdminLayout,
+            component: DefaultLayout,
             meta: { requiresAdmin: true },
             name: 'admin',
             children: [
-                { path: '', name: 'Dashboard', component: () => import('../views/admin/Dashboard.vue') },
-                { path: 'coursList', name: 'CoursAdmin', component: () => import('../views/Home.vue') },
-                { path: 'cours/edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
-                { path: 'coursType/add', name: 'CreateTypeCours', component: TypeCoursForm, meta: {requiresAdmin: true}},
-                { path: 'coursType/edit', name: 'EditTypeCours', component: TypeCoursForm, meta: {requiresAdmin: true}},
-                { path: 'cours/add', name: 'CreateCours', component: CoursForm, meta: {requiresAdmin: true}},
-                { path: 'dataStats', name: 'DataStats', component: DataStats, meta: {requiresAdmin: true}},
+                { path: '', name: 'Statistiques', component: () => import('../views/admin/DataStats.vue'), meta: {requiresAdmin: true}},
+                {
+                  path: 'cours',
+                  name: 'Cours',
+                  meta: {requiresAdmin: true},
+                  children: [
+                      { path: 'coursList', name: 'CoursAdmin', label: "Liste de cours", component: () => import('../views/Home.vue') },
+                      { path: 'add', name: 'CreateCours', label: "Créer cours", component: CoursForm, meta: {requiresAdmin: true}},
+                      { path: 'edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
+                      { path: 'coursType/add', name: 'CreateTypeCours', label: "Créer Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
+                      { path: 'coursType/edit', name: 'EditTypeCours', label: "Modifier Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
+
+                  ]
+                },
             ]
         }
     ],
