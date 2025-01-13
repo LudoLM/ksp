@@ -3,11 +3,94 @@
       <div class="logo">
         <img src="../../images/logo.png" alt="logo de kine sport santé">
       </div>
-      <nav id="nav_links">
-        <router-link v-for="route in routes" :key="route.path" :to="route.path">{{ route.name }}</router-link>
+      <nav v-if="isAdminPath" id="nav_links" class="gap-8 justify-start">
+          <router-link
+              :to="{ name: 'Statistiques' }"
+          >
+              Tableau de bord
+          </router-link>
+          <div class="relative" ref="target">
+              <router-link
+                  class="flex items-center gap-4"
+                  to="#"
+                  @click.prevent="dropdownOpen = !dropdownOpen"
+              >
+                    <span class="hidden text-right lg:block">
+                        <a class="block text-black dark:text-white">Cours</a>
+                    </span>
+
+                  <svg
+                      :class="dropdownOpen && 'rotate-180'"
+                      class="hidden fill-current sm:block"
+                      width="12"
+                      height="8"
+                      viewBox="0 0 12 8"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                  >
+                      <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M0.410765 0.910734C0.736202 0.585297 1.26384 0.585297 1.58928 0.910734L6.00002 5.32148L10.4108 0.910734C10.7362 0.585297 11.2638 0.585297 11.5893 0.910734C11.9147 1.23617 11.9147 1.76381 11.5893 2.08924L6.58928 7.08924C6.26384 7.41468 5.7362 7.41468 5.41077 7.08924L0.410765 2.08924C0.0853277 1.76381 0.0853277 1.23617 0.410765 0.910734Z"
+                          fill=""
+                      />
+                  </svg>
+              </router-link>
+
+              <!-- Dropdown Start -->
+              <div
+                  v-show="dropdownOpen"
+                  class="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
+              >
+                  <ul class="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
+                      <li>
+                          <router-link
+                              :to='{name: "CoursAdmin"}'
+                              class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                          >
+                              Liste des cours
+                          </router-link>
+                      </li>
+                      <li>
+                          <router-link
+                              :to='{name: "CreateCours"}'
+                              class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                          >
+                              Créer un cours
+                          </router-link>
+                      </li>
+                      <li>
+                          <router-link
+                              :to='{name: "CreateTypeCours"}'
+                              class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                          >
+                              Créer un type de cours
+                          </router-link>
+                      </li>
+                      <li>
+                          <router-link
+                              :to='{name: "EditTypeCours"}'
+                              class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                          >
+                              Modifier un type de cours
+                          </router-link>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+      </nav>
+      <nav v-else id="nav_links" class="justify-around">
+          <router-link
+              v-for="route in routes"
+              :key="route.path"
+              :to="route.path"
+          >
+              {{ route.name }}
+          </router-link>
       </nav>
     <div class="flex justify-between items-center space-x-4 ">
-      <Login/>
+      <DropdownUser/>
+<!--      <Login/>-->
       <div class="hamburger">
         <Hamburger @click="toggleNavLinks"/>
       </div>
@@ -16,61 +99,102 @@
   </header>
 </template>
 
-<script>
-import Login from "./Login.vue";
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import DropdownUser from "./DropdownUser.vue";
 import Hamburger from "./Hamburger.vue";
+const dropdownOpen = ref(false)
+import {onClickOutside} from "@vueuse/core";
+
+const route = useRoute();
+const router = useRouter();
+
+// Identifie si l'utilisateur est sur une route admin
+const isAdminPath = computed(() => route.path.startsWith("/admin"));
+const target = ref(null)
 
 
+onClickOutside(target, () => {
+    dropdownOpen.value = false
+});
 
-export default {
-  name: "MyNavLinks",
-  components: { Hamburger, Login },
-  props: {
-    direction: {
-      type: String,
-      default: 'flex-row'
-    }
-  },
-  computed: {
-    routes() {
-      return this.$router.getRoutes().filter(route =>
-          !['CoursDetail', 'CreateCours', 'Login', 'Register', 'AcheterCours', 'Merci', 'Profile', 'EditCours', 'CreateTypeCours', 'EditTypeCours', 'admin', 'Dashboard','CoursAdmin', 'DataStats'].includes(route.name)
-      );
-    }
-  },
-  methods: {
-    handleScroll() {
-      const navWrapper = document.querySelector('.nav_wrapper');
-      if (window.scrollY > navWrapper.offsetHeight) {
-        navWrapper.classList.add('fixed');
-      } else {
-        navWrapper.classList.remove('fixed');
-      }
-    },
-    toggleNavLinks() {
-      const navLinks = document.getElementById('nav_links');
-      navLinks.classList.toggle('active');
-    }
-  },
-  mounted() {
-    document.addEventListener('scroll', this.handleScroll);
-  },
-  beforeUnmount() {
-    document.removeEventListener('scroll', this.handleScroll);
-  }
+// Filtrage des routes dynamiques
+const routes = computed(() =>
+    router.getRoutes().filter((r) =>
+        ![
+            "CoursDetail",
+            "CreateCours",
+            "Login",
+            "Register",
+            "AcheterCours",
+            "Merci",
+            "Profile",
+            "EditCours",
+            "CreateTypeCours",
+            "EditTypeCours",
+            "admin",
+            "Dashboard",
+            "CoursAdmin",
+            "Statistiques",
+            "Cours"
+        ].includes(r.name)
+    )
+);
+
+
+    // Fonction pour extraire les routes administratives
+    const getAdminRoutes = (routes) => {
+        return routes
+            .filter((route) => route.meta?.requiresAdmin) // Garder uniquement les routes admin
+            .map((route) => ({
+                ...route,
+                children: route.children ? getAdminRoutes(route.children) : [], // Récursivité pour les enfants
+            }));
+    };
+
+    // Propriété calculée pour récupérer les routes admin
+    const adminRoutes = computed(() => {
+        const allRoutes = router.getRoutes();
+        const adminRoot = allRoutes.find((route) => route.name === 'admin');
+        return adminRoot ? getAdminRoutes(adminRoot.children || []) : [];
+    });
+
+
+// Gestion des liens de navigation (responsive)
+const toggleNavLinks = () => {
+    const navLinks = document.getElementById("nav_links");
+    navLinks.classList.toggle("active");
 };
 
+// Gestion du défilement pour ajouter une classe fixe
+const handleScroll = () => {
+    const navWrapper = document.querySelector(".nav_wrapper");
+    if (window.scrollY > navWrapper.offsetHeight) {
+        navWrapper.classList.add("fixed");
+    } else {
+        navWrapper.classList.remove("fixed");
+    }
+};
+
+// Écouteurs pour les événements
+onMounted(() => {
+    document.addEventListener("scroll", handleScroll);
+});
+
+onBeforeUnmount(() => {
+    document.removeEventListener("scroll", handleScroll);
+});
 </script>
+
 
 <style lang="scss" scoped>
 
 
 #nav_links {
-  display: flex;
-  justify-content: space-around;
+    display: flex;
+    align-items: center;
   height: 100%;
-  align-items: center;
-  font-size: 12px;
 }
 
 
@@ -87,14 +211,14 @@ a.router-link-exact-active {
   text-decoration: none;
   position: relative;
   display: flex;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
 
   &.router-link-exact-active {
     color: #4f2794;
   }
 
-  &::after {
+  &::after:not(.relative) {
     content: '';
     position: absolute;
     bottom: 0;

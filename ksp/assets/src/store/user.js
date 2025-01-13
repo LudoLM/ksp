@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', {
+
+
     state: () => ({
         userEmail: null,
         userId: null,
@@ -24,7 +26,6 @@ export const useUserStore = defineStore('user', {
             this.userId = null;
             this.userPrenom = null;
             localStorage.removeItem('token');
-            window.location.href = '/';
         },
     },
     getters: {

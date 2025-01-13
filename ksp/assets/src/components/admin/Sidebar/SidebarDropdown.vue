@@ -1,6 +1,5 @@
 <script setup>
-import { useSidebarStore } from '../../../store/sidebar.js'
-import { useRoute } from 'vue-router'
+import {useSidebarStore} from '../../../store/sidebar.js'
 
 const sidebarStore = useSidebarStore()
 
@@ -10,16 +9,14 @@ const props = defineProps({
 });
 
 const handleItemClick = (index) => {
-    const pageName =
-        sidebarStore.selected === props.items[index].label ? '' : props.items[index].label
-    sidebarStore.selected = pageName
+    sidebarStore.selected = sidebarStore.selected === props.items[index].label ? '' : props.items[index].label
 }
 </script>
 
 
 
 <template>
-  <ul class="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
+  <ul class="mt-4 mb-5.5 flex gap-2.5 pl-6">
     <template v-for="(childItem, index) in items" :key="index">
       <li>
         <router-link

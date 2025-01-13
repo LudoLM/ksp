@@ -68,7 +68,7 @@
                 </defs>
               </svg>`,
           label: 'Tableau de stats',
-          route: 'DataStats',
+          route: 'Statistiques',
         },
         {
           icon: `<svg

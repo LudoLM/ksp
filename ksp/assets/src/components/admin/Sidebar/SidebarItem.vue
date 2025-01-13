@@ -1,6 +1,6 @@
 <script setup>
-import { useSidebarStore } from '../../../store/sidebar.js'
-import { useRoute } from 'vue-router'
+import {useSidebarStore} from '../../../store/sidebar.js'
+import {useRoute} from 'vue-router'
 import SidebarDropdown from './SidebarDropdown.vue'
 
 const sidebarStore = useSidebarStore()
@@ -9,8 +9,7 @@ const props = defineProps(['item', 'index'])
 const currentPage = useRoute().name
 
 const handleItemClick = () => {
-  const pageName = sidebarStore.page === props.item.label ? '' : props.item.label
-  sidebarStore.page = pageName
+    sidebarStore.page = sidebarStore.page === props.item.label ? '' : props.item.label
 
   if (props.item.children) {
     return props.item.children.some((child) => sidebarStore.selected === child.label)
@@ -23,19 +22,14 @@ const handleItemClick = () => {
   <li>
     <router-link
       :to="{ name: item.route }"
-      class="group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4"
+      class="relative flex items-center gap-2.5 px-4"
       @click.prevent="handleItemClick"
-      :class="{
-        'bg-graydark dark:bg-meta-4': sidebarStore.page === item.label
-      }"
     >
-      <span v-html="item.icon"></span>
-
-      {{ item.label }}
+        {{ item.label }}
 
       <svg
         v-if="item.children"
-        class="absolute right-4 top-1/2 -translate-y-1/2 fill-current"
+        class="fill-current"
         :class="{ 'rotate-180': sidebarStore.page === item.label }"
         width="20"
         height="20"

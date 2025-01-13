@@ -1,7 +1,6 @@
 <script setup>
 import { useSidebarStore } from '../../../store/sidebar.js'
-import DropdownNotification from './DropdownNotification.vue'
-import DropdownUser from './DropdownUser.vue'
+import DropdownUser from '../../DropdownUser.vue'
 
 const sidebarStore = useSidebarStore();
 const { toggleSidebar } = sidebarStore;
@@ -50,21 +49,9 @@ const { toggleSidebar } = sidebarStore;
             </span>
           </span>
         </button>
-        <!-- Hamburger Toggle BTN -->
-        <router-link class="block flex-shrink-0 lg:hidden" to="/">
-<!--          <img src="@/assets/images/logo/logo-icon.svg" alt="Logo" />-->
-        </router-link>
       </div>
 
       <div class="flex items-center gap-3 2xsm:gap-7">
-        <ul class="flex items-center gap-2 2xsm:gap-4">
-
-          <!-- Notification Menu Area -->
-          <DropdownNotification />
-          <!-- Notification Menu Area -->
-
-        </ul>
-
         <!-- user Area -->
         <DropdownUser />
         <!-- user Area -->
