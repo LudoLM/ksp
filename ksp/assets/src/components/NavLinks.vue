@@ -41,6 +41,7 @@
               <div
                   v-show="dropdownOpen"
                   class="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
+                  @mouseleave="dropdownOpen = false"
               >
                   <ul class="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
                       <li>
@@ -146,20 +147,12 @@ const routes = computed(() =>
     // Fonction pour extraire les routes administratives
     const getAdminRoutes = (routes) => {
         return routes
-            .filter((route) => route.meta?.requiresAdmin) // Garder uniquement les routes admin
+            .filter((route) => route.meta?.requiresAdmin)
             .map((route) => ({
                 ...route,
-                children: route.children ? getAdminRoutes(route.children) : [], // Récursivité pour les enfants
+                children: route.children ? getAdminRoutes(route.children) : [],
             }));
     };
-
-    // Propriété calculée pour récupérer les routes admin
-    const adminRoutes = computed(() => {
-        const allRoutes = router.getRoutes();
-        const adminRoot = allRoutes.find((route) => route.name === 'admin');
-        return adminRoot ? getAdminRoutes(adminRoot.children || []) : [];
-    });
-
 
 // Gestion des liens de navigation (responsive)
 const toggleNavLinks = () => {
