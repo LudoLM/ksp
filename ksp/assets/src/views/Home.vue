@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted, computed} from 'vue';
 import CoursCard from "../components/CoursCard.vue";
 import {VAlert} from "vuetify/components";
 import CoursFilters from "../components/CoursFilters.vue";
@@ -68,7 +68,7 @@ const route = useRoute();
 const totalItems = ref(0);
 const maxPerPage = ref(window.innerWidth > 1460 ? 20 : window.innerWidth > 1110 ? 12 : 10);
 const totalPages = ref(1);
-const isAdminPath = route.path.startsWith('/admin');
+const isAdminPath = computed(() => route.path.startsWith('/admin'));
 const title = isAdminPath ? 'Liste des cours' : 'Les cours à venir';
 
 

@@ -361,4 +361,51 @@ const openCreation = async () => {
 
   }
 }
+
+.isSubscribed{
+    .isSubscribedTag{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        font-weight: 900;
+        z-index: 10;
+    }
+
+    .coursCard {
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+    }
+
+    .card_infos {
+
+        background: rgba(0,0,0,0.8);
+
+        h1, h2, h3, h4, h5, h6, p, button, div, span {
+            color: #fff;
+        }
+        .border {
+            background: #fff;
+        }
+        a {
+            border: 1px solid #fff;
+            color: #fff;
+        }
+        CustomButton {
+            background: #fff;
+            color: #222;
+        }
+
+        .infoRestante {
+            color: #fff;
+        }
+    }
+}
 </style>
