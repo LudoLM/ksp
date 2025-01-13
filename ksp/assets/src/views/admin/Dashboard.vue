@@ -1,12 +1,22 @@
 <script setup>
 
 import ChartThree from "../../components/admin/ChartThree.vue";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 
 const cours = ref([]);
-const tauxRemplissage7Jours = ref(0);
-const tauxRemplissage30Jours = ref(0);
-const tauxRemplissage90Jours= ref(0);
+
+const totals = ref({
+    inscrits7Jours: 0,
+    capacite7Jours: 0,
+    inscrits30Jours: 0,
+    capacite30Jours: 0,
+    inscrits90Jours: 0,
+    capacite90Jours: 0,
+});
+
+const tauxRemplissage7Jours = computed(() => totals.value.capacite7Jours > 0 ? (totals.value.inscrits7Jours / totals.value.capacite7Jours) * 100 : 0);
+const tauxRemplissage30Jours = computed(() => totals.value.capacite30Jours > 0 ? (totals.value.inscrits30Jours / totals.value.capacite30Jours) * 100 : 0);
+const tauxRemplissage90Jours = computed(() => totals.value.capacite90Jours > 0 ? (totals.value.inscrits90Jours / totals.value.capacite90Jours) * 100 : 0);
 
 const fetchCours = async () => {
     const response = await fetch(`/api/getCoursFilling`, {
@@ -15,42 +25,31 @@ const fetchCours = async () => {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + localStorage.getItem('token'),
         },
-    })
+    });
 
     cours.value = await response.json();
-}
+};
 
 const calculateTauxRemplissage = (cours) => {
     if (typeof cours === 'string') {
         cours = JSON.parse(cours);
     }
-    let totalInscrits7Jours = 0;
-    let totalCapacite7Jours = 0;
-    let totalInscrits30Jours = 0;
-    let totalCapacite30Jours = 0;
-    let totalInscrits90Jours = 0;
-    let totalCapacite90Jours = 0;
 
     cours.forEach((cour) => {
         if (new Date(cour.dateCours) < new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000)) {
-            totalInscrits7Jours += cour.nbInscrits;
-            totalCapacite7Jours += cour.nbInscriptionMax;
+            totals.value.inscrits7Jours += cour.nbInscrits;
+            totals.value.capacite7Jours += cour.nbInscriptionMax;
         }
         if (new Date(cour.dateCours) < new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)) {
-            totalInscrits30Jours += cour.nbInscrits;
-            totalCapacite30Jours += cour.nbInscriptionMax;
+            totals.value.inscrits30Jours += cour.nbInscrits;
+            totals.value.capacite30Jours += cour.nbInscriptionMax;
         }
         if (new Date(cour.dateCours) < new Date(new Date().getTime() + 90 * 24 * 60 * 60 * 1000)) {
-            totalInscrits90Jours += cour.nbInscrits;
-            totalCapacite90Jours += cour.nbInscriptionMax;
+            totals.value.inscrits90Jours += cour.nbInscrits;
+            totals.value.capacite90Jours += cour.nbInscriptionMax;
         }
     });
-    tauxRemplissage7Jours.value = totalCapacite7Jours > 0 ? (totalInscrits7Jours / totalCapacite7Jours) * 100 : 0;
-    tauxRemplissage30Jours.value = totalCapacite30Jours > 0 ? (totalInscrits30Jours / totalCapacite30Jours) * 100 : 0;
-    tauxRemplissage90Jours.value = totalCapacite90Jours > 0 ? (totalInscrits90Jours / totalCapacite90Jours) * 100 : 0;
 };
-
-
 
 onMounted(async () => {
     await fetchCours();
@@ -58,6 +57,7 @@ onMounted(async () => {
 });
 
 </script>
+
 
 <template>
 

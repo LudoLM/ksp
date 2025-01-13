@@ -5,19 +5,17 @@ namespace App\Controller\Api;
 
 use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
-use App\Entity\User;
 use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
 use App\Event\CancelCoursEvent;
 use App\Event\DesistementEvent;
+use App\Event\UpdateStatusCoursEvent;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
 use App\Repository\UserRepository;
 use App\Serializer\CreateCoursDTOToCoursDenormalizer;
-use App\Service\UpdateStatusCoursService;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -48,13 +46,16 @@ class CoursController extends AbstractController
     public function coursIndex(Request $request): JsonResponse
     {
         $isAdminPath = $request->query->get('isAdminPath') === 'true';
-        $currentPage = (int)($request->query->get('page', 1)); // Valeur par défaut 1
-        $maxPerPage = (int)($request->query->get('maxPerPage', 10)); // Valeur par défaut 10
+        $currentPage = (int)($request->query->get('page', 1));
+        $maxPerPage = (int)($request->query->get('maxPerPage', 10));
 
         $typeCoursId = $request->query->get('typeCours') ==="null" ? null : $request->query->get('typeCours') ?? null;
         $dateCoursStr = $request->query->get('dateCours')  ==="null" ? null : $request->query->get('dateCours') ?? null;
         $statusCoursId = $request->query->get('statusCours') ==="null" ? null : $request->query->get('statusCours') ?? null;
 
+
+        $eventCours = new UpdateStatusCoursEvent();
+        $this->dispatcher->dispatch($eventCours);
 
         // Récupérer l'entité TypeCours si `typeCours` est fourni
         $typeCours = null;
@@ -88,7 +89,6 @@ class CoursController extends AbstractController
 
         // Récupérer les cours
         $cours = iterator_to_array($coursPaginator);
-
 
         // Calculer les métadonnées de pagination
         $totalItems = count($coursPaginator);
@@ -248,8 +248,8 @@ class CoursController extends AbstractController
     ) : JsonResponse
     {
 
-        $coursDTOSeriliazer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);
-        $cours = $coursDTOSeriliazer->denormalize($coursDTO, Cours::class);
+        $coursDTOSerializer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);
+        $cours = $coursDTOSerializer->denormalize($coursDTO, Cours::class);
         $this->em->persist($cours);
         $this->em->flush();
 
@@ -300,8 +300,8 @@ class CoursController extends AbstractController
         CreateCoursDTO $coursDTO
     ) : JsonResponse
     {
-        $coursDTOSeriliazer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);
-        $cours = $coursDTOSeriliazer->denormalize($coursDTO, Cours::class, context: ['object_to_populate' => $cours]);
+        $coursDTOSerializer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);
+        $cours = $coursDTOSerializer->denormalize($coursDTO, Cours::class, context: ['object_to_populate' => $cours]);
 
         $this->em->persist($cours);
         $this->em->flush();
@@ -316,5 +316,4 @@ class CoursController extends AbstractController
        $jsonCoursFillings = $this->serializer->serialize($coursFilling, 'json', ['groups' => 'cours_filling:index']);
         return new JsonResponse($jsonCoursFillings, 200);
     }
-
 }
