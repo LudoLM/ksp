@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import {ref, onMounted, computed} from 'vue';
+import {ref, onMounted, computed, watch} from 'vue';
 import CoursCard from "../components/CoursCard.vue";
 import {VAlert} from "vuetify/components";
 import CoursFilters from "../components/CoursFilters.vue";
@@ -82,14 +82,20 @@ onMounted(async () => {
     alertVisible.value = false;
   }, 3000);
 
-  await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(isAdminPath.value, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   uniqueTypeCoursList.value = await useGetTypesCours();
   uniqueStatusCoursList.value = await useGetStatusCours();
-  if(isAdminPath) uniqueStatusCoursList.value =
-      uniqueStatusCoursList.value.filter(
-      status => status.id !== 6 && status.id !== 7 && status.id !== 4
-  );
+  if (!isAdminPath.value) {
+      uniqueStatusCoursList.value = uniqueStatusCoursList.value.filter(status => status.id !== 4 && status.id !== 6 && status.id !== 7);
+  }
+});
 
+watch(isAdminPath, async () => {
+    uniqueStatusCoursList.value = await useGetStatusCours();
+    if (!isAdminPath.value) {
+        uniqueStatusCoursList.value = uniqueStatusCoursList.value.filter(status => status.id !== 4 && status.id !== 6 && status.id !== 7);
+    }
+    await useGetCours(isAdminPath.value, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 });
 
 
@@ -142,19 +148,19 @@ const handleCancelCoursResponse = ({ type, message }) => {
 const updateSelectedCoursList = async (value) => {
   selectedCoursId.value = value;
   currentPage.value = 1;
-  await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(isAdminPath.value, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
 const updateSelectedDateList = async (value) => {
   selectedDate.value = value;
   currentPage.value = 1;
-  await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(isAdminPath.value, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
 const updateStatusCoursList = async (value) => {
   selectedStatusId.value = value;
   currentPage.value = 1;
-  await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(isAdminPath.value, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
 
@@ -166,14 +172,14 @@ const resetInfos = () => {
 const nextPage = async () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
-    await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+    await useGetCours(isAdminPath.value, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   }
 };
 
 const prevPage = async () => {
   if (currentPage.value > 1) {
     currentPage.value--;
-    await useGetCours(isAdminPath, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+    await useGetCours(isAdminPath.value, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   }
 };
 </script>

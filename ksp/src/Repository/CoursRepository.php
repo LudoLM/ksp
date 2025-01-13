@@ -159,8 +159,31 @@ class CoursRepository extends ServiceEntityRepository
             COUNT(u.id)
         )')
             ->leftJoin('c.usersCours', 'u')
+            ->where('c.statusCours = 1')
+            ->andWhere('c.dateCours > :currentDate')
+            ->andWhere('c.dateCours < :dateLimit')
+            ->setParameter('currentDate', new \DateTime())
+            ->setParameter('dateLimit', (new \DateTime())->modify('+90days'))
             ->groupBy('c.id')
             ->getQuery()
             ->getResult();
     }
+
+
+    public function getSuperLightAllCours(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->select('NEW App\DTO\SuperLightCoursDTO(
+            c.id,
+            c.dateCours,
+            c.duree,
+            statusCours.id
+        )')
+            ->join('c.statusCours', 'statusCours')
+            ->where('statusCours.id != :archived')
+            ->setParameter('archived', 7)
+            ->getQuery()
+            ->getResult();
+    }
+
 }
