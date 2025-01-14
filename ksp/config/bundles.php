@@ -17,4 +17,5 @@ return [
     Symfony\UX\Vue\VueBundle::class => ['all' => true],
     Symfony\WebpackEncoreBundle\WebpackEncoreBundle::class => ['all' => true],
     Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle::class => ['all' => true],
+    Nucleos\DompdfBundle\NucleosDompdfBundle::class => ['all' => true],
 ];

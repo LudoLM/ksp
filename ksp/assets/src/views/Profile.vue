@@ -1,5 +1,8 @@
 <template>
-  <h1>profil</h1>
+   <div class="container">
+    <div class="title_wrapper">
+        <h2>Profil</h2>
+    </div>
       <!-- Recap des infos ci-dessus de l'utilisateur avec tailwind -->
   <div class="flex flex-col items-center justify-center w-full">
     <div class="bg-white shadow-md rounded-lg p-8 m-4 w-full">
@@ -58,7 +61,7 @@
   <div class="flex items-start">
     <!-- Recap des cours inscrits de l'utilisateur -->
     <div class="flex flex-col items-center justify-center">
-      <div class="flex flex-col items-center justify-center bg-white shadow-md rounded-lg p-8 m-4">
+      <div class="flex flex-col items-center justify-center bg-white shadow-md rounded-lg p-8 mr-4">
         <h3>Cours inscrits</h3>
         <table class="table-auto">
           <thead class="bg-gray-800 text-white">
@@ -89,32 +92,33 @@
 
     <!-- Recap des achats de l'utilisateur -->
     <div class="flex flex-col items-center justify-center">
-      <div class="flex flex-col items-center justify-center bg-white shadow-md rounded-lg p-8 m-4">
+      <div class="flex flex-col items-center justify-center bg-white shadow-md rounded-lg p-8">
         <h3>Recap des achats</h3>
         <table class="table-auto">
           <thead class="bg-gray-800 text-white">
           <tr>
             <th class="px-4 py-2">Date</th>
             <th class="px-4 py-2">Heure</th>
-            <th class="px-4 py-2">Nombre de cours</th>
+            <th class="px-4 py-2">Pack</th>
             <th class="px-4 py-2">Montant</th>
             <th class="px-4 py-2">Facture</th>
           </tr>
           </thead>
           <tbody>
             <tr v-for="(paiement, index) in user.historiquePaiements" :key="paiement.id" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
+
               <td class="border px-4 py-2">{{ formatDateTime(paiement.date)[0] }}</td>
               <td class="border px-4 py-2">{{ formatDateTime(paiement.date)[1] }}</td>
-              <td class="border px-4 py-2">{{ paiement["pack"].nom }}</td>
-              <td class="border px-4 py-2">{{ paiement["pack"].tarif / 100 }} €</td>
-              <td class="border px-4 py-2"><a href=""></a><a href=""><img src="../../icons/download.svg"/></a></td>
-
+              <td class="border px-4 py-2">{{ paiement["pack"].nom.replace("Pack", "") }}</td>
+              <td class="border px-4 py-2">{{ (paiement["pack"].tarif / 100).toFixed(2,0) }} €</td>
+              <td class="border px-4 py-2 flex justify-center" @click="handleInvoicePDF(paiement.id)"><img src="../../icons/download.svg"/></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script setup>
@@ -145,6 +149,40 @@ const getUser = async () => {
 const handleBuyCours = () => {
   router.push("cours/acheter");
 };
+
+const handleInvoicePDF = async (paiementId) => {
+    try {
+        const response = await fetch("/api/getInvoicePDF", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+            body: JSON.stringify({ paiementId: paiementId }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "facture_KSS.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        // Libérer l'URL après le téléchargement
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Erreur lors du téléchargement de la facture :", error);
+    }
+};
+
+
 
 // Fonction de désinscription
 const handleUnsubscription = async (coursId) => {

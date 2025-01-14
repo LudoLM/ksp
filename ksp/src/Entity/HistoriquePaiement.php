@@ -15,6 +15,7 @@ class HistoriquePaiement
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:detail'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
