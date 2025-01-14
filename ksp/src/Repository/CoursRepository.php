@@ -159,7 +159,7 @@ class CoursRepository extends ServiceEntityRepository
             COUNT(u.id)
         )')
             ->leftJoin('c.usersCours', 'u')
-            ->where('c.statusCours = 1')
+            ->where('c.statusCours = 1 OR c.statusCours = 2')
             ->andWhere('c.dateCours > :currentDate')
             ->andWhere('c.dateCours < :dateLimit')
             ->setParameter('currentDate', new \DateTime())
