@@ -1,37 +1,25 @@
 <script setup>
 import { onClickOutside } from '@vueuse/core'
-import {computed, onMounted, ref} from 'vue'
+import {computed, ref} from 'vue'
 import {useUserStore} from "../store/user";
-import {useRouter} from "vue-router";
 import useGetElementsToken from "../utils/useGetElementsToken";
+import { useRouter } from 'vue-router';
 import SwitchToggle from "./SwitchToggle.vue";
 
 const target = ref(null)
 const dropdownOpen = ref(false)
 const userId = computed(() => userStore.userId);
 const userPrenom = computed(() => userStore.userPrenom);
+const router = useRouter();
 
 const role = computed(() => useGetElementsToken().roles[0].split("_")[1].toLowerCase());
 
 const userStore = useUserStore();
-const router = useRouter();
 
 const logout = () => {+
   userStore.logout();
   router.push({name: 'Accueil'});
 };
-
-onMounted(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        const payload = token.split('.')[1];
-        const decoded = atob(payload);
-        const data = JSON.parse(decoded);
-        userStore.setUserEmail(data.username);
-        userStore.setUserId(data.id);
-        userStore.setUserPrenom(data.prenom);
-    }
-});
 
 onClickOutside(target, () => {
     dropdownOpen.value = false
