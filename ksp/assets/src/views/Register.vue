@@ -60,7 +60,20 @@ const handleRegister = async () => {
     userStore.setUserEmail(dataToken.username);
     userStore.setUserId(dataToken.id);
     userStore.setUserPrenom(dataToken.prenom);
-    await route.push('/');
+
+      // Redirige vers la page d'accueil après l'expiration du token après 1h
+      setTimeout(() => {
+          userStore.logout();
+          router.push({
+              name: 'Accueil',
+              query: {
+                  alertMessage: 'Votre session a expiré. Veuillez vous reconnecter.',
+                  alertType: 'info',
+                  alertVisible: true,
+              },
+          });
+      }, 3600000);
+      await route.push('/');
   } catch (err) {
     console.error(err);
   }

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { useUserStore } from '../store/user';
 import { useRouter } from 'vue-router';
 
@@ -23,20 +23,9 @@ const handleLogin = () => {
 
 const logout = () => {
   userStore.logout();
-  router.push('/');
+  router.push({name: 'Accueil'});
 };
 
-onMounted(() => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    const payload = token.split('.')[1];
-    const decoded = atob(payload);
-    const data = JSON.parse(decoded);
-    userStore.setUserEmail(data.username);
-    userStore.setUserId(data.id);
-    userStore.setUserPrenom(data.prenom);
-  }
-});
 </script>
 
 

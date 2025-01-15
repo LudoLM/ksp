@@ -80,7 +80,8 @@ onMounted(async () => {
 
   setTimeout(() => {
     alertVisible.value = false;
-  }, 3000);
+  }, 5000);
+
 
   await useGetCours(isAdminPath.value, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   uniqueTypeCoursList.value = await useGetTypesCours();
@@ -98,8 +99,9 @@ watch(isAdminPath, async () => {
     await useGetCours(isAdminPath.value, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 });
 
-
-
+watch(() => route.query, () => {
+    window.location.reload();
+});
 
 // Déclaration des variables pour l'alerte
 const alertVisible = ref(false);
