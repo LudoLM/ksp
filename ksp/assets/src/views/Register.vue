@@ -6,7 +6,7 @@ import CustomInput from "../components/CustomInput.vue";
 import {useValidationForm} from "../utils/useValidationForm";
 import {ref} from "vue";
 
-const route = useRouter();
+const router = useRouter();
 
 const prenom = ref('');
 const nom = ref('');
@@ -73,7 +73,6 @@ const handleRegister = async () => {
               },
           });
       }, 3600000);
-      await route.push('/');
   } catch (err) {
     console.error(err);
   }

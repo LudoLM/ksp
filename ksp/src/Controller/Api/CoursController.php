@@ -7,9 +7,9 @@ use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
 use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
-use App\Event\CancelCoursEvent;
 use App\Event\DesistementEvent;
 use App\Event\UpdateStatusCoursEvent;
+use App\Message\SendCancelEmailMessage;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
@@ -17,10 +17,12 @@ use App\Repository\UserRepository;
 use App\Serializer\CreateCoursDTOToCoursDenormalizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -37,7 +39,7 @@ class CoursController extends AbstractController
         private readonly StatusCoursRepository $statusCoursRepository,
         private readonly TypeCoursRepository $typeCoursRepository,
         private readonly EventDispatcherInterface $dispatcher,
-        private readonly UserRepository $userRepository
+        private readonly UserRepository $userRepository,
     )
     {
 
@@ -241,7 +243,7 @@ class CoursController extends AbstractController
     public function createCours(
         #[MapRequestPayload(
             serializationContext: [
-                'groups' => ['cours:create']
+
             ]
         )]
         CreateCoursDTO $coursDTO
@@ -279,14 +281,23 @@ class CoursController extends AbstractController
     }
 
     #[Route('cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
-    public function cancelCours(Cours $cours): JsonResponse
+    public function cancelCours(Cours $cours, MessageBusInterface $messageBus): JsonResponse
     {
+        try {
+           /* $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ANNULE->value]));
+            $this->em->persist($cours);*/
+            foreach ($cours->getUsersCours() as $usersCours){
 
-        $eventCours = new CancelCoursEvent($cours);
-        $this->dispatcher->dispatch($eventCours);
+                $messageBus->dispatch(new SendCancelEmailMessage($usersCours->getId(), $this->getUser()->getId() ));
+            }
+            $this->em->flush();
+            return new JsonResponse(['response' => true, 'statusChange' => StatusCoursEnum::OUVERT->value], 200);
+        }
+        catch (\Exception $e) {
+            return new JsonResponse(['response' => false, 'error' => $e->getMessage()], 400);
+        }
 
 
-        return new JsonResponse(['response' => true, 'statusChange' => StatusCoursEnum::ANNULE->value], 200);
     }
 
     #[Route('cours/edit/{id}', name: 'cours_update', methods: ['PUT'])]

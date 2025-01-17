@@ -1,6 +1,6 @@
 <script setup>
 import { onClickOutside } from '@vueuse/core'
-import {computed, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useUserStore} from "../store/user";
 import useGetElementsToken from "../utils/useGetElementsToken";
 import { useRouter } from 'vue-router';
@@ -21,6 +21,18 @@ const logout = () => {+
   router.push({name: 'Accueil'});
 };
 
+onMounted(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        const payload = token.split('.')[1];
+        const decoded = atob(payload);
+        const data = JSON.parse(decoded);
+        userStore.setUserEmail(data.username);
+        userStore.setUserId(data.id);
+        userStore.setUserPrenom(data.prenom);
+    }
+});
+
 onClickOutside(target, () => {
     dropdownOpen.value = false
 });
@@ -36,9 +48,8 @@ onClickOutside(target, () => {
                 <switch-toggle/>
               </div>
                 <div class="relative" ref="target">
-                    <router-link
+                    <a
                         class="flex items-center gap-4"
-                        to="#"
                         @click.prevent="dropdownOpen = !dropdownOpen"
                     >
                     <span class="hidden text-right lg:block">
@@ -65,7 +76,7 @@ onClickOutside(target, () => {
                                 fill=""
                             />
                         </svg>
-                    </router-link>
+                    </a>
 
                     <!-- Dropdown Start -->
                     <div

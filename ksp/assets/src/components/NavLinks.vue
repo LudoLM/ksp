@@ -1,7 +1,9 @@
 <template>
   <header class="flex justify-between items-center w-full">
       <div class="logo">
-        <img src="../../images/logo.png" alt="logo de kine sport santé">
+          <router-link :to="{ name: 'Accueil' }">
+              <img src="../../images/logo.png" alt="logo de kine sport santé">
+          </router-link>
       </div>
       <nav v-if="isAdminPath" id="nav_links" class="gap-8 justify-start">
           <router-link
