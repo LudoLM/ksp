@@ -149,7 +149,7 @@ class CoursRepository extends ServiceEntityRepository
     }
 
 
-    public function getCoursFilling()
+    public function getCoursFilling() : array
     {
         return $this->createQueryBuilder('c')
             ->select('NEW App\DTO\CoursFillingDTO(

@@ -5,6 +5,7 @@ namespace App\DTO;
 use App\Entity\UsersCours;
 use Symfony\Component\Serializer\Attribute\Groups;
 
+
 readonly class CoursFillingDTO{
     public function __construct(int $id, \DateTime $dateCours, int $nbInscriptionMax, int $nbInscrits)
     {
