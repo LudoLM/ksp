@@ -10,6 +10,7 @@ use App\Enum\StatusCoursEnum;
 use App\Event\DesistementEvent;
 use App\Event\UpdateStatusCoursEvent;
 use App\Message\SendCancelEmailMessage;
+use App\Message\UpdateStatusCoursMessage;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -40,6 +42,7 @@ class CoursController extends AbstractController
         private readonly TypeCoursRepository $typeCoursRepository,
         private readonly EventDispatcherInterface $dispatcher,
         private readonly UserRepository $userRepository,
+        private readonly MessageBusInterface $messageBus
     )
     {
 
@@ -273,6 +276,12 @@ class CoursController extends AbstractController
     public function openCours(Cours $cours): JsonResponse
     {
         $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
+        $delay = $cours->getDateCours()->getTimestamp() - time();
+        $this->messageBus->dispatch(
+            new UpdateStatusCoursMessage(
+                $cours->getId()),
+                [ new DelayStamp($delay)]
+        );
 
         $this->em->persist($cours);
         $this->em->flush();

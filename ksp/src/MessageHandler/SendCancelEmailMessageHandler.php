@@ -13,8 +13,8 @@ final readonly class SendCancelEmailMessageHandler
 {
     public function __construct(
         private SendCancelEmailService $sendCancelEmailService,
-        private UsersCoursRepository   $usersCoursRepository,
-        private UserRepository          $userRepository
+        private UsersCoursRepository $usersCoursRepository,
+        private UserRepository $userRepository
 
     ) {
     }
