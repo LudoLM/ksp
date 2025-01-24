@@ -1,6 +1,6 @@
 <script setup>
 
-import ChartThree from "../../components/admin/ChartThree.vue";
+import ChartThree from "./ChartThree.vue";
 import {computed, onMounted, ref} from "vue";
 
 const cours = ref([]);
@@ -26,7 +26,6 @@ const fetchCours = async () => {
             'Authorization': 'Bearer ' + localStorage.getItem('token'),
         },
     });
-
     cours.value = await response.json();
 };
 
@@ -61,13 +60,13 @@ onMounted(async () => {
 
 <template>
 
-
-    <div class="flex flex-col justify-space-between align-center bg-white">
+    <div class="flex flex-col align-center bg-white h-full shadow-default dark:bg-boxdark">
         <h4 class="text-xl font-bold text-black dark:text-white text-center my-6">Remplissage des cours</h4>
         <ChartThree
             title="Sur 7 jours"
             :tauxRemplissage="tauxRemplissage7Jours"
             color='#3C50E0'
+            bgColor='#F0F2FF'
         />
         <ChartThree
             title="Sur 30 jours"

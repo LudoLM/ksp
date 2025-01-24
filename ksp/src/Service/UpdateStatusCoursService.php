@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Cours;
 use App\Entity\StatusCours;
 use App\Enum\StatusCoursEnum;
 use App\Message\UpdateStatusCoursMessage;
@@ -19,7 +20,7 @@ class UpdateStatusCoursService
     )
     {
     }
-    public function update($cours)
+    public function update(Cours $cours)
     {
 
         switch ($cours->getStatusCours()->getLibelle()) {

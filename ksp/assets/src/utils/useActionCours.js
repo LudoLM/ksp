@@ -1,3 +1,5 @@
+import {apiFetch} from "./useFetchInterceptor";
+
 export async function useGetCours(isAdminPath, infos,  currentPage, maxPerPage, totalItems, selectedTypeCours, selectedDate, selectedStatusId, totalPages) {
     try {
 
@@ -75,7 +77,7 @@ export async function useGetStatusCours() {
 
 export async function useDeleteCours(coursId) {
     try {
-        const response = await fetch(`/api/cours/delete/${coursId}`, {
+        const response = await apiFetch(`/api/cours/delete/${coursId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -90,8 +92,7 @@ export async function useDeleteCours(coursId) {
         }
     }
     catch (error) {
-        console.error('Erreur:', error);
-        return false;
+        return error;
     }
 }
 
@@ -126,7 +127,7 @@ export async function useGetPacks() {
 
 export async function useOpenCours(coursId) {
     try {
-        const response = await fetch(`/api/cours/open/${coursId}`, {
+        const response = await apiFetch(`/api/cours/open/${coursId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -140,13 +141,13 @@ export async function useOpenCours(coursId) {
         }
     }
     catch (error) {
-        return false;
+        return error;
     }
 }
 
 export async function useCancelCours(coursId) {
     try {
-        const response = await fetch(`/api/cours/cancel/${coursId}`, {
+        const response = await apiFetch(`/api/cours/cancel/${coursId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -160,6 +161,6 @@ export async function useCancelCours(coursId) {
         }
     }
     catch (error) {
-        return false;
+        return error;
     }
 }

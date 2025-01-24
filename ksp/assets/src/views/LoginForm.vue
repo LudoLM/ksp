@@ -42,19 +42,7 @@ const handleLogin = async () => {
     userStore.setUserEmail(elements.username);
     userStore.setUserId(elements.id);
     userStore.setUserPrenom(elements.prenom);
-
-    // Redirige vers la page d'accueil après l'expiration du token après 1h
-      setTimeout(() => {
-          userStore.logout();
-          router.push({
-              name: 'Accueil',
-              query: {
-                  alertMessage: 'Votre session a expiré. Veuillez vous reconnecter.',
-                  alertType: 'info',
-                  alertVisible: true,
-              },
-          });
-      }, 3600000);
+    userStore.setUserJWTExp(elements.exp);
 
     // Redirige vers la page d'accueil après la connexion réussie
     await router.push('/');

@@ -7,6 +7,8 @@ import CustomSelect from "../components/CustomSelect.vue";
 import CustomButton from "../components/CustomButton.vue";
 import {useValidationForm} from "../utils/useValidationForm";
 import {useGetTypesCours} from "../utils/useActionCours";
+import {apiFetch} from "../utils/useFetchInterceptor";
+import {VAlert} from "vuetify/components";
 
 const router = useRouter();
 const origin = useRoute().params;
@@ -23,6 +25,10 @@ const errors = ref(
     dateLimiteInscription: null,
   },
 )
+
+const alertVisible = ref(false);
+const alertType = ref('info');
+const alertMessage = ref('');
 
 
 const typeCoursList = ref([]);
@@ -55,8 +61,6 @@ const formData = ref({
 
   const handleSubmit = async (event) => {
 
-
-      console.log("formData", formData.value);
     event.preventDefault();
 
     const data = {
@@ -69,7 +73,7 @@ const formData = ref({
     };
 
     try {
-      const response = await fetch(origin.id ? urlEdition : urlCreation, {
+      const response = await apiFetch(origin.id ? urlEdition : urlCreation, {
         method: origin.id ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -82,18 +86,26 @@ const formData = ref({
         await useValidationForm(response, errors);
       }
       if (response.status === 200){
-        await router.push({name: "CoursAdmin", query: {alertMessage: "Cours ajouté avec succès", alertType: "success", alertVisible: true}});
+        await router.push({
+            name: "CoursAdmin",
+            query: {alertMessage: "Cours ajouté avec succès", alertType: "success", alertVisible: true}});
       } else {
         console.error("Erreur lors de la création du cours:", response);
       }
     } catch (error) {
-      console.error("Erreur lors de la création du cours:", error);
+        alertVisible.value = true;
+        alertType.value = error.type;
+        alertMessage.value = error.message;
+
+        setTimeout(() => {
+            alertVisible.value = false;
+        }, 5000);
     }
   };
 
   const getCoursData = async () => {
     try {
-      const response = await fetch("/api/getCours/" + origin.id, {
+      const response = await apiFetch("/api/getCours/" + origin.id, {
         method: "GET",
         headers: { "Authorization": "Bearer " + localStorage.getItem("token")}}
       );
@@ -110,7 +122,13 @@ const formData = ref({
 
 
     } catch (error) {
-      console.error("Erreur lors de la récupération du cours:", error);
+        alertVisible.value = true;
+        alertType.value = error.type;
+        alertMessage.value = error.message;
+
+        setTimeout(() => {
+            alertVisible.value = false;
+        }, 5000);
     }
   };
 
@@ -118,6 +136,9 @@ const formData = ref({
 
 <template>
   <div>
+      <v-alert v-model="alertVisible" :type="alertType" dismissible>
+          {{ alertMessage }}
+      </v-alert>
       <div class="title_wrapper">
           <h2>{{ origin.id ? "Modifier" : "Ajouter" }} un cours</h2>
       </div>

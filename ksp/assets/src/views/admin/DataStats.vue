@@ -3,7 +3,9 @@
     import ChartOne from "../../components/admin/ChartOne.vue";
     import TopProductsTable from "../../components/admin/TopProductsTable.vue";
     import {onMounted, ref} from "vue";
-    import Dashboard from "./Dashboard.vue";
+    import FillingCharts from "../../components/admin/FillingCharts.vue";
+    import {apiFetch} from "../../utils/useFetchInterceptor";
+    import {VAlert} from "vuetify/components";
 
     const paiements = ref([]);
     const quantitiesById = ref([]);
@@ -12,34 +14,49 @@
     const startDate = ref(new Date('2024-01-01T00:00:00'));
     const endDate = ref(new Date());
 
+    const alertVisible = ref(false);
+    const alertType = ref('info');
+    const alertMessage = ref('');
+
     const fetchPaiements = async () => {
-        const startDateString = new Date(startDate.value).toISOString().slice(0, 16);
-        const endDateString = new Date(endDate.value).toISOString().slice(0, 16);
-        const response = await fetch(`/api/historiquePaiements?startDate=${startDateString}&endDate=${endDateString}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token'),
-            },
-        })
+        try {
+            const startDateString = new Date(startDate.value).toISOString().slice(0, 16);
+            const endDateString = new Date(endDate.value).toISOString().slice(0, 16);
+            const response = await apiFetch(`/api/historiquePaiements?startDate=${startDateString}&endDate=${endDateString}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                },
+            })
+            if (response.ok){
+                paiements.value = await response.json();
+                totalTotalTTC.value = paiements.value.reduce((acc, pack) => acc + pack.price * pack.quantity, 0) / 100;
+                nbreTotalVentes.value = paiements.value.reduce((acc, pack) => acc + pack.quantity, 0);
 
-        paiements.value = await response.json();
-        totalTotalTTC.value = paiements.value.reduce((acc, pack) => acc + pack.price * pack.quantity, 0) / 100;
-        nbreTotalVentes.value = paiements.value.reduce((acc, pack) => acc + pack.quantity, 0);
-
-        // Regrouper et compter les quantités par id
-        quantitiesById.value = paiements.value.reduce((acc, pack) => {
-            // Si l'ID est déjà présent, ajouter à la quantité existante
-            if (acc[pack.id]) {
-                acc[pack.id].quantity += pack.quantity;
-            } else {
-                // Si l'ID n'existe pas encore, l'ajouter avec l'objet actuel
-                acc[pack.id] = { ...pack, quantity: pack.quantity };
+                // Regrouper et compter les quantités par id
+                quantitiesById.value = paiements.value.reduce((acc, pack) => {
+                    // Si l'ID est déjà présent, ajouter à la quantité existante
+                    if (acc[pack.id]) {
+                        acc[pack.id].quantity += pack.quantity;
+                    } else {
+                        // Si l'ID n'existe pas encore, l'ajouter avec l'objet actuel
+                        acc[pack.id] = { ...pack, quantity: pack.quantity };
+                    }
+                    return acc;
+                }, {});
+                quantitiesById.value = Object.values(quantitiesById.value).sort((a, b) => b.quantity - a.quantity);
             }
-            return acc;
-        }, {});
+        }
+        catch (error) {
+            alertVisible.value = true;
+            alertType.value = error.type;
+            alertMessage.value = error.message;
 
-        quantitiesById.value = Object.values(quantitiesById.value).sort((a, b) => b.quantity - a.quantity);
+            setTimeout(() => {
+                alertVisible.value = false;
+            }, 5000);
+        }
     }
 
 
@@ -62,6 +79,9 @@
 
 <template>
     <div class="container">
+        <v-alert v-model="alertVisible" :type="alertType" dismissible>
+            {{ alertMessage }}
+        </v-alert>
         <div class="title_wrapper">
             <h2>Statistiques</h2>
         </div>
@@ -78,8 +98,8 @@
                     :paiements="paiements"
                 />
             </section>
-            <aside class="w-1/4">
-                <Dashboard />
+            <aside>
+                <FillingCharts />
             </aside>
         </div>
     </div>

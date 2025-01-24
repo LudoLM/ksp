@@ -3,7 +3,7 @@ import { onClickOutside } from '@vueuse/core'
 import {computed, onMounted, ref} from 'vue'
 import {useUserStore} from "../store/user";
 import useGetElementsToken from "../utils/useGetElementsToken";
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import SwitchToggle from "./SwitchToggle.vue";
 
 const target = ref(null)
@@ -11,9 +11,8 @@ const dropdownOpen = ref(false)
 const userId = computed(() => userStore.userId);
 const userPrenom = computed(() => userStore.userPrenom);
 const router = useRouter();
-
+const route = useRoute();
 const role = computed(() => useGetElementsToken().roles[0].split("_")[1].toLowerCase());
-
 const userStore = useUserStore();
 
 const logout = () => {+
@@ -86,7 +85,7 @@ onClickOutside(target, () => {
                         <ul class="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
                             <li>
                                 <router-link
-                                    :to='{name: "Profile"}'
+                                    :to='{name: route.path.startsWith("/admin") ? "AdminProfile" : "Profile"}'
                                     class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
                                 >
                                     <svg

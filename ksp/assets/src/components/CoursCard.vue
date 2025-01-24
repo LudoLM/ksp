@@ -114,7 +114,7 @@ const props = defineProps({
 const loginDialog = ref(false);
 
 const redirectToLogin = () => {
-  window.location.href = '/login'; // Rediriger vers la route Symfony
+ router.push({ name: 'Login' });
 };
 
 
@@ -154,7 +154,7 @@ const handleAddExtraResponse = ({ type, message, statusChange }) => {
 // Gestion de l'inscription
 const handleSubscription = async (isAttente) => {
   const result = await useSubscription(props.info.id, isAttente);
-  statusCours.value = result.statusChange;
+  statusCours.value = result.statusChange || statusCours.value;
   usersCount.value = result.usersCount;
 
   if (result.success) {
@@ -163,13 +163,13 @@ const handleSubscription = async (isAttente) => {
     isSubscribed.value = !isAttente;
     emit('subscriptionResponse', {
       type: 'success',
-      message: result.response
+      message: result.message
     });
   } else {
     // Si inscription échouée
     emit('subscriptionResponse', {
-      type: 'error',
-      message: result.response
+      type: result.type,
+      message: result.message
     });
   }
 };
@@ -184,25 +184,31 @@ const handleUnsubscription = async (isAttente) => {
     usersCount.value = result.usersCount;
     emit('subscriptionResponse', {
       type: 'success',
-      message: result.response
+      message: result.message
     });
+  } else {
+      // Si la desinscription a échouée
+      emit('subscriptionResponse', {
+          type: result.type,
+          message: result.message
+      });
   }
 };
 
 
 const deleteCreation = async () => {
-  const response = useDeleteCours(props.info.id);
+  const response = await useDeleteCours(props.info.id);
 
-  if (response) {
+  if (response.success) {
     emit('deleteCoursResponse', {
       type: 'success',
-      message: "Le cours a été supprimé",
+      message: response.message,
       id: props.info.id
     });
   } else {
     emit('deleteCoursResponse', {
-      type: 'error',
-      message: "Le cours n'a pas pu être supprimé",
+      type: response.type ,
+      message: response.message,
       id: props.info.id
     });
   }
@@ -214,16 +220,16 @@ const updateCreation = () => {
 
 const cancelCours = async () => {
   const response = await useCancelCours(props.info.id);
-  if (response) {
+  if (response.success) {
     statusCours.value = response.statusChange;
     emit('cancelCoursResponse', {
       type: 'success',
-      message: "Le cours a été annulé",
+      message: response.message,
     });
   } else {
     emit('cancelCoursResponse', {
-      type: 'error',
-      message: "Le cours n'a pas pu être annulé",
+      type: response.type,
+      message: response.message,
     });
   }
 };
@@ -232,17 +238,17 @@ const cancelCours = async () => {
 // A revoir
 const openCreation = async () => {
   const response = await useOpenCours(props.info.id);
-  if (response.response) {
+  if (response.success) {
     statusCours.value = response.statusChange;
     emit('subscriptionResponse', {
       type: 'success',
-      message: "Le cours est désormais ouvert",
+      message: response.message,
     });
 
   } else {
     emit('subscriptionResponse', {
-      type: 'error',
-      message: 'Le cours n\'a pas pu être ouvert',
+      type: response.type,
+      message: response.message,
     });
   }
 };
