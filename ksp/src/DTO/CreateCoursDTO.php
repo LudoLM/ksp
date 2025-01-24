@@ -27,10 +27,6 @@ class CreateCoursDTO
     #[Assert\NotBlank(message: "Le type de cours ne peut pas être vide.")]
     public ?int $typeCours = null;
 
-    #[Assert\NotBlank(message: "La date limite d'inscription ne peut pas être vide.")]
-    public ?\DateTimeInterface $dateLimiteInscription = null;
-
-
     public function getDureeCours(): ?int
     {
         return $this->dureeCours;
@@ -55,12 +51,6 @@ class CreateCoursDTO
     {
         return $this->typeCours;
     }
-
-    public function getDateLimiteInscription(): ?\DateTimeInterface
-    {
-        return $this->dateLimiteInscription;
-    }
-
 
 }
 ?>

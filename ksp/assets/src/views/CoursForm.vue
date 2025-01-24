@@ -22,7 +22,6 @@ const errors = ref(
     dureeCours: null,
     nbInscriptionMax: null,
     description: null,
-    dateLimiteInscription: null,
   },
 )
 
@@ -56,7 +55,6 @@ const formData = ref({
   dureeCours: coursData.value ? coursData.value.dureeCours : 60,
   nbInscriptionMax: 12,
   description: "Cours sympathique",
-  dateLimiteInscription: new Date().toISOString().slice(0, 16),
 });
 
   const handleSubmit = async (event) => {
@@ -69,7 +67,6 @@ const formData = ref({
       dureeCours: parseInt(formData.value.dureeCours),
       nbInscriptionMax: parseInt(formData.value.nbInscriptionMax),
       description: formData.value.description,
-      dateLimiteInscription: formData.value.dateLimiteInscription
     };
 
     try {
@@ -118,7 +115,6 @@ const formData = ref({
       formData.value.dureeCours = coursData.dureeCours;
       formData.value.nbInscriptionMax = coursData.nbInscriptionMax;
       formData.value.description = coursData.description;
-      formData.value.dateLimiteInscription = coursData.dateLimiteInscription ? coursData.dateLimiteInscription.slice(0, 16) : formData.value.dateLimiteInscription;
 
 
     } catch (error) {
@@ -152,7 +148,6 @@ const formData = ref({
         <CustomSelect item="Type de cours" id="typeCours" :error="errors.typeCours" v-model="formData.typeCours" :options="typeCoursList" required/>
         <CustomInput item="Durée (minutes)" type="Number" id="dureeCours" :error="errors.dureeCours" v-model="formData.dureeCours" required/>
         <CustomInput item="Date" type="datetime-local" id="dateCours" dureeCours :error="errors.dateCours" v-model="formData.dateCours" required/>
-        <CustomInput item="Date limite d'inscription" type="datetime-local" id="dateLimiteInscription" :error="errors.dateLimiteInscription" v-model="formData.dateLimiteInscription" required/>
         <CustomInput item="Nombre de places" type="number" id="description" :error="errors.nbInscriptionMax" v-model="formData.nbInscriptionMax" required/>
       </div>
         <CustomTextarea item="Description" id="description" v-model="formData.description" :error="errors.description" required class="w-full" />

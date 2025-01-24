@@ -8,7 +8,6 @@ use App\Entity\Cours;
 use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
 use App\Event\DesistementEvent;
-use App\Event\UpdateStatusCoursEvent;
 use App\Message\SendCancelEmailMessage;
 use App\Message\UpdateStatusCoursMessage;
 use App\Repository\CoursRepository;
@@ -57,10 +56,6 @@ class CoursController extends AbstractController
         $typeCoursId = $request->query->get('typeCours') ==="null" ? null : $request->query->get('typeCours') ?? null;
         $dateCoursStr = $request->query->get('dateCours')  ==="null" ? null : $request->query->get('dateCours') ?? null;
         $statusCoursId = $request->query->get('statusCours') ==="null" ? null : $request->query->get('statusCours') ?? null;
-
-
-        $eventCours = new UpdateStatusCoursEvent();
-        $this->dispatcher->dispatch($eventCours);
 
         // Récupérer l'entité TypeCours si `typeCours` est fourni
         $typeCours = null;
@@ -134,6 +129,11 @@ class CoursController extends AbstractController
         $user = $data['userId'] === null ? $this->getUser() : $this->userRepository->find($data['userId']);
         $cours = $this->coursRepository->find($data['coursId']);
         $isAttente = $data['isAttente'];
+
+//      Si l'heure du cours est passée - 30 minutes, on ne peut plus s'inscrire
+        if($cours->getDateCours()->getTimestamp() - time() < 1800) {
+            return new JsonResponse(['success' => false, 'response' => "Il est trop tard pour s'inscrire à ce cours"], 403);
+        }
 
 //      Calcul du nombre de participants au cours
         $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
