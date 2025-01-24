@@ -14,7 +14,7 @@
           <div class="relative" ref="target">
               <router-link
                   class="flex items-center gap-4"
-                  to="#"
+                  to=""
                   @click.prevent="dropdownOpen = !dropdownOpen"
               >
                     <span class="hidden text-right lg:block">
@@ -137,10 +137,10 @@ const routes = computed(() =>
             "CreateTypeCours",
             "EditTypeCours",
             "admin",
-            "Dashboard",
             "CoursAdmin",
             "Statistiques",
-            "Cours"
+            "Cours",
+            "AdminProfile"
         ].includes(r.name)
     )
 );

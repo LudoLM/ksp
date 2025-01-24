@@ -7,7 +7,8 @@ import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router';
 import {useValidationForm} from "../utils/useValidationForm";
 import {useGetTypesCours} from "../utils/useActionCours";
-
+import {VAlert} from "vuetify/components";
+import {apiFetch} from "../utils/useFetchInterceptor";
 
 const formData = ref({
   nom: null,
@@ -25,6 +26,11 @@ const imagePreview = ref(null);
 
 const urlCreation = "/api/typeCours/create";
 const urlEdition = "/api/typeCours/edit/";
+
+
+const alertVisible = ref(false);
+const alertType = ref('info');
+const alertMessage = ref('');
 
 
 const errors = ref({
@@ -63,7 +69,7 @@ const onTypeCoursChange = (event) => {
 // Récupérer la liste des types de cours
 const fetchData = async () => {
   try {
-    await fetch("/api/getTypeCours", {
+    await apiFetch("/api/getTypeCours", {
       method: "GET",
       headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
     });
@@ -75,7 +81,13 @@ const fetchData = async () => {
       existingImage.value = typeCoursList.value[0].thumbnail;
     }
   } catch (error) {
-    console.error("Erreur lors de la récupération des cours:", error);
+      alertVisible.value = true;
+      alertType.value = error.type;
+      alertMessage.value = error.message;
+
+      setTimeout(() => {
+          alertVisible.value = false;
+      }, 5000);
   }
 };
 
@@ -86,32 +98,44 @@ onMounted(() => {
 const handleSubmit = async (event) => {
   event.preventDefault();
 
-  const data = new FormData();
-  data.append("nom", formData.value.nom);
-  data.append("image", formData.value.image);
+    try {
+        const data = new FormData();
+        data.append("nom", formData.value.nom);
+        data.append("image", formData.value.image);
 
-  const url = origin.value === "EditTypeCours" ? urlEdition + typeCoursId.value : urlCreation;
+        const url = origin.value === "EditTypeCours" ? urlEdition + typeCoursId.value : urlCreation;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer " + localStorage.getItem("token")
-    },
-    body: data
-  });
+        const response = await apiFetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("token")
+            },
+            body: data
+        });
 
-  if (!response.ok) {
-    await useValidationForm(response, errors);
-  }
-  else{
-      router.push({name:"CreateCours"});
+        if (!response.ok) {
+            await useValidationForm(response, errors);
+        }
+        else{
+            router.push({name:"CreateCours"});
+        }
+    }
+    catch (error) {
+        alertVisible.value = true;
+        alertType.value = error.type;
+        alertMessage.value = error.message;
 
-  }
+        setTimeout(() => {
+            alertVisible.value = false;
+        }, 5000);
+    }
 };
 </script>
 
 <template>
-
+    <v-alert v-model="alertVisible" :type="alertType" dismissible>
+        {{ alertMessage }}
+    </v-alert>
     <div class="title_wrapper">
         <h2>{{ origin === "EditTypeCours" ? "Modifier" : "Ajouter" }} un type de cours</h2>
     </div>

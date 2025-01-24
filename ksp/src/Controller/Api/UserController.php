@@ -38,7 +38,7 @@ class UserController extends AbstractController
     public function getUsersData(UserRepository $userRepository, Cours $cours) : JsonResponse
     {
         $users = $userRepository->getLightUsersAll($cours);
-        $jsonUsers = $this->serializer->serialize($users, 'json', ['groups' => 'cours:index']);
+        $jsonUsers = $this->serializer->serialize($users, 'json');
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 

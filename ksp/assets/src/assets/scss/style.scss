@@ -80,11 +80,9 @@ a{
 .isSubscribed{
   .color-button{
     background: #fff;
-    color: #222;
+    color: #222 !important;
   }
 }
-
-
 
 .column {
   flex-direction: column;

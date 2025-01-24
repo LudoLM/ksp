@@ -1,5 +1,8 @@
 <template>
    <div class="container">
+       <v-alert v-model="alertVisible" :type="alertType" dismissible>
+           {{ alertMessage }}
+       </v-alert>
     <div class="title_wrapper">
         <h2>Profil</h2>
     </div>
@@ -51,7 +54,7 @@
         <CustomButton>
           Modifier
         </CustomButton>
-        <CustomButton @click="handleBuyCours">
+        <CustomButton v-if='!route.path.startsWith("/admin")' @click="handleBuyCours">
           Acheter des cours
         </CustomButton>
       </div>
@@ -80,7 +83,7 @@
             <td class="border px-4 py-2">{{ formatDateTime(coursArr.cours.dateCours)[1] }}</td>
             <td class="border px-4 py-2">{{ coursArr.cours.statusCours.libelle }}</td>
             <td class="border px-4 py-2">
-              <CustomButton @click="handleUnsubscription(coursArr.cours.id)">
+              <CustomButton v-if="coursArr.cours.statusCours.id !== 3" @click="handleUnsubscription(coursArr.cours.id)">
                 Se désinscrire
               </CustomButton>
             </td>
@@ -123,15 +126,21 @@
 
 <script setup>
 import {computed, onMounted, ref} from "vue";
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useUnSubscription } from "../utils/useSubscribing";
 import CustomButton from "../components/CustomButton.vue";
+import {apiFetch} from "../utils/useFetchInterceptor";
+import {VAlert} from "vuetify/components";
 
 const user = ref({});
 const coursFiltered = computed(() =>
     user.value.usersCours ? user.value.usersCours.filter(coursArr => !coursArr.isEnAttente) : []
 );
 const router = useRouter();
+const route = useRoute();
+const alertVisible = ref(false);
+const alertType = ref('info');
+const alertMessage = ref('');
 
 const getUser = async () => {
   const response = await fetch("/api/user", {
@@ -152,7 +161,7 @@ const handleBuyCours = () => {
 
 const handleInvoicePDF = async (paiementId) => {
     try {
-        const response = await fetch("/api/getInvoicePDF", {
+        const response = await apiFetch("/api/getInvoicePDF", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -161,12 +170,13 @@ const handleInvoicePDF = async (paiementId) => {
             body: JSON.stringify({ paiementId: paiementId }),
         });
 
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        console.log(response);
         const blob = await response.blob();
-
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -178,7 +188,14 @@ const handleInvoicePDF = async (paiementId) => {
         // Libérer l'URL après le téléchargement
         window.URL.revokeObjectURL(url);
     } catch (error) {
-        console.error("Erreur lors du téléchargement de la facture :", error);
+        alertMessage.value = 'Votre session a expiré. Veuillez vous reconnecter.';
+        alertType.value = 'info';
+        alertVisible.value = true;
+
+        setTimeout(() => {
+            alertVisible.value = false;
+        }, 5000);
+
     }
 };
 
@@ -187,13 +204,18 @@ const handleInvoicePDF = async (paiementId) => {
 // Fonction de désinscription
 const handleUnsubscription = async (coursId) => {
   const result = await useUnSubscription(coursId, false);
-
   if (result.success) {
     // Filtrer le cours désinscrit localement
     user.value.usersCours = user.value.usersCours.filter(coursArr => coursArr.cours.id !== coursId);
     user.value.nombreCours += 1;
   } else {
-    console.error("Échec de la désinscription.");
+    alertMessage.value = result.message;
+    alertType.value = result.type;
+    alertVisible.value = true;
+
+    setTimeout(() => {
+      alertVisible.value = false;
+    }, 5000);
   }
 };
 

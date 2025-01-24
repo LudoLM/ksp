@@ -200,7 +200,6 @@ const prevPage = async () => {
   margin-bottom: 5rem;
 }
 
-
 .pagination {
   display: flex;
   justify-content: center;
@@ -213,8 +212,4 @@ const prevPage = async () => {
       width: 200px;
     }
 }
-
-
-
-
 </style>

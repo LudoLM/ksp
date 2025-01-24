@@ -200,7 +200,7 @@ class CoursController extends AbstractController
 
 
 //      Retourne une réponse JSON pour indiquer que l'utilisateur a été ajouté avec succès
-        return new JsonResponse(['success' => true, 'response' => !$isAttente ? "Vous êtes bien inscrit au cours" : "Vous êtes sur la liste d'attente", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
+        return new JsonResponse(['success' => true, 'message' => !$isAttente ? "Vous êtes bien inscrit au cours" : "Vous êtes sur la liste d'attente", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
     }
 
 
@@ -237,7 +237,7 @@ class CoursController extends AbstractController
         $this->em->flush();
 
         // Retourne une réponse JSON pour indiquer que l'utilisateur a été supprimé avec succès
-        return new JsonResponse(['success' => true, 'response' => !$isAttente ? 'Vous avez bien été supprimé du cours': 'Vous n\'êtes plus sur la liste d\'attente', 'statusChange' => $statusChange, 'usersCount' => $usersCount], 200);
+        return new JsonResponse(['success' => true, 'message' => !$isAttente ? 'Vous avez bien été supprimé du cours': 'Vous n\'êtes plus sur la liste d\'attente', 'statusChange' => $statusChange, 'usersCount' => $usersCount], 200);
     }
 
     // Add route for create new cours
@@ -269,7 +269,7 @@ class CoursController extends AbstractController
         $this->em->remove($cours);
         $this->em->flush();
 
-        return new JsonResponse(['response' => true], 200);
+        return new JsonResponse(['success' => true, 'message' => 'Le cours a bien été effacé'], 200);
     }
 
     #[Route('cours/open/{id}', name: 'cours_open', methods: ['PUT'])]
@@ -286,24 +286,24 @@ class CoursController extends AbstractController
         $this->em->persist($cours);
         $this->em->flush();
 
-        return new JsonResponse(['response' => true, 'statusChange' => StatusCoursEnum::OUVERT->value], 200);
+        return new JsonResponse(['success' => true, 'message' => 'Le cours est maintenant ouvert aux inscriptions', 'statusChange' => StatusCoursEnum::OUVERT->value], 200);
     }
 
     #[Route('cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
     public function cancelCours(Cours $cours, MessageBusInterface $messageBus): JsonResponse
     {
         try {
-           /* $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ANNULE->value]));
-            $this->em->persist($cours);*/
+            $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ANNULE->value]));
+            $this->em->persist($cours);
             foreach ($cours->getUsersCours() as $usersCours){
 
                 $messageBus->dispatch(new SendCancelEmailMessage($usersCours->getId(), $this->getUser()->getId() ));
             }
             $this->em->flush();
-            return new JsonResponse(['response' => true, 'statusChange' => StatusCoursEnum::OUVERT->value], 200);
+            return new JsonResponse(['success' => true, 'message' => 'Le cours a été annulé', 'statusChange' => StatusCoursEnum::ANNULE->value], 200);
         }
         catch (\Exception $e) {
-            return new JsonResponse(['response' => false, 'error' => $e->getMessage()], 400);
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
         }
 
 

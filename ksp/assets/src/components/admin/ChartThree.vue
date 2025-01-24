@@ -63,7 +63,7 @@ const chartData = computed(() => {
 </script>
 
 <template>
-    <div class="col-10 rounded-sm bg-white shadow-default dark:bg-boxdark">
+    <div class="col-10 rounded-sm bg-white">
         <div class="flex flex-col justify-center items-center gap-4">
             <div class="mb-2">
                 <div id="chartThree" class="mx-auto flex justify-center">

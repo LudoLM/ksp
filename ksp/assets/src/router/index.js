@@ -12,6 +12,7 @@ import useGetElementsToken from "../utils/useGetElementsToken";
 import Profile from '../views/Profile.vue';
 import TypeCoursForm from "../views/TypeCoursForm.vue";
 import DefaultLayout from "../layouts/DefaultLayout.vue";
+import {useUserStore} from "../store/user";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -52,11 +53,11 @@ const router = createRouter({
                       { path: 'edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
                       { path: 'coursType/add', name: 'CreateTypeCours', label: "Créer Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
                       { path: 'coursType/edit', name: 'EditTypeCours', label: "Modifier Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
-
+                      { path: 'profile', name: 'AdminProfile', component: Profile, meta: {requiresAdmin: true}},
                   ]
                 },
             ]
-        }
+        },
     ],
 })
 
@@ -64,36 +65,58 @@ const vuetify = createVuetify({
     theme: {
         defaultTheme: 'light',
     },
-    components,
-    directives,
+  components,
+  directives,
 })
 
 
 // Garde de navigation globale
 router.beforeEach((to, from, next) => {
 
-    // Vérifie si la route nécessite un rôle admin
-    if (to.matched.some(record => record.meta.requiresAdmin)) {
-        const userRole = localStorage.getItem('token') ? useGetElementsToken().roles[0] : null;
-        if (userRole) {
-            if (userRole === 'ROLE_ADMIN') {
-                next();  // L'utilisateur est admin, continuer
-            } else {
-                next({ path: '/',
-                    query: {
-                        alertMessage: "Vous n'avez pas les droits pour accéder à cette page",
-                        alertType: 'error',
-                        alertVisible: true
-                    }
-                });  // Redirige si l'utilisateur n'est pas admin
-            }
-        } else {
-            next({ path: '/login' });  // Redirige vers la page de login si pas authentifié
-        }
-    } else {
-        next();  // Si pas de restriction, continuer normalement
+  const tokenExpiration = useGetElementsToken()?.exp;
+  const userStore = useUserStore();
+
+  // 1. Vérifie si le token est expiré
+  if (tokenExpiration <= Date.now() / 1000) {
+    userStore.logout();
+    return next({
+      path: '/',
+      query: {
+        alertMessage: 'Votre session a expiré. Veuillez vous reconnecter.',
+        alertType: 'info',
+        alertVisible: true,
+      },
+    });
+  }
+
+  // 2. Vérifie si la route nécessite un rôle admin
+  if (to.matched.some(record => record.meta.requiresAdmin)) {
+    const userRole = localStorage.getItem('token')
+      ? useGetElementsToken().roles[0]
+      : null;
+
+    if (!userRole) {
+      // Pas authentifié, redirige vers la page de connexion
+      return next({ path: '/' });
     }
+
+    if (userRole !== 'ROLE_ADMIN') {
+      // Non admin, redirige avec un message d'erreur
+      return next({
+        path: '/',
+        query: {
+          alertMessage: "Vous n'avez pas les droits pour accéder à cette page.",
+          alertType: 'error',
+          alertVisible: true,
+        },
+      });
+    }
+  }
+
+  // 3. Si aucune condition ne bloque, continue la navigation
+  next();
 });
+
 
 
 
