@@ -78,6 +78,9 @@
                               Modifier un type de cours
                           </router-link>
                       </li>
+                      <li>
+                          <a @click="handleRefreshCours" >Rafraichir les cours</a>
+                      </li>
                   </ul>
               </div>
           </div>
@@ -109,6 +112,7 @@ import DropdownUser from "./DropdownUser.vue";
 import Hamburger from "./Hamburger.vue";
 const dropdownOpen = ref(false)
 import {onClickOutside} from "@vueuse/core";
+import {apiFetch} from "../utils/useFetchInterceptor";
 
 const route = useRoute();
 const router = useRouter();
@@ -146,15 +150,15 @@ const routes = computed(() =>
 );
 
 
-    // Fonction pour extraire les routes administratives
-    const getAdminRoutes = (routes) => {
-        return routes
-            .filter((route) => route.meta?.requiresAdmin)
-            .map((route) => ({
-                ...route,
-                children: route.children ? getAdminRoutes(route.children) : [],
-            }));
-    };
+// Fonction pour extraire les routes administratives
+const getAdminRoutes = (routes) => {
+    return routes
+        .filter((route) => route.meta?.requiresAdmin)
+        .map((route) => ({
+            ...route,
+            children: route.children ? getAdminRoutes(route.children) : [],
+        }));
+};
 
 // Gestion des liens de navigation (responsive)
 const toggleNavLinks = () => {
@@ -170,6 +174,28 @@ const handleScroll = () => {
     } else {
         navWrapper.classList.remove("fixed");
     }
+};
+
+const handleRefreshCours = async () => {
+        try {
+            const response = await apiFetch("/api/updateCoursClick", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token"),
+                },
+            });
+
+           const data = await response.json();
+           if (data.success){
+               console.log(data.message)
+           }
+
+        }
+        catch (error) {
+            console.log(error)
+            return error;
+        }
 };
 
 // Écouteurs pour les événements

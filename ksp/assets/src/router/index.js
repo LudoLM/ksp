@@ -53,7 +53,7 @@ const router = createRouter({
                       { path: 'edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
                       { path: 'coursType/add', name: 'CreateTypeCours', label: "Créer Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
                       { path: 'coursType/edit', name: 'EditTypeCours', label: "Modifier Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
-                      { path: 'profile', name: 'AdminProfile', component: Profile, meta: {requiresAdmin: true}},
+                      { path: 'profile', name: 'AdminProfile', component: Profile, meta: {requiresAdmin: true}}
                   ]
                 },
             ]

@@ -8,7 +8,6 @@ use App\Entity\Cours;
 use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
 use App\Event\DesistementEvent;
-use App\Event\UpdateStatusCoursEvent;
 use App\Message\SendCancelEmailMessage;
 use App\Message\UpdateStatusCoursMessage;
 use App\Repository\CoursRepository;
@@ -16,6 +15,7 @@ use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
 use App\Repository\UserRepository;
 use App\Serializer\CreateCoursDTOToCoursDenormalizer;
+use App\Service\UpdateStatusCoursClickService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -42,7 +42,8 @@ class CoursController extends AbstractController
         private readonly TypeCoursRepository $typeCoursRepository,
         private readonly EventDispatcherInterface $dispatcher,
         private readonly UserRepository $userRepository,
-        private readonly MessageBusInterface $messageBus
+        private readonly MessageBusInterface $messageBus,
+        private readonly UpdateStatusCoursClickService $updateStatusCoursClickService
     )
     {
 
@@ -57,10 +58,6 @@ class CoursController extends AbstractController
         $typeCoursId = $request->query->get('typeCours') ==="null" ? null : $request->query->get('typeCours') ?? null;
         $dateCoursStr = $request->query->get('dateCours')  ==="null" ? null : $request->query->get('dateCours') ?? null;
         $statusCoursId = $request->query->get('statusCours') ==="null" ? null : $request->query->get('statusCours') ?? null;
-
-
-        $eventCours = new UpdateStatusCoursEvent();
-        $this->dispatcher->dispatch($eventCours);
 
         // Récupérer l'entité TypeCours si `typeCours` est fourni
         $typeCours = null;
@@ -134,6 +131,11 @@ class CoursController extends AbstractController
         $user = $data['userId'] === null ? $this->getUser() : $this->userRepository->find($data['userId']);
         $cours = $this->coursRepository->find($data['coursId']);
         $isAttente = $data['isAttente'];
+
+//      Si l'heure du cours est passée - 30 minutes, on ne peut plus s'inscrire
+        if($cours->getDateCours()->getTimestamp() - time() < 1800) {
+            return new JsonResponse(['success' => false, 'response' => "Il est trop tard pour s'inscrire à ce cours"], 403);
+        }
 
 //      Calcul du nombre de participants au cours
         $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
@@ -275,6 +277,10 @@ class CoursController extends AbstractController
     #[Route('cours/open/{id}', name: 'cours_open', methods: ['PUT'])]
     public function openCours(Cours $cours): JsonResponse
     {
+        //Si  la date du cours est passé, on ne peut pas ouvrir le cours
+        if($cours->getDateCours()->getTimestamp() < time()) {
+            return new JsonResponse(['success' => false, 'type'=> 'error', 'message' => 'Le date est déjà passé'], 400);
+        }
         $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
         $delay = $cours->getDateCours()->getTimestamp() - time();
         $this->messageBus->dispatch(
@@ -282,7 +288,6 @@ class CoursController extends AbstractController
                 $cours->getId()),
                 [ new DelayStamp($delay)]
         );
-
         $this->em->persist($cours);
         $this->em->flush();
 
@@ -335,5 +340,12 @@ class CoursController extends AbstractController
        $coursFilling = $this->coursRepository->getCoursFilling();
        $jsonCoursFillings = $this->serializer->serialize($coursFilling, 'json', ['groups' => 'cours_filling:index']);
         return new JsonResponse($jsonCoursFillings, 200);
+    }
+
+    #[Route('updateCoursClick', name: 'updateCoursClick', methods: ['GET'])]
+    public function updateCoursClick(): JsonResponse
+    {
+        $this->updateStatusCoursClickService->update();
+        return new JsonResponse(['success' => true, 'message' => 'Les statuts des cours ont bien été mis à jour'], 200);
     }
 }

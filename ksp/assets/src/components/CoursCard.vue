@@ -22,6 +22,9 @@
           <div :class="isUserAttente ? 'isUserAttente' : 'invisible'">
             En attente
           </div>
+          <div :class="debutTimer * 60 * 60 * 1000 > remainingTime && remainingTime > 0 && (statusCours === 'Ouvert' || statusCours === 'Complet') ? 'isUserAttente' : 'invisible'">
+              {{ remainingTimeFormatted }}
+          </div>
         </div>
         <div class="min-h-24 grid items-end">
           <div class="grid grid-cols-2">
@@ -41,7 +44,7 @@
 
             />
 
-            <ButtonsCardUser v-if="!isAdminPath"
+            <ButtonsCardUser v-if="!isAdminPath && remainingTime > 0"
                 :userId="userId"
                 :statusCours="statusCours"
                 :isSubscribed="isSubscribed"
@@ -66,13 +69,13 @@
       </div>
     </div>
     <div :class="['card_status', colors[statusCours]]">
-      {{ statusCours }}
+      {{ (statusCours === "Ouvert"|| statusCours === "Complet") && remainingTime < 0 ? 'Imminent' : statusCours }}
     </div>
   </div>
 </template>
 
 <script setup>
-import {ref, computed} from 'vue';
+import {ref, computed, onMounted, onUnmounted} from 'vue';
 import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
 import {useSubscription, useUnSubscription} from "../utils/useSubscribing";
@@ -86,6 +89,8 @@ const userStore = useUserStore();
 const userId = userStore.userId;
 const router = useRouter();
 const emit = defineEmits(['subscriptionResponse', 'deleteCoursResponse', 'cancelCoursResponse', 'handleSubscription', 'handleUnsubscription']);
+const delaiLimite = 30 * 60 * 1000;
+const debutTimer = ref(6);
 
 // Couleurs par statut
 const colors = {
@@ -96,6 +101,7 @@ const colors = {
   'En création': 'bg-purple-300',
   'Passé': 'bg-red-300',
   'Archivé': 'bg-stone-300',
+  'Imminent': 'bg-orange-300',
 };
 
 // Props
@@ -110,6 +116,7 @@ const props = defineProps({
   }
 });
 
+
 // État de la modale
 const loginDialog = ref(false);
 
@@ -117,21 +124,70 @@ const redirectToLogin = () => {
  router.push({ name: 'Login' });
 };
 
-
 // Formatage des dates
 const dateDebut = computed(() => new Date(props.info.dateCours));
-const formattedDate = computed(() => useDateFormat(dateDebut.value, 'dddd D MMMM YYYY').value);
-const capitalizedDate = computed(() => formattedDate.value.charAt(0).toUpperCase() + formattedDate.value.slice(1));
-const formattedHour = computed(() => useDateFormat(dateDebut.value, 'H:mm').value);
+
+const formattedDate = computed(() =>
+    useDateFormat(dateDebut.value, 'dddd D MMMM YYYY').value
+);
+
+const capitalizedDate = computed(() =>
+    formattedDate.value.charAt(0).toUpperCase() + formattedDate.value.slice(1)
+);
+
+const formattedHour = computed(() => {
+    const hours = dateDebut.value.getUTCHours();
+    const minutes = String(dateDebut.value.getUTCMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+});
 
 // Initialiser le statut du cours comme réactif
 const statusCours = ref(props.info.statusCours.libelle);
 let usersCount = ref(props.info.usersCours.filter(cours => cours.isEnAttente === false).length);
+const remainingTime = ref(0);
+
 
 
 // Vérifier si l'utilisateur est inscrit
 const isSubscribed = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === false));
 const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === true));
+
+
+
+onMounted(() => {
+    if (props.info.statusCours.id === 1 || props.info.statusCours.id === 2) {
+        // Capture la valeur initiale
+        let initialTime = Date.now();
+
+        const interval = setInterval(() => {
+            // Calcule le temps écoulé depuis le début
+            initialTime += 1000;
+            remainingTime.value = new Date(dateDebut.value.getTime()).toISOString() - delaiLimite - initialTime;
+
+            if (remainingTime.value <= 0) {
+                clearInterval(interval);
+            }
+        }, 1000);
+
+        // Nettoyer l'intervalle lors de la destruction du composant
+        onUnmounted(() => {
+            clearInterval(interval);
+        });
+    }
+});
+
+
+
+// Convertir le temps restant en heures et minutes
+const remainingTimeFormatted = computed(() => {
+    const hours = Math.abs(Math.floor(remainingTime.value / (1000 * 60 * 60)));
+    const minutes = Math.abs(Math.floor((remainingTime.value % (1000 * 60 * 60)) / (1000 * 60)));
+    const seconds = Math.abs(Math.floor((remainingTime.value % (1000 * 60)) / 1000));
+
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedSeconds = String(seconds).padStart(2, '0');
+    return `${hours}h${formattedMinutes}m${formattedSeconds}s`;
+});
 
 const handleAddExtraResponse = ({ type, message, statusChange }) => {
   if (type === 'success') {
@@ -340,7 +396,7 @@ const openCreation = async () => {
 
 .card_times {
   font-weight: 100;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 
 .isUserAttente{

@@ -31,10 +31,6 @@ class Cours
     #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
     private ?string $description = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
-    private ?\DateTimeInterface $dateLimiteInscription = null;
-
     #[ORM\Column]
     #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", 'cours_filling:index'])]
     private ?int $nbInscriptionMax = null;
@@ -123,23 +119,6 @@ class Cours
     public function setDescription(?string $description): void
     {
         $this->description = $description;
-    }
-
-
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getDateLimiteInscription(): ?\DateTimeInterface
-    {
-        return $this->dateLimiteInscription;
-    }
-
-    /**
-     * @param \DateTimeInterface|null $dateLimiteInscription
-     */
-    public function setDateLimiteInscription(?\DateTimeInterface $dateLimiteInscription): void
-    {
-        $this->dateLimiteInscription = $dateLimiteInscription;
     }
 
     /**

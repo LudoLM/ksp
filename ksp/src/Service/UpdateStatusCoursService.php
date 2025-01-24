@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Entity\Cours;
-use App\Entity\StatusCours;
 use App\Enum\StatusCoursEnum;
 use App\Message\UpdateStatusCoursMessage;
 use App\Repository\StatusCoursRepository;
@@ -22,7 +21,6 @@ class UpdateStatusCoursService
     }
     public function update(Cours $cours)
     {
-
         switch ($cours->getStatusCours()->getLibelle()) {
             case StatusCoursEnum::OUVERT->value:
             case StatusCoursEnum::COMPLET->value:
