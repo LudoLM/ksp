@@ -134,11 +134,8 @@ export async function useOpenCours(coursId) {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
             },
         });
-        if (response.ok) {
-            return await response.json();
-        } else {
-            return false;
-        }
+
+        return await response.json();
     }
     catch (error) {
         return error;

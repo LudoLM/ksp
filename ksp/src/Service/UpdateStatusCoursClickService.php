@@ -1,31 +1,28 @@
 <?php
 
-namespace App\EventSubscriber;
+namespace App\Service;
 
 use App\Entity\Cours;
 use App\Enum\StatusCoursEnum;
-use App\Event\UpdateStatusCoursEvent;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
-use App\Serializer\CreateCoursDTOToCoursDenormalizer;
 use App\Serializer\UpdateCoursDTOToCoursDenormalizer;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Serializer\Serializer;
 
-class UpdateStatusCoursSubscriber implements EventSubscriberInterface
+final readonly class UpdateStatusCoursClickService
 {
 
     public function __construct(
-        private readonly CoursRepository $coursRepository,
-        private readonly StatusCoursRepository $statusCoursRepository,
-        private readonly EntityManagerInterface $em,
+        private CoursRepository $coursRepository,
+        private StatusCoursRepository $statusCoursRepository,
+        private EntityManagerInterface $em,
     )
     {
 
     }
 
-    public function onUpdateStatusCoursEvent($event): void
+    public function update(): void
     {
         $coursArray = $this->coursRepository->getSuperLightAllCours();
         $archive = $this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ARCHIVE->value]);
@@ -60,12 +57,5 @@ class UpdateStatusCoursSubscriber implements EventSubscriberInterface
                 $this->em->flush();
             }
         }
-    }
-
-    public static function getSubscribedEvents()
-    {
-        return [
-            UpdateStatusCoursEvent::class => 'onUpdateStatusCoursEvent',
-        ];
     }
 }

@@ -19,7 +19,7 @@ final readonly class UpdateStatusCoursMessageHandler
 
     public function __invoke(UpdateStatusCoursMessage $message) : void
     {
-        $cours= $this->coursRepository->find($message->getCoursId());
+        $cours= $this->coursRepository->find($message->getCoursId());;
         $this->updateStatusCoursService->update($cours);
 
     }

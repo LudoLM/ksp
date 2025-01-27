@@ -17,24 +17,14 @@ export async function apiFetch(url, options = {}) {
     headers: { ...defaultHeaders, ...options.headers },
   };
 
-  try {
     const response = await fetch(fullUrl, mergedOptions);
 
     if (response.status === 401) {
-        userStore.logout();
-        const error = new Error('La session a expiré. Veuillez vous reconnecter.');
-        error.type = 'info'; // Ajoute un type personnalisé
-        throw error;
+      userStore.logout();
+      const error = new Error('La session a expiré. Veuillez vous reconnecter.');
+      error.type = 'info';
+      throw error;
     }
 
-    // Vérifiez si la réponse est ok
-    if (response.ok) {
-      return response; // Retourne les données JSON si tout va bien
-    }
-
-    // Pour d'autres erreurs, lancez une erreur explicite
-    throw new Error(result?.message || `Erreur HTTP ${response.status}`);
-  } catch (error) {
-    throw error;
-  }
+    return response;
 }
