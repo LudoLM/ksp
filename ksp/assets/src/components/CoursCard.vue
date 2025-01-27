@@ -116,13 +116,13 @@ const props = defineProps({
   }
 });
 
-
 // État de la modale
 const loginDialog = ref(false);
 
 const redirectToLogin = () => {
  router.push({ name: 'Login' });
 };
+
 
 // Formatage des dates
 const dateDebut = computed(() => new Date(props.info.dateCours));
