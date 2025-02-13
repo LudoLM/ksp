@@ -17,7 +17,7 @@ const emit = defineEmits(['update:modelValue']);
 
 <template>
   <div class="form-group mb-4">
-    <label :for="id" class="block text-gray-700 font-semibold mb-2">{{ item }}:</label>
+    <label :for="id" class="block text-gray-700 font-semibold mb-2" v-if="item !== ''">{{ item }}:</label>
     <select
         :id="id"
         :value="modelValue"

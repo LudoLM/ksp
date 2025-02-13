@@ -1,9 +1,9 @@
 import {apiFetch} from "./useFetchInterceptor";
 
-export async function useGetCours(isAdminPath, infos,  currentPage, maxPerPage, totalItems, selectedTypeCours, selectedDate, selectedStatusId, totalPages) {
+export async function useGetCours(isAdminPath, route, infos,  currentPage, maxPerPage, totalItems, selectedTypeCours, selectedDate, selectedStatusId, totalPages) {
     try {
 
-        const response = await fetch("/api/getCours?page="
+        const response = await fetch("/api/" + route + "?page="
             + currentPage.value + "&maxPerPage="
             + maxPerPage.value + "&typeCours="
             + selectedTypeCours.value + "&dateCours="

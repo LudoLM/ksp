@@ -18,7 +18,6 @@ use App\Serializer\CreateCoursDTOToCoursDenormalizer;
 use App\Service\UpdateStatusCoursClickService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,7 +29,7 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 
-#[Route(path: "api/", name:"api")]
+#[Route(path: "api/", name:"api_")]
 class CoursController extends AbstractController
 {
 
@@ -48,9 +47,12 @@ class CoursController extends AbstractController
     {
 
     }
+
+    #[Route('getCoursCalendar', name: 'cours_calendar', methods: ['GET'])]
     #[Route('getCours', name: 'cours_index', methods: ['GET'])]
     public function coursIndex(Request $request): JsonResponse
     {
+
         $isAdminPath = $request->query->get('isAdminPath') === 'true';
         $currentPage = (int)($request->query->get('page', 1));
         $maxPerPage = (int)($request->query->get('maxPerPage', 10));
@@ -58,6 +60,8 @@ class CoursController extends AbstractController
         $typeCoursId = $request->query->get('typeCours') ==="null" ? null : $request->query->get('typeCours') ?? null;
         $dateCoursStr = $request->query->get('dateCours')  ==="null" ? null : $request->query->get('dateCours') ?? null;
         $statusCoursId = $request->query->get('statusCours') ==="null" ? null : $request->query->get('statusCours') ?? null;
+        $dateLimit = null;
+
 
         // Récupérer l'entité TypeCours si `typeCours` est fourni
         $typeCours = null;
@@ -75,6 +79,15 @@ class CoursController extends AbstractController
             }
         }
 
+        // recupere le 1er jour de la semaine de la variable dateCours si la route est getCoursCalendar
+        if($request->attributes->get('_route') === 'api_cours_calendar') {
+            $dateCours->modify('+' . ($currentPage - 1) * 7 . ' days');
+            $dateCours->modify('monday this week');
+            $dateLimit = clone $dateCours;
+            $dateLimit->modify('+6 days');
+        }
+
+
         $statusCours = null;
         if ($statusCoursId) {
             $statusCours = $this->statusCoursRepository->findOneBy(['id' => $statusCoursId]);
@@ -84,9 +97,9 @@ class CoursController extends AbstractController
         // Appeler le repository avec la pagination et les filtres
 
         if($isAdminPath) {
-            $coursPaginator = $this->coursRepository->findAllSortByDate($currentPage, $maxPerPage, $typeCours, $dateCours, $statusCours);
+            $coursPaginator = $this->coursRepository->findAllSortByDate($currentPage, $maxPerPage, $typeCours, $dateCours, $dateLimit,  $statusCours);
         } else {
-            $coursPaginator = $this->coursRepository->findAllSortByDateForUsers($currentPage, $maxPerPage, $typeCours, $dateCours, $statusCours);
+            $coursPaginator = $this->coursRepository->findAllSortByDateForUsers($currentPage, $maxPerPage, $typeCours, $dateCours, $dateLimit, $statusCours);
         }
 
         // Récupérer les cours
