@@ -56,6 +56,7 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/getCours, roles: PUBLIC_ACCESS }
+        - { path: ^/api/getCoursCalendar, roles: PUBLIC_ACCESS }
         - { path: ^/api/getStatusCours, roles: PUBLIC_ACCESS }
         - { path: ^/api/getTypesCours, roles: PUBLIC_ACCESS }
         - { path: ^/api/cours, roles: ROLE_ADMIN }

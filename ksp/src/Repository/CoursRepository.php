@@ -79,6 +79,7 @@ class CoursRepository extends ServiceEntityRepository
         int $maxPerPage,
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
+        ?\DateTime $dateLimit,
         ?StatusCours $statusCours
     ): Paginator {
 
@@ -93,18 +94,24 @@ class CoursRepository extends ServiceEntityRepository
         }
 
         if ($dateCours !== null) {
-            $qb->andWhere('c.dateCours > :dateCours')
+            $qb->andWhere('c.dateCours >= :dateCours')
                 ->setParameter('dateCours', $dateCours);
+        }
+
+        if ($dateLimit !== null) {
+            $qb->andWhere('c.dateCours <= :dateLimit')
+                ->setParameter('dateLimit', $dateLimit);
+        }
+        else{
+            // Ajouter la pagination
+            $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
+                ->setMaxResults($maxPerPage);
         }
 
         if ($statusCours !== null) {
             $qb->andWhere('c.statusCours = :statusCours')
                 ->setParameter('statusCours', $statusCours);
         }
-
-        // Ajouter la pagination
-        $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
-            ->setMaxResults($maxPerPage);
 
         // Retourner un Paginator
         return new Paginator($qb->getQuery());
@@ -116,6 +123,7 @@ class CoursRepository extends ServiceEntityRepository
         int $maxPerPage,
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
+        ?\DateTime $dateLimit,
         ?StatusCours $statusCours
     ): Paginator {
 
@@ -135,14 +143,20 @@ class CoursRepository extends ServiceEntityRepository
                 ->setParameter('dateCours', $dateCours);
         }
 
+        if ($dateLimit !== null) {
+            $qb->andWhere('c.dateCours <= :dateLimit')
+                ->setParameter('dateLimit', $dateLimit);
+        }
+        else{
+            // Ajouter la pagination
+            $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
+                ->setMaxResults($maxPerPage);
+        }
+
         if ($statusCours !== null) {
             $qb->andWhere('c.statusCours = :statusCours')
                 ->setParameter('statusCours', $statusCours);
         }
-
-        // Ajouter la pagination
-        $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
-            ->setMaxResults($maxPerPage);
 
         // Retourner un Paginator
         return new Paginator($qb->getQuery());
