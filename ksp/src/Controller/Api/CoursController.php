@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Controller\Api;
-
 
 use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
@@ -152,7 +150,7 @@ class CoursController extends AbstractController
 
 //      Calcul du nombre de participants au cours
         $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
-        $statusChange = $cours->getStatusCours()->getLibelle();
+        $statusChange = $cours->getStatusCours();
 
 //      Si l'admin ajoute un extra
         if($user !== $this->getUser()) {
@@ -165,7 +163,7 @@ class CoursController extends AbstractController
             $isFull = $usersCount + 1 >= $cours->getNbInscriptionMax();
             if ($isFull) {
                 $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::COMPLET->value]));
-                $statusChange = StatusCoursEnum::COMPLET->value;
+                $statusChange = $cours->getStatusCours();
             }
             $this->em->persist($cours);
             $this->em->flush();
@@ -174,7 +172,7 @@ class CoursController extends AbstractController
 
 //      Si le cours n'est pas en attente mais complet
         if ($usersCount >= $cours->getNbInscriptionMax() && !$isAttente ) {
-            return new JsonResponse([ 'success' => false, 'response' => "Le cours est complet", 'statusChange' => StatusCoursEnum::COMPLET->value, "usersCount" => $usersCount], 200);
+            return new JsonResponse([ 'success' => false, 'message' => "Le cours est complet", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
         }
 
 //      Si le cours n'est pas complet, je vérifie si l'utilisateur est déjà inscrit ou en attente
@@ -200,7 +198,7 @@ class CoursController extends AbstractController
         $isFull = $usersCount >= $cours->getNbInscriptionMax();
         if ($isFull) {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::COMPLET->value]));
-            $statusChange = StatusCoursEnum::COMPLET->value;
+            $statusChange = $cours->getStatusCours();
         }
 
 //       Si le cours n'est pas en attente alors on décrémente le nombre de cours de l'utilisateur
@@ -215,7 +213,11 @@ class CoursController extends AbstractController
 
 
 //      Retourne une réponse JSON pour indiquer que l'utilisateur a été ajouté avec succès
-        return new JsonResponse(['success' => true, 'message' => !$isAttente ? "Vous êtes bien inscrit au cours" : "Vous êtes sur la liste d'attente", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
+        return new JsonResponse([
+            'success' => true,
+            'message' => !$isAttente ? "Vous êtes bien inscrit au cours" : "Vous êtes sur la liste d'attente",
+            'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']),
+            'usersCount' => $usersCount], 200);
     }
 
 
@@ -224,7 +226,7 @@ class CoursController extends AbstractController
     {
         $user = $this->getUser();
         $isAttente = $isAttente === 'true';
-        $statusChange = $cours->getStatusCours()->getLibelle();
+        $statusChange = $cours->getStatusCours();
         // Suppression de l'utilisateur du cours
         foreach ($cours->getUsersCours() as $usersCours) {
             if ($usersCours->getUser() === $user) {
@@ -239,10 +241,10 @@ class CoursController extends AbstractController
         if(count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();})) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
 
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
-            $statusChange = StatusCoursEnum::OUVERT->value;
+            $statusChange = $cours->getStatusCours();
             // Envoi d'un mail aux personnes en attente
-            $eventCours = new DesistementEvent($cours);
-            $this->dispatcher->dispatch($eventCours);
+            /*$eventCours = new DesistementEvent($cours);
+            $this->dispatcher->dispatch($eventCours);*/
         }
 
         $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
@@ -252,7 +254,7 @@ class CoursController extends AbstractController
         $this->em->flush();
 
         // Retourne une réponse JSON pour indiquer que l'utilisateur a été supprimé avec succès
-        return new JsonResponse(['success' => true, 'message' => !$isAttente ? 'Vous avez bien été supprimé du cours': 'Vous n\'êtes plus sur la liste d\'attente', 'statusChange' => $statusChange, 'usersCount' => $usersCount], 200);
+        return new JsonResponse(['success' => true, 'message' => !$isAttente ? 'Vous avez bien été supprimé du cours': 'Vous n\'êtes plus sur la liste d\'attente', 'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']), 'usersCount' => $usersCount], 200);
     }
 
     // Add route for create new cours
@@ -268,14 +270,13 @@ class CoursController extends AbstractController
     ) : JsonResponse
     {
 
-        $coursDTOSerializer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);
+        $coursDTOSerializer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);;
         $cours = $coursDTOSerializer->denormalize($coursDTO, Cours::class);
         $this->em->persist($cours);
         $this->em->flush();
 
         return new JsonResponse(['response' => true], 200);
     }
-
 
     //Delete route for delete cours
     #[Route('cours/delete/{id}', name: 'cours_delete', methods: ['DELETE'])]
@@ -304,7 +305,7 @@ class CoursController extends AbstractController
         $this->em->persist($cours);
         $this->em->flush();
 
-        return new JsonResponse(['success' => true, 'message' => 'Le cours est maintenant ouvert aux inscriptions', 'statusChange' => StatusCoursEnum::OUVERT->value], 200);
+        return new JsonResponse(['success' => true, 'message' => 'Le cours est maintenant ouvert aux inscriptions', 'statusChange' => $cours->getStatusCours()], 200);
     }
 
     #[Route('cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
@@ -313,12 +314,12 @@ class CoursController extends AbstractController
         try {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ANNULE->value]));
             $this->em->persist($cours);
-            foreach ($cours->getUsersCours() as $usersCours){
+            /*foreach ($cours->getUsersCours() as $usersCours){
 
                 $messageBus->dispatch(new SendCancelEmailMessage($usersCours->getId(), $this->getUser()->getId() ));
-            }
+            }*/
             $this->em->flush();
-            return new JsonResponse(['success' => true, 'message' => 'Le cours a été annulé', 'statusChange' => StatusCoursEnum::ANNULE->value], 200);
+            return new JsonResponse(['success' => true, 'message' => 'Le cours a été annulé', 'statusChange' => $cours->getStatusCours()], 200);
         }
         catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], 400);
@@ -360,5 +361,41 @@ class CoursController extends AbstractController
     {
         $this->updateStatusCoursClickService->update();
         return new JsonResponse(['success' => true, 'message' => 'Les statuts des cours ont bien été mis à jour'], 200);
+    }
+
+    #[Route('removeUsers/{id}', name: 'remove_users_cours', methods: ['POST'])]
+    public function removeUsersFromCours(
+        Cours $cours,
+        Request $request
+    ): JsonResponse
+    {
+        $participants = json_decode($request->getContent(), true)['usersChecked'];
+        $statusChange = $cours->getStatusCours();
+        foreach ($cours->getUsersCours() as $usersCours) {
+            if(in_array($usersCours->getUser()->getId(), $participants)) {
+                $cours->removeUsersCours($usersCours);
+                $usersCours->getUser()->setNombreCours($usersCours->getUser()->getNombreCours() + 1);
+            }
+        }
+//        Si le cours est complet et qu'il y a de la place, je change le statut du cours et envoie un mail aux personnes en attente
+        if(count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();})) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
+
+            $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
+            $statusChange = $cours->getStatusCours();
+            // Envoi d'un mail aux personnes en attente
+            /*$eventCours = new DesistementEvent($cours);
+            $this->dispatcher->dispatch($eventCours);*/
+        }
+        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
+
+        $this->em->persist($cours);
+        $this->em->flush();
+
+        // Retourne une réponse JSON pour indiquer que l'utilisateur a été supprimé avec succès
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Les participants ont bien été supprimés du cours',
+            'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']),
+            'usersCount' => $usersCount], 200);
     }
 }

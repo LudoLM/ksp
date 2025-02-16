@@ -22,13 +22,10 @@
           <div :class="isUserAttente ? 'isUserAttente' : 'invisible'">
             En attente
           </div>
-          <div :class="debutTimer * 60 * 60 * 1000 > remainingTime && remainingTime > 0 && (statusCours === 'Ouvert' || statusCours === 'Complet') ? 'isUserAttente' : 'invisible'">
-              {{ remainingTimeFormatted }}
-          </div>
         </div>
         <div class="min-h-24 grid items-end">
           <div class="grid grid-cols-2">
-            <router-link :to="{ name: 'CoursDetail', params: { id: info.id }}" class="mt-3 mx-2 block px-3 py-2 text-center text-sm font-semibold text-violet-600 border-2 border-violet-600">
+            <router-link :to="{ name: !isAdminPath ? 'CoursDetails' : 'AdminCoursDetails', params: { id: info.id }}" class="mt-3 mx-2 block px-3 py-2 text-center text-sm font-semibold text-violet-600 border-2 border-violet-600">
                 + d'infos
             </router-link>
 
@@ -41,70 +38,56 @@
                 @updateCreation="updateCreation"
                 @openCreation="openCreation"
                 @handleAddExtraResponse="handleAddExtraResponse"
-
             />
 
-            <ButtonsCardUser v-if="!isAdminPath && remainingTime > 0"
-                :userId="userId"
-                :statusCours="statusCours"
-                :isSubscribed="isSubscribed"
-                :isUserAttente="isUserAttente"
-                @handleSubscription="handleSubscription"
-                @handleUnsubscription="handleUnsubscription"
-
+            <ButtonsCardUser v-if="!isAdminPath"
+                 :userId="userId"
+                 :coursId="props.info.id"
+                 :statusCours="statusCours"
+                 :isSubscribed="isSubscribed"
+                 :isUserAttente="isUserAttente"
+                 @updateCoursStatus="handleUpdateStatusCours"
+                 @subscriptionResponse="handleSubscriptionresponse"
+                 @unSubscriptionResponse="handleUnsubscriptionresponse"
             />
 
             <ModalConfirm
-                v-if="!userId && (statusCours === 'Ouvert' || statusCours === 'Complet')"
+                v-if="!userId && (statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet')"
                 v-model:isOpen="loginDialog"
                 title="Connexion requise"
                 message="Veuillez vous authentifier pour vous inscrire à ce cours."
                 @login="redirectToLogin"
             >
-              {{ statusCours === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
+              {{ statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
             </ModalConfirm>
 
           </div>
         </div>
       </div>
     </div>
-    <div :class="['card_status', colors[statusCours]]">
-      {{ (statusCours === "Ouvert"|| statusCours === "Complet") && remainingTime < 0 ? 'Imminent' : statusCours }}
-    </div>
+    <StatusCoursTag
+        class="statusCoursTag"
+        :statusCours="statusCours"
+    />
   </div>
 </template>
 
 <script setup>
-import {ref, computed, onMounted, onUnmounted} from 'vue';
+import {ref, computed} from 'vue';
 import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
-import {useSubscription, useUnSubscription} from "../utils/useSubscribing";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
 import { useRouter } from 'vue-router';
 import ModalConfirm from "./modal/ModalConfirm.vue";
 import ButtonsCardAdmin from "./admin/ButtonsCardAdmin.vue";
 import ButtonsCardUser from "./user/ButtonsCardUser.vue";
+import StatusCoursTag from "./StatusCoursTag.vue";
 
 const userStore = useUserStore();
 const userId = userStore.userId;
 const router = useRouter();
-const emit = defineEmits(['subscriptionResponse', 'deleteCoursResponse', 'cancelCoursResponse', 'handleSubscription', 'handleUnsubscription']);
-const delaiLimite = 30 * 60 * 1000;
-const debutTimer = ref(6);
+const emit = defineEmits(['subscriptionResponse', 'deleteCoursResponse', 'cancelCoursResponse', 'handleSubscription', 'handleUnsubscription', 'updateCoursStatus']);
 
-// Couleurs par statut
-const colors = {
-  'En cours': 'bg-lime-300',
-  'Ouvert': 'bg-emerald-300',
-  'Complet': 'bg-blue-300',
-  'Annulé': 'bg-yellow-300',
-  'En création': 'bg-purple-300',
-  'Passé': 'bg-red-300',
-  'Archivé': 'bg-stone-300',
-  'Imminent': 'bg-orange-300',
-};
-
-// Props
 const props = defineProps({
   info: {
     type: Object,
@@ -126,68 +109,25 @@ const redirectToLogin = () => {
 
 // Formatage des dates
 const dateDebut = computed(() => new Date(props.info.dateCours));
-
 const formattedDate = computed(() =>
     useDateFormat(dateDebut.value, 'dddd D MMMM YYYY').value
 );
-
 const capitalizedDate = computed(() =>
     formattedDate.value.charAt(0).toUpperCase() + formattedDate.value.slice(1)
 );
-
 const formattedHour = computed(() => {
     const hours = dateDebut.value.getUTCHours();
     const minutes = String(dateDebut.value.getUTCMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 });
-
 // Initialiser le statut du cours comme réactif
-const statusCours = ref(props.info.statusCours.libelle);
-let usersCount = ref(props.info.usersCours.filter(cours => cours.isEnAttente === false).length);
-const remainingTime = ref(0);
-
-
-
+const statusCours = ref(props.info.statusCours);
+const usersCount = ref(props.info.usersCours.filter(cours => cours.isEnAttente === false).length);
 // Vérifier si l'utilisateur est inscrit
 const isSubscribed = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === false));
+// Vérifier si l'utilisateur est en attente
 const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === true));
 
-
-
-onMounted(() => {
-    if (props.info.statusCours.id === 1 || props.info.statusCours.id === 2) {
-        // Capture la valeur initiale
-        let initialTime = Date.now();
-
-        const interval = setInterval(() => {
-            // Calcule le temps écoulé depuis le début
-            initialTime += 1000;
-            remainingTime.value = new Date(dateDebut.value.getTime()).toISOString() - delaiLimite - initialTime;
-
-            if (remainingTime.value <= 0) {
-                clearInterval(interval);
-            }
-        }, 1000);
-
-        // Nettoyer l'intervalle lors de la destruction du composant
-        onUnmounted(() => {
-            clearInterval(interval);
-        });
-    }
-});
-
-
-
-// Convertir le temps restant en heures et minutes
-const remainingTimeFormatted = computed(() => {
-    const hours = Math.abs(Math.floor(remainingTime.value / (1000 * 60 * 60)));
-    const minutes = Math.abs(Math.floor((remainingTime.value % (1000 * 60 * 60)) / (1000 * 60)));
-    const seconds = Math.abs(Math.floor((remainingTime.value % (1000 * 60)) / 1000));
-
-    const formattedMinutes = String(minutes).padStart(2, '0');
-    const formattedSeconds = String(seconds).padStart(2, '0');
-    return `${hours}h${formattedMinutes}m${formattedSeconds}s`;
-});
 
 const handleAddExtraResponse = ({ type, message, statusChange }) => {
   if (type === 'success') {
@@ -203,51 +143,6 @@ const handleAddExtraResponse = ({ type, message, statusChange }) => {
       type: type,
       message: message,
     });
-  }
-};
-
-
-// Gestion de l'inscription
-const handleSubscription = async (isAttente) => {
-  const result = await useSubscription(props.info.id, isAttente);
-  statusCours.value = result.statusChange || statusCours.value;
-  usersCount.value = result.usersCount;
-
-  if (result.success) {
-    // Si inscription réussie
-    isUserAttente.value = !!isAttente;
-    isSubscribed.value = !isAttente;
-    emit('subscriptionResponse', {
-      type: 'success',
-      message: result.message
-    });
-  } else {
-    // Si inscription échouée
-    emit('subscriptionResponse', {
-      type: result.type,
-      message: result.message
-    });
-  }
-};
-
-
-// Gestion de la désinscription
-const handleUnsubscription = async (isAttente) => {
-  const result = await useUnSubscription(props.info.id, isAttente);
-  if (result.success) {
-    isAttente ? isUserAttente.value = false : isSubscribed.value = false;
-    statusCours.value = result.statusChange;
-    usersCount.value = result.usersCount;
-    emit('subscriptionResponse', {
-      type: 'success',
-      message: result.message
-    });
-  } else {
-      // Si la desinscription a échouée
-      emit('subscriptionResponse', {
-          type: result.type,
-          message: result.message
-      });
   }
 };
 
@@ -308,6 +203,27 @@ const openCreation = async () => {
     });
   }
 };
+
+const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscribedValue, isUserAttenteValue }) => {
+  statusCours.value = statusCoursValue;
+  usersCount.value = usersCountValue;
+  isSubscribed.value = isSubscribedValue;
+  isUserAttente.value = isUserAttenteValue;
+};
+
+const handleSubscriptionresponse = ({ type, message }) => {
+  emit('subscriptionResponse', {
+    type: type,
+    message: message,
+  });
+};
+
+const handleUnsubscriptionresponse = ({ type, message }) => {
+  emit('subscriptionResponse', {
+    type: type,
+    message: message,
+  });
+}
 
 </script>
 
@@ -371,21 +287,12 @@ const openCreation = async () => {
   z-index: 100;
 }
 
-.card_status {
+.statusCoursTag {
   position: absolute;
-  width: 100px;
-  height: 40px;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   top: -10px;
   right: 10px;
-  border-radius: 3px;
-  transition: all 0.3s ease-in-out;
   z-index: 11;
 }
-
 
 .card_title {
   font-size: 1.5rem;

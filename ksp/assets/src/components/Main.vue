@@ -1,6 +1,6 @@
 <template>
   <main>
-    <section><router-view/></section>
+    <section class="w-full"><router-view/></section>
   </main>
 </template>
 
@@ -22,8 +22,6 @@ main{
 
 section{
   width: 100%;
-  margin: 10px 30px;
-  padding: 0 15px;
 }
 
 

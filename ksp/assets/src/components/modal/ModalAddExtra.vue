@@ -17,7 +17,7 @@
             :items="userOptions"
             item-title="nom"
             item-value="id"
-            item-color="#ccc"
+            bg-color="red"
             label="Utilisateur"
         ></v-select>
       </v-card-text>
@@ -35,7 +35,7 @@
 import { ref, computed, onMounted } from 'vue';
 import CustomButton from '../CustomButton.vue';
 import { useSubscription } from "../../utils/useSubscribing";
-import 'vuetify/styles';
+
 // Définition des props
 const props = defineProps({
   title: {

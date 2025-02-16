@@ -5,7 +5,6 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import Home from '../views/Home.vue'
-import CoursDetail from '../views/CoursDetails.vue'
 import App from '../App.vue'
 import CoursForm from "../views/CoursForm.vue";
 import useGetElementsToken from "../utils/useGetElementsToken";
@@ -26,7 +25,7 @@ const router = createRouter({
                 { path: '/inscriptions', name: 'Inscriptions', component: () =>  import('../views/Inscriptions.vue')},
                 { path: '/schedule', name: 'Programme', component: () => import('../views/Schedule.vue')},
                 { path: '/contact', name: 'Contact', component: () => import('../views/Contact.vue') },
-                { path: '/coursDetails/:id', name: 'CoursDetail', component: CoursDetail },
+                { path: '/coursDetails/:id', name: 'CoursDetails', component:() => import('../views/CoursDetails.vue')},
                 { path: '/login', name: 'Login', component: () => import('../views/LoginForm.vue')},
                 { path: '/register', name: 'Register', component: () => import('../views/Register.vue')},
                 { path: '/cours/acheter', name: 'AcheterCours', component: () => import('../views/AcheterCours.vue')},
@@ -44,6 +43,7 @@ const router = createRouter({
             name: 'admin',
             children: [
                 { path: '', name: 'Statistiques', component: () => import('../views/admin/DataStats.vue'), meta: {requiresAdmin: true}},
+                { path: 'profile', name: 'AdminProfile', component: Profile, meta: {requiresAdmin: true}},
                 {
                   path: 'cours',
                   name: 'Cours',
@@ -54,7 +54,7 @@ const router = createRouter({
                       { path: 'edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
                       { path: 'coursType/add', name: 'CreateTypeCours', label: "Créer Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
                       { path: 'coursType/edit', name: 'EditTypeCours', label: "Modifier Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
-                      { path: 'profile', name: 'AdminProfile', component: Profile, meta: {requiresAdmin: true}}
+                      { path: 'coursDetails/:id', name: 'AdminCoursDetails', component: () => import('../views/CoursDetails.vue'), meta: {requiresAdmin: true}}
                   ]
                 },
             ]
