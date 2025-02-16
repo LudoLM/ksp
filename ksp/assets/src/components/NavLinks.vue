@@ -130,7 +130,7 @@ onClickOutside(target, () => {
 const routes = computed(() =>
     router.getRoutes().filter((r) =>
         ![
-            "CoursDetail",
+            "CoursDetails",
             "CreateCours",
             "Login",
             "Register",
@@ -144,7 +144,8 @@ const routes = computed(() =>
             "CoursAdmin",
             "Statistiques",
             "Cours",
-            "AdminProfile"
+            "AdminProfile",
+            "AdminCoursDetails"
         ].includes(r.name)
     )
 );

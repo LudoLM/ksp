@@ -1,81 +1,221 @@
-<template>
-  <div class="coursDetail">
-    <div class="container w-full">
-      <div v-if="cours" class="details_wrapper">
-        <div class="img_wrapper">
-          <img :src="require(`../../images/uploads/${cours.typeCours.thumbnail}`)" alt="">
-        </div>
-        <div class="infos_wrapper flex flex-col">
-          <p>Type de cours: {{ cours.typeCours.libelle }}</p>
-          <p>Date: {{ formattedDate }}</p>
-          <p>Heure: {{ formattedHour }}</p>
-          <p>Durée: {{ cours.duree }} minutes</p>
-          <p>Description: {{ cours.description }}</p>
-          <div class="button flex justify-center">
-            <div>
-              <CustomButton @click="subscription">S'inscrire</CustomButton>
-            </div>
-            <div>
-              <router-link :to="{ name: 'Accueil' }"><CustomButton>Retour</CustomButton></router-link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import {ref, computed, onMounted} from 'vue';
-import {useRoute} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import {useDateFormat} from '@vueuse/core';
 import {useGetCoursById} from "../utils/useActionCours";
 import CustomButton from "../components/CustomButton.vue";
+import {VAlert} from "vuetify/components";
+import ButtonsCardUser from "../components/user/ButtonsCardUser.vue";
+import { useUserStore } from "../store/user";
+import StatusCoursTag from "../components/StatusCoursTag.vue";
+import ModalConfirm from "../components/modal/ModalConfirm.vue";
+import ModalUnsubscribeUsers from "../components/modal/ModalUnsubscribeUsers.vue";
 
 const route = useRoute();
+const router = useRouter();
 const coursId = route.params.id;
+const userStore = useUserStore();
+const userId = ref(userStore.userId);
 const cours = ref(null);
+const isAdminPath = route.path.startsWith('/admin');
+// Recupoerer la liste des participants
+const usersSubscribed = ref([]);
+// Recuperer la liste des participants en attente
+const usersOnStandby = ref([]);
+const loginDialog = ref(false);
+const UnsubscribeUsersDialog = ref(false);
+const usersCount = ref(0);
+const isSubscribed = ref(false);
+const isUserAttente = ref(false);
+const dateStart = computed(() => new Date(cours.value?.dateCours));
+const formattedDate = computed(() => useDateFormat(dateStart.value, 'DD/MM/YYYY').value);
+const formattedHour = computed(() => useDateFormat(dateStart.value, 'HH:mm').value);
+const alertVisible = ref(false);
+const alertType = ref('info');
+const alertMessage = ref('');
+
+const emit = defineEmits(['handleSubscription', 'handleUnsubscription']);
+
+
+const redirectToLogin = () => {
+    router.push({ name: 'Login' });
+};
 
 const coursDetails = async () => {
   const result = await useGetCoursById(coursId);
   cours.value = JSON.parse(result);
+  usersCount.value = cours.value.usersCours.filter(userCours => userCours.isEnAttente === false).length;
+  usersSubscribed.value = cours.value.usersCours.filter(userCours => userCours.isEnAttente === false);
+  usersOnStandby.value = cours.value.usersCours.filter(userCours => userCours.isEnAttente === true);
 }
 
 
-onMounted(coursDetails);
+onMounted( async () => {
+   await coursDetails();
+   userId.value = userStore.userId;
+   isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && !usersCours.isEnAttente);
+   isUserAttente.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && usersCours.isEnAttente);
+});
 
 
-const dateDebut = computed(() => new Date(cours.value?.dateCours));
-const formattedDate = computed(() => useDateFormat(dateDebut.value, 'DD/MM/YYYY').value);
-const formattedHour = computed(() => useDateFormat(dateDebut.value, 'HH:mm').value);
+const handleUpdateUnsubscribeUsersValue = ({ statusCoursValue, usersSubscribedValue }) => {
+    cours.value.statusCours = statusCoursValue;
+    usersSubscribed.value = usersSubscribedValue;
+    usersCount.value = usersSubscribed.value.length;
+};
+
+const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscribedValue, isUserAttenteValue }) => {
+    cours.value.statusCours = statusCoursValue;
+    usersCount.value = usersCountValue;
+    isSubscribed.value = isSubscribedValue;
+    isUserAttente.value = isUserAttenteValue;
+};
+
+const handleSubscriptionResponse = ({ type, message }) => {
+    alertType.value = type;
+    alertMessage.value = message;
+    alertVisible.value = true;
+    setTimeout(() => {
+        alertVisible.value = false;
+    }, 5000);
+};
+
+const handleUnSubscriptionResponse = ({ type, message }) => {
+    alertType.value = type;
+    alertMessage.value = message;
+    alertVisible.value = true;
+    setTimeout(() => {
+        alertVisible.value = false;
+    }, 5000);
+}
 </script>
+
+
+<template>
+    <v-alert v-model="alertVisible" :type="alertType" dismissible>
+        {{ alertMessage }}
+    </v-alert>
+    <div class="coursDetails">
+        <div v-if="cours" class="details_wrapper w-full relative">
+            <img class="w-full" :src="require(`../../images/uploads/${cours.typeCours.thumbnail}`)" alt="">
+            <div class="infos_wrapper">
+                <div class="infos_container">
+                    <div class="flex justify-between items-baseline">
+                        <div class="date text-indigo-400 font-bold mb-10 flex items-center">Le {{ formattedDate }} à {{ formattedHour }}</div>
+                        <StatusCoursTag
+                            :statusCours="cours.statusCours" />
+                    </div>
+                    <div>
+                        <h2 class="text-white mb-4">{{ cours.typeCours.libelle }}</h2>
+                        <div class="flex justify-between mb-4">
+                            <div class="duree text-gray-400">Durée: {{ cours.duree }} min</div>
+                            <div :style="{ visibility: cours.nbInscriptionMax - usersCount <= 3 ? 'visible' : 'hidden' }" class="dispo quantity">
+                                Dispo:&nbsp;<span class="infoRestante">{{ cours.nbInscriptionMax - usersCount >= 0 ? cours.nbInscriptionMax - usersCount : 0}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="description mt-10 text-gray-200">{{ cours.description }}</div>
+
+                    <div class="w-full ml-auto mr-auto mt-5">
+                        <!--                    Barre delimitation-->
+                        <div class="w-2/3 h-0.5 bg-gray-200 mx-auto"></div>
+                        <div :class="isSubscribed || isUserAttente ? 'flex flex-col items-end py-5 mt-2' : 'flex flex-col items-end py-5 mt-2 invisible'">
+                            <div :class="isSubscribed ? 'isSubscribedTag' : 'invisible'">Je participe</div>
+                            <div :class="isUserAttente ? 'text-red-500' : 'invisible'">En attente</div>
+                        </div>
+
+                        <div class="button flex justify-center">
+                            <ButtonsCardUser v-if="!isAdminPath"
+                                             :userId="userId"
+                                             :coursId="cours.id"
+                                             :statusCours="cours.statusCours"
+                                             :isSubscribed="isSubscribed"
+                                             :isUserAttente="isUserAttente"
+                                             @updateCoursStatus="handleUpdateStatusCours"
+                                             @subscriptionResponse="handleSubscriptionResponse"
+                                             @unSubscriptionResponse="handleUnSubscriptionResponse"
+
+                            />
+
+<!--                            Ouvre une modale pour désinscrire plusieurs participants-->
+                            <div v-if="isAdminPath && (cours.statusCours.id === 1 || cours.statusCours.id === 2)">
+                                <ModalUnsubscribeUsers
+                                    :cours="cours"
+                                    :usersSubscribed="usersSubscribed"
+                                    :isModalUnsubscribedUsersOpen="UnsubscribeUsersDialog"
+                                    :usersOnStandby="usersOnStandby"
+                                    @updateUnsubscribeUsersValue="handleUpdateUnsubscribeUsersValue"
+                                />
+                            </div>
+
+                            <ModalConfirm
+                                v-if="!userId && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
+                                v-model:isOpen="loginDialog"
+                                title="Connexion requise"
+                                message="Veuillez vous authentifier pour vous inscrire à ce cours."
+                                @login="redirectToLogin"
+                            >
+                                {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
+                            </ModalConfirm>
+                            <div>
+                                <router-link :to="{ name: 'Calendar' }"><CustomButton>Retour</CustomButton></router-link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</template>
 
 <style scoped lang="scss">
 
-.coursDetail {
-  background-color: #fff;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
 .details_wrapper {
-  display: flex;
-  width: 100%; /* S'assurer que le conteneur utilise toute la largeur disponible */
-}
+    display: flex;
+    position: relative;
 
-.img_wrapper {
-  width: 80%;
-  flex-shrink: 0;
-}
 
-.img_wrapper img {
-  width: 100%; /* L'image prend toute la largeur de son conteneur */
-  height: auto; /* Garder le ratio de l'image */
+    img {
+        width: 100%;
+        min-height: 60vh;
+        object-fit: cover;
+    }
 }
 
 .infos_wrapper {
-  width: 20%;
-  padding: 20px;
+    position: absolute;
+    width: 50%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    display: flex;
+    flex-direction: column;
+
+    .infos_container {
+        height: 100%;
+        margin: 4vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .date {
+      text-transform: uppercase;
+      letter-spacing: .2rem;
+      font-size: clamp(0.6rem, .8vw, 1rem);
+    }
 }
 
+.isSubscribedTag, .isUserAttenteTag, .description, .duree, .dispo, .susbscribed, .onStandBy {
+    font-size: clamp(0.8rem, 1vw, 1rem);
+}
+
+@media (max-width: 980px) {
+  .infos_wrapper {
+    width: 100%;
+  }
+}
 </style>

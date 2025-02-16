@@ -37,3 +37,9 @@ const colors = {
         <slot></slot>
     </button>
 </template>
+
+<style scoped>
+    button {
+        font-size: clamp(0.8rem, 1vw, .9rem);
+    }
+</style>

@@ -4,9 +4,9 @@ import CustomButton from "../CustomButton.vue";
 import ModalAddExtra from "../modal/ModalAddExtra.vue";
 import {ref} from "vue";
 
-defineProps({
+const props = defineProps({
   statusCours:{
-    type: String,
+    type: Object,
     required: true
   },
   coursId:{
@@ -17,8 +17,6 @@ defineProps({
 })
 
 const addExtraDialog = ref(false);
-
-
 const emit = defineEmits([
   'openCreation',
   'updateCreation',
@@ -30,21 +28,22 @@ const emit = defineEmits([
 </script>
 <template>
 
-  <CustomButton v-if="statusCours === 'En création'" @click="emit('openCreation')">
+  <CustomButton v-if="props.statusCours.libelle === 'En création'" @click="emit('openCreation')">
+      {{props.statusCours.libelle}}
     Ouvrir
   </CustomButton>
-  <CustomButton v-if="statusCours === 'En création'" @click="emit('updateCreation')">
+  <CustomButton v-if="props.statusCours.libelle === 'En création'" @click="emit('updateCreation')">
     Modifier
   </CustomButton>
-  <CustomButton v-if="statusCours === 'En création'" @click="emit('deleteCreation')" :color="'red'">
+  <CustomButton v-if="props.statusCours.libelle === 'En création'" @click="emit('deleteCreation')" :color="'red'">
     Supprimer
   </CustomButton>
-  <CustomButton v-if="(statusCours === 'Ouvert' || statusCours === 'Complet')" @click="emit('cancelCours')">
+  <CustomButton v-if="(props.statusCours.libelle === 'Ouvert' || props.statusCours.libelle === 'Complet')" @click="emit('cancelCours')">
     Annuler
   </CustomButton>
 
   <ModalAddExtra
-      v-if="statusCours === 'Ouvert' || statusCours === 'Complet'"
+      v-if="props.statusCours.libelle === 'Ouvert' || props.statusCours.libelle === 'Complet'"
       v-model:isOpen="addExtraDialog"
       title="Ajouter un extra"
       message="Sélectionner l'extra à ajouter."

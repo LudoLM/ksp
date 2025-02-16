@@ -16,14 +16,14 @@ class UsersCours
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['user:detail', 'cours:index'])]
+    #[Groups(['user:detail', 'cours:index', 'cours:detail'])]
     #[ORM\Column]
     private ?bool $isEnAttente = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
 
-    #[Groups(['cours:index'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     #[ORM\ManyToOne(inversedBy: 'usersCours')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
