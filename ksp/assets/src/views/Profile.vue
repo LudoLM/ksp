@@ -156,7 +156,7 @@ const getUser = async () => {
 };
 
 const handleBuyCours = () => {
-  router.push("cours/acheter");
+  router.push("formules");
 };
 
 const handleInvoicePDF = async (paiementId) => {
