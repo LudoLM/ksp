@@ -21,7 +21,7 @@ const router = createRouter({
             component: DefaultLayout,
             children: [
                 { path: '', name: 'Accueil', component: Home },
-                { path: '/schoolback', name: 'Ecole du dos', component: () => import('../views/Schoolback.vue')},
+                { path: '/coursDescriptions', name: 'Les cours', component: () => import('../views/CoursDescriptions.vue')},
                 { path: '/inscriptions', name: 'Inscriptions', component: () =>  import('../views/Inscriptions.vue')},
                 { path: '/schedule', name: 'Programme', component: () => import('../views/Schedule.vue')},
                 { path: '/contact', name: 'Contact', component: () => import('../views/Contact.vue') },

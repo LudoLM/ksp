@@ -3,7 +3,6 @@
 namespace App\Controller\Api;
 
 use App\DTO\CreateCoursDTO;
-use App\DTO\CreateTypeCoursDTO;
 use App\Entity\TypeCours;
 use App\Repository\TypeCoursRepository;
 use App\Service\FileUploaderService;
@@ -49,11 +48,14 @@ class TypeCoursController extends AbstractController
         EntityManagerInterface $em,
         ValidatorInterface $validator
     ): JsonResponse {
-        $nom = $request->request->get('nom') === "null" ? "" : $request->request->get('nom');
+
+        $nom = $request->request->get('libelle') === "null" ? "" : $request->request->get('libelle');
+        $descriptif = $request->request->get('descriptif') === "null" ? "" : $request->request->get('descriptif');
         $image = $request->files->get('image');
 
         $typeCours = new TypeCours();
         $typeCours->setLibelle($nom);
+        $typeCours->setDescriptif($descriptif);
 
         if ($image instanceof UploadedFile) {
             $fileName = "thumbnail-" . uniqid() . "." . $image->guessExtension();

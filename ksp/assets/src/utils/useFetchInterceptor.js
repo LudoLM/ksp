@@ -8,7 +8,6 @@ export async function apiFetch(url, options = {}) {
 
   // Ajoutez automatiquement l'en-tête Authorization
   const defaultHeaders = {
-    'Content-Type': 'application/json',
     Authorization: `Bearer ${localStorage.getItem('token')}`,
   };
 

@@ -13,6 +13,8 @@ date.value = date.value.toISOString().split('T')[0];
 const days = ref([]);
 const weekString = ref('');
 const uniqueTypeCoursList = ref([]);
+// get query params
+const coursId = parseInt(new URLSearchParams(window.location.search).get('coursId'));
 
 // Récupère les jours de la semaine
 const updateDaysOfWeek = () => {
@@ -90,7 +92,8 @@ const formatDay = (day) => {
 };
 
 onMounted(async () => {
-    await getCoursPerWeek();
+    // Si coursId est défini, met à jour le type de cours sélectionné sinon récupère les cours de la semaine
+    coursId !== null ? handleUpdateSelectedTypeCours(coursId) : await getCoursPerWeek();
     uniqueTypeCoursList.value = await useGetTypesCours();
 });
 
@@ -112,6 +115,7 @@ onMounted(async () => {
         </div>
         <TypeCoursFilter
             :uniqueTypeCoursList="uniqueTypeCoursList"
+            :coursId="coursId"
             @update:selectedTypeCours="handleUpdateSelectedTypeCours"
         />
     </div>

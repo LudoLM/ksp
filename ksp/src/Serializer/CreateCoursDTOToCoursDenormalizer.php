@@ -3,6 +3,7 @@
 namespace App\Serializer;
 
 
+use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
 use App\Enum\StatusCoursEnum;
 use App\Repository\StatusCoursRepository;
@@ -21,8 +22,8 @@ class CreateCoursDTOToCoursDenormalizer implements DenormalizerInterface
 
     public function denormalize($data, string $type, string $format = null, array $context = [])
     {
-        /** @var \App\DTO\CreateCoursDTO $data */
-        if (!$data instanceof \App\DTO\CreateCoursDTO) {
+        /** @var CreateCoursDTO $data */
+        if (!$data instanceof CreateCoursDTO) {
             throw new \Exception('Expected instance of CreateCoursDTO');
         }
         if (array_key_exists('object_to_populate', $context) &&  $context['object_to_populate'] instanceof Cours) {
@@ -34,13 +35,13 @@ class CreateCoursDTOToCoursDenormalizer implements DenormalizerInterface
         }
         $cours->setDuree($data->getDureeCours());
         $cours->setDateCours($data->getDateCours());
-        $cours->setDescription($data->getDescription());
+        $cours->setSpecialNote($data->getSpecialNote());
         $cours->setNbInscriptionMax($data->getNbInscriptionMax());
         $cours->setTypeCours($this->typeCoursRepository->find($data->getTypeCours()));
         return $cours;
     }
 
-    public function supportsDenormalization($data, string $type, string $format = null)
+    public function supportsDenormalization($data, string $type, string $format = null): bool
     {
         return Cours::class === $type;
     }

@@ -114,7 +114,9 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
                             </div>
                         </div>
                     </div>
-                    <div class="description mt-10 text-gray-200">{{ cours.description }}</div>
+                    <div class="descriptif">{{ cours.typeCours.descriptif }}</div>
+
+                    <div class="specialNote mt-5" v-if="cours.specialNote !== ''">Note: {{ cours.specialNote }}</div>
 
                     <div class="w-full ml-auto mr-auto mt-5">
                         <!--                    Barre delimitation-->
@@ -174,6 +176,7 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
 .details_wrapper {
     display: flex;
     position: relative;
+    max-height: 80vh;
 
 
     img {
@@ -209,7 +212,7 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
     }
 }
 
-.isSubscribedTag, .isUserAttenteTag, .description, .duree, .dispo, .susbscribed, .onStandBy {
+.isSubscribedTag, .isUserAttenteTag, .specialNote, .descriptif, .duree, .dispo, .susbscribed, .onStandBy {
     font-size: clamp(0.8rem, 1vw, 1rem);
 }
 
