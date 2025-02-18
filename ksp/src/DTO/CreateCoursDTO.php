@@ -3,12 +3,10 @@
 
 namespace App\DTO;
 
-use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class CreateCoursDTO
 {
-
     #[Assert\NotBlank(message: "La durée ne peut pas être vide.")]
     #[Assert\GreaterThanOrEqual(1, message: "La durée du cours doit être positive")]
     public ?int $dureeCours = null;
@@ -17,9 +15,7 @@ class CreateCoursDTO
     #[Assert\GreaterThanOrEqual('+1 day', message: "Le cours ne peut pas être créé sans un délai d'un jour.")]
     public ?\DateTimeInterface $dateCours = null;
 
-    #[Assert\NotBlank(message: "La description ne peut pas être vide.")]
-    public ?string $description = null;
-
+    public ?string $specialNote = null;
     #[Assert\NotBlank(message: "Le nombre d'inscription max ne peut pas être vide.")]
     #[Assert\GreaterThanOrEqual(1, message: "Le nombre d'inscriptions max doit être positive.")]
     public ?int $nbInscriptionMax = null;
@@ -37,9 +33,9 @@ class CreateCoursDTO
         return $this->dateCours;
     }
 
-    public function getDescription(): ?string
+    public function getSpecialNote(): ?string
     {
-        return $this->description;
+        return $this->specialNote;
     }
 
     public function getNbInscriptionMax(): ?int

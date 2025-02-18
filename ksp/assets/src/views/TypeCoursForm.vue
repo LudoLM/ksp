@@ -9,9 +9,11 @@ import {useValidationForm} from "../utils/useValidationForm";
 import {useGetTypesCours} from "../utils/useActionCours";
 import {VAlert} from "vuetify/components";
 import {apiFetch} from "../utils/useFetchInterceptor";
+import CustomTextarea from "../components/CustomTextarea.vue";
 
 const formData = ref({
   nom: null,
+  descriptif: null,
   image: null,
 });
 
@@ -35,12 +37,14 @@ const alertMessage = ref('');
 
 const errors = ref({
   libelle: null,
+  descriptif: null,
   thumbnail: null,
 });
 
 watch(() => route.name, (newRoute) => {
   origin.value = newRoute;
   formData.value.nom = null;
+  formData.value.descriptif = null;
   existingImage.value = null;
   imagePreview.value = null;
   fetchData();
@@ -60,6 +64,7 @@ const onTypeCoursChange = (event) => {
     const selectedCours = typeCoursList.value.find(cours => cours.id === parseInt(typeCoursId.value));
     if (selectedCours) {
         formData.value.nom = selectedCours.libelle;
+        formData.value.descriptif = selectedCours.descriptif;
         formData.value.image = null;
         existingImage.value = selectedCours.thumbnail;
         imagePreview.value = null;
@@ -78,6 +83,7 @@ const fetchData = async () => {
     if (origin.value === "EditTypeCours" && typeCoursList.value.length > 0) {
       typeCoursId.value = typeCoursList.value[0].id;
       formData.value.nom = typeCoursList.value[0].libelle;
+      formData.value.descriptif = typeCoursList.value[0].descriptif;
       existingImage.value = typeCoursList.value[0].thumbnail;
     }
   } catch (error) {
@@ -96,31 +102,34 @@ onMounted(() => {
 });
 
 const handleSubmit = async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
     try {
         const data = new FormData();
-        data.append("nom", formData.value.nom);
-        data.append("image", formData.value.image);
+        data.append("libelle", formData.value.nom);
+        data.append("descriptif", formData.value.descriptif);
+
+        // Si un fichier a été sélectionné, on l'ajoute
+        if (formData.value.image) {
+            data.append("image", formData.value.image);
+        }
 
         const url = origin.value === "EditTypeCours" ? urlEdition + typeCoursId.value : urlCreation;
 
         const response = await apiFetch(url, {
             method: "POST",
             headers: {
-                "Authorization": "Bearer " + localStorage.getItem("token")
+                "Accept": "application/json",
             },
-            body: data
+            body: data,
         });
 
         if (!response.ok) {
             await useValidationForm(response, errors);
+        } else {
+            router.push({ name: "CreateCours" });
         }
-        else{
-            router.push({name:"CreateCours"});
-        }
-    }
-    catch (error) {
+    } catch (error) {
         alertVisible.value = true;
         alertType.value = error.type;
         alertMessage.value = error.message;
@@ -160,6 +169,16 @@ const handleSubmit = async (event) => {
           :error="errors.libelle"
           required
       />
+
+        <CustomTextarea
+            type="text"
+            item="Descriptif"
+            id="descriptif"
+            v-model="formData.descriptif"
+            class="w-full"
+            :error="errors.descriptif"
+            required
+        />
 
       <CustomInput
           type="file"

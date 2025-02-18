@@ -21,7 +21,7 @@ const errors = ref(
     dateCours: null,
     dureeCours: null,
     nbInscriptionMax: null,
-    description: null,
+    specialNote: null,
   },
 )
 
@@ -58,7 +58,7 @@ const formData = ref({
   dateCours: localISOTime,
   dureeCours: coursData.value ? coursData.value.dureeCours : 60,
   nbInscriptionMax: 12,
-  description: "Cours sympathique",
+  specialNote: "Cours sympathique",
 });
 
   const handleSubmit = async (event) => {
@@ -70,7 +70,7 @@ const formData = ref({
       dateCours: formData.value.dateCours,
       dureeCours: parseInt(formData.value.dureeCours),
       nbInscriptionMax: parseInt(formData.value.nbInscriptionMax),
-      description: formData.value.description,
+      specialNote: formData.value.specialNote,
     };
 
     try {
@@ -78,8 +78,6 @@ const formData = ref({
         method: origin.id ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify(data),
       });
@@ -109,9 +107,8 @@ const formData = ref({
   const getCoursData = async () => {
     try {
       const response = await apiFetch("/api/getCours/" + origin.id, {
-        method: "GET",
-        headers: { "Authorization": "Bearer " + localStorage.getItem("token")}}
-      );
+        method: "GET"
+      });
 
       const data = await response.json();
       const coursData = JSON.parse(data);
@@ -120,7 +117,7 @@ const formData = ref({
       formData.value.dateCours = coursData.dateCours ? coursData.dateCours.slice(0, 16) : formData.value.dateCours;
       formData.value.dureeCours = coursData.dureeCours;
       formData.value.nbInscriptionMax = coursData.nbInscriptionMax;
-      formData.value.description = coursData.description;
+      formData.value.specialNote = coursData.specialNote;
 
 
     } catch (error) {
@@ -154,9 +151,9 @@ const formData = ref({
         <CustomSelect item="Type de cours" id="typeCours" :error="errors.typeCours" v-model="formData.typeCours" :options="typeCoursList" required/>
         <CustomInput item="Durée (minutes)" type="Number" id="dureeCours" :error="errors.dureeCours" v-model="formData.dureeCours" required/>
         <CustomInput item="Date" type="datetime-local" id="dateCours" dureeCours :error="errors.dateCours" v-model="formData.dateCours" required/>
-        <CustomInput item="Nombre de places" type="number" id="description" :error="errors.nbInscriptionMax" v-model="formData.nbInscriptionMax" required/>
+        <CustomInput item="Nombre de places" type="number" id="nbInscriptionMax" :error="errors.nbInscriptionMax" v-model="formData.nbInscriptionMax" required/>
       </div>
-        <CustomTextarea item="Description" id="description" v-model="formData.description" :error="errors.description" required class="w-full" />
+        <CustomTextarea item="Note" id="specialNote" :error="errors.specialNote" class="w-full" />
       <div class="mt-4 flex justify-center">
         <CustomButton type="submit" @click="handleSubmit">
           {{ origin.id ? "Modifier" : "Ajouter" }}

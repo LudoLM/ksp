@@ -23,6 +23,11 @@ class TypeCours
     #[Assert\NotBlank(message: "Le nom ne peut pas être vide.")]
     private ?string $libelle = null;
 
+    #[ORM\Column(type: 'text')]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
+    #[Assert\NotBlank(message: 'Le descriptif ne peut pas être vide.')]
+    private ?string $descriptif = null;
+
     #[ORM\OneToMany(mappedBy: 'typeCours', targetEntity: Cours::class, orphanRemoval: true)]
     private Collection $cours;
 
@@ -49,6 +54,18 @@ class TypeCours
     public function setLibelle(string $libelle): self
     {
         $this->libelle = $libelle;
+
+        return $this;
+    }
+
+    public function getDescriptif(): ?string
+    {
+        return $this->descriptif;
+    }
+
+    public function setDescriptif(string $descriptif): self
+    {
+        $this->descriptif = $descriptif;
 
         return $this;
     }

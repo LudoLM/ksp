@@ -3,22 +3,27 @@
 import {ref, watch} from "vue";
 import CustomSelect from "../CustomSelect.vue";
 
-
-defineProps({
+const props = defineProps({
     uniqueTypeCoursList: {
         type: Array,
-        required: true
-    }
+        required: true,
+    },
+    coursId: {
+        type: Number,
+    },
 });
 
+// Vérifier et utiliser une valeur par défaut locale pour éviter NaN
+const selectedTypeCours = ref(props.coursId || 0);
+
 const emit = defineEmits(['update:selectedTypeCours']);
-const selectedTypeCours = ref(0);
 
 watch(selectedTypeCours, (newValue) => {
     emit('update:selectedTypeCours', newValue);
 });
 
 </script>
+
 
 <template>
 
@@ -27,7 +32,7 @@ watch(selectedTypeCours, (newValue) => {
             <!-- Sélection du type de cours -->
             <div class="form-item">
                 <CustomSelect
-                    :options="uniqueTypeCoursList"
+                    :options="props.uniqueTypeCoursList"
                     v-model="selectedTypeCours"
                     item=""
                     id="Tous les cours"

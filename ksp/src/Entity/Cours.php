@@ -29,7 +29,7 @@ class Cours
 
     #[ORM\Column(length: 255)]
     #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update"])]
-    private ?string $description = null;
+    private ?string $specialNote = null;
 
     #[ORM\Column]
     #[Groups(['cours:index', 'cours:detail', "cours:create", "cours:update", 'cours_filling:index'])]
@@ -108,17 +108,17 @@ class Cours
     /**
      * @return string|null
      */
-    public function getDescription(): ?string
+    public function getSpecialNote(): ?string
     {
-        return $this->description;
+        return $this->specialNote;
     }
 
     /**
-     * @param string|null $description
+     * @param string|null $specialNote
      */
-    public function setDescription(?string $description): void
+    public function setSpecialNote(?string $specialNote): void
     {
-        $this->description = $description;
+        $this->specialNote = $specialNote;
     }
 
     /**

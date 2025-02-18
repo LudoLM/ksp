@@ -17,11 +17,9 @@ class CoursFixtures extends Fixture implements DependentFixtureInterface
         for ($i = 1; $i < 300; $i++) {
             $cours[$i] = new Cours();
             $cours[$i]->setDateCours($faker->dateTimeBetween('-1 week', '+3 month'));
-            $cours[$i]->setDateLimiteInscription($faker->dateTimeBetween('-3 week', '-1 week'));
             $cours[$i]->setDuree($faker->numberBetween(30, 120));
             $cours[$i]->setNbInscriptionMax($faker->numberBetween(3, 10));
-            $cours[$i]->setDescription("blabla");
-            $cours[$i]->setTarif(20);
+            $cours[$i]->setSpecialNote("blabla");
             $cours[$i]->setTypeCours($this->getReference("typeCours" . $faker->numberBetween(0, 5)));
             $cours[$i]->setStatusCours($this->getReference("statusCours" . $faker->numberBetween(0, 6)));
             $manager->persist($cours[$i]);
