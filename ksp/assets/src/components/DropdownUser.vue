@@ -138,7 +138,7 @@ onClickOutside(target, () => {
             </div>
             <div v-else>
               <div class="loginButtons">
-                <router-link :to='{name: "Register"}' class="createCount">"Créer un compte</router-link>
+                <router-link :to='{name: "Register"}' class="createCount">Créer un compte</router-link>
                 <router-link :to='{name: "Login"}' class="identifier"><img src="../../icons/user.svg"/><span class="identifier_text">Me connecter</span></router-link>
               </div>
             </div>

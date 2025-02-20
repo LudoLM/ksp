@@ -17,7 +17,6 @@ main{
   display: flex;
   justify-content: center;
   flex-grow: 1;
-  margin-top: 123px;
 }
 
 section{

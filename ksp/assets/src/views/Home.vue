@@ -1,216 +1,282 @@
 <template>
-  <div class="container">
-    <!-- Affichage d'un message de validation -->
-    <v-alert v-model="alertVisible" :type="alertType" dismissible>
-      {{ alertMessage }}
-    </v-alert>
-   <HeroBanner v-if="!isAdminPath"/>
-    <div class="title_wrapper">
-      <h2>{{ title }}</h2>
+    <div class="banner">
+        <img src="../../images/banner4.jpg" alt="">
+        <div class="title">
+            <h1>Kiné Sport Santé</h1>
+            <button>
+                <router-link :to="{name:'Calendar'}">S'inscrire aux cours</router-link>
+            </button>
+        </div>
     </div>
+    <div>
+        <div class="centerPart">
+            <div class="centerWrapper flex justify-center items-center">
+                <div class="image">
+                    <img src="../../images/banner2.jpg" alt="">
+                </div>
+                <div class="text">
+                    <div class="flex flex-col justify-center items-end mr-2 mb-6">
+                        <h3>Le centre</h3>
+                        <span class="flex gap-2">
+                            <h6>{{ store.address }} {{ store.fullAddress }}</h6>
+                            <a href="https://maps.app.goo.gl/ApZ1E35srhDT2ynK7">
+                                <div class="pinWrapper">
+                                    <img src="../../icons/pin.svg"/>
+                                </div>
+                            </a>
+                        </span>
+
+                    </div>
+
+                    <p>Aujourd’hui, douleurs et fatigue physique font malheureusement partie de notre quotidien : mal de dos, raideur articulaire, tensions musculaires... Comme pour beaucoup de problème de santé, notre mode de vie (sédentarisme, alimentation, mauvais sommeil, stress,…) est en lien direct avec ces souffrances quotidiennes.</p>
+                    <p>Nous vous proposons donc des METHODES SIMPLES ET EFFICACES pour vous aider à changer les habitudes : le SPORT SANTE ! Ces cours vous permettront de comprendre et de soulager vos douleurs.</p>
+                    <p>Vous y apprendrez les règles de bon fonctionnement de l’organisme : schéma corporel, posture quotidienne, mobilité articulaire, renforcement musculaire, respiration, coordination, équilibre, étirements, gestes et posture et détente… Ces séances de gymnastique ont également un but préventif et vous permettront d’empêcher les récidives.</p>
+                </div>
+            </div>
+        </div>
+        <div class="coachPart">
+            <div class="coachWrapper flex justify-between items-center w-full">
+                <div class="text">
+                    <div class="flex flex-col justify-center items-start mb-6">
+                        <h3>La coach</h3>
+                        <h6 class="font-bold">{{ store.fullName }} - Masseur-Kinésithérapeute DE</h6>
+                    </div>
+                    <div class="image image_mobile">
+                        <div class="w-1/2 flex justify-center items-center">
+                            <img class="rounded-full" src="../../images/servane.jpg" alt="">
+                        </div>
+                    </div>
+                    <p>En choisissant le métier de masseur kinésithérapeute, je voulais aider et soigner les gens, tout en gardant comme objectif de pouvoir me rapprocher du milieu sportif. Avec mes spécialisations en rééducation du dos, des abdominaux et du périnée, et plus récemment mes formations en sport santé, je vous propose des cours de gym adaptés à vos besoins.</p>
+                </div>
+                <div class="image image_desktop">
+                    <div class="w-1/2">
+                        <img class="rounded-full" src="../../images/servane.jpg" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="assetsPart">
+            <div class="w-full">
+                <div class="text">
+                    <div class="flex flex-col justify-center items-start h-full">
+                        <div class="flex flex-col justify-center items-start mb-6">
+                            <h3>Les atouts</h3>
+                        </div>
+                        <ul class="flex flex-col justify-lg-space-around gap-8 w-full mt-10">
+                            <li class="flex items-center">Encadrement par un professionnel de santé</li>
+                            <li class="flex items-center">Cours en petits groupes (10 personnes max)</li>
+                            <li class="flex items-center"><div class="w-3/4">Bilan sport santé possible (RDV sur Doctolib)</div><button><a target="_blank" href="https://www.doctolib.fr/masseur-kinesitherapeute/mordelles/servane-cosqueric-mordelles/booking/availabilities?specialityId=9&telehealth=false&placeId=practice-567335&motiveCategoryIds%5B%5D=338126&motiveIds%5B%5D=11667176&bookingFunnelSource=profile">Prendre RDV</a></button></li>
+                            <li class="flex items-center"><div class="w-3/4">Séance de coaching individuel proposé (RDV sur Doctolib)</div><button><a target="_blank" href="https://www.doctolib.fr/masseur-kinesitherapeute/mordelles/servane-cosqueric-mordelles/booking/availabilities?specialityId=9&telehealth=false&placeId=practice-567335&motiveCategoryIds%5B%5D=338126&motiveIds%5B%5D=11667177&bookingFunnelSource=profile">Prendre RDV</a></button></li>
+                            <li class="flex items-center">Exercices et conseils personnalisés</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
 
 
-    <div class="buttonsFilters">
-      <router-link :to="{name: 'CreateCours'}"><CustomButton v-if="isAdminPath">Ajouter un cours</CustomButton></router-link>
-      <CoursFilters
-          :uniqueTypeCours="uniqueTypeCoursList"
-          :uniqueStatusCours="uniqueStatusCoursList"
-          :selectedCoursId="selectedCoursId"
-          :selectedDate="selectedDate"
-          :selectedStatusId="selectedStatusId"
-          @update:selectedCoursId="updateSelectedCoursList"
-          @update:selectedDate="updateSelectedDateList"
-          @update:selectedStatusId="updateStatusCoursList"
-          @resetInfos="resetInfos"
-      />
     </div>
-
-    <div class="gridCards p-12">
-      <ul v-if="totalItems > 0">
-        <li v-for="info in infos" :key="info.id">
-          <CoursCard
-              :info="info"
-              :isAdminPath="isAdminPath"
-              @subscriptionResponse="handleSubscriptionResponse"
-              @deleteCoursResponse="handleDeleteCoursResponse"
-              @cancelCoursResponse="handleCancelCoursResponse"
-          />
-        </li>
-      </ul>
-      <p v-else class="flex justify-center font-bold">Il n'y a pas de cours correspondant à la recherche</p>
-    </div>
-    <div class="pagination">
-      <CustomButton :class="currentPage === 1 ? 'invisible' : 'visible'" :color="'gray'" @click="prevPage" :disabled="currentPage === 1">Précédent</CustomButton>
-      <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-      <CustomButton :class="currentPage === totalPages ? 'invisible' : 'visible'" :color="'gray'" @click="nextPage" :disabled="currentPage === totalPages">Suivant</CustomButton>
-    </div>
-  </div>
 </template>
 
 <script setup>
-import {ref, onMounted, computed, watch} from 'vue';
-import CoursCard from "../components/CoursCard.vue";
-import {VAlert} from "vuetify/components";
-import CoursFilters from "../components/CoursFilters.vue";
-import { useRoute } from "vue-router";
-import {useGetCours, useGetStatusCours, useGetTypesCours} from "../utils/useActionCours";
-import CustomButton from "../components/CustomButton.vue";
-import HeroBanner from "../components/user/HeroBanner.vue";
-
-const infos = ref([]);
-const selectedCoursId = ref(null);
-const selectedDate = ref(null);
-const selectedStatusId = ref(null);
-const currentPage = ref(1);
-const uniqueTypeCoursList = ref([]);
-const uniqueStatusCoursList = ref([]);
-const route = useRoute();
-const totalItems = ref(0);
-const maxPerPage = ref(window.innerWidth > 1460 ? 20 : window.innerWidth > 1110 ? 12 : 10);
-const totalPages = ref(1);
-const isAdminPath = computed(() => route.path.startsWith('/admin'));
-const title = isAdminPath ? 'Liste des cours' : 'Les cours à venir';
-
-
-// Appel de fetchData lors du montage
-onMounted(async () => {
-  alertMessage.value = route.query.alertMessage || '';
-  alertType.value = route.query.alertType || 'success';
-  alertVisible.value = route.query.alertVisible === 'true';
-
-  setTimeout(() => {
-    alertVisible.value = false;
-  }, 5000);
-
-
-  await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
-  uniqueTypeCoursList.value = await useGetTypesCours();
-  uniqueStatusCoursList.value = await useGetStatusCours();
-  if (!isAdminPath.value) {
-      uniqueStatusCoursList.value = uniqueStatusCoursList.value.filter(status => status.id !== 4 && status.id !== 6 && status.id !== 7);
-  }
-});
-
-watch(isAdminPath, async () => {
-    uniqueStatusCoursList.value = await useGetStatusCours();
-    if (!isAdminPath.value) {
-        uniqueStatusCoursList.value = uniqueStatusCoursList.value.filter(status => status.id !== 4 && status.id !== 6 && status.id !== 7);
-    }
-
-    await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
-});
-
-watch(() => route.query, () => {
-    window.location.reload();
-});
-
-// Déclaration des variables pour l'alerte
-const alertVisible = ref(false);
-const alertType = ref('success');
-const alertMessage = ref('');
-
-// Fonction pour gérer l'événement subscriptionResponse
-const handleSubscriptionResponse = ({ type, message }) => {
-  alertType.value = type;
-  alertMessage.value = message;
-  alertVisible.value = true;
-
-  // Masquer l'alerte après 3 secondes
-  setTimeout(() => {
-    alertVisible.value = false;
-  }, 3000);
-};
-
-const handleDeleteCoursResponse = ({ type, message, id }) => {
-  alertType.value = type;
-  alertMessage.value = message;
-  alertVisible.value = true;
-
-  // Masquer l'alerte après 3 secondes
-  setTimeout(() => {
-    alertVisible.value = false;
-  }, 3000);
-
-  // Supprimer le cours de la liste
-  infos.value = infos.value.filter(info => info.id !== id);
-};
-
-const handleCancelCoursResponse = ({ type, message }) => {
-  alertType.value = type;
-  alertMessage.value = message;
-  alertVisible.value = true;
-
-  // Masquer l'alerte après 3 secondes
-  setTimeout(() => {
-    alertVisible.value = false;
-  }, 3000);
-};
-
-
-// Mise à jour des filtres lorsqu'un événement est reçu
-const updateSelectedCoursList = async (value) => {
-  selectedCoursId.value = value;
-  currentPage.value = 1;
-  await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
-};
-
-const updateSelectedDateList = async (value) => {
-  selectedDate.value = value;
-  currentPage.value = 1;
-  await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
-};
-
-const updateStatusCoursList = async (value) => {
-  selectedStatusId.value = value;
-  currentPage.value = 1;
-  await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
-};
-
-
-// Méthodes pour la pagination
-const resetInfos = () => {
-  selectedCoursId.value = null;
-  selectedDate.value = '';
-};
-const nextPage = async () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
-  }
-};
-
-const prevPage = async () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-    await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
-  }
-};
+import { infos } from "../store/index";
+const store = infos();
 </script>
 
 
-<style scoped>
+<style scoped lang="scss">
 
-.container {
-  min-width: 100%;
+.banner {
+    height: 50vh;
+    object-fit: cover;
+    position: relative;
+
+    img{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(70%);
+    }
+
+    .title{
+        position: absolute;
+        top: 70%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+
+
+        button{
+            background: #5e2ca5;
+            font-size: clamp(0.6rem, 1vw, .8rem);
+            padding: 10px;
+            border-radius: 5px;
+
+            &:hover{
+                background: #731dd3;
+            }
+        }
+    }
 }
 
-.buttonsFilters {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 5rem;
+.text{
+    width: 50%;
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    gap: 2vh;
+
+
+
+    h3{
+        font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+        color:#fff;
+        text-align: right;
+    }
+
+    h6{
+        font-size: clamp(0.6rem, 1.2vw, .8rem);
+        color: #e2a945;
+        text-align: right;
+    }
+
+    .pinWrapper{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #e2a945;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+    }
+
+    p{
+        font-size: clamp(0.8rem, 1.5vw, 1rem);
+        color: #aba9a9;
+    }
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-top: 5rem;
-  margin-bottom: 5rem;
-  padding: 0 5rem;
-    button {
-      width: 200px;
+
+.centerPart, .coachPart, .assetsPart {
+    width: 100%;
+    background: #27272A;
+    padding: 6vw;
+    display: flex;
+}
+
+.image{
+    width: 50%;
+    height: 50vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+
+.coachPart{
+    background: transparent;
+
+    h3{
+        color: #5e2ca5;
+    }
+    p{
+        color: #27272A;
+    }
+
+    .image{
+        max-width: 600px;
+        width: 70%;
+        height: 50%;
+    }
+
+    .image_mobile{
+        display: none;
+    }
+}
+
+.assetsPart{
+    background: #fff;
+    color: #2e2e2e;
+
+    h3{
+        color: #27272A;
+    }
+
+    li{
+        padding-left: 20px;
+        border-left: 2px solid #e2a945;
+        height: 40px;
+        color: #7e7e7e;
+        font-size: clamp(0.8rem, 1.5vw, 1rem);
+    }
+    button{
+        background: #e2a945;
+        font-size: clamp(0.6rem, 1vw, .8rem);
+        padding: 10px;
+        border-radius: 5px;
+        color: #F3F4F6;
+        width: 100px;
+        margin-left: 2vw;
+
+        &:hover{
+            background: #e5bb58;
+        }
+    }
+}
+
+@media (max-width: 750px) {
+
+    .text{
+        width: 100%;
+        padding: 20px;
+    }
+
+    .centerWrapper{
+        display: flex;
+
+        .image {
+            display: none;
+        }
+    }
+
+    .coachWrapper {
+        display: block;
+        flex-direction: column;
+
+        .image_desktop {
+            display: none;
+        }
+
+        .image_mobile {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            img {
+                width: 100%;
+                height: 50%;
+                object-fit: cover;
+            }
+        }
     }
 }
 </style>
+
+
