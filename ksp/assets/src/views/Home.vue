@@ -18,7 +18,7 @@
                     <div class="flex flex-col justify-center items-end mr-2 mb-6">
                         <h3>Le centre</h3>
                         <span class="flex gap-2">
-                            <h6>3 rue de Rennes 35310 Mordelles</h6>
+                            <h6>{{ store.address }} {{ store.fullAddress }}</h6>
                             <a href="https://maps.app.goo.gl/ApZ1E35srhDT2ynK7">
                                 <div class="pinWrapper">
                                     <img src="../../icons/pin.svg"/>
@@ -39,7 +39,7 @@
                 <div class="text">
                     <div class="flex flex-col justify-center items-start mb-6">
                         <h3>La coach</h3>
-                        <h6 class="font-bold">Servane Cosquéric - Masseur-Kinésithérapeute DE</h6>
+                        <h6 class="font-bold">{{ store.fullName }} - Masseur-Kinésithérapeute DE</h6>
                     </div>
                     <div class="image image_mobile">
                         <div class="w-1/2 flex justify-center items-center">
@@ -79,6 +79,11 @@
 
     </div>
 </template>
+
+<script setup>
+import { infos } from "../store/index";
+const store = infos();
+</script>
 
 
 <style scoped lang="scss">
