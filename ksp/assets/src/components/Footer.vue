@@ -4,21 +4,24 @@
       <div class="columns">
         <div class="footer_column">
           <h4>Kiné Sport Santé</h4>
-          <div>{{ store.address }}</div>
-          <div>{{ store.fullAddress }}</div>
-          <br>
-          <a href="https://maps.app.goo.gl/ApZ1E35srhDT2ynK7">
-            <div class="flex gap-3">
-              <img src="../../icons/pin.svg"/>
-             Localiser
+            <div class="adress">
+              <div>{{ store.address }}</div>
+              <div>{{ store.fullAddress }}</div>
             </div>
-          </a>
-          <a :href="'tel:' + store.fullPhone">
-            <div class="flex gap-3">
-              <img src="../../icons/phone.svg"/>
-              <div>{{ store.fullPhone}}</div>
+            <div class="contact">
+                <a href="https://maps.app.goo.gl/ApZ1E35srhDT2ynK7">
+                    <div class="flex gap-3">
+                        <img src="../../icons/pin.svg"/>
+                        Localiser
+                    </div>
+                </a>
+                <a :href="'tel:' + store.fullPhone">
+                    <div class="flex gap-3">
+                        <img src="../../icons/phone.svg"/>
+                        <div>{{ store.fullPhone}}</div>
+                    </div>
+                </a>
             </div>
-          </a>
         </div>
         <div class="footer_column">
           <h4>Suivez-moi</h4>
@@ -34,7 +37,7 @@
             </a>
           </div>
         </div>
-        <div class="footer_column">
+        <div class="about footer_column">
           <h4>A propos</h4>
         </div>
       </div>
@@ -58,7 +61,7 @@ footer{
   width: 100%;
   min-height: 400px;
   padding-bottom: 20px;
-  margin-top: 250px;
+  margin-top: 50px;
 }
 
 a{
@@ -83,6 +86,7 @@ a{
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
 
   .columns{
     width: 80%;
@@ -92,7 +96,6 @@ a{
     border-bottom: 2ps solid #3c3c3c;
 
     h4{
-      font-size: 1rem;
       margin-bottom: 20px;
       font-weight: 900;
       font-style: italic;
@@ -100,7 +103,7 @@ a{
   }
 }
 .footer_column{
-  width: 25%;
+  width: 100%;
   padding: 0 3%;
   line-height: 2rem;
   li{
@@ -116,15 +119,30 @@ a{
 .social{
   width: 100%;
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
+  gap: 1vw;
   align-items: center;
   a{
     padding: 10px;
     border-radius: 50%;
     border: 2px solid #000;
     margin-right: 10px;
+      transition: border .2s ease-in-out;
+
+    &:hover{
+      border: 2px solid #e2a945;
+    }
   }
 
+}
+
+.contact a{
+
+    transition: color .2s ease-in-out;
+
+    &:hover{
+        color: #e2a945;
+    }
 }
 
 .mentionsLegales{
@@ -137,6 +155,33 @@ a{
   font-size: .8rem;
   color: #3c3c3c;
   border-top: #b3b2b2 1px solid;
+}
+
+
+@media (max-width: 750px) {
+
+    .about{
+      display: none;
+    }
+
+    .columns{
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .social{
+      justify-content: flex-start;
+    }
+
+    .adress{
+      display: none;
+    }
+
+    .mentionsLegales{
+      flex-direction: column;
+      gap: 10px;
+    }
+
 }
 
 </style>
