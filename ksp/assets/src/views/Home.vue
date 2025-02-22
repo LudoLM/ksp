@@ -1,13 +1,9 @@
 <template>
-    <div class="banner">
-        <img src="../../images/banner4.jpg" alt="">
-        <div class="title">
-            <h1>Kiné Sport Santé</h1>
-            <button>
-                <router-link :to="{name:'Calendar'}">S'inscrire aux cours</router-link>
-            </button>
-        </div>
-    </div>
+    <Banner
+        title="Kiné Sport Santé"
+        :image="bannerImage"
+        :backgroundColor="'rgba(71,35,113,.3)'"
+    />
     <div>
         <div class="centerPart">
             <div class="centerWrapper flex justify-center items-center">
@@ -82,49 +78,13 @@
 
 <script setup>
 import { infos } from "../store/index";
+import bannerImage from "../../images/banner4.jpg";
+import Banner from "../components/Banner.vue";
 const store = infos();
 </script>
 
 
 <style scoped lang="scss">
-
-.banner {
-    height: 50vh;
-    object-fit: cover;
-    position: relative;
-
-    img{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: brightness(70%);
-    }
-
-    .title{
-        position: absolute;
-        top: 70%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-
-
-        button{
-            background: #5e2ca5;
-            font-size: clamp(0.6rem, 1vw, .8rem);
-            padding: 10px;
-            border-radius: 5px;
-
-            &:hover{
-                background: #731dd3;
-            }
-        }
-    }
-}
 
 .text{
     width: 50%;
@@ -175,7 +135,7 @@ const store = infos();
 
 .image{
     width: 50%;
-    height: 50vh;
+    height: 100%;
     padding: 20px;
     display: flex;
     justify-content: center;
@@ -193,7 +153,7 @@ const store = infos();
     background: transparent;
 
     h3{
-        color: #5e2ca5;
+        color: #472371;
     }
     p{
         color: #27272A;
@@ -240,7 +200,7 @@ const store = infos();
     }
 }
 
-@media (max-width: 750px) {
+@media (max-width: 760px) {
 
     .text{
         width: 100%;

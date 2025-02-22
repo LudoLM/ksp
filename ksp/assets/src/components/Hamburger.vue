@@ -26,6 +26,8 @@ onMounted(() => {
 
 <style scoped lang="scss">
 
+/* Hamburger component */
+
 .nav-icon {
   position: relative;
   cursor: pointer;
@@ -37,7 +39,7 @@ onMounted(() => {
 .nav-icon > .line {
   position: absolute;
   width: 35px;
-  height: 4px;
+  height: 2px;
   background-color: #000;
   transform-origin: center center;
   border-radius: 2px;

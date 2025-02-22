@@ -1,7 +1,12 @@
 <template>
     <div>
-        <h1>Cours Descriptions</h1>
-        <div class="w-full flex flex-col items-center">
+        <Banner
+            title="Découvrez Nos Cours"
+            :backgroundColor="'rgba(30, 27, 75, .9)'"
+            :image="bannerImage"
+        />
+        <!--            :backgroundColor="'rgba(30, 41, 59, .9)'"-->
+        <div class="w-full flex flex-col items-center mt-20">
             <div v-for="cours in coursDescriptions" :key="cours.id" class="coursInfo ">
                 <div class="descriptifWrapper">
                     <img class="imageDesktop" :src="require(`../../images/uploads/${cours.thumbnail}`)" alt="">
@@ -24,6 +29,8 @@ import {onMounted, ref} from 'vue';
 import {useGetTypesCours} from "../utils/useActionCours";
 import CustomButton from "../components/CustomButton.vue";
 import {useRouter} from "vue-router";
+import Banner from "../components/Banner.vue";
+import bannerImage from "../../images/imageBanner15.jpg";
 
 const coursDescriptions = ref([]);
 const router = useRouter();
@@ -34,10 +41,8 @@ onMounted(async () => {
 
 
 const handleRedirection = (cours) => {
-    router.push({ name: 'Calendar', query: { coursId: cours.id } });
+    router.push({ name: 'Calendrier', query: { coursId: cours.id } });
 }
-
-
 
 </script>
 
@@ -77,7 +82,7 @@ const handleRedirection = (cours) => {
 
     h3{
         font-size: clamp(1.5rem, 3.5vw, 2.5rem);
-        color: rgb(85, 19, 96);
+        color: #472371;
     }
 
     @media (max-width: 980px) {

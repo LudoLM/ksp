@@ -1,6 +1,8 @@
 <script setup>
 
 import CustomButton from "../components/CustomButton.vue";
+import bannerImage from "../../images/imageBanner17.jpg";
+import Banner from "../components/Banner.vue";
 
 const goingBack = () => {
   window.history.back();
@@ -9,7 +11,11 @@ const goingBack = () => {
 </script>
 
 <template>
-  <h1 class="mb-20">Les formules</h1>
+    <Banner
+        title="Les packs disponibles"
+        :backgroundColor="'rgba(30, 27, 75, .9)'"
+        :image="bannerImage"
+    />
 
     <div class="modalitesWrapper flex justify-center gap-5 m-20 bg-white">
         <div class="image w-1/3">
@@ -131,6 +137,10 @@ const goingBack = () => {
         gap: 20px;
         margin: 5vw;
         background-color: #fff;
+
+        .infos{
+            padding: 5vw;
+        }
     }
 
     .offres{
@@ -140,11 +150,12 @@ const goingBack = () => {
         gap: 20px;
         margin: 5vw;
         padding: 5vw;
+
         background-color: #fff;
     }
 
     .card{
-        width: 90%;
+        width: 100%;
     }
 
     h3{

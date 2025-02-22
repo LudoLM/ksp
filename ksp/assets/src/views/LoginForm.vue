@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from "../store/user";
 import CustomInput from "../components/CustomInput.vue";
 import CustomButton from "../components/CustomButton.vue";
+import Banner from "../components/Banner.vue";
 
 // Instancier le store en dehors de la fonction handleLogin
 const userStore = useUserStore();
@@ -53,6 +54,12 @@ const handleLogin = async () => {
 </script>
 
 <template>
+    <Banner
+        title="Authentification"
+        :textColor="'rgba(30, 27, 75, .9)'"
+        backgroundHeight="40vh"
+        :hasButton=false
+    />
   <div class="login-container">
     <form @submit.prevent="handleLogin">
 

@@ -5,6 +5,7 @@ import CustomButton from "../components/CustomButton.vue";
 import CustomInput from "../components/CustomInput.vue";
 import {useValidationForm} from "../utils/useValidationForm";
 import {ref} from "vue";
+import Banner from "../components/Banner.vue";
 
 const router = useRouter();
 
@@ -70,6 +71,12 @@ const handleRegister = async () => {
 </script>
 
 <template>
+    <Banner
+        title="Création de compte"
+        :textColor="'rgba(30, 27, 75, .9)'"
+        backgroundHeight="40vh"
+        :hasButton=false
+    />
   <div class="login-container w-full flex items-center justify-center">
     <form  @submit.prevent="handleRegister" class="bg-white p-8 rounded-lg shadow-lg w-full">
       <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">Créer un compte</h2>
