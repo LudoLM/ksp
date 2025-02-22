@@ -1,28 +1,15 @@
-<script>
+<script setup>
 import '../assets/scss/style.scss';
-import Mymain from "../components/Main";
-import Myfooter from "../components/Footer";
-import MyNavLinks from "../components/NavLinks.vue";
-
-export default {
-  name: 'DefaultLayout',
-  components: {
-    MyNavLinks,
-    Mymain,
-    Myfooter
-  }
-}
-
+import Header from "../components/Header.vue";
+import Main from "../components/Main.vue";
+import Footer from "../components/Footer.vue";
 </script>
 
 <template>
-  <div class="nav_wrapper">
-    <MyNavLinks/>
-  </div>
-  <Mymain/>
-  <Myfooter/>
+    <Header/>
+    <Main />
+    <Footer />
 </template>
 
-<style>
-
+<style scoped>
 </style>

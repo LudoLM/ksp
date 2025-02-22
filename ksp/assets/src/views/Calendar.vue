@@ -5,6 +5,8 @@ import {onMounted, ref} from "vue";
 import {useDateFormat} from "@vueuse/core";
 import CoursCardCalendar from "../components/CoursCardCalendar.vue";
 import TypeCoursFilter from "../components/filtersCours/TypeCoursFilter.vue";
+import bannerImage from "../../images/imageBanner9.jpg";
+import Banner from "../components/Banner.vue";
 
 const date = ref(new Date());
 const currentDate = ref(new Date());
@@ -100,7 +102,12 @@ onMounted(async () => {
 </script>
 
 <template>
-    <h1>Calendrier</h1>
+    <Banner
+        title="Planning des cours"
+        :backgroundColor="'rgba(30, 27, 75, .9)'"
+        :image="bannerImage"
+        :hasButton=false
+    />
     <div class="flex flex-col justify-center items-center gap-4 my-8 relative">
         <div>
             <p>{{ weekString }}</p>

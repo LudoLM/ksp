@@ -22,15 +22,14 @@ const router = createRouter({
             children: [
                 { path: '', name: 'Accueil', component: Home },
                 { path: '/coursDescriptions', name: 'Les cours', component: () => import('../views/CoursDescriptions.vue')},
-                { path: '/inscriptions', name: 'Inscriptions', component: () =>  import('../views/Inscriptions.vue')},
-                { path: '/contact', name: 'Contact', component: () => import('../views/Contact.vue') },
+                { path: '/calendar', name: 'Calendrier', component: () => import('../views/Calendar.vue')},
+                { path: '/formules', name: 'Packs', component: () => import('../views/Pricing.vue')},
+                { path: '/pratique', name: 'Pratique', component: () => import('../views/Pratique.vue') },
                 { path: '/coursDetails/:id', name: 'CoursDetails', component:() => import('../views/CoursDetails.vue')},
                 { path: '/login', name: 'Login', component: () => import('../views/LoginForm.vue')},
                 { path: '/register', name: 'Register', component: () => import('../views/Register.vue')},
-                { path: '/formules', name: 'Formules', component: () => import('../views/Pricing.vue')},
                 { path: '/merci', name: 'Merci', component: () => import('../views/Merci.vue')},
                 { path: '/profile', name: 'Profile', component: Profile},
-                {path:  '/calendar', name: 'Calendar', component: () => import('../views/Calendar.vue')},
 
             ]
 

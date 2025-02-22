@@ -1,10 +1,10 @@
 <script setup>
 import { onClickOutside } from '@vueuse/core'
 import {computed, onMounted, ref} from 'vue'
-import {useUserStore} from "../store/user";
-import useGetElementsToken from "../utils/useGetElementsToken";
+import {useUserStore} from "../../store/user";
+import useGetElementsToken from "../../utils/useGetElementsToken";
 import { useRouter, useRoute } from 'vue-router';
-import SwitchToggle from "./SwitchToggle.vue";
+import SwitchToggle from "../SwitchToggle.vue";
 
 const target = ref(null)
 const dropdownOpen = ref(false)
@@ -139,7 +139,9 @@ onClickOutside(target, () => {
             <div v-else>
               <div class="loginButtons">
                 <router-link :to='{name: "Register"}' class="createCount">Créer un compte</router-link>
-                <router-link :to='{name: "Login"}' class="identifier"><img src="../../icons/user.svg"/><span class="identifier_text">Me connecter</span></router-link>
+                <router-link :to='{name: "Login"}' class="identifier">
+                    <img src="" alt="">
+                    <span class="identifier_text">Se connecter</span></router-link>
               </div>
             </div>
         </div>
@@ -182,13 +184,13 @@ onClickOutside(target, () => {
         display: flex;
         justify-content: center;
         align-items: center;
-        color: #5e2ca5;
-        border: 2px solid #5e2ca5;
+        color: #472371;
+        border: 2px solid #472371;
         border-radius: 5px;
-        width: 150px;
-        height: 50px;
+        width: 130px;
+        height: 40px;
         font-weight: 400;
-        font-size: .8rem;
+        font-size: clamp(.7rem, 1.2vw, .8rem);
     }
 
     .identifier{
@@ -196,13 +198,13 @@ onClickOutside(target, () => {
         justify-content: center;
         align-items: center;
         gap: 5px;
-        width: 150px;
-        height: 50px;
-        background: #5e2ca5;
+        width: 130px;
+        height: 40px;
+        background: #472371;
         border-radius: 5px;
         color: #dfdfdf;
         font-weight: 400;
-        font-size: .8rem;
+        font-size: clamp(.7rem, 1.2vw, .8rem);
     }
 
     .logout{
@@ -230,7 +232,7 @@ onClickOutside(target, () => {
         .createCount {
             display: flex;
         }
-        .identifier_text{
+        .loginButtons{
             display: flex;
         }
     }
@@ -242,10 +244,7 @@ onClickOutside(target, () => {
     }
 
     @media (max-width: 700px) {
-        .identifier {
-            width: 50px;
-        }
-        .identifier_text {
+        .loginButtons {
             display: none;
         }
     }

@@ -5,14 +5,9 @@
 </template>
 
 <script>
-export default {
-  name: "Mymain",
-}
 </script>
 
 <style lang="scss">
-
-
 main{
   display: flex;
   justify-content: center;
@@ -22,6 +17,5 @@ main{
 section{
   width: 100%;
 }
-
 
 </style>

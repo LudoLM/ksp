@@ -160,7 +160,7 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
                                 {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
                             </ModalConfirm>
                             <div>
-                                <router-link :to="{ name: 'Calendar' }"><CustomButton>Retour</CustomButton></router-link>
+                                <router-link :to="{ name: 'Calendrier' }"><CustomButton>Retour</CustomButton></router-link>
                             </div>
                         </div>
                     </div>
@@ -172,6 +172,11 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
 </template>
 
 <style scoped lang="scss">
+
+
+.coursDetails{
+    margin-top: 123px;
+}
 
 .details_wrapper {
     display: flex;
