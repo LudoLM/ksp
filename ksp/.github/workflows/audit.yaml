@@ -3,42 +3,40 @@ on: push
 jobs:
     audit:
         name: Security Audit
-        runs-on: debian-latest
+        runs-on: ubuntu-latest
         steps:
             - name: Checkout
               uses: actions/checkout@v2
+
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                  php-version: '7.4'
+                  php-version: '8.3'
                   extensions: intl, zip, pdo_mysql
+
             - name: Setup Cache
-              run: echo "COMPOSER_CACHE_DIR=${{ composer config cache-dir }}" >> $GITHUB_ENV
+              id: composer-cache
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
             - name: Caching deps
               uses: actions/cache@v4
-              with: 
-                  path: ${{ env.COMPOSER_CACHE_DIR }}
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
                   key: php8.3-composer-${{ hashFiles('**/composer.json') }}
-                  restore-keys: php8.3-composer-latest
-                  
+                  restore-keys: php8.3-composer-
+
             - name: Update composer
               run: composer self-update
-              
+
             - name: Install dependencies
-                run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
-            
+              run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
+
             - name: Security audit
-              run: composer audit \
-                composer.audit \
-                 --abandonned="report" \
-                 --ignore-security="low" \
-                 --ignore-severity="medium" \
-                 --format="json" \
-                 --no-ansi
-                > /tmp/security-audit.json
-            - name: upload security audit report
-                uses: actions/upload-artifact@v4
-                if: always()
-                with:
-                    name: security-audit
-                    path: /tmp/security-audit.json 
+              run: composer audit --abandoned="report" --ignore-security="low" --ignore-severity="medium" --format="json" --no-ansi > /tmp/security-audit.json
+
+            - name: Upload security audit report
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: security-audit
+                  path: /tmp/security-audit.json
