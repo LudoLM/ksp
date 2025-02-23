@@ -43,9 +43,6 @@ onClickOutside(target, () => {
     <div id="header_container">
         <div id="compte">
             <div v-if="userId" class="profil flex gap-6">
-              <div v-show="role === 'admin'">
-                <switch-toggle/>
-              </div>
                 <div class="relative" ref="target">
                     <a
                         class="flex items-center gap-4"
@@ -82,7 +79,10 @@ onClickOutside(target, () => {
                         v-show="dropdownOpen"
                         class="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
                     >
-                        <ul class="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
+                        <ul class="flex flex-col gap-8 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
+                            <li v-show="role === 'admin'">
+                                <switch-toggle/>
+                            </li>
                             <li>
                                 <router-link
                                     :to='{name: route.path.startsWith("/admin") ? "AdminProfile" : "Profile"}'
