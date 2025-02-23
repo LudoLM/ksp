@@ -1,6 +1,6 @@
 <template>
   <div class="nav_wrapper">
-    <header class="header_desktop">
+<!--    <header class="header_desktop">
       <Logo/>
       <Navbar/>
       <div class="flex justify-between items-center space-x-4 ">
@@ -11,6 +11,20 @@
       <Navbar/>
       <Logo/>
       <DropdownUser/>
+    </header>-->
+    <header :class="isMobile ? 'header_mobile' : 'header_desktop'">
+      <template v-if="isMobile">
+        <Navbar />
+        <Logo />
+        <DropdownUser />
+      </template>
+      <template v-else>
+        <Logo />
+        <Navbar />
+        <div class="flex justify-between items-center space-x-4">
+          <DropdownUser />
+        </div>
+      </template>
     </header>
   </div>
 </template>
@@ -19,8 +33,15 @@
 import Logo from "./header/Logo.vue";
 import DropdownUser from "./header/DropdownUser.vue";
 import Navbar from "./header/Navbar.vue";
-import {onBeforeUnmount, onMounted} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 
+
+const windowWidth = ref(window.innerWidth);
+const isMobile = computed(() => windowWidth.value <= 900);
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+};
 
 // Gestion du défilement pour ajouter une classe fixe
 const handleScroll = () => {
@@ -35,10 +56,12 @@ const handleScroll = () => {
 // Écouteurs pour les événements
 onMounted(() => {
   document.addEventListener("scroll", handleScroll, { passive: true });
+  window.addEventListener("resize", handleResize);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("scroll", handleScroll);
+  window.removeEventListener("resize", handleResize);
 });
 </script>
 
