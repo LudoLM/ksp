@@ -1,12 +1,7 @@
 <script setup>
 
-import CustomButton from "../components/CustomButton.vue";
 import bannerImage from "../../images/imageBanner17.jpg";
 import Banner from "../components/Banner.vue";
-
-const goingBack = () => {
-  window.history.back();
-};
 
 </script>
 
@@ -115,9 +110,6 @@ const goingBack = () => {
           >
           </stripe-buy-button>
       </div>
-  </div>
-  <div class="flex justify-center my-10">
-    <CustomButton @click="goingBack">Retour</CustomButton>
   </div>
 </template>
 

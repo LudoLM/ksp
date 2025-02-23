@@ -39,7 +39,7 @@
             </router-link>
             <div
                 v-show="dropdownOpen"
-                class="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
+                class="absolute left-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
                 @mouseleave="dropdownOpen = false"
             >
                 <ul class="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
@@ -92,9 +92,13 @@
             {{ route.name }}
         </router-link>
 
-        <div class="loginLinks">
+        <div class="loginLinks" v-if="!userId">
             <router-link :to="{name: 'Login'}" @click="closeNavLinks">Se connecter</router-link>
             <router-link :to="{name: 'Register'}" @click="closeNavLinks">Créer un compte</router-link>
+        </div>
+        <div v-else class="loginLinks">
+            <a @click="logout">Se déconnecter</a>
+            <router-link :to="{name: 'Packs'}" @click="closeNavLinks">Acheter packs</router-link>
         </div>
         <div class="mailSocialPin">
             <div class="icon">
@@ -120,16 +124,20 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import {useUserStore} from "../../store/user";
 import { onClickOutside } from "@vueuse/core";
 import { apiFetch } from "../../utils/useFetchInterceptor";
 import Hamburger from "../Hamburger.vue";
 import { infos } from "../../store/index";
 
 const dropdownOpen = ref(false);
-const isNavOpen = ref(true);
+const isNavOpen = ref(false);
 const route = useRoute();
 const router = useRouter();
 const target = ref(null);
+const userStore = useUserStore();
+const userId = computed(() => userStore.userId);
+console.log(userId.value);
 const store = infos();
 
 const isAdminPath = computed(() => route.path.startsWith("/admin"));
@@ -167,6 +175,12 @@ const toggleNavLinks = () => {
 
 const closeNavLinks = () => {
     isNavOpen.value = false;
+};
+
+const logout = () => {+
+    userStore.logout();
+    closeNavLinks();
+    router.push({name: 'Accueil'});
 };
 
 const handleRefreshCours = async () => {
@@ -223,17 +237,17 @@ const handleRefreshCours = async () => {
         > a {
             display: flex;
             width: 80%;
-            height: 5vh;
+            height: 10vh;
             border-bottom: 1px solid #575656;
         }
 
         .loginLinks {
             width: 80%;
-            height: 5vh;
+            height: 10vh;
             border-bottom: 1px solid #575656;
             display: flex;
             justify-content: flex-start;
-            gap: 20px;
+            gap: 40px;
             color: #e2a945;
         }
 

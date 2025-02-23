@@ -21,8 +21,8 @@ const handleSwitcher = () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 justify-center items-center">
-    <div class="block text-xs font-medium">Mode admin</div>
+  <div class="flex gap-2 justify-around items-center">
+    <div class="block text-sm font-medium lg:text-base">Mode admin</div>
     <label for="toggle3" class="flex cursor-pointer select-none items-center">
       <div class="relative">
         <input

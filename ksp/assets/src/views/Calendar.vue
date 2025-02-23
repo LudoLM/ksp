@@ -127,7 +127,7 @@ onMounted(async () => {
         />
     </div>
 
-    <div class="grid grid-cols-6 gap-4">
+    <div class="grid grid-cols-6 gap-4 mx-10">
         <div v-for="(day, index) in days" :key="day" class="flex justify-center" @click="daySelected = index">
             <div
                 v-html="formatDay(day)"
