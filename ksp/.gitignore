@@ -21,8 +21,12 @@ yarn-error.log
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
 
+
+
 ###> secrets ###
 /config/secrets/dev/dev.decrypt.private.php
+/config/secrets/dev/dev.JWT_SECRET_KEY.*
+
 /config/secrets/prod/prod.decrypt.private.php
 ###< secrets ###
 ###> symfony/phpunit-bridge ###
