@@ -29,7 +29,6 @@ const emit = defineEmits([
 <template>
 
   <CustomButton v-if="props.statusCours.libelle === 'En création'" @click="emit('openCreation')">
-      {{props.statusCours.libelle}}
     Ouvrir
   </CustomButton>
   <CustomButton v-if="props.statusCours.libelle === 'En création'" @click="emit('updateCreation')">
