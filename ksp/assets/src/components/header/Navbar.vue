@@ -137,7 +137,6 @@ const router = useRouter();
 const target = ref(null);
 const userStore = useUserStore();
 const userId = computed(() => userStore.userId);
-console.log(userId.value);
 const store = infos();
 
 const isAdminPath = computed(() => route.path.startsWith("/admin"));

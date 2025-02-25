@@ -69,7 +69,8 @@ const getCoursPerWeek = async () => {
     });
 };
 
-const handleGetCoursPerWeek = async (direction) => {
+const handleGetCoursPerWeek = async (direction, daySelectedParam) => {
+    daySelected.value = daySelectedParam;
     const current = new Date(date.value);
     // Ajoute ou soustrait 7 jours
     current.setDate(current.getDate() + (direction === "next" ? 7 : -7));
@@ -113,10 +114,10 @@ onMounted(async () => {
             <p>{{ weekString }}</p>
         </div>
         <div class="buttons flex justify-center gap-1">
-            <CustomButton  :class="new Date(date) > new Date(currentDate) ? '' : 'invisible'" @click="handleGetCoursPerWeek('prev')">
+            <CustomButton  :class="new Date(date) > new Date(currentDate) ? '' : 'invisible'" @click="handleGetCoursPerWeek('prev', 0)">
                 Semaine Précédente
             </CustomButton>
-            <CustomButton @click="handleGetCoursPerWeek('next')">
+            <CustomButton @click="handleGetCoursPerWeek('next', 0)">
                 Semaine Suivante
             </CustomButton>
         </div>
@@ -143,7 +144,7 @@ onMounted(async () => {
     </div>
     <div class="mobile">
         <!-- Format Mobile -->
-        <div :class="daySelected !== 0 ? 'dayBefore' : 'dayBefore invisible'" @click="handleDaySelected(-1)"></div>
+        <div :class="daySelected !== 0 || new Date(date) > new Date(currentDate) ? 'dayBefore' : 'dayBefore invisible'" @click="daySelected !== 0 ?handleDaySelected(-1) : handleGetCoursPerWeek('prev', 5)"></div>
         <div class="active">
             <!-- Affiche les cours en fonction de la date daySelected -->
             <div v-if="weekInfos[daySelected]?.length > 0">
@@ -156,7 +157,7 @@ onMounted(async () => {
             </div>
         </div>
 
-        <div :class="daySelected !== 5 ? 'dayAfter' : 'dayAfter invisible'" @click="handleDaySelected(+1)"></div>
+        <div :class="daySelected !== 5 ? 'dayAfter' : 'dayAfter'" @click="daySelected !== 5 ?handleDaySelected(+1) : handleGetCoursPerWeek('next', 0)"></div>
     </div>
 </template>
 
