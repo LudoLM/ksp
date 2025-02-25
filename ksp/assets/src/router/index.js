@@ -47,7 +47,7 @@ const router = createRouter({
                   name: 'Cours',
                   meta: {requiresAdmin: true},
                   children: [
-                      { path: 'coursList', name: 'CoursAdmin', label: "Liste de cours", component: () => import('../views/Home.vue') },
+                      { path: 'coursList', name: 'CoursAdmin', label: "Liste de cours", component: () => import('../views/CoursListAdmin.vue'), meta: {requiresAdmin: true}},
                       { path: 'add', name: 'CreateCours', label: "Créer cours", component: CoursForm, meta: {requiresAdmin: true}},
                       { path: 'edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
                       { path: 'coursType/add', name: 'CreateTypeCours', label: "Créer Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
