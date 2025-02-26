@@ -262,6 +262,10 @@ const handleUnsubscriptionresponse = ({ type, message }) => {
   position: relative;
 }
 
+h3 {
+    font-size: clamp(1.5rem, 1.5vw, 2rem);
+}
+
 .card_dateDebut {
   font-style: italic;
   font-weight: 900;
