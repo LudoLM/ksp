@@ -132,6 +132,7 @@ const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === 
 
         h3 {
             font-size: clamp(1rem, 1.8vw, 1.5rem);
+            color: #fff;
             margin-bottom: 5px;
             transition: all .5s ease-in-out;
         }
