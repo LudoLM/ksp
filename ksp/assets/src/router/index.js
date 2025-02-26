@@ -14,56 +14,59 @@ import DefaultLayout from "../layouts/DefaultLayout.vue";
 import {useUserStore} from "../store/user";
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes: [
-        {
-            path: '/',
-            component: DefaultLayout,
-            children: [
-                { path: '', name: 'Accueil', component: Home },
-                { path: '/coursDescriptions', name: 'Les cours', component: () => import('../views/CoursDescriptions.vue')},
-                { path: '/calendar', name: 'Calendrier', component: () => import('../views/Calendar.vue')},
-                { path: '/formules', name: 'Packs', component: () => import('../views/Pricing.vue')},
-                { path: '/pratique', name: 'Pratique', component: () => import('../views/Pratique.vue') },
-                { path: '/coursDetails/:id', name: 'CoursDetails', component:() => import('../views/CoursDetails.vue')},
-                { path: '/login', name: 'Login', component: () => import('../views/LoginForm.vue')},
-                { path: '/register', name: 'Register', component: () => import('../views/Register.vue')},
-                { path: '/merci', name: 'Merci', component: () => import('../views/Merci.vue')},
-                { path: '/profile', name: 'Profile', component: Profile},
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/',
+      component: DefaultLayout,
+      children: [
+        { path: '', name: 'Accueil', component: Home },
+        { path: '/coursDescriptions', name: 'Les cours', component: () => import('../views/CoursDescriptions.vue')},
+        { path: '/calendar', name: 'Calendrier', component: () => import('../views/Calendar.vue')},
+        { path: '/formules', name: 'Packs', component: () => import('../views/Pricing.vue')},
+        { path: '/pratique', name: 'Pratique', component: () => import('../views/Pratique.vue') },
+        { path: '/coursDetails/:id', name: 'CoursDetails', component:() => import('../views/CoursDetails.vue')},
+        { path: '/login', name: 'Login', component: () => import('../views/LoginForm.vue')},
+        { path: '/register', name: 'Register', component: () => import('../views/Register.vue')},
+        { path: '/merci', name: 'Merci', component: () => import('../views/Merci.vue')},
+        { path: '/profile', name: 'Profile', component: Profile},
 
-            ]
+      ]
 
-        },
+    },
+    {
+      path: '/admin',
+      component: DefaultLayout,
+      meta: { requiresAdmin: true },
+      name: 'admin',
+      children: [
+        { path: '', name: 'Statistiques', component: () => import('../views/admin/DataStats.vue'), meta: {requiresAdmin: true}},
+        { path: 'profile', name: 'AdminProfile', component: Profile, meta: {requiresAdmin: true}},
         {
-            path: '/admin',
-            component: DefaultLayout,
-            meta: { requiresAdmin: true },
-            name: 'admin',
-            children: [
-                { path: '', name: 'Statistiques', component: () => import('../views/admin/DataStats.vue'), meta: {requiresAdmin: true}},
-                { path: 'profile', name: 'AdminProfile', component: Profile, meta: {requiresAdmin: true}},
-                {
-                  path: 'cours',
-                  name: 'Cours',
-                  meta: {requiresAdmin: true},
-                  children: [
-                      { path: 'coursList', name: 'CoursAdmin', label: "Liste de cours", component: () => import('../views/CoursListAdmin.vue'), meta: {requiresAdmin: true}},
-                      { path: 'add', name: 'CreateCours', label: "Créer cours", component: CoursForm, meta: {requiresAdmin: true}},
-                      { path: 'edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
-                      { path: 'coursType/add', name: 'CreateTypeCours', label: "Créer Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
-                      { path: 'coursType/edit', name: 'EditTypeCours', label: "Modifier Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
-                      { path: 'coursDetails/:id', name: 'AdminCoursDetails', component: () => import('../views/CoursDetails.vue'), meta: {requiresAdmin: true}}
-                  ]
-                },
-            ]
+          path: 'cours',
+          name: 'Cours',
+          meta: {requiresAdmin: true},
+          children: [
+            { path: 'coursList', name: 'CoursAdmin', label: "Liste de cours", component: () => import('../views/CoursListAdmin.vue'), meta: {requiresAdmin: true}},
+            { path: 'add', name: 'CreateCours', label: "Créer cours", component: CoursForm, meta: {requiresAdmin: true}},
+            { path: 'edit/:id', name: 'EditCours', component: CoursForm, meta: {requiresAdmin: true}},
+            { path: 'coursType/add', name: 'CreateTypeCours', label: "Créer Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
+            { path: 'coursType/edit', name: 'EditTypeCours', label: "Modifier Type de cours", component: TypeCoursForm, meta: {requiresAdmin: true}},
+            { path: 'coursDetails/:id', name: 'AdminCoursDetails', component: () => import('../views/CoursDetails.vue'), meta: {requiresAdmin: true}}
+          ]
         },
-    ],
+      ]
+    },
+  ],
+  scrollBehavior() {
+    document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
+  }
 })
 
 const vuetify = createVuetify({
-    theme: {
-        defaultTheme: 'light',
-    },
+  theme: {
+    defaultTheme: 'light',
+  },
   components,
   directives,
 })
