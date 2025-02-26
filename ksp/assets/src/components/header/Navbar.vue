@@ -1,6 +1,9 @@
 <template>
     <div class="hamburger">
-        <Hamburger @click="toggleNavLinks" />
+        <Hamburger
+            @click="toggleNavLinks"
+            :isClose="isNavOpen"
+        />
     </div>
     <nav
         v-if="isAdminPath"
