@@ -54,7 +54,7 @@ onMounted( async () => {
    await coursDetails();
    userId.value = userStore.userId;
    isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && !usersCours.isEnAttente);
-   isUserAttente.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && usersCours.isEnAttente);
+
 });
 
 
@@ -102,8 +102,13 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
                 <div class="infos_container">
                     <div class="flex justify-between items-baseline">
                         <div class="date text-indigo-400 font-bold mb-10 flex items-center">Le {{ formattedDate }} à {{ formattedHour }}</div>
-                        <StatusCoursTag
-                            :statusCours="cours.statusCours" />
+                        <div class="flex flex-col justify-center items-center">
+                            <StatusCoursTag :statusCours="cours.statusCours" />
+                            <div class="pt-6 h-10 w-20">
+                                <div class='isSubscribedTag' v-if="isSubscribed">Je participe</div>
+                                <div class='onStandby text-red-500' v-if="isUserAttente">En attente</div>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <h2 class="text-white mb-4">{{ cours.typeCours.libelle }}</h2>
@@ -118,14 +123,9 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
 
                     <div class="specialNote mt-5" v-if="cours.specialNote !== ''">Note: {{ cours.specialNote }}</div>
 
-                    <div class="w-full ml-auto mr-auto mt-5">
+                    <div class="w-full ml-auto mr-auto mt-2">
                         <!--                    Barre delimitation-->
-                        <div class="w-2/3 h-0.5 bg-gray-200 mx-auto"></div>
-                        <div :class="isSubscribed || isUserAttente ? 'flex flex-col items-end py-5 mt-2' : 'flex flex-col items-end py-5 mt-2 invisible'">
-                            <div :class="isSubscribed ? 'isSubscribedTag' : 'invisible'">Je participe</div>
-                            <div :class="isUserAttente ? 'text-red-500' : 'invisible'">En attente</div>
-                        </div>
-
+                        <div class="w-2/3 h-0.5 bg-gray-200 mx-auto mb-3"></div>
                         <div class="button flex justify-center">
                             <ButtonsCardUser v-if="!isAdminPath"
                                              :userId="userId"
@@ -217,9 +217,10 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
     }
 }
 
-.isSubscribedTag, .isUserAttenteTag, .specialNote, .descriptif, .duree, .dispo, .susbscribed, .onStandBy {
+.isSubscribedTag, .isUserAttenteTag, .specialNote, .descriptif, .duree, .dispo, .isSubscribed, .onStandby {
     font-size: clamp(0.8rem, 1vw, 1rem);
 }
+
 
 @media (max-width: 980px) {
   .infos_wrapper {
