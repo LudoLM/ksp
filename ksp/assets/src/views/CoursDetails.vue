@@ -1,5 +1,5 @@
 <script setup>
-import {ref, computed, onMounted} from 'vue';
+import {ref, computed, onMounted, inject} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import {useDateFormat} from '@vueuse/core';
 import {useGetCoursById} from "../utils/useActionCours";
@@ -30,9 +30,7 @@ const isUserAttente = ref(false);
 const dateStart = computed(() => new Date(cours.value?.dateCours));
 const formattedDate = computed(() => useDateFormat(dateStart.value, 'DD/MM/YYYY').value);
 const formattedHour = computed(() => useDateFormat(dateStart.value, 'HH:mm').value);
-const alertVisible = ref(false);
-const alertType = ref('info');
-const alertMessage = ref('');
+const alertStore = inject('alertStore');
 
 const emit = defineEmits(['handleSubscription', 'handleUnsubscription']);
 
@@ -72,29 +70,16 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
 };
 
 const handleSubscriptionResponse = ({ type, message }) => {
-    alertType.value = type;
-    alertMessage.value = message;
-    alertVisible.value = true;
-    setTimeout(() => {
-        alertVisible.value = false;
-    }, 5000);
+    alertStore.setAlert(message, type);
 };
 
 const handleUnSubscriptionResponse = ({ type, message }) => {
-    alertType.value = type;
-    alertMessage.value = message;
-    alertVisible.value = true;
-    setTimeout(() => {
-        alertVisible.value = false;
-    }, 5000);
+    alertStore.setAlert(message, type);
 }
 </script>
 
 
 <template>
-    <v-alert v-model="alertVisible" :type="alertType" dismissible>
-        {{ alertMessage }}
-    </v-alert>
     <div class="coursDetails">
         <div v-if="cours" class="details_wrapper w-full relative">
             <img class="w-full" :src="require(`../../images/uploads/${cours.typeCours.thumbnail}`)" alt="">

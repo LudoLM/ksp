@@ -1,13 +1,13 @@
-<template>
-  <div>
-    <router-view />
-  </div>
-</template>
+<script setup>
+import { provide } from 'vue';
+import { createAlertStore } from './store/alert';
+import AlertMessage from "./components/message/AlertMessage.vue";
 
-<script>
-export default {
-  name: "App",
-};
+const alertStore = createAlertStore();
+provide('alertStore', alertStore);
 </script>
 
-<style scoped></style>
+<template>
+    <AlertMessage style="z-index: 10000" />
+    <router-view />
+</template>

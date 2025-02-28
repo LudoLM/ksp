@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watch} from "vue";
+import {inject, onMounted, ref, watch} from "vue";
 import CustomButton from "../components/CustomButton.vue";
 import CustomInput from "../components/CustomInput.vue";
 import CustomSelect from "../components/CustomSelect.vue";
@@ -24,16 +24,9 @@ const typeCoursList = ref([]);
 const origin = ref(route.name);
 const existingImage = ref(null);
 const imagePreview = ref(null);
-
-
 const urlCreation = "/api/typeCours/create";
 const urlEdition = "/api/typeCours/edit/";
-
-
-const alertVisible = ref(false);
-const alertType = ref('info');
-const alertMessage = ref('');
-
+const alertStore = inject('alertStore');
 
 const errors = ref({
   libelle: null,
@@ -87,13 +80,7 @@ const fetchData = async () => {
       existingImage.value = typeCoursList.value[0].thumbnail;
     }
   } catch (error) {
-      alertVisible.value = true;
-      alertType.value = error.type;
-      alertMessage.value = error.message;
-
-      setTimeout(() => {
-          alertVisible.value = false;
-      }, 5000);
+      alertStore.setAlert(error.message, error.type);
   }
 };
 
@@ -130,21 +117,12 @@ const handleSubmit = async (event) => {
             router.push({ name: "CreateCours" });
         }
     } catch (error) {
-        alertVisible.value = true;
-        alertType.value = error.type;
-        alertMessage.value = error.message;
-
-        setTimeout(() => {
-            alertVisible.value = false;
-        }, 5000);
+        alertStore.setAlert(error.message, error.type);
     }
 };
 </script>
 
 <template>
-    <v-alert v-model="alertVisible" :type="alertType" dismissible>
-        {{ alertMessage }}
-    </v-alert>
     <div class="title_wrapper">
         <h2>{{ origin === "EditTypeCours" ? "Modifier" : "Ajouter" }} un type de cours</h2>
     </div>
