@@ -2,7 +2,7 @@
 
     import ChartOne from "../../components/admin/ChartOne.vue";
     import TopProductsTable from "../../components/admin/TopProductsTable.vue";
-    import {onMounted, ref} from "vue";
+    import {inject, onMounted, ref} from "vue";
     import FillingCharts from "../../components/admin/FillingCharts.vue";
     import {apiFetch} from "../../utils/useFetchInterceptor";
     import {VAlert} from "vuetify/components";
@@ -13,10 +13,7 @@
     const nbreTotalVentes = ref(0);
     const startDate = ref(new Date('2024-01-01T00:00:00'));
     const endDate = ref(new Date());
-
-    const alertVisible = ref(false);
-    const alertType = ref('info');
-    const alertMessage = ref('');
+    const alertStore = inject('alertStore');
 
     const fetchPaiements = async () => {
         try {
@@ -49,13 +46,7 @@
             }
         }
         catch (error) {
-            alertVisible.value = true;
-            alertType.value = error.type;
-            alertMessage.value = error.message;
-
-            setTimeout(() => {
-                alertVisible.value = false;
-            }, 5000);
+            alertStore.setAlert(error.message, error.type);
         }
     }
 
@@ -79,9 +70,6 @@
 
 <template>
     <div class="container">
-        <v-alert v-model="alertVisible" :type="alertType" dismissible>
-            {{ alertMessage }}
-        </v-alert>
         <div class="title_wrapper">
             <h2>Statistiques</h2>
         </div>

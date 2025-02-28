@@ -30,7 +30,6 @@ const handleLogin = async () => {
     }
 
     const data = await response.json();
-
     // Stocker le token et mettre à jour le store
     localStorage.setItem('token', data.token);
 
@@ -48,7 +47,7 @@ const handleLogin = async () => {
     // Redirige vers la page d'accueil après la connexion réussie
     await router.push('/');
   } catch (err) {
-    error.value = err.message;
+    error.value = "Les informations d'identification sont incorrectes";
   }
 };
 </script>

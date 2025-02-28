@@ -1,8 +1,5 @@
 <template>
    <div class="container">
-       <v-alert v-model="alertVisible" :type="alertType" dismissible>
-           {{ alertMessage }}
-       </v-alert>
     <div class="title_wrapper">
         <h2>Profil</h2>
     </div>
@@ -125,7 +122,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref} from "vue";
 import { useRouter, useRoute } from 'vue-router';
 import { useUnSubscription } from "../utils/useSubscribing";
 import CustomButton from "../components/CustomButton.vue";
@@ -138,9 +135,7 @@ const coursFiltered = computed(() =>
 );
 const router = useRouter();
 const route = useRoute();
-const alertVisible = ref(false);
-const alertType = ref('info');
-const alertMessage = ref('');
+const alertStore = inject('alertStore');
 
 const getUser = async () => {
   const response = await fetch("/api/user", {
@@ -188,14 +183,7 @@ const handleInvoicePDF = async (paiementId) => {
         // Libérer l'URL après le téléchargement
         window.URL.revokeObjectURL(url);
     } catch (error) {
-        alertMessage.value = 'Votre session a expiré. Veuillez vous reconnecter.';
-        alertType.value = 'info';
-        alertVisible.value = true;
-
-        setTimeout(() => {
-            alertVisible.value = false;
-        }, 5000);
-
+        alertStore.setAlert(error.message, error.type);
     }
 };
 
@@ -209,13 +197,7 @@ const handleUnsubscription = async (coursId) => {
     user.value.usersCours = user.value.usersCours.filter(coursArr => coursArr.cours.id !== coursId);
     user.value.nombreCours += 1;
   } else {
-    alertMessage.value = result.message;
-    alertType.value = result.type;
-    alertVisible.value = true;
-
-    setTimeout(() => {
-      alertVisible.value = false;
-    }, 5000);
+      alertStore.setAlert(result.message, result.type);
   }
 };
 

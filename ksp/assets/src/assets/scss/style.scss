@@ -34,6 +34,9 @@ h6{
     color: #472371;
 }
 
+AlertMessage{
+   z-index: 10000;
+}
 
 
 .title_wrapper {
@@ -154,7 +157,6 @@ a{
 .v-alert {
     opacity: .9;
     position: fixed;
-    z-index: 1000;
     top: 5%;
     left: 10%;
     right: 10%;

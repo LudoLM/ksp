@@ -1,9 +1,5 @@
 <template>
   <div class="container">
-    <!-- Affichage d'un message de validation -->
-    <v-alert v-model="alertVisible" :type="alertType" dismissible>
-      {{ alertMessage }}
-    </v-alert>
    <HeroBanner v-if="!isAdminPath"/>
     <div class="title_wrapper">
       <h2>{{ title }}</h2>
@@ -48,7 +44,7 @@
 </template>
 
 <script setup>
-import {ref, onMounted, computed, watch} from 'vue';
+import {ref, onMounted, computed, watch, inject} from 'vue';
 import CoursCard from "../components/CoursCard.vue";
 import {VAlert} from "vuetify/components";
 import CoursFilters from "../components/CoursFilters.vue";
@@ -70,19 +66,11 @@ const maxPerPage = ref(window.innerWidth > 1460 ? 20 : window.innerWidth > 1110 
 const totalPages = ref(1);
 const isAdminPath = computed(() => route.path.startsWith('/admin'));
 const title = isAdminPath ? 'Liste des cours' : 'Les cours à venir';
+const alertStore = inject('alertStore');
 
 
 // Appel de fetchData lors du montage
 onMounted(async () => {
-  alertMessage.value = route.query.alertMessage || '';
-  alertType.value = route.query.alertType || 'success';
-  alertVisible.value = route.query.alertVisible === 'true';
-
-  setTimeout(() => {
-    alertVisible.value = false;
-  }, 5000);
-
-
   await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   uniqueTypeCoursList.value = await useGetTypesCours();
   uniqueStatusCoursList.value = await useGetStatusCours();
@@ -104,46 +92,20 @@ watch(() => route.query, () => {
     window.location.reload();
 });
 
-// Déclaration des variables pour l'alerte
-const alertVisible = ref(false);
-const alertType = ref('success');
-const alertMessage = ref('');
 
 // Fonction pour gérer l'événement subscriptionResponse
 const handleSubscriptionResponse = ({ type, message }) => {
-  alertType.value = type;
-  alertMessage.value = message;
-  alertVisible.value = true;
-
-  // Masquer l'alerte après 3 secondes
-  setTimeout(() => {
-    alertVisible.value = false;
-  }, 3000);
+    alertStore.setAlert(message, type);
 };
 
 const handleDeleteCoursResponse = ({ type, message, id }) => {
-  alertType.value = type;
-  alertMessage.value = message;
-  alertVisible.value = true;
-
-  // Masquer l'alerte après 3 secondes
-  setTimeout(() => {
-    alertVisible.value = false;
-  }, 3000);
-
-  // Supprimer le cours de la liste
-  infos.value = infos.value.filter(info => info.id !== id);
+    alertStore.setAlert(message, type);
+    // Supprimer le cours de la liste
+    infos.value = infos.value.filter(info => info.id !== id);
 };
 
 const handleCancelCoursResponse = ({ type, message }) => {
-  alertType.value = type;
-  alertMessage.value = message;
-  alertVisible.value = true;
-
-  // Masquer l'alerte après 3 secondes
-  setTimeout(() => {
-    alertVisible.value = false;
-  }, 3000);
+    alertStore.setAlert(message, type);
 };
 
 

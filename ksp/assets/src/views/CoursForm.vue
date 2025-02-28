@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref} from 'vue';
+import {inject, onMounted, ref} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import CustomTextarea from "../components/CustomTextarea.vue";
 import CustomInput from "../components/CustomInput.vue";
@@ -8,7 +8,6 @@ import CustomButton from "../components/CustomButton.vue";
 import {useValidationForm} from "../utils/useValidationForm";
 import {useGetTypesCours} from "../utils/useActionCours";
 import {apiFetch} from "../utils/useFetchInterceptor";
-import {VAlert} from "vuetify/components";
 
 const router = useRouter();
 const origin = useRoute().params;
@@ -25,9 +24,6 @@ const errors = ref(
   },
 )
 
-const alertVisible = ref(false);
-const alertType = ref('info');
-const alertMessage = ref('');
 
 
 const typeCoursList = ref([]);
@@ -52,6 +48,7 @@ const typeCoursList = ref([]);
 const tzoffset = (new Date()).getTimezoneOffset() * 60000;
 const ajoutHeure = 60 * 60 * 1000;
 const localISOTime = (new Date(Date.now() - tzoffset + ajoutHeure)).toISOString().slice(0, 16);
+const alertStore = inject('alertStore');
 
 const formData = ref({
   typeCours: null,
@@ -89,18 +86,13 @@ const formData = ref({
       if (response.status === 200){
         await router.push({
             name: "CoursAdmin",
-            query: {alertMessage: "Cours ajouté avec succès", alertType: "success", alertVisible: true}});
+        });
+        alertStore.setAlert("Cours ajouté avec succès", "success");
       } else {
         console.error("Erreur lors de la création du cours:", response);
       }
     } catch (error) {
-        alertVisible.value = true;
-        alertType.value = error.type;
-        alertMessage.value = error.message;
-
-        setTimeout(() => {
-            alertVisible.value = false;
-        }, 5000);
+        alertStore.setAlert(error.message, error.type);
     }
   };
 
@@ -121,13 +113,7 @@ const formData = ref({
 
 
     } catch (error) {
-        alertVisible.value = true;
-        alertType.value = error.type;
-        alertMessage.value = error.message;
-
-        setTimeout(() => {
-            alertVisible.value = false;
-        }, 5000);
+        alertStore.setAlert(error.message, error.type);
     }
   };
 
@@ -135,9 +121,6 @@ const formData = ref({
 
 <template>
   <div>
-      <v-alert v-model="alertVisible" :type="alertType" dismissible>
-          {{ alertMessage }}
-      </v-alert>
       <div class="title_wrapper">
           <h2>{{ origin.id ? "Modifier" : "Ajouter" }} un cours</h2>
       </div>
