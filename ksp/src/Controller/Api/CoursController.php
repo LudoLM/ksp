@@ -1,24 +1,32 @@
 <?php
 namespace App\Controller\Api;
 
+use App\DTO\AddUserToCoursDTO;
+use App\DTO\AddUserToCoursDTOToUserCours;
 use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
 use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
-use App\Event\DesistementEvent;
-use App\Message\SendCancelEmailMessage;
+use App\Manager\UsersCoursManager;
 use App\Message\UpdateStatusCoursMessage;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
 use App\Repository\UserRepository;
+use App\Serializer\AddUserToCoursDTOToUsersCoursDenormalizer;
 use App\Serializer\CreateCoursDTOToCoursDenormalizer;
+use App\Service\CoursControllerService\AddUserTimeCheckerService;
+use App\Service\CoursControllerService\CountUsersInCoursService;
+use App\Service\CoursControllerService\CreateUsersCoursService;
+use App\Service\CoursControllerService\FilteringCoursService;
+use App\Service\CoursControllerService\SubscribeExtraUserService;
 use App\Service\UpdateStatusCoursClickService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
@@ -32,98 +40,45 @@ class CoursController extends AbstractController
 {
 
     public function __construct(
-        private readonly CoursRepository $coursRepository,
-        private readonly SerializerInterface $serializer,
-        private readonly EntityManagerInterface $em,
-        private readonly StatusCoursRepository $statusCoursRepository,
-        private readonly TypeCoursRepository $typeCoursRepository,
-        private readonly EventDispatcherInterface $dispatcher,
-        private readonly UserRepository $userRepository,
-        private readonly MessageBusInterface $messageBus,
-        private readonly UpdateStatusCoursClickService $updateStatusCoursClickService
+        private readonly CoursRepository               $coursRepository,
+        private readonly SerializerInterface           $serializer,
+        private readonly EntityManagerInterface        $em,
+        private readonly StatusCoursRepository         $statusCoursRepository,
+        private readonly TypeCoursRepository           $typeCoursRepository,
+        private readonly EventDispatcherInterface      $dispatcher,
+        private readonly UserRepository                $userRepository,
+        private readonly MessageBusInterface           $messageBus,
+        private readonly UpdateStatusCoursClickService $updateStatusCoursClickService,
+        private readonly FilteringCoursService         $filteringCoursService,
+        private readonly AddUserTimeCheckerService     $addUserTimeCheckerService,
+        private readonly CountUsersInCoursService      $countUsersInCoursService,
+        private readonly UsersCoursManager             $usersCoursManager, private readonly CreateUsersCoursService $createUsersCoursService,
     )
     {
-
     }
-
     #[Route('getCoursCalendar', name: 'cours_calendar', methods: ['GET'])]
     #[Route('getCours', name: 'cours_index', methods: ['GET'])]
-    public function coursIndex(Request $request): JsonResponse
-    {
+    public function coursIndex(
+        Request $request,
+        #[MapQueryParameter] int $currentPage,
+        #[MapQueryParameter] int $maxPerPage,
+        #[MapQueryParameter] int $typeCoursId,
+        #[MapQueryParameter] string $dateCoursStr,
+        #[MapQueryParameter] int $statusCoursId
 
-        $isAdminPath = $request->query->get('isAdminPath') === 'true';
-        $currentPage = (int)($request->query->get('page', 1));
-        $maxPerPage = (int)($request->query->get('maxPerPage', 10));
+    ): JsonResponse {
 
-        $typeCoursId = $request->query->get('typeCours') ==="null" ? null : $request->query->get('typeCours') ?? null;
-        $dateCoursStr = $request->query->get('dateCours')  ==="null" ? null : $request->query->get('dateCours') ?? null;
-        $statusCoursId = $request->query->get('statusCours') ==="null" ? null : $request->query->get('statusCours') ?? null;
-        $dateLimit = null;
-
-
-        // Récupérer l'entité TypeCours si `typeCours` est fourni
-        $typeCours = null;
-        if ($typeCoursId) {
-            $typeCours = $this->typeCoursRepository->findOneBy(['id' => $typeCoursId]);
+        //Si apres getPath c'est "/admin" alors isAdminPath = true
+        $isAdminPath = str_starts_with($request->headers->get('referer'),$request->getSchemeAndHttpHost() . '/admin');
+        $route = $request->attributes->get('_route');
+        try {
+            $responseData = $this->filteringCoursService->filterCours($currentPage, $maxPerPage, $typeCoursId, $dateCoursStr, $statusCoursId, $route, $isAdminPath);
+            $responseData = $this->serializer->serialize($responseData, 'json', ['groups' => 'cours:index']);
+            return new JsonResponse($responseData, 200);
+        }catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], $e->getCode());
         }
-
-        // Convertir la chaîne de date en \DateTime si `dateCours` est fourni
-        $dateCours = null;
-        if ($dateCoursStr) {
-            try {
-                $dateCours = new \DateTime($dateCoursStr);
-            } catch (\Exception $e) {
-                return new JsonResponse(['error' => 'Invalid date format'], 400);
-            }
-        }
-
-        // recupere le 1er jour de la semaine de la variable dateCours si la route est getCoursCalendar
-        if($request->attributes->get('_route') === 'api_cours_calendar') {
-            $dateCours->modify('+' . ($currentPage - 1) * 7 . ' days');
-            $dateCours->modify('monday this week');
-            $dateLimit = clone $dateCours;
-            $dateLimit->modify('+6 days');
-        }
-
-
-        $statusCours = null;
-        if ($statusCoursId) {
-            $statusCours = $this->statusCoursRepository->findOneBy(['id' => $statusCoursId]);
-        }
-
-
-        // Appeler le repository avec la pagination et les filtres
-
-        if($isAdminPath) {
-            $coursPaginator = $this->coursRepository->findAllSortByDate($currentPage, $maxPerPage, $typeCours, $dateCours, $dateLimit,  $statusCours);
-        } else {
-            $coursPaginator = $this->coursRepository->findAllSortByDateForUsers($currentPage, $maxPerPage, $typeCours, $dateCours, $dateLimit, $statusCours);
-        }
-
-        // Récupérer les cours
-        $cours = iterator_to_array($coursPaginator);
-
-        // Calculer les métadonnées de pagination
-        $totalItems = count($coursPaginator);
-        $totalPages = ceil($totalItems / $maxPerPage);
-
-        // Préparer la réponse
-        $responseData = [
-            'data' => $cours,
-            'pagination' => [
-                'currentPage' => $currentPage,
-                'maxPerPage' => $maxPerPage,
-                'totalItems' => $totalItems,
-                'totalPages' => $totalPages,
-            ],
-        ];
-
-
-        $responseData = $this->serializer->serialize($responseData, 'json', ['groups' => 'cours:index']);
-
-        return new JsonResponse($responseData, 200);
     }
-
 
 
     #[Route('getCours/{id}', name: 'cours_detail', methods: ['GET'])]
@@ -143,81 +98,7 @@ class CoursController extends AbstractController
         $cours = $this->coursRepository->find($data['coursId']);
         $isAttente = $data['isAttente'];
 
-//      Si l'heure du cours est passée - 30 minutes, on ne peut plus s'inscrire
-        if($cours->getDateCours()->getTimestamp() - time() < 1800) {
-            return new JsonResponse(['success' => false, 'response' => "Il est trop tard pour s'inscrire à ce cours"], 403);
-        }
-
-//      Calcul du nombre de participants au cours
-        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
-        $statusChange = $cours->getStatusCours();
-
-//      Si l'admin ajoute un extra
-        if($user !== $this->getUser()) {
-            $usersCours = new UsersCours();
-            $usersCours->setUser($user);
-            $usersCours->setCreatedAt(new \DateTimeImmutable());
-            $usersCours->setEnAttente(false);
-            $cours->addUsersCours($usersCours);
-            $user->setNombreCours($user->getNombreCours() - 1);
-            $isFull = $usersCount + 1 >= $cours->getNbInscriptionMax();
-            if ($isFull) {
-                $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::COMPLET->value]));
-                $statusChange = $cours->getStatusCours();
-            }
-            $this->em->persist($cours);
-            $this->em->flush();
-            return new JsonResponse(['success' => true, 'response' => $user->getPrenom() . " " . $user->getNom() ." a bien été ajouté au cours", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
-        }
-
-//      Si le cours n'est pas en attente mais complet
-        if ($usersCount >= $cours->getNbInscriptionMax() && !$isAttente ) {
-            return new JsonResponse([ 'success' => false, 'message' => "Le cours est complet", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
-        }
-
-//      Si le cours n'est pas complet, je vérifie si l'utilisateur est déjà inscrit ou en attente
-        $usersCoursFiltered = array_filter($cours->getUsersCours()->toArray(), function ($usersCours) use ($user) { return $usersCours->getUser() === $user;});
-
-//      Si l'utilisateur est déjà en attente, je le passe en inscrit
-        if(count($usersCoursFiltered) > 0) {
-            $usersCours = array_values($usersCoursFiltered)[0];
-            $usersCours->setEnAttente(false);
-            $usersCours->setCreatedAt(new \DateTimeImmutable());
-        }
-//      Si l'utilisateur n'est pas inscrit, je l'ajoute à la liste des participants
-        else{
-            $usersCours = new UsersCours();
-            $usersCours->setUser($user);
-            $usersCours->setCreatedAt(new \DateTimeImmutable());
-            $usersCours->setEnAttente($isAttente);
-            $cours->addUsersCours($usersCours);
-        }
-
-//      Si le cours est complet, je change le statut du cours
-        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
-        $isFull = $usersCount >= $cours->getNbInscriptionMax();
-        if ($isFull) {
-            $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::COMPLET->value]));
-            $statusChange = $cours->getStatusCours();
-        }
-
-//       Si le cours n'est pas en attente alors on décrémente le nombre de cours de l'utilisateur
-        if (!$isAttente) {
-            $this->getUser()->setNombreCours($this->getUser()->getNombreCours() - 1);
-        }
-
-
-//      Sauvegarde des modifications en base de données
-        $this->em->persist($cours);
-        $this->em->flush();
-
-
-//      Retourne une réponse JSON pour indiquer que l'utilisateur a été ajouté avec succès
-        return new JsonResponse([
-            'success' => true,
-            'message' => !$isAttente ? "Vous êtes bien inscrit au cours" : "Vous êtes sur la liste d'attente",
-            'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']),
-            'usersCount' => $usersCount], 200);
+        return $this->createUsersCoursService->createUsersCours($cours, $user, $isAttente);
     }
 
 

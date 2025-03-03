@@ -105,14 +105,11 @@
         </div>
         <div class="mailSocialPin">
             <div class="icon">
-                <a :href="'mailto:' + store.fullMail">
-                    <img src="../../../icons/mail.svg" alt=""/>
-                </a>
                 <a href="">
                     <img src="../../../icons/facebook.svg" alt=""/>
                 </a>
-                <a href="">
-                    <img src="../../../icons/instagram.svg" alt=""/>
+                <a :href="'mailto:' + store.fullMail">
+                    <img src="../../../icons/mail.svg" alt=""/>
                 </a>
                 <a href="https://maps.app.goo.gl/ApZ1E35srhDT2ynK7">
                     <div class="flex gap-3">

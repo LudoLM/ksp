@@ -80,11 +80,6 @@ const handleRedirection = (cours) => {
         color: rgba(0, 0, 0, 0.6);
     }
 
-    h3{
-        font-size: clamp(1.5rem, 3.5vw, 2.5rem);
-        color: #472371;
-    }
-
     @media (max-width: 980px) {
         .descriptifWrapper{
             position: relative;
@@ -104,9 +99,6 @@ const handleRedirection = (cours) => {
                 margin-bottom: 10px;
             }
 
-            h3{
-                margin-bottom: 10px;
-            }
         }
     }
 

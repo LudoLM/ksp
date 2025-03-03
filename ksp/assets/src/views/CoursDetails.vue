@@ -89,7 +89,7 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
                         <div class="date text-indigo-400 font-bold mb-10 flex items-center">Le {{ formattedDate }} à {{ formattedHour }}</div>
                         <div class="flex flex-col justify-center items-center">
                             <StatusCoursTag :statusCours="cours.statusCours" />
-                            <div class="pt-6 h-10 w-20">
+                            <div class="pt-6 h-10">
                                 <div class='isSubscribedTag' v-if="isSubscribed">Je participe</div>
                                 <div class='onStandby text-red-500' v-if="isUserAttente">En attente</div>
                             </div>
@@ -159,6 +159,12 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
 <style scoped lang="scss">
 
 
+    p{
+        font-size: clamp(0.8rem, 1vw, 1.4rem);
+    }
+
+
+
 .coursDetails{
     margin-top: 123px;
 }
@@ -166,6 +172,7 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
 .details_wrapper {
     display: flex;
     position: relative;
+    min-height: 500px;
     max-height: 80vh;
 
 

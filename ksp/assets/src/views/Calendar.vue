@@ -10,11 +10,14 @@ import Banner from "../components/Banner.vue";
 
 const date = ref(new Date());
 const currentDate = ref(new Date());
+const routeGetCours = ref("getCoursCalendar");
+
 // Formate la date pour l'envoyer au serveur
 date.value = date.value.toISOString().split('T')[0];
 const days = ref([]);
 const weekString = ref('');
 const uniqueTypeCoursList = ref([]);
+
 // get query params
 const coursId = parseInt(new URLSearchParams(window.location.search).get('coursId'));
 
@@ -49,10 +52,10 @@ const statusCours = ref(null);
 const currentPage = ref(1);
 const maxPerPage = ref(1000);
 const totalPages = ref(1);
-const totalItems = ref(0);
+const totalItems = ref(null);
 
 const getCoursPerWeek = async () => {
-    await useGetCours(false, "getCoursCalendar", infos, currentPage, maxPerPage, totalItems, selectedTypeCours, date, statusCours, totalPages);
+    await useGetCours(routeGetCours, infos, currentPage, maxPerPage, totalItems, selectedTypeCours, date, statusCours, totalPages);
     // Classe les cours par date/heure
     infos.value.sort((a, b) => new Date(a.dateCours) - new Date(b.dateCours));
 
@@ -96,7 +99,7 @@ const formatDay = (day) => {
 
 onMounted(async () => {
     // Si coursId est défini, met à jour le type de cours sélectionné sinon récupère les cours de la semaine
-    coursId !== null ? handleUpdateSelectedTypeCours(coursId) : await getCoursPerWeek();
+    coursId ? handleUpdateSelectedTypeCours(coursId) : await getCoursPerWeek();
     uniqueTypeCoursList.value = await useGetTypesCours();
 });
 

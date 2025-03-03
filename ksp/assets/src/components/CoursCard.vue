@@ -25,12 +25,11 @@
         </div>
         <div class="min-h-24 grid items-end">
           <div class="grid grid-cols-2">
-            <router-link :to="{ name: !isAdminPath ? 'CoursDetails' : 'AdminCoursDetails', params: { id: info.id }}" class="mt-3 mx-2 block px-3 py-2 text-center text-sm font-semibold text-violet-600 border-2 border-violet-600">
+            <router-link :to="{ name: 'AdminCoursDetails', params: { id: info.id }}" class="mt-3 mx-2 block px-3 py-2 text-center text-sm font-semibold text-violet-600 border-2 border-violet-600">
                 + d'infos
             </router-link>
 
-
-            <ButtonsCardAdmin v-if="isAdminPath"
+            <ButtonsCardAdmin
                 :statusCours="statusCours"
                 :coursId="info.id"
                 @cancelCours="cancelCours"
@@ -38,17 +37,6 @@
                 @updateCreation="updateCreation"
                 @openCreation="openCreation"
                 @handleAddExtraResponse="handleAddExtraResponse"
-            />
-
-            <ButtonsCardUser v-if="!isAdminPath"
-                 :userId="userId"
-                 :coursId="props.info.id"
-                 :statusCours="statusCours"
-                 :isSubscribed="isSubscribed"
-                 :isUserAttente="isUserAttente"
-                 @updateCoursStatus="handleUpdateStatusCours"
-                 @subscriptionResponse="handleSubscriptionresponse"
-                 @unSubscriptionResponse="handleUnsubscriptionresponse"
             />
 
             <ModalConfirm
@@ -93,10 +81,6 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  isAdminPath: {
-    type: Boolean,
-    default: false,
-  }
 });
 
 // État de la modale

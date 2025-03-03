@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UsersCoursRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -36,10 +37,6 @@ class UsersCours
     #[ORM\JoinColumn(nullable: false)]
     private ?Cours $cours = null;
 
-    public function __construct()
-    {
-        $this->created_at = new \DateTimeImmutable();
-    }
 
     public function getId(): ?int
     {

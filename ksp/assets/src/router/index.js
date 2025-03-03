@@ -26,7 +26,7 @@ const router = createRouter({
         { path: '', name: 'Accueil', component: Home },
         { path: '/coursDescriptions', name: 'Les cours', component: () => import('../views/CoursDescriptions.vue') },
         { path: '/calendar', name: 'Calendrier', component: () => import('../views/Calendar.vue') },
-        { path: '/formules', name: 'Packs', component: () => import('../views/Pricing.vue') },
+        { path: '/packs', name: 'Packs', component: () => import('../views/Pricing.vue') },
         { path: '/pratique', name: 'Pratique', component: () => import('../views/Pratique.vue') },
         { path: '/coursDetails/:id', name: 'CoursDetails', component: () => import('../views/CoursDetails.vue') },
         { path: '/login', name: 'Login', component: () => import('../views/LoginForm.vue') },

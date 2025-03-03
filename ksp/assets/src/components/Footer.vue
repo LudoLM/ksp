@@ -29,16 +29,16 @@
                         <a href="https://www.facebook.com/kinesportsante35">
                             <img src="../../icons/facebook.svg"/>
                         </a>
-                        <a href="">
-                            <img src="../../icons/instagram.svg"/>
-                        </a>
+
+                    </div>
+                </div>
+                <div class="footer_column">
+                    <h4>Me contacter</h4>
+                    <div class="social">
                         <a :href="'mailto:' + store.fullMail">
                             <img src="../../icons/mail.svg"/>
                         </a>
                     </div>
-                </div>
-                <div class="about footer_column">
-                    <h4>A propos</h4>
                 </div>
             </div>
             <div class="mentionsLegales">
@@ -159,10 +159,6 @@ a{
 
 
 @media (max-width: 750px) {
-
-    .about{
-        display: none;
-    }
 
     .columns{
         flex-direction: column;
