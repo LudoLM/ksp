@@ -8,10 +8,6 @@ const props = defineProps({
         type: Object,
         required: true,
     },
-    isAdminPath: {
-        type: Boolean,
-        default: false,
-    }
 });
 
 const formattedHour = computed(() => {
@@ -131,6 +127,7 @@ const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === 
         justify-content: flex-end;
 
         h3 {
+            color: #ffffff;
             font-size: clamp(1rem, 1.8vw, 1.5rem);
             color: #fff;
             margin-bottom: 5px;

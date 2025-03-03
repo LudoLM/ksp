@@ -31,9 +31,8 @@
                             <li><a :href="'tel:' + store.fullPhone"><strong>Téléphone</strong> : {{ store.fullPhone }}</a></li>
                             <li><a :href="'mailto:' + store.fullMail"><strong>Email</strong> : {{ store.fullMail }}</a></li>
                             <li><strong>Réseaux sociaux</strong> :
-                                <ul class="ml-5 list-disc">
+                                <ul class="ml-5">
                                     <li><a href="https://www.facebook.com/kinesportsante35">Facebook</a></li>
-                                    <li><a href="https://instagram.com/pilates">Instagram</a></li>
                                 </ul>
                             </li>
                         </ul>
