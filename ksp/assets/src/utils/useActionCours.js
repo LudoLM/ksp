@@ -1,26 +1,26 @@
 import {apiFetch} from "./useFetchInterceptor";
 
-export async function useGetCours(isAdminPath, route, infos,  currentPage, maxPerPage, totalItems, selectedTypeCours, selectedDate, selectedStatusId, totalPages) {
+export async function useGetCours(route, infos, currentPage, maxPerPage, totalItems, selectedTypeCours, selectedDate, selectedStatusId, totalPages) {
     try {
+      const params = new URLSearchParams({
+        currentPage: currentPage.value || 1,
+        maxPerPage: maxPerPage.value || 10,
+        typeCoursId: selectedTypeCours.value === null ? "0" : selectedTypeCours.value,
+        dateCoursStr: selectedDate.value,
+        statusCoursId: selectedStatusId.value === null ? "0" : selectedStatusId.value,
+      });
 
-        const response = await fetch("/api/" + route + "?page="
-            + currentPage.value + "&maxPerPage="
-            + maxPerPage.value + "&typeCours="
-            + selectedTypeCours.value + "&dateCours="
-            + selectedDate.value + "&statusCours="
-            + selectedStatusId.value + "&isAdminPath="
-            + isAdminPath
-            , {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        const result = JSON.parse(await response.json());
-        infos.value = result.data;
-        currentPage.value = result.pagination.currentPage;
-        totalItems.value = result.pagination.totalItems;
-        totalPages.value = result.pagination.totalPages;
+      const response = await fetch(`/api/${route.value}?${params.toString()}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const result = JSON.parse(await response.json());
+      infos.value = result.data;
+      currentPage.value = result.pagination.currentPage;
+      totalItems.value = result.pagination.totalItems;
+      totalPages.value = result.pagination.totalPages;
     } catch (error) {
         console.error("Erreur lors de la récupération des cours:", error);
     }

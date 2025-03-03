@@ -25,7 +25,7 @@
         </div>
         <div class="min-h-24 grid items-end">
           <div class="grid grid-cols-2">
-            <router-link :to="{ name: !isAdminPath ? 'CoursDetails' : 'AdminCoursDetails', params: { id: info.id }}" class="mt-3 mx-2 block px-3 py-2 text-center text-sm font-semibold text-violet-600 border-2 border-violet-600">
+            <router-link :to="{ name: 'AdminCoursDetails', params: { id: info.id }}" class="mt-3 mx-2 block px-3 py-2 text-center text-sm font-semibold text-violet-600 border-2 border-violet-600">
                 + d'infos
             </router-link>
 

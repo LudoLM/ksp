@@ -61,6 +61,7 @@ const handleRegister = async () => {
     userStore.setUserEmail(dataToken.username);
     userStore.setUserId(dataToken.id);
     userStore.setUserPrenom(dataToken.prenom);
+    await router.push('/');
 
   } catch (err) {
     console.error(err);

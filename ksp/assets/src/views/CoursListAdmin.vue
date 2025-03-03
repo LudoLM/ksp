@@ -1,13 +1,12 @@
 <template>
   <div class="container">
-   <HeroBanner v-if="!isAdminPath"/>
     <div class="title_wrapper">
       <h2>{{ title }}</h2>
     </div>
 
 
     <div class="buttonsFilters">
-      <router-link :to="{name: 'CreateCours'}"><CustomButton v-if="isAdminPath">Ajouter un cours</CustomButton></router-link>
+      <router-link :to="{name: 'CreateCours'}"><CustomButton>Ajouter un cours</CustomButton></router-link>
       <CoursFilters
           :uniqueTypeCours="uniqueTypeCoursList"
           :uniqueStatusCours="uniqueStatusCoursList"
@@ -26,7 +25,6 @@
         <li v-for="info in infos" :key="info.id">
           <CoursCard
               :info="info"
-              :isAdminPath="isAdminPath"
               @subscriptionResponse="handleSubscriptionResponse"
               @deleteCoursResponse="handleDeleteCoursResponse"
               @cancelCoursResponse="handleCancelCoursResponse"
@@ -64,29 +62,20 @@ const route = useRoute();
 const totalItems = ref(0);
 const maxPerPage = ref(window.innerWidth > 1460 ? 20 : window.innerWidth > 1110 ? 12 : 10);
 const totalPages = ref(1);
-const isAdminPath = computed(() => route.path.startsWith('/admin'));
-const title = isAdminPath ? 'Liste des cours' : 'Les cours à venir';
 const alertStore = inject('alertStore');
+const title = 'Liste des cours';
+const routeGetCours = ref("getCours");
+
 
 
 // Appel de fetchData lors du montage
 onMounted(async () => {
-  await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+
+  await useGetCours(routeGetCours, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   uniqueTypeCoursList.value = await useGetTypesCours();
   uniqueStatusCoursList.value = await useGetStatusCours();
-  if (!isAdminPath.value) {
-      uniqueStatusCoursList.value = uniqueStatusCoursList.value.filter(status => status.id !== 4 && status.id !== 6 && status.id !== 7);
-  }
 });
 
-watch(isAdminPath, async () => {
-    uniqueStatusCoursList.value = await useGetStatusCours();
-    if (!isAdminPath.value) {
-        uniqueStatusCoursList.value = uniqueStatusCoursList.value.filter(status => status.id !== 4 && status.id !== 6 && status.id !== 7);
-    }
-
-    await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
-});
 
 watch(() => route.query, () => {
     window.location.reload();
@@ -113,19 +102,19 @@ const handleCancelCoursResponse = ({ type, message }) => {
 const updateSelectedCoursList = async (value) => {
   selectedCoursId.value = value;
   currentPage.value = 1;
-  await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(routeGetCours, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
 const updateSelectedDateList = async (value) => {
   selectedDate.value = value;
   currentPage.value = 1;
-  await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(routeGetCours, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
 const updateStatusCoursList = async (value) => {
   selectedStatusId.value = value;
   currentPage.value = 1;
-  await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+  await useGetCours(routeGetCours, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
 };
 
 
@@ -137,14 +126,14 @@ const resetInfos = () => {
 const nextPage = async () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
-    await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+    await useGetCours(routeGetCours, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   }
 };
 
 const prevPage = async () => {
   if (currentPage.value > 1) {
     currentPage.value--;
-    await useGetCours(isAdminPath.value, "getCours", infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
+    await useGetCours(routeGetCours, infos, currentPage, maxPerPage, totalItems, selectedCoursId, selectedDate, selectedStatusId, totalPages);
   }
 };
 </script>
