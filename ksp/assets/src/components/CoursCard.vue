@@ -29,7 +29,8 @@
                 + d'infos
             </router-link>
 
-            <ButtonsCardAdmin
+
+            <ButtonsCardAdmin v-if="isAdminPath"
                 :statusCours="statusCours"
                 :coursId="info.id"
                 @cancelCours="cancelCours"
@@ -37,6 +38,17 @@
                 @updateCreation="updateCreation"
                 @openCreation="openCreation"
                 @handleAddExtraResponse="handleAddExtraResponse"
+            />
+
+            <ButtonsCardUser v-if="!isAdminPath"
+                 :userId="userId"
+                 :coursId="props.info.id"
+                 :statusCours="statusCours"
+                 :isSubscribed="isSubscribed"
+                 :isUserAttente="isUserAttente"
+                 @updateCoursStatus="handleUpdateStatusCours"
+                 @subscriptionResponse="handleSubscriptionresponse"
+                 @unSubscriptionResponse="handleUnsubscriptionresponse"
             />
 
             <ModalConfirm
@@ -81,6 +93,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  isAdminPath: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 // État de la modale
