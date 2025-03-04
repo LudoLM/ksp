@@ -29,7 +29,7 @@ class CreateUsersCoursService
 
     }
 
-    public function createUsersCours(Cours $cours, $user, $isAttente = false): JsonResponse
+    public function createUsersCours(Cours $cours, $user, $isOnWaitingList = false): JsonResponse
     {
         //      Si l'heure du cours est passée - 30 minutes, on ne peut plus s'inscrire
         if ($this->addUserTimeCheckerService->isTooLateRegister($cours)) {
@@ -47,7 +47,7 @@ class CreateUsersCoursService
         }
 
 //      Si le cours est désormais complet, on ne peut plus s'inscrire
-        if ($usersCount >= $cours->getNbInscriptionMax() && !$isAttente) {
+        if ($usersCount >= $cours->getNbInscriptionMax() && !$isOnWaitingList) {
             return new JsonResponse(['success' => false, 'message' => "Le cours est complet", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
         }
 
@@ -59,11 +59,11 @@ class CreateUsersCoursService
 //      Si l'utilisateur est déjà en attente, je le passe en inscrit
         if (count($usersCoursFiltered) > 0) {
             $usersCours = array_values($usersCoursFiltered)[0];
-            $usersCours->setEnAttente(false);
+            $usersCours->setIsOnWaitingList(false);
             $usersCours->setCreatedAt(new \DateTimeImmutable());
         } //      Si l'utilisateur n'est pas inscrit, je l'ajoute à la liste des participants
         else {
-            $cours = $this->usersCoursManager->addUserToCours($cours, $isAttente, $user);
+            $cours = $this->usersCoursManager->addUserToCours($cours, $isOnWaitingList, $user);
         }
 
 //      Si le cours est complet, je change le statut du cours
@@ -74,7 +74,7 @@ class CreateUsersCoursService
         }
 
 //       Si le cours n'est pas en attente alors on décrémente le nombre de cours de l'utilisateur
-        if (!$isAttente) {
+        if (!$isOnWaitingList) {
             $this->security->getUser()->setNombreCours($this->security->getUser()->getNombreCours() - 1);
         }
 
@@ -85,7 +85,7 @@ class CreateUsersCoursService
 //      Retourne une réponse JSON pour indiquer que l'utilisateur a été ajouté avec succès
         return new JsonResponse([
             'success' => true,
-            'message' => !$isAttente ? "Vous êtes bien inscrit au cours" : "Vous êtes sur la liste d'attente",
+            'message' => !$isOnWaitingList ? "Vous êtes bien inscrit au cours" : "Vous êtes sur la liste d'attente",
             'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']),
             'usersCount' => $usersCount], 200);
 

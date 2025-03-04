@@ -1,6 +1,6 @@
 import {apiFetch} from "./useFetchInterceptor";
 
-export async function useSubscription(coursId, isAttente, userId = null) {
+export async function useSubscription(coursId, isOnWaitingList, userId = null) {
     try {
         const response = await apiFetch(`/api/addUser`, {
             method: 'POST',
@@ -8,7 +8,7 @@ export async function useSubscription(coursId, isAttente, userId = null) {
                 'Content-Type': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({coursId, isAttente, userId})
+            body: JSON.stringify({coursId, isOnWaitingList, userId})
         });
 
         const data = await response.json();
@@ -26,15 +26,15 @@ export async function useSubscription(coursId, isAttente, userId = null) {
 
 
 
-export async function useUnSubscription(coursId, isAttente) {
+export async function useUnSubscription(coursId, isOnWaitingList) {
     try {
-        const response = await apiFetch(`/api/removeUser/${coursId}/${isAttente}`, {
+        const response = await apiFetch(`/api/removeUser`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('token')}`
-            }
-
+            },
+            body: JSON.stringify({coursId, isOnWaitingList})
         });
 
         const data = await response.json();

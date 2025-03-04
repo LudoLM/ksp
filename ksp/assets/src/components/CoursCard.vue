@@ -19,7 +19,7 @@
           <div :style="{ visibility: info.nbInscriptionMax - usersCount <= 3 ? 'visible' : 'hidden' }" class="quantity">
             Dispo:&nbsp;<span class="infoRestante">{{ info.nbInscriptionMax - usersCount >= 0 ? info.nbInscriptionMax - usersCount : 0}}</span>
           </div>
-          <div :class="isUserAttente ? 'isUserAttente' : 'invisible'">
+          <div :class="isUserOnWaitingList ? 'isUserOnWaitingList' : 'invisible'">
             En attente
           </div>
         </div>
@@ -45,7 +45,7 @@
                  :coursId="props.info.id"
                  :statusCours="statusCours"
                  :isSubscribed="isSubscribed"
-                 :isUserAttente="isUserAttente"
+                 :isUserOnWaitingList="isUserOnWaitingList"
                  @updateCoursStatus="handleUpdateStatusCours"
                  @subscriptionResponse="handleSubscriptionresponse"
                  @unSubscriptionResponse="handleUnsubscriptionresponse"
@@ -122,11 +122,11 @@ const formattedHour = computed(() => {
 });
 // Initialiser le statut du cours comme réactif
 const statusCours = ref(props.info.statusCours);
-const usersCount = ref(props.info.usersCours.filter(cours => cours.isEnAttente === false).length);
+const usersCount = ref(props.info.usersCours.filter(cours => cours.isOnWaitingList === false).length);
 // Vérifier si l'utilisateur est inscrit
-const isSubscribed = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === false));
+const isSubscribed = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isOnWaitingList === false));
 // Vérifier si l'utilisateur est en attente
-const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === true));
+const isUserOnWaitingList = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isOnWaitingList === true));
 
 
 const handleAddExtraResponse = ({ type, message, statusChange }) => {
@@ -204,11 +204,11 @@ const openCreation = async () => {
   }
 };
 
-const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscribedValue, isUserAttenteValue }) => {
+const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscribedValue, isUserOnWaitingListValue }) => {
   statusCours.value = statusCoursValue;
   usersCount.value = usersCountValue;
   isSubscribed.value = isSubscribedValue;
-  isUserAttente.value = isUserAttenteValue;
+  isUserOnWaitingList.value = isUserOnWaitingListValue;
 };
 
 const handleSubscriptionresponse = ({ type, message }) => {
@@ -310,7 +310,7 @@ h3 {
   margin-bottom: 5px;
 }
 
-.isUserAttente{
+.isUserOnWaitingList{
   color: red;
   font-weight: normal;
   font-style: italic;

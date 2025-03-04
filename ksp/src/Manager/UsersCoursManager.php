@@ -9,12 +9,12 @@ use App\Entity\UsersCours;
 class UsersCoursManager
 {
 
-    public function addUserToCours(Cours $cours, bool $isEnAttente, User $user) : Cours
+    public function addUserToCours(Cours $cours, bool $isOnWaitingList, User $user) : Cours
     {
         $usersCours = new UsersCours();
         $usersCours->setUser($user);
         $usersCours->setCreatedAt(new \DateTimeImmutable());
-        $usersCours->setEnAttente($isEnAttente);
+        $usersCours->setIsOnWaitingList($isOnWaitingList);
         $cours->addUsersCours($usersCours);
 
         return $cours;

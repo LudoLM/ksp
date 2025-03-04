@@ -18,7 +18,7 @@ class DesistementSubscriber implements EventSubscriberInterface
 
         $cours = $event->getCours();
         $usersCours = $cours->getUsersCours();
-        $usersCours = array_filter($usersCours->toArray(), function ($usersCours) {return $usersCours->isEnAttente();});
+        $usersCours = array_filter($usersCours->toArray(), function ($usersCours) {return $usersCours->isOnWaitingList();});
         foreach ($usersCours as $user) {
             $email = (new TemplatedEmail())
                 ->from('test@test.fr')
