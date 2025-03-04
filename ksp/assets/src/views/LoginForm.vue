@@ -45,7 +45,7 @@ const handleLogin = async () => {
     userStore.setUserJWTExp(elements.exp);
 
     // Redirige vers la page d'accueil après la connexion réussie
-    await router.push('/');
+    router.go(-1);
   } catch (err) {
     error.value = "Les informations d'identification sont incorrectes";
   }
