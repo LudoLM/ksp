@@ -11,7 +11,7 @@ const props = defineProps({
         type: Boolean,
         required: true,
     },
-    isUserAttente: {
+    isUserOnWaitingList: {
         type: Boolean,
         required: true,
     },
@@ -26,10 +26,10 @@ const props = defineProps({
 });
 // Utiliser une seule fonction de surveillance pour plusieurs propriétés
 watch(
-    [() => props.isSubscribed, () => props.isUserAttente],
-    ([newIsSubscribed, newIsUserAttente]) => {
+    [() => props.isSubscribed, () => props.isUserOnWaitingList],
+    ([newIsSubscribed, newIsUserOnWaitingList]) => {
         localData.value.isSubscribed = newIsSubscribed;
-        localData.value.isUserAttente = newIsUserAttente;
+        localData.value.isUserOnWaitingList = newIsUserOnWaitingList;
     }
 );
 
@@ -39,18 +39,18 @@ const emit = defineEmits(["updateCoursStatus", "subscriptionResponse", "unSubscr
 const localData = ref({
     statusCours: props.statusCours,
     isSubscribed: props.isSubscribed,
-    isUserAttente: props.isUserAttente,
+    isUserOnWaitingList: props.isUserOnWaitingList,
 });
 
 // Gestion de l'inscription
-const handleSubscription = async (isAttente) => {
+const handleSubscription = async (isUserOnWaitingList) => {
     try {
-        const result = await useSubscription(props.coursId, isAttente);
+        const result = await useSubscription(props.coursId, isUserOnWaitingList);
         if (result.success) {
             localData.value = {
                 statusCours: JSON.parse(result.statusChange),
-                isUserAttente: !!isAttente,
-                isSubscribed: !isAttente
+                isUserOnWaitingList: !!isUserOnWaitingList,
+                isSubscribed: !isUserOnWaitingList
             };
 
             // Informer le parent
@@ -58,7 +58,7 @@ const handleSubscription = async (isAttente) => {
                 statusCoursValue: localData.value.statusCours,
                 usersCountValue: result.usersCount,
                 isSubscribedValue: localData.value.isSubscribed,
-                isUserAttenteValue: localData.value.isUserAttente,
+                isUserOnWaitingListValue: localData.value.isUserOnWaitingList,
 
             });
             emit("subscriptionResponse", {
@@ -82,24 +82,24 @@ const handleSubscription = async (isAttente) => {
 };
 
 // Gestion de la désinscription
-const handleUnsubscription = async (isAttente) => {
+const handleUnsubscription = async (isUserOnWaitingList) => {
     try {
-        const result = await useUnSubscription(props.coursId, isAttente);
+        const result = await useUnSubscription(props.coursId, isUserOnWaitingList);
         if (result.success) {
             localData.value = {
                 statusCours: JSON.parse(result.statusChange),
-                isUserAttente: !!isAttente,
-                isSubscribed: !isAttente
+                isUserOnWaitingList: !!isUserOnWaitingList,
+                isSubscribed: !isUserOnWaitingList
             };
             // Mettre à jour les variables locales en vérifiant si les données sont valides
-            isAttente ? localData.value.isUserAttente = false : localData.value.isSubscribed = false;
+            isUserOnWaitingList ? localData.value.isUserOnWaitingList = false : localData.value.isSubscribed = false;
 
             // Informer le parent
             emit("updateCoursStatus", {
                 statusCoursValue: localData.value.statusCours,
                 usersCountValue: result.usersCount,
                 isSubscribedValue: localData.value.isSubscribed,
-                isUserAttenteValue: localData.value.isUserAttente,
+                isUserOnWaitingListValue: localData.value.isUserOnWaitingList,
             });
             emit("unSubscriptionResponse", {
                 type: "success",
@@ -129,10 +129,10 @@ const handleUnsubscription = async (isAttente) => {
     <CustomButton v-if="userId && localData.isSubscribed" @click="handleUnsubscription(false)">
         Se désinscrire
     </CustomButton>
-    <CustomButton v-if="userId && !localData.isSubscribed && !localData.isUserAttente && localData.statusCours.libelle === 'Complet'" @click="handleSubscription(true)">
+    <CustomButton v-if="userId && !localData.isSubscribed && !localData.isUserOnWaitingList && localData.statusCours.libelle === 'Complet'" @click="handleSubscription(true)">
         Liste d'attente
     </CustomButton>
-    <CustomButton v-if="userId && localData.isUserAttente && localData.statusCours.libelle === 'Complet'" @click="handleUnsubscription(true)">
+    <CustomButton v-if="userId && localData.isUserOnWaitingList && localData.statusCours.libelle === 'Complet'" @click="handleUnsubscription(true)">
         Retirer attente
     </CustomButton>
 </template>

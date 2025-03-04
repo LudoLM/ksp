@@ -127,11 +127,10 @@ import { useRouter, useRoute } from 'vue-router';
 import { useUnSubscription } from "../utils/useSubscribing";
 import CustomButton from "../components/CustomButton.vue";
 import {apiFetch} from "../utils/useFetchInterceptor";
-import {VAlert} from "vuetify/components";
 
 const user = ref({});
 const coursFiltered = computed(() =>
-    user.value.usersCours ? user.value.usersCours.filter(coursArr => !coursArr.isEnAttente) : []
+    user.value.usersCours ? user.value.usersCours.filter(coursArr => !coursArr.isOnWaitingList) : []
 );
 const router = useRouter();
 const route = useRoute();

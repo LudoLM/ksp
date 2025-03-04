@@ -4,7 +4,6 @@ import {useRoute, useRouter} from 'vue-router';
 import {useDateFormat} from '@vueuse/core';
 import {useGetCoursById} from "../utils/useActionCours";
 import CustomButton from "../components/CustomButton.vue";
-import {VAlert} from "vuetify/components";
 import ButtonsCardUser from "../components/user/ButtonsCardUser.vue";
 import { useUserStore } from "../store/user";
 import StatusCoursTag from "../components/StatusCoursTag.vue";
@@ -26,7 +25,7 @@ const loginDialog = ref(false);
 const UnsubscribeUsersDialog = ref(false);
 const usersCount = ref(0);
 const isSubscribed = ref(false);
-const isUserAttente = ref(false);
+const isUserOnWaitingList = ref(false);
 const dateStart = computed(() => new Date(cours.value?.dateCours));
 const formattedDate = computed(() => useDateFormat(dateStart.value, 'DD/MM/YYYY').value);
 const formattedHour = computed(() => useDateFormat(dateStart.value, 'HH:mm').value);
@@ -42,16 +41,16 @@ const redirectToLogin = () => {
 const coursDetails = async () => {
   const result = await useGetCoursById(coursId);
   cours.value = JSON.parse(result);
-  usersCount.value = cours.value.usersCours.filter(userCours => userCours.isEnAttente === false).length;
-  usersSubscribed.value = cours.value.usersCours.filter(userCours => userCours.isEnAttente === false);
-  usersOnStandby.value = cours.value.usersCours.filter(userCours => userCours.isEnAttente === true);
+  usersCount.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === false).length;
+  usersSubscribed.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === false);
+  usersOnStandby.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === true);
 }
 
 
 onMounted( async () => {
    await coursDetails();
    userId.value = userStore.userId;
-   isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && !usersCours.isEnAttente);
+   isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && !usersCours.isOnWaitingList);
 
 });
 
@@ -62,11 +61,11 @@ const handleUpdateUnsubscribeUsersValue = ({ statusCoursValue, usersSubscribedVa
     usersCount.value = usersSubscribed.value.length;
 };
 
-const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscribedValue, isUserAttenteValue }) => {
+const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscribedValue, isUserOnWaitingListValue }) => {
     cours.value.statusCours = statusCoursValue;
     usersCount.value = usersCountValue;
     isSubscribed.value = isSubscribedValue;
-    isUserAttente.value = isUserAttenteValue;
+    isUserOnWaitingList.value = isUserOnWaitingListValue;
 };
 
 const handleSubscriptionResponse = ({ type, message }) => {
@@ -91,7 +90,7 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
                             <StatusCoursTag :statusCours="cours.statusCours" />
                             <div class="pt-6 h-10">
                                 <div class='isSubscribedTag' v-if="isSubscribed">Je participe</div>
-                                <div class='onStandby text-red-500' v-if="isUserAttente">En attente</div>
+                                <div class='onStandby text-red-500' v-if="isUserOnWaitingList">En attente</div>
                             </div>
                         </div>
                     </div>
@@ -117,7 +116,7 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
                                              :coursId="cours.id"
                                              :statusCours="cours.statusCours"
                                              :isSubscribed="isSubscribed"
-                                             :isUserAttente="isUserAttente"
+                                             :isUserOnWaitingList="isUserOnWaitingList"
                                              @updateCoursStatus="handleUpdateStatusCours"
                                              @subscriptionResponse="handleSubscriptionResponse"
                                              @unSubscriptionResponse="handleUnSubscriptionResponse"
@@ -209,7 +208,7 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
     }
 }
 
-.isSubscribedTag, .isUserAttenteTag, .specialNote, .descriptif, .duree, .dispo, .isSubscribed, .onStandby {
+.isSubscribedTag, .isUserOnWaitingListTag, .specialNote, .descriptif, .duree, .dispo, .isSubscribed, .onStandby {
     font-size: clamp(0.8rem, 1vw, 1rem);
 }
 

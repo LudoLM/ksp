@@ -1,25 +1,20 @@
 <?php
 namespace App\Controller\Api;
 
-use App\DTO\AddUserToCoursDTO;
-use App\DTO\AddUserToCoursDTOToUserCours;
+
 use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
-use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
-use App\Manager\UsersCoursManager;
 use App\Message\UpdateStatusCoursMessage;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
 use App\Repository\UserRepository;
-use App\Serializer\AddUserToCoursDTOToUsersCoursDenormalizer;
 use App\Serializer\CreateCoursDTOToCoursDenormalizer;
 use App\Service\CoursControllerService\AddUserTimeCheckerService;
 use App\Service\CoursControllerService\CountUsersInCoursService;
 use App\Service\CoursControllerService\CreateUsersCoursService;
 use App\Service\CoursControllerService\FilteringCoursService;
-use App\Service\CoursControllerService\SubscribeExtraUserService;
 use App\Service\UpdateStatusCoursClickService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -52,7 +47,7 @@ class CoursController extends AbstractController
         private readonly FilteringCoursService         $filteringCoursService,
         private readonly AddUserTimeCheckerService     $addUserTimeCheckerService,
         private readonly CountUsersInCoursService      $countUsersInCoursService,
-        private readonly UsersCoursManager             $usersCoursManager, private readonly CreateUsersCoursService $createUsersCoursService,
+        private readonly CreateUsersCoursService $createUsersCoursService,
     )
     {
     }
@@ -96,17 +91,20 @@ class CoursController extends AbstractController
         $data = json_decode($request->getContent(), true);
         $user = $data['userId'] === null ? $this->getUser() : $this->userRepository->find($data['userId']);
         $cours = $this->coursRepository->find($data['coursId']);
-        $isAttente = $data['isAttente'];
+        $isOnWaitingList = $data['isOnWaitingList'];
 
-        return $this->createUsersCoursService->createUsersCours($cours, $user, $isAttente);
+        return $this->createUsersCoursService->createUsersCours($cours, $user, $isOnWaitingList);
     }
 
 
-    #[Route('removeUser/{id}/{isAttente}', name: 'cours_remove_user')]
-    public function removeUserFromCours(Cours $cours, string $isAttente): JsonResponse
+    #[Route('removeUser', name: 'cours_remove_user')]
+    public function removeUserFromCours(Request $request): JsonResponse
     {
+        $data = json_decode($request->getContent(), true);
+        $cours = $this->coursRepository->find($data['coursId']);
+        $isOnWaitingList = $data['isOnWaitingList'];
         $user = $this->getUser();
-        $isAttente = $isAttente === 'true';
+        $isOnWaitingList = $isOnWaitingList === 'true';
         $statusChange = $cours->getStatusCours();
         // Suppression de l'utilisateur du cours
         foreach ($cours->getUsersCours() as $usersCours) {
@@ -114,12 +112,12 @@ class CoursController extends AbstractController
                 $cours->removeUsersCours($usersCours);
             }
         }
-        if(!$isAttente) {
+        if(!$isOnWaitingList) {
             $user->setNombreCours($user->getNombreCours() + 1);
         }
 
 //        Si le cours est complet et qu'il y a de la place, je change le statut du cours et envoie un mail aux personnes en attente
-        if(count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();})) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
+        if(count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isOnWaitingList();})) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
 
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
             $statusChange = $cours->getStatusCours();
@@ -128,14 +126,14 @@ class CoursController extends AbstractController
             $this->dispatcher->dispatch($eventCours);*/
         }
 
-        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
+        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isOnWaitingList();}));
 
 //        // Sauvegarde des modifications en base de données
         $this->em->persist($cours);
         $this->em->flush();
 
         // Retourne une réponse JSON pour indiquer que l'utilisateur a été supprimé avec succès
-        return new JsonResponse(['success' => true, 'message' => !$isAttente ? 'Vous avez bien été supprimé du cours': 'Vous n\'êtes plus sur la liste d\'attente', 'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']), 'usersCount' => $usersCount], 200);
+        return new JsonResponse(['success' => true, 'message' => !$isOnWaitingList ? 'Vous avez bien été supprimé du cours': 'Vous n\'êtes plus sur la liste d\'attente', 'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']), 'usersCount' => $usersCount], 200);
     }
 
     // Add route for create new cours
@@ -259,7 +257,7 @@ class CoursController extends AbstractController
             }
         }
 //        Si le cours est complet et qu'il y a de la place, je change le statut du cours et envoie un mail aux personnes en attente
-        if(count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();})) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
+        if(count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isOnWaitingList();})) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
 
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
             $statusChange = $cours->getStatusCours();
@@ -267,7 +265,7 @@ class CoursController extends AbstractController
             /*$eventCours = new DesistementEvent($cours);
             $this->dispatcher->dispatch($eventCours);*/
         }
-        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isEnAttente();}));
+        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), function ($usersCours) {return !$usersCours->isOnWaitingList();}));
 
         $this->em->persist($cours);
         $this->em->flush();

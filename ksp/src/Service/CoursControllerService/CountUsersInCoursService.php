@@ -9,7 +9,7 @@ class CountUsersInCoursService
         return count(array_filter(
             $cours->getUsersCours()->toArray(),
             function ($usersCours) {
-                return !$usersCours->isEnAttente();
+                return !$usersCours->isOnWaitingList();
             }
         ));
     }

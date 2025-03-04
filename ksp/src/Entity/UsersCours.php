@@ -19,7 +19,7 @@ class UsersCours
 
     #[Groups(['user:detail', 'cours:index', 'cours:detail'])]
     #[ORM\Column]
-    private ?bool $isEnAttente = null;
+    private ?bool $isOnWaitingList = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
@@ -43,14 +43,14 @@ class UsersCours
         return $this->id;
     }
 
-    public function isEnAttente(): ?bool
+    public function isOnWaitingList(): ?bool
     {
-        return $this->isEnAttente;
+        return $this->isOnWaitingList;
     }
 
-    public function setEnAttente(bool $isEnAttente): static
+    public function setIsOnWaitingList(bool $isOnWaitingList): static
     {
-        $this->isEnAttente = $isEnAttente;
+        $this->isOnWaitingList = $isOnWaitingList;
 
         return $this;
     }

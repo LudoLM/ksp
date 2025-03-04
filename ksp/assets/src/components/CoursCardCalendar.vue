@@ -18,8 +18,8 @@ const formattedHour = computed(() => {
 });
 const userStore = useUserStore();
 const userId = userStore.userId;
-const isSubscribed = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === false));
-const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === userId && cours.isEnAttente === true));
+const isSubscribed = ref(props.info.usersCours.some(userCours => userCours.user.id === userId && userCours.isOnWaitingList === false));
+const isUserOnWaitingList = ref(props.info.usersCours.some(userCours => userCours.user.id === userId && userCours.isOnWaitingList === true));
 </script>
 
 <template>
@@ -53,7 +53,7 @@ const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === 
                 />
             </svg>
             <div :class="isSubscribed ? 'isSubscribed' : 'invisible'">Je participe</div>
-            <div :class="isUserAttente ? 'isUserAttente' : 'invisible'">
+            <div :class="isUserOnWaitingList ? 'isUserOnWaitingList' : 'invisible'">
                 En attente
             </div>
             <div class="card_title">
@@ -129,7 +129,6 @@ const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === 
         h3 {
             color: #ffffff;
             font-size: clamp(1rem, 1.8vw, 1.5rem);
-            color: #fff;
             margin-bottom: 5px;
             transition: all .5s ease-in-out;
         }
@@ -146,7 +145,7 @@ const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === 
             transition: fill .5s ease-in-out;
         }
 
-        .isSubscribed, .isUserAttente {
+        .isSubscribed, .isUserOnWaitingList {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -155,7 +154,7 @@ const isUserAttente = ref(props.info.usersCours.some(cours => cours.user.id === 
         }
 
 
-        &:has(.isSubscribed, .isUserAttente) {
+        &:has(.isSubscribed, .isUserOnWaitingList) {
             background-color: rgba(0, 0, 0, 0.8);
         }
     }
