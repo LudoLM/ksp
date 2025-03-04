@@ -30,7 +30,7 @@
             </router-link>
 
 
-            <ButtonsCardAdmin v-if="isAdminPath"
+            <ButtonsCardAdmin
                 :statusCours="statusCours"
                 :coursId="info.id"
                 @cancelCours="cancelCours"
@@ -40,7 +40,7 @@
                 @handleAddExtraResponse="handleAddExtraResponse"
             />
 
-            <ButtonsCardUser v-if="!isAdminPath"
+<!--            <ButtonsCardUser v-if="!isAdminPath"
                  :userId="userId"
                  :coursId="props.info.id"
                  :statusCours="statusCours"
@@ -49,7 +49,7 @@
                  @updateCoursStatus="handleUpdateStatusCours"
                  @subscriptionResponse="handleSubscriptionresponse"
                  @unSubscriptionResponse="handleUnsubscriptionresponse"
-            />
+            />-->
 
             <ModalConfirm
                 v-if="!userId && (statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet')"
@@ -80,7 +80,6 @@ import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCo
 import { useRouter } from 'vue-router';
 import ModalConfirm from "./modal/ModalConfirm.vue";
 import ButtonsCardAdmin from "./admin/ButtonsCardAdmin.vue";
-import ButtonsCardUser from "./user/ButtonsCardUser.vue";
 import StatusCoursTag from "./StatusCoursTag.vue";
 
 const userStore = useUserStore();
@@ -93,10 +92,6 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  isAdminPath: {
-    type: Boolean,
-    default: false,
-  }
 });
 
 // État de la modale

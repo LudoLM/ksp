@@ -42,14 +42,12 @@
 </template>
 
 <script setup>
-import {ref, onMounted, computed, watch, inject} from 'vue';
+import {ref, onMounted, watch, inject} from 'vue';
 import CoursCard from "../components/CoursCard.vue";
-import {VAlert} from "vuetify/components";
 import CoursFilters from "../components/CoursFilters.vue";
 import { useRoute } from "vue-router";
 import {useGetCours, useGetStatusCours, useGetTypesCours} from "../utils/useActionCours";
 import CustomButton from "../components/CustomButton.vue";
-import HeroBanner from "../components/user/HeroBanner.vue";
 
 const infos = ref([]);
 const selectedCoursId = ref(null);

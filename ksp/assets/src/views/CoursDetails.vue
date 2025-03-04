@@ -28,7 +28,11 @@ const isSubscribed = ref(false);
 const isUserOnWaitingList = ref(false);
 const dateStart = computed(() => new Date(cours.value?.dateCours));
 const formattedDate = computed(() => useDateFormat(dateStart.value, 'DD/MM/YYYY').value);
-const formattedHour = computed(() => useDateFormat(dateStart.value, 'HH:mm').value);
+const formattedHour = computed(() => {
+    const hours = dateStart.value.getUTCHours();
+    const minutes = String(dateStart.value.getUTCMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+});
 const alertStore = inject('alertStore');
 
 const emit = defineEmits(['handleSubscription', 'handleUnsubscription']);

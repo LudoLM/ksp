@@ -46,8 +46,9 @@ const typeCoursList = ref([]);
   });
 
 const tzoffset = (new Date()).getTimezoneOffset() * 60000;
-const ajoutHeure = 60 * 60 * 1000;
-const localISOTime = (new Date(Date.now() - tzoffset + ajoutHeure)).toISOString().slice(0, 16);
+// Ajout d'un jour pour la date par défaut (l'utilisateur ne peut pas créer un cours le jour même)
+const ajoutJour = 60 * 60 * 1000 * 24;
+const localISOTime = (new Date(Date.now() - tzoffset + ajoutJour)).toISOString().slice(0, 16);
 const alertStore = inject('alertStore');
 
 const formData = ref({
