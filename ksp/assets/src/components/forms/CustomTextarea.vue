@@ -23,13 +23,13 @@ const emit = defineEmits(['update:modelValue']);
 </script>
 
 <template>
-  <div class="form-group mb-4">
-    <label :for="id" class="block text-gray-700 font-semibold mb-2">{{ item }}:</label>
+  <div>
+    <label :for="id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{{ item }}:</label>
     <textarea
         :id="id"
         :value="modelValue"
         @input="emit('update:modelValue', $event.target.value)"
-        class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
     />
     <div class="error-message text-red-500 text-sm h-4">
       {{ error }}
@@ -37,11 +37,3 @@ const emit = defineEmits(['update:modelValue']);
   </div>
   <!-- Affiche le message d'erreur s'il est présent -->
 </template>
-
-<style scoped lang="scss">
-  textarea {
-    border-radius: 0;
-    border: 1px solid #000;
-    background: #fff;
-  }
-</style>

@@ -1,5 +1,5 @@
 <script setup>
-import CustomButton from "../components/CustomButton.vue";
+import CustomButton from "../components/forms/CustomButton.vue";
 import {useGetCours, useGetTypesCours} from "../utils/useActionCours";
 import {onMounted, ref} from "vue";
 import {useDateFormat} from "@vueuse/core";

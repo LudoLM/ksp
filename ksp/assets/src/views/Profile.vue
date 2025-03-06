@@ -125,7 +125,7 @@
 import {computed, inject, onMounted, ref} from "vue";
 import { useRouter, useRoute } from 'vue-router';
 import { useUnSubscription } from "../utils/useSubscribing";
-import CustomButton from "../components/CustomButton.vue";
+import CustomButton from "../components/forms/CustomButton.vue";
 import {apiFetch} from "../utils/useFetchInterceptor";
 
 const user = ref({});

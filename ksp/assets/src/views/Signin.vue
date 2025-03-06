@@ -1,0 +1,219 @@
+<template>
+    <div class="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
+        <div
+            class="relative flex flex-col justify-center w-full h-screen lg:flex-row dark:bg-gray-900"
+        >
+            <div class="flex flex-col flex-1 w-full lg:w-1/2">
+                <div class="w-full max-w-md pt-10 mx-auto">
+                    <div @click="handleRedirection" class="handleRedirection inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                        <svg
+                            class="stroke-current"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                        >
+                            <path
+                                d="M12.7083 5L7.5 10.2083L12.7083 15.4167"
+                                stroke=""
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                        Retour
+                    </div>
+                </div>
+                <div class="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+                    <div>
+                        <div class="mb-5 sm:mb-8">
+                            <h1 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+                                Connectez-vous
+                            </h1>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Entrez vos informations d'identification
+                            </p>
+                        </div>
+                        <div>
+                            <div class="relative py-3 mb-6 sm:py-5">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-200 dark:border-gray-800"></div>
+                                </div>
+                            </div>
+                            <form @submit.prevent="handleSubmit">
+                                <div class="space-y-5">
+                                    <!-- Email -->
+                                    <CustomInput
+                                        item="Email"
+                                        type="email"
+                                        id="username"
+                                        placeholder="info@gmail.com"
+                                        v-model="username"
+                                    />
+                                    <!-- Password -->
+                                    <CustomPassword
+                                        v-model="password"
+                                    />
+                                    <div
+                                        :class="error ? 'opacity-100' : 'opacity-0'"
+                                        class="h-auto text-red-600 transition-opacity duration-300"
+                                    >
+                                        {{ error }}
+                                    </div>
+                                    <p class="text-sm font-normal text-gray-700 dark:text-gray-400  text-right">
+                                        <router-link
+                                            to="/"
+                                            class="text-right"
+                                        >Mot de passe oublié?</router-link
+                                        >
+                                    </p>
+                                </div>
+                                <!-- Button -->
+                                <div>
+                                    <button
+                                        type="submit"
+                                        class="flex items-center justify-center w-full px-4 py-3 mt-10 text-sm font-medium text-white transition rounded-lg shadow-theme-xs hover:bg-brand-600"
+                                    >
+                                        Connexion
+                                    </button>
+                                </div>
+                            </form>
+                            <div class="mt-5">
+                                <p class="text-sm font-normal text-gray-700 dark:text-gray-400 text-start">
+                                    Vous n'avez pas de compte?
+                                    <router-link
+                                        to="/register"
+                                    >Créez-en un </router-link
+                                    >
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="banner relative items-center hidden w-full h-full lg:w-1/2 lg:grid">
+                <div class="overlay flex items-center justify-center">
+                    <div class="logoWrapper flex flex-col items-center max-w-xs">
+                        <router-link to="/" class="block mb-4">
+                            <h3>Kiné Sport Santé</h3>
+                        </router-link>
+                        <p class="text-center text-gray-300 dark:text-white/70">
+                            Soulagez vos douleurs et renforcez votre bien-être.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import CustomInput from "../components/forms/CustomInput.vue";
+import {useUserStore} from "../store/user";
+import CustomPassword from "../components/forms/CustomPassword.vue";
+
+
+// Instancier le store en dehors de la fonction handleLogin
+const userStore = useUserStore();
+const username = ref('');
+const password = ref('');
+const error = ref('');
+const router = useRouter();
+
+const handleRedirection = () => {
+    router.go(-1);
+}
+
+const handleSubmit = async () => {
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: username.value, password: password.value }),
+        });
+
+        if (!response.ok) {
+            const responseError = await response.json();
+
+            throw new Error(responseError.message);
+        }
+
+        const data = await response.json();
+        // Stocker le token et mettre à jour le store
+        localStorage.setItem('token', data.token);
+
+        // Décoder le token pour récupérer l'email de l'utilisateur
+        const payload = data.token.split('.')[1];
+        const decoded = atob(payload);
+        const elements = JSON.parse(decoded);
+
+        // Mettre à jour le store avec l'email de l'utilisateur et l'état d'authentification
+        userStore.setUserEmail(elements.username);
+        userStore.setUserId(elements.id);
+        userStore.setUserPrenom(elements.prenom);
+        userStore.setUserJWTExp(elements.exp);
+
+        // Redirige vers la page d'accueil après la connexion réussie
+        await router.push('/');
+    } catch (err) {
+        error.value = "Les informations d'identification sont incorrectes";
+    }
+}
+</script>
+
+
+<style scoped>
+
+
+    h1 {
+        text-align: start;
+    }
+    .banner {
+        background: url('../../images/imageBanner13.jpg') no-repeat center center / cover;
+
+        .overlay {
+            background: rgba(30, 27, 75, .9);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        h3{
+            color: #fff;
+        }
+
+        p{
+            color: #d9d9d9;
+            font-size: clamp(0.6rem, 1.2vw, .8rem);
+        };
+
+    }
+
+    button{
+        background-color: #472371;
+
+        &:hover{
+            background-color: #5f3f71;
+        }
+    }
+
+    a{
+        color: #e2a945;
+    }
+
+    .handleRedirection{
+        cursor: pointer;
+    }
+
+    .error{
+        color: red;
+    }
+</style>

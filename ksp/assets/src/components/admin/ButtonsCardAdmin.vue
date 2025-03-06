@@ -1,6 +1,6 @@
 <script setup>
 
-import CustomButton from "../CustomButton.vue";
+import CustomButton from "../forms/CustomButton.vue";
 import ModalAddExtra from "../modal/ModalAddExtra.vue";
 import {ref} from "vue";
 

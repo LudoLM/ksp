@@ -27,7 +27,7 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import {useGetTypesCours} from "../utils/useActionCours";
-import CustomButton from "../components/CustomButton.vue";
+import CustomButton from "../components/forms/CustomButton.vue";
 import {useRouter} from "vue-router";
 import Banner from "../components/Banner.vue";
 import bannerImage from "../../images/imageBanner15.jpg";

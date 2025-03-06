@@ -1,13 +1,15 @@
 <script setup>
 import {inject, onMounted, ref} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
-import CustomTextarea from "../components/CustomTextarea.vue";
-import CustomInput from "../components/CustomInput.vue";
-import CustomSelect from "../components/CustomSelect.vue";
-import CustomButton from "../components/CustomButton.vue";
+import CustomTextarea from "../components/forms/CustomTextarea.vue";
+import CustomInput from "../components/forms/CustomInput.vue";
+import CustomSelect from "../components/forms/CustomSelect.vue";
+import CustomButton from "../components/forms/CustomButton.vue";
 import {useValidationForm} from "../utils/useValidationForm";
 import {useGetTypesCours} from "../utils/useActionCours";
 import {apiFetch} from "../utils/useFetchInterceptor";
+import Banner from "../components/Banner.vue";
+import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
 
 const router = useRouter();
 const origin = useRoute().params;
@@ -80,9 +82,11 @@ const formData = ref({
         body: JSON.stringify(data),
       });
 
-        if (!response.ok) {
-            await useValidationForm(response, errors);
-        }
+      const data = await response.json();
+
+      if (!response.ok) {
+        await useValidationForm(data, errors);
+      }
 
       if (response.status === 200){
         await router.push({
@@ -121,32 +125,46 @@ const formData = ref({
 </script>
 
 <template>
-  <div>
-      <div class="title_wrapper">
-          <h2>{{ origin.id ? "Modifier" : "Ajouter" }} un cours</h2>
-      </div>
+    <div class="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900">
+        <div class="w-full max-w-2xl">
+            <!-- Banner -->
+            <Banner
+                :title="(origin.id ? 'Modifier' : 'Ajouter') + ' un cours'"
+                :textColor="'rgba(30, 27, 75, .9)'"
+                backgroundHeight="20vh"
+                :hasButton="false"
+            />
 
-    <div class="buttonsFilters flex justify-start">
-      <router-link :to="{name: 'CreateTypeCours'}"><CustomButton>Ajouter un type de Cours</CustomButton></router-link>
-      <router-link :to="{name: 'EditTypeCours'}"><CustomButton>Modifier un type de Cours</CustomButton></router-link>
+            <!-- Buttons -->
+            <div class="flex justify-end mt-4">
+                <router-link :to="{name: 'CreateTypeCours'}">
+                    <CustomButton>Ajouter un type de Cours</CustomButton>
+                </router-link>
+                <router-link :to="{name: 'EditTypeCours'}">
+                    <CustomButton>Modifier un type de Cours</CustomButton>
+                </router-link>
+            </div>
+
+            <!-- Form -->
+            <form @submit.prevent="handleSubmit" class="mt-6 space-y-4">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <CustomSelect item="Type de cours" id="typeCours" :error="errors.typeCours" v-model="formData.typeCours" :options="typeCoursList" required />
+                    <CustomInput item="Durée (minutes)" type="number" id="dureeCours" :error="errors.dureeCours" v-model="formData.dureeCours" required />
+                    <CustomInput item="Date" type="datetime-local" id="dateCours" :error="errors.dateCours" v-model="formData.dateCours" required />
+                    <CustomInput item="Nombre de places" type="number" id="nbInscriptionMax" :error="errors.nbInscriptionMax" v-model="formData.nbInscriptionMax" required />
+                </div>
+                <CustomTextarea item="Note" id="specialNote" :error="errors.specialNote" v-model="formData.specialNote" class="w-full" />
+                <div class="mt-4 flex justify-center">
+                    <CustomValidationButton
+                        :title="origin.id ? 'Modifier' : 'Ajouter'"
+                        class="w-full"
+                    />
+                </div>
+            </form>
+        </div>
     </div>
-    <form>
-      <div class="grid grid-cols-2 gap-4">
-        <CustomSelect item="Type de cours" id="typeCours" :error="errors.typeCours" v-model="formData.typeCours" :options="typeCoursList" required/>
-        <CustomInput item="Durée (minutes)" type="Number" id="dureeCours" :error="errors.dureeCours" v-model="formData.dureeCours" required/>
-        <CustomInput item="Date" type="datetime-local" id="dateCours" dureeCours :error="errors.dateCours" v-model="formData.dateCours" required/>
-        <CustomInput item="Nombre de places" type="number" id="nbInscriptionMax" :error="errors.nbInscriptionMax" v-model="formData.nbInscriptionMax" required/>
-      </div>
-        <CustomTextarea item="Note" id="specialNote" :error="errors.specialNote" class="w-full" />
-      <div class="mt-4 flex justify-center">
-        <CustomButton type="submit" @click="handleSubmit">
-          {{ origin.id ? "Modifier" : "Ajouter" }}
-        </CustomButton>
-      </div>
-    </form>
-  </div>
-
 </template>
+
 
 <style scoped lang="scss">
 

@@ -1,7 +1,7 @@
 <script setup>
 
 import {ref, watch} from "vue";
-import CustomSelect from "../CustomSelect.vue";
+import CustomSelect from "../forms/CustomSelect.vue";
 
 const props = defineProps({
     uniqueTypeCoursList: {

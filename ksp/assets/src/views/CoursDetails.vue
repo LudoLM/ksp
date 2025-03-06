@@ -3,7 +3,7 @@ import {ref, computed, onMounted, inject} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import {useDateFormat} from '@vueuse/core';
 import {useGetCoursById} from "../utils/useActionCours";
-import CustomButton from "../components/CustomButton.vue";
+import CustomButton from "../components/forms/CustomButton.vue";
 import ButtonsCardUser from "../components/user/ButtonsCardUser.vue";
 import { useUserStore } from "../store/user";
 import StatusCoursTag from "../components/StatusCoursTag.vue";
