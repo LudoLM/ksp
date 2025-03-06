@@ -13,6 +13,7 @@ import DefaultLayout from '../layouts/DefaultLayout.vue';
 import { useUserStore } from '../store/user';
 import { createAlertStore } from '../store/alert';
 import useGetElementsToken from '../utils/useGetElementsToken';
+import LoginLayout from "../layouts/LoginLayout.vue";
 
 const alertStore = createAlertStore(); // Instance unique d'alertStore
 
@@ -29,11 +30,17 @@ const router = createRouter({
         { path: '/packs', name: 'Packs', component: () => import('../views/Pricing.vue') },
         { path: '/pratique', name: 'Pratique', component: () => import('../views/Pratique.vue') },
         { path: '/coursDetails/:id', name: 'CoursDetails', component: () => import('../views/CoursDetails.vue') },
-        { path: '/login', name: 'Login', component: () => import('../views/LoginForm.vue') },
-        { path: '/register', name: 'Register', component: () => import('../views/Register.vue') },
         { path: '/merci', name: 'Merci', component: () => import('../views/Merci.vue') },
         { path: '/profile', name: 'Profile', component: Profile },
       ],
+    },
+    {
+      path: '/',
+      component: LoginLayout,
+      children: [
+        { path: '/login', name: 'Login', component: () => import('../views/Signin.vue') },
+        { path: '/register', name: 'Register', component: () => import('../views/Signup.vue') }
+      ]
     },
     {
       path: '/admin',

@@ -1,8 +1,8 @@
 <script setup>
 import {ref, watch} from 'vue';
-import CustomSelect from "./CustomSelect.vue";
-import CustomInput from "./CustomInput.vue";
-import CustomButton from "./CustomButton.vue";
+import CustomSelect from "./forms/CustomSelect.vue";
+import CustomInput from "./forms/CustomInput.vue";
+import CustomButton from "./forms/CustomButton.vue";
 
 defineProps({
   uniqueTypeCours: {

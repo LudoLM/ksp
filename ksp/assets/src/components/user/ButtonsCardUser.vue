@@ -1,6 +1,6 @@
 <script setup>
 import {ref, watch} from "vue";
-import CustomButton from "../CustomButton.vue";
+import CustomButton from "../forms/CustomButton.vue";
 import { useSubscription, useUnSubscription } from "../../utils/useSubscribing";
 
 const props = defineProps({

@@ -53,7 +53,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import CustomButton from "../CustomButton.vue";
+import CustomButton from "../forms/CustomButton.vue";
 import CheckboxThree from "../forms/CheckboxThree.vue";
 import { apiFetch } from "../../utils/useFetchInterceptor";
 

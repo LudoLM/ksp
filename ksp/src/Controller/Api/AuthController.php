@@ -61,6 +61,8 @@ class AuthController extends AbstractController
         $authenticatedToken = new UsernamePasswordToken($user, 'main', $user->getRoles());
         $this->tokenStorage->setToken($authenticatedToken);
 
+        dd($token);
+
 
         return new JsonResponse([
             'message' => 'Utilisateur créé',

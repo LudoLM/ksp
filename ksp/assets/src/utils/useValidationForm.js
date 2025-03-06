@@ -1,7 +1,5 @@
 
-export async function useValidationForm(response, errors) {
-
-  const message = await response.json();
+export async function useValidationForm(message, errors) {
 
     if (message.detail) {
         errors.value = message.detail.split('\n').reduce((acc, error) => {

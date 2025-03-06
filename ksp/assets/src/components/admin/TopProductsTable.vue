@@ -1,7 +1,7 @@
 <script setup>
     import { ref} from 'vue'
-    import CustomButton from "../../components/CustomButton.vue";
-    import CustomInput from "../../components/CustomInput.vue";
+    import CustomButton from "../forms/CustomButton.vue";
+    import CustomInput from "../forms/CustomInput.vue";
 
 
     const props = defineProps({

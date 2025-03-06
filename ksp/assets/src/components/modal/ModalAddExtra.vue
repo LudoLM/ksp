@@ -33,7 +33,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import CustomButton from '../CustomButton.vue';
+import CustomButton from '../forms/CustomButton.vue';
 import { useSubscription } from "../../utils/useSubscribing";
 
 // Définition des props

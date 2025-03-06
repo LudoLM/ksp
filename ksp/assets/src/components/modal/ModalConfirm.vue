@@ -22,7 +22,7 @@
 
 <script>
 import { ref } from 'vue';
-import CustomButton from "../CustomButton.vue";
+import CustomButton from "../forms/CustomButton.vue";
 
 export default {
   name: "ModalConfirm",

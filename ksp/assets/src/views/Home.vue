@@ -42,7 +42,7 @@
                             <img class="rounded-full" src="../../images/servane.jpg" alt="">
                         </div>
                     </div>
-                    <p>En choisissant le métier de masseur kinésithérapeute, je voulais aider et soigner les gens, tout en gardant comme objectif de pouvoir me rapprocher du milieu sportif. Avec mes spécialisations en rééducation du dos, des abdominaux et du périnée, et plus récemment mes formations en sport santé, je vous propose des cours de gym adaptés à vos besoins.</p>
+                    <p>"En choisissant le métier de masseur kinésithérapeute, je voulais aider et soigner les gens, tout en gardant comme objectif de pouvoir me rapprocher du milieu sportif. Avec mes spécialisations en rééducation du dos, des abdominaux et du périnée, et plus récemment mes formations en sport santé, je vous propose des cours de gym adaptés à vos besoins."</p>
                 </div>
                 <div class="image image_desktop">
                     <div class="w-1/2">

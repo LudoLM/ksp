@@ -1,20 +1,21 @@
 <script setup>
 import {inject, onMounted, ref, watch} from "vue";
-import CustomButton from "../components/CustomButton.vue";
-import CustomInput from "../components/CustomInput.vue";
-import CustomSelect from "../components/CustomSelect.vue";
+import CustomInput from "../components/forms/CustomInput.vue";
+import CustomSelect from "../components/forms/CustomSelect.vue";
 import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router';
 import {useValidationForm} from "../utils/useValidationForm";
 import {useGetTypesCours} from "../utils/useActionCours";
-import {VAlert} from "vuetify/components";
 import {apiFetch} from "../utils/useFetchInterceptor";
-import CustomTextarea from "../components/CustomTextarea.vue";
+import CustomTextarea from "../components/forms/CustomTextarea.vue";
+import Banner from "../components/Banner.vue";
+import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
+import CustomFileInput from "../components/forms/CustomFileInput.vue";
 
 const formData = ref({
-  nom: null,
-  descriptif: null,
-  image: null,
+    nom: null,
+    descriptif: null,
+    image: null,
 });
 
 const router = useRouter();
@@ -29,27 +30,27 @@ const urlEdition = "/api/typeCours/edit/";
 const alertStore = inject('alertStore');
 
 const errors = ref({
-  libelle: null,
-  descriptif: null,
-  thumbnail: null,
+    libelle: null,
+    descriptif: null,
+    thumbnail: null,
 });
 
 watch(() => route.name, (newRoute) => {
-  origin.value = newRoute;
-  formData.value.nom = null;
-  formData.value.descriptif = null;
-  existingImage.value = null;
-  imagePreview.value = null;
-  fetchData();
+    origin.value = newRoute;
+    formData.value.nom = null;
+    formData.value.descriptif = null;
+    existingImage.value = null;
+    imagePreview.value = null;
+    fetchData();
 });
 
 // Fonction pour capturer le fichier
 const onFileChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    formData.value.image = file;
-    imagePreview.value = URL.createObjectURL(file);
-  }
+    const file = event.target.files[0];
+    if (file) {
+        formData.value.image = file;
+        imagePreview.value = URL.createObjectURL(file);
+    }
 };
 
 const onTypeCoursChange = (event) => {
@@ -66,26 +67,26 @@ const onTypeCoursChange = (event) => {
 
 // Récupérer la liste des types de cours
 const fetchData = async () => {
-  try {
-    await apiFetch("/api/getTypeCours", {
-      method: "GET",
-      headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
-    });
-    typeCoursList.value = await useGetTypesCours();
+    try {
+        await apiFetch("/api/getTypeCours", {
+            method: "GET",
+            headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
+        });
+        typeCoursList.value = await useGetTypesCours();
 
-    if (origin.value === "EditTypeCours" && typeCoursList.value.length > 0) {
-      typeCoursId.value = typeCoursList.value[0].id;
-      formData.value.nom = typeCoursList.value[0].libelle;
-      formData.value.descriptif = typeCoursList.value[0].descriptif;
-      existingImage.value = typeCoursList.value[0].thumbnail;
+        if (origin.value === "EditTypeCours" && typeCoursList.value.length > 0) {
+            typeCoursId.value = typeCoursList.value[0].id;
+            formData.value.nom = typeCoursList.value[0].libelle;
+            formData.value.descriptif = typeCoursList.value[0].descriptif;
+            existingImage.value = typeCoursList.value[0].thumbnail;
+        }
+    } catch (error) {
+        alertStore.setAlert(error.message, error.type);
     }
-  } catch (error) {
-      alertStore.setAlert(error.message, error.type);
-  }
 };
 
 onMounted(() => {
-  fetchData();
+    fetchData();
 });
 
 const handleSubmit = async (event) => {
@@ -111,8 +112,10 @@ const handleSubmit = async (event) => {
             body: data,
         });
 
+        const result = await response.json();
+
         if (!response.ok) {
-            await useValidationForm(response, errors);
+            await useValidationForm(result, errors);
         } else {
             router.push({ name: "CreateCours" });
         }
@@ -123,65 +126,71 @@ const handleSubmit = async (event) => {
 </script>
 
 <template>
-    <div class="title_wrapper">
-        <h2>{{ origin === "EditTypeCours" ? "Modifier" : "Ajouter" }} un type de cours</h2>
+    <div class="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900">
+        <div class="w-full max-w-2xl">
+            <!-- Banner -->
+            <Banner
+                :title="(origin.id ? 'Modifier' : 'Ajouter') + ' un type de cours'"
+                :textColor="'rgba(30, 27, 75, .9)'"
+                backgroundHeight="20vh"
+                :hasButton="false"
+            />
+
+            <form @submit="handleSubmit" enctype="multipart/form-data">
+                <div class="flex flex-col gap-4">
+                    <CustomSelect
+                        v-if="origin === 'EditTypeCours'"
+                        item="Type de cours à modifier"
+                        v-model="typeCoursId"
+                        @change="onTypeCoursChange"
+                        :options="typeCoursList"
+                        required
+                    />
+
+                    <CustomInput
+                        type="text"
+                        item="Nouveau nom"
+                        id="nouveauNom"
+                        v-model="formData.nom"
+                        class="w-full"
+                        :error="errors.libelle"
+                        required
+                    />
+
+                    <CustomTextarea
+                        type="text"
+                        item="Descriptif"
+                        id="descriptif"
+                        v-model="formData.descriptif"
+                        class="w-full"
+                        :error="errors.descriptif"
+                        required
+                    />
+
+                    <CustomFileInput
+                        item="Nouvelle image"
+                        class="w-full"
+                        @change="onFileChange"
+                        :error="errors.thumbnail"
+                    />
+
+                    <div v-if="imagePreview">
+                        <p>Image sélectionnée :</p>
+                        <img :src="imagePreview" alt="Image sélectionnée" class="max-w-xs" />
+                    </div>
+
+                    <div v-else-if="existingImage">
+                        <p>Image actuelle :</p>
+                        <img :src="require(`../../images/uploads/${existingImage}`)" alt="Image actuelle" class="max-w-xs" />
+                    </div>
+                </div>
+                <CustomValidationButton
+                    :title="origin === 'CreateTypeCours' ? 'Ajouter' : 'Modifier'"
+                    class="w-full"
+                />
+            </form>
+        </div>
     </div>
-
-  <form @submit="handleSubmit" enctype="multipart/form-data">
-    <div class="grid grid-cols-2 gap-4">
-      <CustomSelect
-          v-if="origin === 'EditTypeCours'"
-          item="Type de cours à modifier"
-          v-model="typeCoursId"
-          @change="onTypeCoursChange"
-          :options="typeCoursList"
-          required
-      />
-
-      <CustomInput
-          type="text"
-          item="Nouveau nom"
-          id="nouveauNom"
-          v-model="formData.nom"
-          class="w-full"
-          :error="errors.libelle"
-          required
-      />
-
-        <CustomTextarea
-            type="text"
-            item="Descriptif"
-            id="descriptif"
-            v-model="formData.descriptif"
-            class="w-full"
-            :error="errors.descriptif"
-            required
-        />
-
-      <CustomInput
-          type="file"
-          item="Nouvelle image"
-          id="image"
-          @change="onFileChange"
-          class="w-full"
-          :error="errors.thumbnail"
-      />
-
-      <div v-if="imagePreview">
-        <p>Image sélectionnée :</p>
-        <img :src="imagePreview" alt="Image sélectionnée" class="max-w-xs" />
-      </div>
-
-      <div v-else-if="existingImage">
-        <p>Image actuelle :</p>
-        <img :src="require(`../../images/uploads/${existingImage}`)" alt="Image actuelle" class="max-w-xs" />
-      </div>
-    </div>
-
-    <div class="flex justify-center">
-      <CustomButton>{{ origin === "CreateTypeCours" ? "Ajouter" : "Modifier" }}</CustomButton>
-    </div>
-  </form>
 </template>
 
 <style scoped lang="scss">

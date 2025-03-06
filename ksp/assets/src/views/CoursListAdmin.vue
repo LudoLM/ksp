@@ -1,8 +1,11 @@
 <template>
   <div class="container">
-    <div class="title_wrapper">
-      <h2>{{ title }}</h2>
-    </div>
+      <Banner
+          :title="title"
+          :textColor="'rgba(30, 27, 75, .9)'"
+          backgroundHeight="40vh"
+          :hasButton="false"
+      />
 
 
     <div class="buttonsFilters">
@@ -47,7 +50,8 @@ import CoursCard from "../components/CoursCard.vue";
 import CoursFilters from "../components/CoursFilters.vue";
 import { useRoute } from "vue-router";
 import {useGetCours, useGetStatusCours, useGetTypesCours} from "../utils/useActionCours";
-import CustomButton from "../components/CustomButton.vue";
+import CustomButton from "../components/forms/CustomButton.vue";
+import Banner from "../components/Banner.vue";
 
 const infos = ref([]);
 const selectedCoursId = ref(null);
