@@ -3,7 +3,11 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/ksp/src" isTestSource="false" packagePrefix="App\" />
+      <sourceFolder url="file://$MODULE_DIR$/ksp/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/ksp/tests" isTestSource="true" packagePrefix="App\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" packagePrefix="App\" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" packagePrefix="App\Tests\" />
       <excludeFolder url="file://$MODULE_DIR$/ksp/vendor/doctrine/dbal" />
       <excludeFolder url="file://$MODULE_DIR$/ksp/vendor/doctrine/sql-formatter" />
       <excludeFolder url="file://$MODULE_DIR$/ksp/vendor/psr/clock" />
