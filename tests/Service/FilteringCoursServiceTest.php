@@ -68,17 +68,24 @@ class FilteringCoursServiceTest extends TestCase
     {
         $currentPage = 1;
         $maxPerPage = 10;
-        $typeCoursId = 1;
-        $dateCoursStr = 'invalid-date';
+        $typeCoursId = 1; // ID valide
+        $dateCoursStr = 'invalid-date'; // Date invalide
         $statusCoursId = 1;
         $route = 'api_cours_calendar';
         $isAdminPath = true;
 
+        // Retourner un TypeCours valide pour l'ID fourni
+        $this->typeCoursRepository->method('findOneBy')->with(['id' => $typeCoursId])->willReturn(new TypeCours());
+
+        // Attendre l'exception spécifique avec le message et le code appropriés
         $this->expectException(FilteringCoursException::class);
+        $this->expectExceptionCode(400);
         $this->expectExceptionMessage("La date fournie est invalide");
 
+        // Appeler la méthode qui devrait lever l'exception pour la date invalide
         $this->filteringCoursService->filterCours($currentPage, $maxPerPage, $typeCoursId, $dateCoursStr, $statusCoursId, $route, $isAdminPath);
     }
+
 
     public function testFilterCoursWithCalendarRoute(): void
     {
