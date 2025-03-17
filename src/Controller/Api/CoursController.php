@@ -47,7 +47,7 @@ class CoursController extends AbstractController
         private readonly FilteringCoursService         $filteringCoursService,
         private readonly AddUserTimeCheckerService     $addUserTimeCheckerService,
         private readonly CountUsersInCoursService      $countUsersInCoursService,
-        private readonly CreateUsersCoursService $createUsersCoursService,
+        private readonly CreateUsersCoursService       $createUsersCoursService,
     )
     {
     }
