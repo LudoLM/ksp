@@ -1,8 +1,8 @@
 <?php
+
 namespace App\MessageHandler;
 
 use App\Message\SendCancelEmailMessage;
-use App\Repository\CoursRepository;
 use App\Repository\UserRepository;
 use App\Repository\UsersCoursRepository;
 use App\Service\SendCancelEmailService;
@@ -14,8 +14,7 @@ final readonly class SendCancelEmailMessageHandler
     public function __construct(
         private SendCancelEmailService $sendCancelEmailService,
         private UsersCoursRepository $usersCoursRepository,
-        private UserRepository $userRepository
-
+        private UserRepository $userRepository,
     ) {
     }
 
@@ -24,10 +23,10 @@ final readonly class SendCancelEmailMessageHandler
         $userCours = $this->usersCoursRepository->find($message->getUserCoursId());
         $currentUser = $this->userRepository->find($message->getCurrentUserId());
 
-        if ($userCours === null) {
+        if (null === $userCours) {
             throw new \Exception('UserCours not found');
         }
-        if ($currentUser === null) {
+        if (null === $currentUser) {
             throw new \Exception('CurrentUser not found');
         }
 

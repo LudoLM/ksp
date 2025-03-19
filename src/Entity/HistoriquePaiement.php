@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\HistoriquePaiementRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -19,18 +17,17 @@ class HistoriquePaiement
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $checkoutId = null;
+    private string $checkoutId;
 
     #[ORM\ManyToOne(inversedBy: 'historiquePaiements')]
     private ?User $user = null;
 
     #[Groups(['user:detail'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date = null;
+    private \DateTimeInterface $date;
     #[Groups(['user:detail', 'historique_paiements:index'])]
     #[ORM\ManyToOne(inversedBy: 'historiquePaiements')]
     private ?Pack $pack = null;
-
 
     public function getId(): ?int
     {

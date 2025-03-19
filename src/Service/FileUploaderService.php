@@ -1,6 +1,7 @@
 <?php
 
 // src/Service/FileUploaderService.php
+
 namespace App\Service;
 
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -10,8 +11,8 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 class FileUploaderService
 {
     public function __construct(
-        private string $targetDirectory,
-        private SluggerInterface $slugger,
+        private readonly string $targetDirectory,
+        private readonly SluggerInterface $slugger,
     ) {
     }
 
@@ -23,7 +24,7 @@ class FileUploaderService
 
         try {
             $file->move($this->getTargetDirectory(), $fileName);
-        } catch (FileException $e) {
+        } catch (FileException) {
             // ... handle exception if something happens during file upload
         }
 
@@ -35,5 +36,3 @@ class FileUploaderService
         return $this->targetDirectory;
     }
 }
-
-?>

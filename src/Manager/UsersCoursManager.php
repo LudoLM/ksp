@@ -8,8 +8,7 @@ use App\Entity\UsersCours;
 
 class UsersCoursManager
 {
-
-    public function addUserToCours(Cours $cours, bool $isOnWaitingList, User $user) : Cours
+    public function addUserToCours(Cours $cours, bool $isOnWaitingList, User $user): Cours
     {
         $usersCours = new UsersCours();
         $usersCours->setUser($user);

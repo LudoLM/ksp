@@ -6,9 +6,6 @@ use App\Entity\HistoriquePaiement;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<HistoriquePaiement>
- */
 class HistoriquePaiementRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,33 +13,32 @@ class HistoriquePaiementRepository extends ServiceEntityRepository
         parent::__construct($registry, HistoriquePaiement::class);
     }
 
-//    /**
-//     * @return HistoriquePaiement[] Returns an array of HistoriquePaiement objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('h')
-//            ->andWhere('h.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('h.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    //    /**
+    //     * @return HistoriquePaiement[] Returns an array of HistoriquePaiement objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('h')
+    //            ->andWhere('h.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('h.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
 
-//    public function findOneBySomeField($value): ?HistoriquePaiement
-//    {
-//        return $this->createQueryBuilder('h')
-//            ->andWhere('h.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    //    public function findOneBySomeField($value): ?HistoriquePaiement
+    //    {
+    //        return $this->createQueryBuilder('h')
+    //            ->andWhere('h.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 
-
-    public function findQuantityOfEachPacksPerMonth($startDate, $endDate): array
+    public function findQuantityOfEachPacksPerMonth(\DateTimeInterface $startDate, \DateTimeInterface $endDate): array
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = '
@@ -62,7 +58,4 @@ class HistoriquePaiementRepository extends ServiceEntityRepository
 
         return $result->fetchAllAssociative();
     }
-
-
-
 }

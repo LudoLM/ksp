@@ -1,0 +1,28 @@
+parameters:
+    level: 5
+    paths:
+        - src/
+    excludePaths:
+        - tests/
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    doctrine:
+        objectManagerLoader: tests/object-manager.php
+    strictRules:
+        noVariableVariables: false
+    reportUnmatchedIgnoredErrors: false
+    treatPhpDocTypesAsCertain: false
+    type_perfect:
+            no_mixed: true
+            null_over_false: true
+            narrow_param: true
+            narrow_return: true
+    ignoreErrors:
+        - '#Strict comparison using !== between array\{\} and array\{\} will always evaluate to false#'
+        - '#Use explicit methods over array access on object#'
+
+
+
+
+
+

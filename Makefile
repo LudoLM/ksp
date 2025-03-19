@@ -29,6 +29,8 @@ start: build up ## Build and start the containers
 down: ## Stop the docker hub
 	@$(DOCKER_COMP) down --remove-orphans
 
+restart: down start ## Restart the docker hub
+
 logs: ## Show live logs
 	@$(DOCKER_COMP) logs --tail=0 --follow
 
@@ -42,6 +44,16 @@ test: ## Start tests with phpunit, pass the parameter "c=" to add options to php
 	@$(eval c ?=)
 	@$(DOCKER_COMP) exec -e APP_ENV=test php bin/phpunit $(c)
 
+phpstan: ## Run PHPStan
+	@$(DOCKER_COMP) exec php vendor/bin/phpstan analyse
+
+cs: ## Run PHP CS Fixer
+	@$(DOCKER_COMP) exec php vendor/bin/php-cs-fixer fix
+
+rector: ## Run Rector
+	@$(DOCKER_COMP) exec php vendor/bin/rector process
+
+analyse: phpstan cs rector ## Run PHPStan, PHP CS Fixer and Rector
 
 ## —— Composer 🧙 ——————————————————————————————————————————————————————————————
 composer: ## Run composer, pass the parameter "c=" to run a given command, example: make composer c='req symfony/orm-pack'

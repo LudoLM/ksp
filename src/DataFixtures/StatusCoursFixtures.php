@@ -15,7 +15,7 @@ class StatusCoursFixtures extends Fixture
             $statusCours = new StatusCours();
             $statusCours->setLibelle($statusCoursEnum->getValue());
             $manager->persist($statusCours);
-            $this->addReference('statusCours' . $index, $statusCours);
+            $this->addReference('statusCours'.$index, $statusCours);
         }
 
         $manager->flush();

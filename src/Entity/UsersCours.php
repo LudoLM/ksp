@@ -3,9 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\UsersCoursRepository;
-use DateTimeImmutable;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -19,24 +16,20 @@ class UsersCours
 
     #[Groups(['user:detail', 'cours:index', 'cours:detail'])]
     #[ORM\Column]
-    private ?bool $isOnWaitingList = null;
+    private bool $isOnWaitingList;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private \DateTimeImmutable $created_at;
 
     #[Groups(['cours:index', 'cours:detail'])]
     #[ORM\ManyToOne(inversedBy: 'usersCours')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private User $user;
 
-    /**
-     * @var Collection<int, Cours>
-     */
     #[Groups(['user:detail'])]
     #[ORM\ManyToOne(inversedBy: 'usersCours')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Cours $cours = null;
-
+    private Cours $cours;
 
     public function getId(): ?int
     {

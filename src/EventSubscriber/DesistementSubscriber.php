@@ -8,17 +8,17 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Mailer\MailerInterface;
 
-class DesistementSubscriber implements EventSubscriberInterface
+readonly class DesistementSubscriber implements EventSubscriberInterface
 {
-    public function __construct(private readonly MailerInterface $mailer, private readonly Security $security)
+    public function __construct(private MailerInterface $mailer, private Security $security)
     {
     }
-    public function onDesistementEvent($event): void
-    {
 
+    public function onDesistementEvent(DesistementEvent $event): void
+    {
         $cours = $event->getCours();
         $usersCours = $cours->getUsersCours();
-        $usersCours = array_filter($usersCours->toArray(), function ($usersCours) {return $usersCours->isOnWaitingList();});
+        $usersCours = array_filter($usersCours->toArray(), fn ($usersCours): ?bool => $usersCours->isOnWaitingList());
         foreach ($usersCours as $user) {
             $email = (new TemplatedEmail())
                 ->from('test@test.fr')
@@ -28,7 +28,7 @@ class DesistementSubscriber implements EventSubscriberInterface
                 ->context([
                     'cours' => $cours,
                     'participant' => $user->getUser(),
-                    'user' => $this->security->getUser()
+                    'user' => $this->security->getUser(),
                 ]);
 
             $this->mailer->send($email);

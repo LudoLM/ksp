@@ -2,20 +2,14 @@
 
 namespace App\DTO;
 
-
-use App\Entity\StatusCours;
-
 class SuperLightCoursDTO
 {
-
     public function __construct(
         private readonly int $id,
         private readonly \DateTime $dateCours,
         private readonly int $duree,
         private int $statusCours,
-    )
-    {
-
+    ) {
     }
 
     public function getId(): int
@@ -41,6 +35,7 @@ class SuperLightCoursDTO
     public function setStatusCours(int $statusCours): self
     {
         $this->statusCours = $statusCours;
+
         return $this;
     }
 }

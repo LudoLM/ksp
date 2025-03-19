@@ -15,48 +15,47 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class CreateUsersCoursService
 {
-
     public function __construct(
-        private CountUsersInCoursService $countUsersInCoursService,
-        private UsersCoursManager $usersCoursManager,
-        private AddUserTimeCheckerService $addUserTimeCheckerService,
-        private EntityManagerInterface $em,
-        private StatusCoursRepository $statusCoursRepository,
-        private SerializerInterface $serializer,
-        private Security $security
-    )
-    {
-
+        private readonly CountUsersInCoursService $countUsersInCoursService,
+        private readonly UsersCoursManager $usersCoursManager,
+        private readonly AddUserTimeCheckerService $addUserTimeCheckerService,
+        private readonly EntityManagerInterface $em,
+        private readonly StatusCoursRepository $statusCoursRepository,
+        private readonly SerializerInterface $serializer,
+        private readonly Security $security,
+    ) {
     }
 
     public function createUsersCours(Cours $cours, $user, $isOnWaitingList = false): JsonResponse
     {
+        if (!$user instanceof User) {
+            throw new \Exception('Type de l\'utilisateur invalide');
+        }
         //      Si l'heure du cours est passée - 30 minutes, on ne peut plus s'inscrire
         if ($this->addUserTimeCheckerService->isTooLateRegister($cours)) {
-            return new JsonResponse(['success' => false, 'response' => "Il est trop tard pour s'inscrire à ce cours"], 403);
+            return new JsonResponse(['success' => false, 'response' => "Il est trop tard pour s'inscrire à ce cours"], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
         }
-//      Calcul du nombre de participants au cours
+        //      Calcul du nombre de participants au cours
         $usersCount = $this->countUsersInCoursService->countUsers($cours);
-//      Récupération du statut du cours
+        //      Récupération du statut du cours
         $statusChange = $cours->getStatusCours();
 
-//      Si l'admin ajoute un extra user, on ne vérifie pas si le cours est complet
+        //      Si l'admin ajoute un extra user, on ne vérifie pas si le cours est complet
         if ($user !== $this->security->getUser()) {
             $this->addExtraUser($cours, $user, $statusChange);
-            return new JsonResponse(['success' => true, 'response' => $user->getPrenom() . " " . $user->getNom() . " a bien été ajouté au cours", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
+
+            return new JsonResponse(['success' => true, 'response' => $user->getPrenom().' '.$user->getNom().' a bien été ajouté au cours', 'statusChange' => $statusChange, 'usersCount' => $usersCount], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         }
 
-//      Si le cours est désormais complet, on ne peut plus s'inscrire
+        //      Si le cours est désormais complet, on ne peut plus s'inscrire
         if ($usersCount >= $cours->getNbInscriptionMax() && !$isOnWaitingList) {
-            return new JsonResponse(['success' => false, 'message' => "Le cours est complet", 'statusChange' => $statusChange, "usersCount" => $usersCount], 200);
+            return new JsonResponse(['success' => false, 'message' => 'Le cours est complet', 'statusChange' => $statusChange, 'usersCount' => $usersCount], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         }
 
-//      Si le cours n'est pas complet, je vérifie si l'utilisateur est déjà inscrit ou en attente
-        $usersCoursFiltered = array_filter($cours->getUsersCours()->toArray(), function ($usersCours) use ($user) {
-            return $usersCours->getUser() === $user;
-        });
+        //      Si le cours n'est pas complet, je vérifie si l'utilisateur est déjà inscrit ou en attente
+        $usersCoursFiltered = array_filter($cours->getUsersCours()->toArray(), fn ($usersCours): bool => $usersCours->getUser() === $user);
 
-//      Si l'utilisateur est déjà en attente, je le passe en inscrit
+        //      Si l'utilisateur est déjà en attente, je le passe en inscrit
         if (count($usersCoursFiltered) > 0) {
             $usersCours = array_values($usersCoursFiltered)[0];
             $usersCours->setIsOnWaitingList(false);
@@ -66,38 +65,37 @@ class CreateUsersCoursService
             $cours = $this->usersCoursManager->addUserToCours($cours, $isOnWaitingList, $user);
         }
 
-//      Si le cours est complet, je change le statut du cours
+        //      Si le cours est complet, je change le statut du cours
         $usersCount = $this->countUsersInCoursService->countUsers($cours);
         $isFull = $usersCount >= $cours->getNbInscriptionMax();
         if ($isFull) {
             $statusChange = $this->changeStatus($cours);
         }
 
-//       Si le cours n'est pas en attente alors on décrémente le nombre de cours de l'utilisateur
+        //       Si le cours n'est pas en attente alors on décrémente le nombre de cours de l'utilisateur
         if (!$isOnWaitingList) {
+            // Vérifiez que $user est une instance de la classe utilisateur
             $this->security->getUser()->setNombreCours($this->security->getUser()->getNombreCours() - 1);
         }
 
-//      Sauvegarde des modifications en base de données
+        //      Sauvegarde des modifications en base de données
         $this->em->persist($cours);
         $this->em->flush();
 
-//      Retourne une réponse JSON pour indiquer que l'utilisateur a été ajouté avec succès
+        //      Retourne une réponse JSON pour indiquer que l'utilisateur a été ajouté avec succès
         return new JsonResponse([
             'success' => true,
-            'message' => !$isOnWaitingList ? "Vous êtes bien inscrit au cours" : "Vous êtes sur la liste d'attente",
+            'message' => $isOnWaitingList ? "Vous êtes sur la liste d'attente" : 'Vous êtes bien inscrit au cours',
             'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']),
-            'usersCount' => $usersCount], 200);
-
+            'usersCount' => $usersCount], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
-
 
     public function changeStatus(Cours $cours): StatusCours
     {
         $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::COMPLET->value]));
+
         return $cours->getStatusCours();
     }
-
 
     public function addExtraUser(Cours $cours, User $user, StatusCours $statusChange): StatusCours
     {
@@ -114,5 +112,4 @@ class CreateUsersCoursService
 
         return $statusChange;
     }
-
 }

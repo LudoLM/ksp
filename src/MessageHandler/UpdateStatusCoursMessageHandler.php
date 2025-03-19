@@ -12,16 +12,13 @@ final readonly class UpdateStatusCoursMessageHandler
 {
     public function __construct(
         private CoursRepository $coursRepository,
-        private UpdateStatusCoursService $updateStatusCoursService
-    )
-    {
+        private UpdateStatusCoursService $updateStatusCoursService,
+    ) {
     }
 
-    public function __invoke(UpdateStatusCoursMessage $message) : void
+    public function __invoke(UpdateStatusCoursMessage $message): void
     {
-        $cours= $this->coursRepository->find($message->getCoursId());;
+        $cours = $this->coursRepository->find($message->getCoursId());
         $this->updateStatusCoursService->update($cours);
-
     }
-
 }

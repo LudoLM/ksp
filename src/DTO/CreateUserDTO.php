@@ -2,20 +2,15 @@
 
 namespace App\DTO;
 
-use App\Entity\Cours;
-use App\Entity\User;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class CreateUserDTO
 {
-
-    #[Assert\NotBlank(message: "Le prénom ne peut pas être vide.")]
+    #[Assert\NotBlank(message: 'Le prénom ne peut pas être vide.')]
     public string $prenom;
 
-    #[Assert\NotBlank(message: "Le nom ne peut pas être vide.")]
+    #[Assert\NotBlank(message: 'Le nom ne peut pas être vide.')]
     public string $nom;
-
 
     #[Assert\NotBlank(message: "L'email ne peut pas être vide")]
     #[Assert\Email(
@@ -25,16 +20,16 @@ class CreateUserDTO
 
     #[Assert\Length(
         min: 8,
-        minMessage: "Le mot de passe doit contenir au moins 8 caractères."
+        minMessage: 'Le mot de passe doit contenir au moins 8 caractères.'
     )]
-    public ?string $password;
-    #[Assert\NotBlank(message: "Le numéro de téléphone ne peut pas être vide.")]
+    public ?string $password = null;
+    #[Assert\NotBlank(message: 'Le numéro de téléphone ne peut pas être vide.')]
     #[Assert\Regex(
-        pattern: "/^[0-9]{10}$/",
-        message: "Le numéro de téléphone doit contenir exactement 10 chiffres."
+        pattern: '/^\d{10}$/',
+        message: 'Le numéro de téléphone doit contenir exactement 10 chiffres.'
     )]
     public string $telephone;
-    public ?string $adresse;
-    public ?string $cp;
-    public ?string $commune;
+    public ?string $adresse = null;
+    public ?string $cp = null;
+    public ?string $commune = null;
 }

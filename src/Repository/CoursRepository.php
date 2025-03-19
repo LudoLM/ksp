@@ -8,7 +8,6 @@ use App\Entity\TypeCours;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @extends ServiceEntityRepository<Cours>
@@ -43,34 +42,35 @@ class CoursRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Cours[] Returns an array of Cours objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    //    /**
+    //     * @return Cours[] Returns an array of Cours objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('c')
+    //            ->andWhere('c.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('c.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
 
-//    public function findOneBySomeField($value): ?Cours
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    //    public function findOneBySomeField($value): ?Cours
+    //    {
+    //        return $this->createQueryBuilder('c')
+    //            ->andWhere('c.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 
-    public function findCoursFiltered() : array
+    public function findCoursFiltered(): array
     {
         $qb = $this->createQueryBuilder('c');
+
         return $qb->getQuery()->getResult();
     }
 
@@ -80,35 +80,32 @@ class CoursRepository extends ServiceEntityRepository
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
         ?\DateTime $dateLimit,
-        ?StatusCours $statusCours
+        ?StatusCours $statusCours,
     ): Paginator {
-
-
         $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'DESC');
 
         // Ajouter les filtres dynamiques
-        if ($typeCours !== null) {
+        if ($typeCours instanceof TypeCours) {
             $qb->andWhere('c.typeCours = :typeCours')
                 ->setParameter('typeCours', $typeCours);
         }
 
-        if ($dateCours !== null) {
+        if ($dateCours instanceof \DateTime) {
             $qb->andWhere('c.dateCours >= :dateCours')
                 ->setParameter('dateCours', $dateCours);
         }
 
-        if ($dateLimit !== null) {
+        if ($dateLimit instanceof \DateTime) {
             $qb->andWhere('c.dateCours <= :dateLimit')
                 ->setParameter('dateLimit', $dateLimit);
-        }
-        else{
+        } else {
             // Ajouter la pagination
             $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
                 ->setMaxResults($maxPerPage);
         }
 
-        if ($statusCours !== null) {
+        if ($statusCours instanceof StatusCours) {
             $qb->andWhere('c.statusCours = :statusCours')
                 ->setParameter('statusCours', $statusCours);
         }
@@ -116,7 +113,6 @@ class CoursRepository extends ServiceEntityRepository
         // Retourner un Paginator
         return new Paginator($qb->getQuery());
     }
-
 
     public function findAllSortByDateForUsers(
         int $currentPage,
@@ -124,36 +120,33 @@ class CoursRepository extends ServiceEntityRepository
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
         ?\DateTime $dateLimit,
-        ?StatusCours $statusCours
+        ?StatusCours $statusCours,
     ): Paginator {
-
-
         $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'DESC')
             ->where('c.statusCours = 1 OR c.statusCours = 2 OR c.statusCours = 3 OR c.statusCours = 5');
 
         // Ajouter les filtres dynamiques
-        if ($typeCours !== null) {
+        if ($typeCours instanceof TypeCours) {
             $qb->andWhere('c.typeCours = :typeCours')
                 ->setParameter('typeCours', $typeCours);
         }
 
-        if ($dateCours !== null) {
+        if ($dateCours instanceof \DateTime) {
             $qb->andWhere('c.dateCours > :dateCours')
                 ->setParameter('dateCours', $dateCours);
         }
 
-        if ($dateLimit !== null) {
+        if ($dateLimit instanceof \DateTime) {
             $qb->andWhere('c.dateCours <= :dateLimit')
                 ->setParameter('dateLimit', $dateLimit);
-        }
-        else{
+        } else {
             // Ajouter la pagination
             $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
                 ->setMaxResults($maxPerPage);
         }
 
-        if ($statusCours !== null) {
+        if ($statusCours instanceof StatusCours) {
             $qb->andWhere('c.statusCours = :statusCours')
                 ->setParameter('statusCours', $statusCours);
         }
@@ -162,8 +155,7 @@ class CoursRepository extends ServiceEntityRepository
         return new Paginator($qb->getQuery());
     }
 
-
-    public function getCoursFilling() : array
+    public function getCoursFilling(): array
     {
         return $this->createQueryBuilder('c')
             ->select('NEW App\DTO\CoursFillingDTO(
@@ -183,7 +175,6 @@ class CoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-
     public function getSuperLightAllCours(): array
     {
         return $this->createQueryBuilder('c')
@@ -199,5 +190,4 @@ class CoursRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
 }

@@ -10,20 +10,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route(path: "api/", name:"api")]
 class HistoriquePaiementController extends AbstractController
 {
-
-
     public function __construct(
         private readonly HistoriquePaiementRepository $historiquePaiementRepository,
-        private readonly SerializerInterface $serializer
-    )
-    {
-
+        private readonly SerializerInterface $serializer,
+    ) {
     }
 
-    #[Route('historiquePaiements', name: 'get_historique_paiements', methods: ['GET'])]
+    #[Route('api/historiquePaiements', name: 'get_historique_paiements', methods: ['GET'])]
     public function index(Request $request): Response
     {
         $startDate = $request->query->get('startDate');
@@ -31,12 +26,13 @@ class HistoriquePaiementController extends AbstractController
         try {
             $startDate = new \DateTime($startDate);
             $endDate = new \DateTime($endDate);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Invalid date format'], 400);
+        } catch (\Exception) {
+            return new JsonResponse(['error' => 'Invalid date format'], Response::HTTP_BAD_REQUEST);
         }
 
-       $allPaiements = $this->historiquePaiementRepository->findQuantityOfEachPacksPerMonth($startDate, $endDate);
-       $responseData = $this->serializer->serialize($allPaiements, 'json', ['groups' => 'historique_paiements:index']);
-       return new JsonResponse($responseData, 200, [], true);
+        $allPaiements = $this->historiquePaiementRepository->findQuantityOfEachPacksPerMonth($startDate, $endDate);
+        $responseData = $this->serializer->serialize($allPaiements, 'json', ['groups' => 'historique_paiements:index']);
+
+        return new JsonResponse($responseData, Response::HTTP_OK, [], true);
     }
 }
