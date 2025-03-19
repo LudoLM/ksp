@@ -10,66 +10,82 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
+  
+  
+env:
+    APP_ENV_DEV: dev
 
 jobs:
   tests:
-    name: Tests
+    name: PHPUnit Tests
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        
+      - uses: actions/checkout@v4
+
       - name: Create .env file
         run: |
-          echo "APP_ENV=${{ secrets.APP_ENV }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "MAILER_DSN=${{ secrets.MAILER_DSN }}" >> .env
+          echo "APP_ENV=$APP_ENV_DEV" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build Docker images
-        uses: docker/bake-action@v5
+      - uses: php-actions/composer@v6 
+      - uses: php-actions/phpunit@master
         with:
-          pull: true
-          load: true
-          files: |
-            compose.yaml
-            compose.override.yaml
-          set: |
-            *.cache-from=type=gha,scope=${{github.ref}}
-            *.cache-from=type=gha,scope=refs/heads/main
-            *.cache-to=type=gha,scope=${{github.ref}},mode=max
+          version: 11.5
+          php_extensions: xdebug
+          bootstrap: vendor/autoload.php
+          configuration: phpunit.xml
+          args: --coverage-text
+        env:
+          XDEBUG_MODE: coverage
+  
 
-      - name: Create network
-        run: docker network create proxy
+  phpstan:
+    name: PHPStan Static Analysis
+    runs-on: ubuntu-latest
 
-      - name: Start services
-        run: docker compose up --wait --no-build
-      - name: Fix repository ownership
-        run: docker compose exec -T php chown -R www-data:www-data /app
-      - name: Check HTTP reachability
-        run: curl -v --fail-with-body http://localhost
-      - name: Check HTTPS reachability
-        if: false # Remove this line when the homepage will be configured, or change the path to check
-        run: curl -vk --fail-with-body https://localhost
-      - name: Check Mercure reachability
-        run: curl -vkI --fail-with-body https://localhost/.well-known/mercure?topic=test
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Show Docker logs
-        if: failure()
-        run: docker compose logs
+      - name: Create .env file
+        run: |
+          echo "APP_ENV=$APP_ENV_DEV" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
+  
 
-      - name: Create test database
-        if: false # Remove this line if Doctrine ORM is installed
-        run: docker compose exec -T php bin/console -e test doctrine:database:create
-      - name: Run migrations
-        if: false # Remove this line if Doctrine Migrations is installed
-        run: docker compose exec -T php bin/console -e test doctrine:migrations:migrate --no-interaction
-      - name: Run PHPUnit
-        run: docker compose exec -T php bin/phpunit
-      - name: Doctrine Schema Validator
-        if: false # Remove this line if Doctrine ORM is installed
-        run: docker compose exec -T php bin/console -e test doctrine:schema:validate
+      - uses: php-actions/composer@v6 # or alternative dependency management
+      - uses: php-actions/phpstan@v3
+        with:
+          path: src/
+          
+  php-cs-fixer:
+    name: PHP-CS-Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP-CS-Fixer
+        uses: docker://oskarstark/php-cs-fixer-ga
+        with:
+          args: --diff --dry-run
+          
+          
+  rector:
+    name: Rector
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create .env file
+        run: |
+          echo "APP_ENV=$APP_ENV_DEV" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
+      - uses: shivammathur/setup-php@v2
+        with:
+          coverage: none
+      - run: composer install --no-progress --ansi
+      - run: vendor/bin/rector process --dry-run --config rector.php
+
+  
+  
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest
