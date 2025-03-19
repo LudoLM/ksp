@@ -10,11 +10,10 @@ use App\Repository\TypeCoursRepository;
 
 readonly class FilteringCoursService
 {
-
     public function __construct(
-        private CoursRepository       $coursRepository,
-        private TypeCoursRepository   $typeCoursRepository,
-        private StatusCoursRepository $statusCoursRepository
+        private CoursRepository $coursRepository,
+        private TypeCoursRepository $typeCoursRepository,
+        private StatusCoursRepository $statusCoursRepository,
     ) {
     }
 
@@ -25,57 +24,52 @@ readonly class FilteringCoursService
         string $dateCoursStr,
         int $statusCoursId,
         string $route,
-        bool $isAdminPath
-    ): array
-    {
+        bool $isAdminPath,
+    ): array {
         if ($currentPage <= 0 || $maxPerPage <= 0) {
-            throw new \InvalidArgumentException("Les paramètres de pagination doivent être supérieurs à zéro.");
+            throw new \InvalidArgumentException('Les paramètres de pagination doivent être supérieurs à zéro.');
         }
         // Récupérer l'entité TypeCours si `typeCours` est fourni
         $typeCours = null;
-        if ($typeCoursId && $typeCoursId !== 0) {
+        if (0 !== $typeCoursId) {
             try {
                 $typeCours = $this->typeCoursRepository->findOneBy(['id' => $typeCoursId]);
-                if ($typeCours === null) {
-                    throw new FilteringCoursException("Le type de cours fourni est invalide", 400);
+                if (null === $typeCours) {
+                    throw new FilteringCoursException('Le type de cours fourni est invalide', 400);
                 }
             } catch (\Exception $exception) {
-                throw new FilteringCoursException("Le type de cours fourni est invalide", 400, $exception);
+                throw new FilteringCoursException('Le type de cours fourni est invalide', 400, $exception);
             }
         }
 
-
         // Convertir la chaîne de date en \DateTime si `dateCours` est fourni
-        $dateCoursStr = $dateCoursStr === "null" ? null : $dateCoursStr;
+        $dateCoursStr = 'null' === $dateCoursStr ? null : $dateCoursStr;
         $dateCours = null;
-        if ($dateCoursStr) {
+        if (null !== $dateCoursStr && '' !== $dateCoursStr && '0' !== $dateCoursStr) {
             try {
                 $dateCours = new \DateTime($dateCoursStr);
             } catch (\Exception $e) {
-                throw new FilteringCoursException("La date fournie est invalide", 400, $e);
+                throw new FilteringCoursException('La date fournie est invalide', 400, $e);
             }
         }
 
         $dateLimit = null;
         // recupere le 1er jour de la semaine de la variable dateCours si la route est getCoursCalendar
-        if ($route === 'api_cours_calendar') {
+        if ('api_cours_calendar' === $route) {
             [$dateCours, $dateLimit] = DateHelper::adjustDatesForCalendarRoute($dateCours, $currentPage);
         }
 
-
         $statusCours = null;
-        if ($statusCoursId && $statusCoursId !== 0) {
+        if (0 !== $statusCoursId) {
             try {
                 $statusCours = $this->statusCoursRepository->findOneBy(['id' => $statusCoursId]);
             } catch (\Exception $e) {
-                throw new FilteringCoursException("Le statut fourni est invalide", 400, $e);
+                throw new FilteringCoursException('Le statut fourni est invalide', 400, $e);
             }
         }
 
-
         // Appeler le repository avec la pagination et les filtres
         if ($isAdminPath) {
-
             $coursPaginator = $this->coursRepository->findAllSortByDate($currentPage, $maxPerPage, $typeCours, $dateCours, $dateLimit, $statusCours);
         } else {
             $coursPaginator = $this->coursRepository->findAllSortByDateForUsers($currentPage, $maxPerPage, $typeCours, $dateCours, $dateLimit, $statusCours);
@@ -101,5 +95,4 @@ readonly class FilteringCoursService
 
         return $responseData;
     }
-
 }

@@ -15,11 +15,11 @@ class UpdateStatusCoursService
     public function __construct(
         private readonly StatusCoursRepository $statusCoursRepository,
         private readonly MessageBusInterface $messageBus,
-        private readonly EntityManagerInterface $entityManager
-    )
-    {
+        private readonly EntityManagerInterface $entityManager,
+    ) {
     }
-    public function update(Cours $cours)
+
+    public function update(Cours $cours): void
     {
         switch ($cours->getStatusCours()->getLibelle()) {
             case StatusCoursEnum::OUVERT->value:

@@ -17,9 +17,8 @@ class TypeCoursRepository extends ServiceEntityRepository
      * @method TypeCours[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
      */
     public function __construct(
-        private readonly ManagerRegistry $registry,
-    )
-    {
+        ManagerRegistry $registry,
+    ) {
         parent::__construct($registry, TypeCours::class);
     }
 }

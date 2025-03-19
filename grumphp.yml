@@ -1,0 +1,41 @@
+grumphp:
+    process_timeout: 120
+    hooks_dir: ~
+    hooks_preset: local
+    stop_on_failure: true
+    ignore_unstaged_changes: false
+    ascii:
+        failed: grumphp-grumpy.txt
+        succeeded: grumphp-happy.txt
+    tasks:
+        git_blacklist:
+            metadata:
+                priority: 1
+            keywords:
+                - "die("
+                - "var_dump("
+                - "dump("
+                - "dd("
+                - "console.log("
+                - "debugger"
+                - "exit;"
+            whitelist_patterns: [ ]
+            regexp_type: G
+            match_word: true
+        phpstan:
+            metadata:
+                priority: 0
+            configuration: 'phpstan.neon'
+            memory_limit: '216M'
+        phpcsfixer2:
+            metadata:
+                priority: 0
+            config: '.php-cs-fixer.dist.php'
+        rector:
+            metadata:
+                priority: 0
+            config: 'rector.php'
+        phpunit:
+            metadata:
+                priority: 0
+            always_execute: true

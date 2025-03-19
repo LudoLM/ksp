@@ -8,22 +8,23 @@ use App\Entity\TypeCours;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
+use Faker\Generator;
 
 class CoursFixtures extends Fixture
 {
-
     public function __construct(
-
     ) {
     }
+
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
-
+        /** @var Generator $faker */
         $typeCoursList = $manager->getRepository(TypeCours::class)->findAll();
         $statusCours = $manager->getRepository(StatusCours::class)->findOneBy(['id' => 4]);
+        $cours = [];
 
-        for ($i = 1; $i < 100; $i++) {
+        for ($i = 1; $i < 100; ++$i) {
             $cours[$i] = new Cours();
             $date = $faker->dateTimeBetween('+1 day', '+3 month');
 
@@ -32,14 +33,14 @@ class CoursFixtures extends Fixture
             $date->setTime($hour, 0, 0); // Fixer à l'heure entière pour commencer
 
             // Récupérer les minutes
-            $minutes = (int)$date->format('i');
+            $minutes = (int) $date->format('i');
 
             // Calculer l'incrément pour arrondir au prochain intervalle (par exemple, 15 minutes)
             $increment = 15 - ($minutes % 15);
             $date->modify("+$increment minutes");
 
             // Assurer que les secondes sont à 0
-            $date->setTime((int)$date->format('H'), (int)$date->format('i'), 0);
+            $date->setTime((int) $date->format('H'), (int) $date->format('i'), 0);
 
             // Affecter la date au cours
             $cours[$i]->setDateCours($date);
@@ -56,6 +57,5 @@ class CoursFixtures extends Fixture
             $manager->persist($cours[$i]);
         }
         $manager->flush();
-
     }
 }

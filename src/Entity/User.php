@@ -13,20 +13,19 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[UniqueEntity(fields: ['email'], message: "Cet email est déjà utilisé.")]
+#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, \Stringable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:index','user:detail', 'cours:index', 'cours:detail'])]
+    #[Groups(['user:index', 'user:detail', 'cours:index', 'cours:detail'])]
     private ?int $id = null;
 
     #[Groups(['user:detail'])]
     #[ORM\Column(length: 180)]
     public string $email;
-
 
     #[ORM\Column]
     private array $roles = [];
@@ -35,15 +34,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    private ?string $password = null;
+    private string $password;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
-    private ?string $prenom = null;
+    private string $prenom;
 
     #[Groups(['user:detail'])]
     #[ORM\Column(length: 255, nullable: true)]
@@ -57,16 +56,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $commune = null;
     #[Groups(['user:detail'])]
     #[ORM\Column(length: 10)]
-    #[Assert\NotBlank(message: "Le numéro de téléphone ne doit pas être vide.")]
+    #[Assert\NotBlank(message: 'Le numéro de téléphone ne doit pas être vide.')]
     #[Assert\Regex(
-        pattern: "/^[0-9]{10}$/",
-        message: "Le numéro de téléphone doit contenir exactement 10 chiffres."
+        pattern: '/^\d{10}$/',
+        message: 'Le numéro de téléphone doit contenir exactement 10 chiffres.'
     )]
-    private ?string $telephone = null;
+    private string $telephone;
 
     #[Groups(['user:detail'])]
     #[ORM\Column]
-    private ?int $nombreCours = null;
+    private int $nombreCours;
 
     /**
      * @var Collection<int, HistoriquePaiement>
@@ -81,7 +80,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:detail'])]
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UsersCours::class, orphanRemoval: true)]
     private Collection $usersCours;
-
 
     public function __construct()
     {
@@ -113,11 +111,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return $this->email;
     }
 
-
-    public function onJWTCreated(JWTCreatedEvent $event)
+    public function onJWTCreated(JWTCreatedEvent $event): void
     {
         $payload = $event->getData();
         $payload['id'] = $this->getId();
@@ -163,7 +160,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
@@ -243,7 +240,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __toString(): string
     {
-        return $this->getNom();  // or some string field in your Vegetal Entity
+        return (string) $this->getNom();  // or some string field in your Vegetal Entity
     }
 
     public function getNombreCours(): ?int
@@ -278,18 +275,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeHistoriquePaiement(HistoriquePaiement $historiquePaiement): static
     {
-        if ($this->historiquePaiements->removeElement($historiquePaiement)) {
-            // set the owning side to null (unless already changed)
-            if ($historiquePaiement->getUser() === $this) {
-                $historiquePaiement->setUser(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->historiquePaiements->removeElement($historiquePaiement) && $historiquePaiement->getUser() === $this) {
+            $historiquePaiement->setUser(null);
         }
 
         return $this;
     }
 
     /**
-     * @return Collection<int, <UsersCours>>
+     * @return Collection<int, UsersCours>
      */
     public function getUsersCours(): Collection
     {
@@ -308,14 +303,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeUsersCour(UsersCours $usersCours): static
     {
-        if ($this->usersCours->removeElement($usersCours)) {
-            // set the owning side to null (unless already changed)
-            if ($usersCours->getUser() === $this) {
-                $usersCours->setUser(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->usersCours->removeElement($usersCours) && $usersCours->getUser() === $this) {
+            $usersCours->setUser(null);
         }
 
         return $this;
     }
-
 }

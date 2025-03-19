@@ -12,14 +12,11 @@ use Symfony\Component\Serializer\Serializer;
 
 final readonly class UpdateStatusCoursClickService
 {
-
     public function __construct(
         private CoursRepository $coursRepository,
         private StatusCoursRepository $statusCoursRepository,
         private EntityManagerInterface $em,
-    )
-    {
-
+    ) {
     }
 
     public function update(): void
@@ -29,8 +26,10 @@ final readonly class UpdateStatusCoursClickService
         $enCours = $this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::EN_COURS->value]);
         $passe = $this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::PASSE->value]);
 
-
         foreach ($coursArray as $cours) {
+            if (!$cours instanceof Cours) {
+                throw new \InvalidArgumentException('Un des éléments du tableau n\'est pas une instance de Cours.');
+            }
             $dateCours = $cours->getDateCours();
             $status = $cours->getStatusCours();
             $newStatus = null;
@@ -45,12 +44,12 @@ final readonly class UpdateStatusCoursClickService
                 $newStatus = $archive;
             }
 
-            if($dateCours > new \DateTime() && $dateCours < new \DateTime('+' . $cours->getDuree() . " minutes") && $status === StatusCoursEnum::OUVERT->value){
+            if ($dateCours > new \DateTime() && $dateCours < new \DateTime('+'.$cours->getDuree().' minutes') && $status === StatusCoursEnum::OUVERT->value) {
                 $newStatus = $enCours;
             }
 
-            if($newStatus !== null){
-                $cours->setStatusCours($newStatus->getId());
+            if (null !== $newStatus) {
+                $cours->setStatusCours($this->statusCoursRepository->find($newStatus->getId()));
                 $coursDTOSerializer = new Serializer([new UpdateCoursDTOToCoursDenormalizer($this->statusCoursRepository, $this->coursRepository)]);
                 $cours = $coursDTOSerializer->denormalize($cours, Cours::class);
                 $this->em->persist($cours);

@@ -6,7 +6,7 @@ final readonly class SendCancelEmailMessage
 {
     public function __construct(
         private int $userCoursId,
-        private int $currentUserId
+        private int $currentUserId,
     ) {
     }
 

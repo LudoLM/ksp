@@ -18,15 +18,14 @@ class Pack
 
     #[Groups(['user:detail', 'historique_paiements:index'])]
     #[ORM\Column(length: 255)]
-    private ?string $nom = null;
+    private string $nom;
 
     #[Groups(['user:detail', 'historique_paiements:index'])]
     #[ORM\Column]
-    private ?float $tarif = null;
-
+    private float $tarif;
 
     #[ORM\Column]
-    private ?int $nombreCours = null;
+    private int $nombreCours;
 
     /**
      * @var Collection<int, HistoriquePaiement>
@@ -100,11 +99,9 @@ class Pack
 
     public function removeHistoriquePaiement(HistoriquePaiement $historiquePaiement): static
     {
-        if ($this->historiquePaiements->removeElement($historiquePaiement)) {
-            // set the owning side to null (unless already changed)
-            if ($historiquePaiement->getPack() === $this) {
-                $historiquePaiement->setPack(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->historiquePaiements->removeElement($historiquePaiement) && $historiquePaiement->getPack() === $this) {
+            $historiquePaiement->setPack(null);
         }
 
         return $this;

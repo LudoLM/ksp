@@ -9,15 +9,15 @@ use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
 use App\Service\CoursControllerService\FilteringCoursService;
-use PHPUnit\Framework\TestCase;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use PHPUnit\Framework\TestCase;
 
 class FilteringCoursServiceTest extends TestCase
 {
-    private $coursRepository;
-    private $typeCoursRepository;
-    private $statusCoursRepository;
-    private $filteringCoursService;
+    private \PHPUnit\Framework\MockObject\MockObject $coursRepository;
+    private \PHPUnit\Framework\MockObject\MockObject $typeCoursRepository;
+    private \PHPUnit\Framework\MockObject\MockObject $statusCoursRepository;
+    private FilteringCoursService $filteringCoursService;
 
     protected function setUp(): void
     {
@@ -80,12 +80,11 @@ class FilteringCoursServiceTest extends TestCase
         // Attendre l'exception spécifique avec le message et le code appropriés
         $this->expectException(FilteringCoursException::class);
         $this->expectExceptionCode(400);
-        $this->expectExceptionMessage("La date fournie est invalide");
+        $this->expectExceptionMessage('La date fournie est invalide');
 
         // Appeler la méthode qui devrait lever l'exception pour la date invalide
         $this->filteringCoursService->filterCours($currentPage, $maxPerPage, $typeCoursId, $dateCoursStr, $statusCoursId, $route, $isAdminPath);
     }
-
 
     public function testFilterCoursWithCalendarRoute(): void
     {
@@ -141,11 +140,9 @@ class FilteringCoursServiceTest extends TestCase
         // Attendre l'exception spécifique avec le message et le code appropriés
         $this->expectException(FilteringCoursException::class);
         $this->expectExceptionCode(400);
-        $this->expectExceptionMessage("Le type de cours fourni est invalide");
+        $this->expectExceptionMessage('Le type de cours fourni est invalide');
 
         // Appeler la méthode qui devrait lever l'exception
         $this->filteringCoursService->filterCours($currentPage, $maxPerPage, $typeCoursId, $dateCoursStr, $statusCoursId, $route, $isAdminPath);
     }
-
-
 }

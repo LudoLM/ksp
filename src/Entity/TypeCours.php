@@ -19,22 +19,25 @@ class TypeCours
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', "user:detail"])]
-    #[Assert\NotBlank(message: "Le nom ne peut pas être vide.")]
-    private ?string $libelle = null;
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', 'user:detail'])]
+    #[Assert\NotBlank(message: 'Le nom ne peut pas être vide.')]
+    private string $libelle;
 
-    #[ORM\Column(type: 'text')]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::TEXT)]
     #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
     #[Assert\NotBlank(message: 'Le descriptif ne peut pas être vide.')]
-    private ?string $descriptif = null;
+    private string $descriptif;
 
+    /**
+     * @var Collection<int, Cours>
+     */
     #[ORM\OneToMany(mappedBy: 'typeCours', targetEntity: Cours::class, orphanRemoval: true)]
     private Collection $cours;
 
     #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "L'image ne peut pas être vide.")]
-    private ?string $thumbnail = null;
+    private string $thumbnail;
 
     public function __construct()
     {
@@ -90,11 +93,9 @@ class TypeCours
 
     public function removeCour(Cours $cour): self
     {
-        if ($this->cours->removeElement($cour)) {
-            // set the owning side to null (unless already changed)
-            if ($cour->getTypeCours() === $this) {
-                $cour->setTypeCours(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->cours->removeElement($cour) && $cour->getTypeCours() === $this) {
+            $cour->setTypeCours(null);
         }
 
         return $this;
