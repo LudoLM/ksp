@@ -28,8 +28,8 @@ class UsersCours
 
     #[Groups(['user:detail'])]
     #[ORM\ManyToOne(inversedBy: 'usersCours')]
-    #[ORM\JoinColumn(nullable: false)]
-    private Cours $cours;
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Cours $cours = null;
 
     public function getId(): ?int
     {
@@ -60,7 +60,7 @@ class UsersCours
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getUser(): User
     {
         return $this->user;
     }
@@ -72,7 +72,7 @@ class UsersCours
         return $this;
     }
 
-    public function getCours(): ?Cours
+    public function getCours(): Cours
     {
         return $this->cours;
     }
