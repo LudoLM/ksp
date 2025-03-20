@@ -55,7 +55,7 @@ readonly class FilteringCoursService
 
         $dateLimit = null;
         // recupere le 1er jour de la semaine de la variable dateCours si la route est getCoursCalendar
-        if ('api_cours_calendar' === $route) {
+        if ('cours_calendar' === $route) {
             [$dateCours, $dateLimit] = DateHelper::adjustDatesForCalendarRoute($dateCours, $currentPage);
         }
 

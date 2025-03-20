@@ -71,7 +71,7 @@ class FilteringCoursServiceTest extends TestCase
         $typeCoursId = 1; // ID valide
         $dateCoursStr = 'invalid-date'; // Date invalide
         $statusCoursId = 1;
-        $route = 'api_cours_calendar';
+        $route = 'cours_calendar';
         $isAdminPath = true;
 
         // Retourner un TypeCours valide pour l'ID fourni
@@ -93,7 +93,7 @@ class FilteringCoursServiceTest extends TestCase
         $typeCoursId = 1;
         $dateCoursStr = '2023-10-01';
         $statusCoursId = 1;
-        $route = 'api_cours_calendar';
+        $route = 'cours_calendar';
         $isAdminPath = true;
 
         $typeCours = new TypeCours(); // Mock TypeCours entity
@@ -131,7 +131,7 @@ class FilteringCoursServiceTest extends TestCase
         $typeCoursId = 999; // ID inexistant
         $dateCoursStr = '2023-10-01';
         $statusCoursId = 1;
-        $route = 'api_cours_calendar';
+        $route = 'cours_calendar';
         $isAdminPath = true;
 
         // Configurer le mock pour retourner null lorsque l'ID n'existe pas
