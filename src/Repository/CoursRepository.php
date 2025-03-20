@@ -67,13 +67,6 @@ class CoursRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function findCoursFiltered(): array
-    {
-        $qb = $this->createQueryBuilder('c');
-
-        return $qb->getQuery()->getResult();
-    }
-
     public function findAllSortByDate(
         int $currentPage,
         int $maxPerPage,
@@ -141,7 +134,7 @@ class CoursRepository extends ServiceEntityRepository
             $qb->andWhere('c.dateCours <= :dateLimit')
                 ->setParameter('dateLimit', $dateLimit);
         } else {
-            // Ajouter la pagination
+            // Si ce n'est pas dans le calendrier, ajouter la pagination
             $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
                 ->setMaxResults($maxPerPage);
         }
