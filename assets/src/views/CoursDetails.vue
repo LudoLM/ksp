@@ -29,8 +29,8 @@ const isUserOnWaitingList = ref(false);
 const dateStart = computed(() => new Date(cours.value?.dateCours));
 const formattedDate = computed(() => useDateFormat(dateStart.value, 'DD/MM/YYYY').value);
 const formattedHour = computed(() => {
-    const hours = dateStart.value.getUTCHours();
-    const minutes = String(dateStart.value.getUTCMinutes()).padStart(2, '0');
+    const hours = dateStart.value.getCHours();
+    const minutes = String(dateStart.value.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 });
 const alertStore = inject('alertStore');

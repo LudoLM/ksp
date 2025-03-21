@@ -22,9 +22,9 @@ class Cours
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update'])]
     private ?int $duree = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:detail', 'cours_filling:index'])]
-    private ?\DateTimeInterface $dateCours = null;
+    private \DateTimeInterface $dateCours;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update'])]

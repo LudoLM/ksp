@@ -62,7 +62,7 @@ const getCoursPerWeek = async () => {
     // Réinitialisez et mettez à jour weekInfos
     weekInfos.value = [[], [], [], [], [], [], []];
     infos.value.forEach(info => {
-        const rawDay = new Date(info.dateCours).getUTCDay();
+        const rawDay = new Date(info.dateCours).getDay();
         const day = (rawDay + 6) % 7; // Ajuste pour que Lundi = 0, Dimanche = 6
         if (weekInfos.value[day]) {
             weekInfos.value[day].push(info);
@@ -92,7 +92,7 @@ const handleUpdateSelectedTypeCours = (value) => {
 const formatDay = (day) => {
     const date = new Date(day); // Convertir en objet Date
     const daysOfWeek = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-    const dayOfWeek = daysOfWeek[date.getUTCDay()]; // Obtenir le nom du jour
+    const dayOfWeek = daysOfWeek[date.getDay()]; // Obtenir le nom du jour
     const dayPart = day.split('-')[2]; // Obtenir le jour
     return `<p>${dayOfWeek.substring(0, 3)} </p><p> ${dayPart}</p>`; // Utilisation de <br> pour un saut de ligne
 };

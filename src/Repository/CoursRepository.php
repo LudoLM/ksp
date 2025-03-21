@@ -117,7 +117,7 @@ class CoursRepository extends ServiceEntityRepository
     ): Paginator {
         $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'DESC')
-            ->where('c.statusCours = 1 OR c.statusCours = 2 OR c.statusCours = 3 OR c.statusCours = 5');
+            ->where('c.statusCours = 1 OR c.statusCours = 2 OR c.statusCours = 3 OR c.statusCours = 5 OR c.statusCours = 6');
 
         // Ajouter les filtres dynamiques
         if ($typeCours instanceof TypeCours) {
