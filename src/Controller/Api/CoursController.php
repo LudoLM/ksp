@@ -161,12 +161,24 @@ class CoursController extends AbstractController
     #[Route('api/cours/open/{id}', name: 'cours_open', methods: ['PUT'])]
     public function openCours(Cours $cours): JsonResponse
     {
-        // Si  la date du cours est passé, on ne peut pas ouvrir le cours
-        if ($cours->getDateCours()->getTimestamp() < time()) {
+        // Obtenez la date du cours
+        $dateCours = $cours->getDateCours();
+
+        // Vérifiez si c'est bien un objet DateTime, sinon créez-en un avec le bon fuseau horaire
+        if (!$dateCours instanceof \DateTime) {
+            $dateTime = new \DateTime();
+            $dateTime->setTimestamp($dateCours->getTimestamp());
+        }
+        $currentDateTime = new \DateTime('now');
+
+        // Calculez le délai en millisecondes
+        $delay = ($dateCours->getTimestamp() - $currentDateTime->getTimestamp()) * 1000;
+        // Si la date du cours est passé, on ne peut pas ouvrir le cours
+        if ($delay < 0) {
             return new JsonResponse(['success' => false, 'type' => 'error', 'message' => 'Le date est déjà passé'], \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST);
         }
+
         $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
-        $delay = $cours->getDateCours()->getTimestamp() - time();
         $this->messageBus->dispatch(
             new UpdateStatusCoursMessage(
                 $cours->getId()),

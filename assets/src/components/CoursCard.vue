@@ -111,8 +111,8 @@ const capitalizedDate = computed(() =>
     formattedDate.value.charAt(0).toUpperCase() + formattedDate.value.slice(1)
 );
 const formattedHour = computed(() => {
-    const hours = dateDebut.value.getUTCHours();
-    const minutes = String(dateDebut.value.getUTCMinutes()).padStart(2, '0');
+    const hours = dateDebut.value.getHours();
+    const minutes = String(dateDebut.value.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 });
 // Initialiser le statut du cours comme réactif

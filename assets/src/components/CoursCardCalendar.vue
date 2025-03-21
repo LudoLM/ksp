@@ -12,8 +12,8 @@ const props = defineProps({
 
 const formattedHour = computed(() => {
     const date = new Date(props.info.dateCours);
-    const hours = date.getUTCHours();
-    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 });
 const userStore = useUserStore();
