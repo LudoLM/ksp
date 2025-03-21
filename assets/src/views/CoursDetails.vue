@@ -29,7 +29,7 @@ const isUserOnWaitingList = ref(false);
 const dateStart = computed(() => new Date(cours.value?.dateCours));
 const formattedDate = computed(() => useDateFormat(dateStart.value, 'DD/MM/YYYY').value);
 const formattedHour = computed(() => {
-    const hours = dateStart.value.getCHours();
+    const hours = dateStart.value.getHours();
     const minutes = String(dateStart.value.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 });
