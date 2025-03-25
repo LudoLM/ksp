@@ -27,7 +27,7 @@ const colors = {
 
 <template>
     <button
-        class="color-button mt-3 mx-2 block px-3 py-2 text-center text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        class="color-button block px-3 py-2 text-center text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         :class="[
       colors[color]?.base,
       colors[color]?.hover,
@@ -40,6 +40,9 @@ const colors = {
 
 <style scoped>
     button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         font-size: clamp(0.8rem, 1vw, .9rem);
     }
 </style>

@@ -8,7 +8,7 @@
         <div class="centerPart">
             <div class="centerWrapper flex justify-center items-center">
                 <div class="image">
-                    <img src="../../images/banner2.jpg" alt="">
+                    <img src="../../images/banners/banner2.jpg" alt="">
                 </div>
                 <div class="text">
                     <div class="flex flex-col justify-center items-end mr-2 mb-6">
@@ -78,7 +78,7 @@
 
 <script setup>
 import { infos } from "../store/index";
-import bannerImage from "../../images/banner4.jpg";
+import bannerImage from "../../images/banners/banner4.jpg";
 import Banner from "../components/Banner.vue";
 const store = infos();
 </script>

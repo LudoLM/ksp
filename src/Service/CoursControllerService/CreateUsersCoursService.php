@@ -44,7 +44,13 @@ class CreateUsersCoursService
         if ($user !== $this->security->getUser()) {
             $this->addExtraUser($cours, $user, $statusChange);
 
-            return new JsonResponse(['success' => true, 'response' => $user->getPrenom().' '.$user->getNom().' a bien été ajouté au cours', 'statusChange' => $statusChange, 'usersCount' => $usersCount], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+            return new JsonResponse([
+                'success' => true,
+                'response' => $user->getPrenom().' '.$user->getNom().' a bien été ajouté au cours',
+                'statusChange' => $this->serializer->serialize($cours->getStatusCours(), 'json', ['groups' => 'cours:detail']),
+                'usersCount' => $usersCount,
+            ],
+                \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         }
 
         //      Si le cours est désormais complet, on ne peut plus s'inscrire

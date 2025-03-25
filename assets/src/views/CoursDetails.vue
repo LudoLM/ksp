@@ -42,6 +42,10 @@ const redirectToLogin = () => {
     router.push({ name: 'Login' });
 };
 
+const stepBack = () => {
+    router.back();
+};
+
 const coursDetails = async () => {
   const result = await useGetCoursById(coursId);
   cours.value = JSON.parse(result);
@@ -148,7 +152,7 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
                                 {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
                             </ModalConfirm>
                             <div>
-                                <router-link :to="{ name: 'Calendrier' }"><CustomButton>Retour</CustomButton></router-link>
+                                <CustomButton @click="stepBack">Retour</CustomButton>
                             </div>
                         </div>
                     </div>

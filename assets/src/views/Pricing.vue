@@ -1,6 +1,6 @@
 <script setup>
 
-import bannerImage from "../../images/imageBanner17.jpg";
+import bannerImage from "../../images/banners/imageBanner17.jpg";
 import Banner from "../components/Banner.vue";
 
 </script>
@@ -14,7 +14,7 @@ import Banner from "../components/Banner.vue";
 
     <div class="modalitesWrapper flex justify-center gap-5 m-20 bg-white">
         <div class="image w-1/3">
-            <img src="../../images/banner.jpg">
+            <img src="../../images/banners/banner.jpg">
         </div>
         <div class="infos p-6 w-2/3 mb-10">
             <div class="w-full mb-10">

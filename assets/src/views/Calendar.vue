@@ -1,11 +1,11 @@
 <script setup>
 import CustomButton from "../components/forms/CustomButton.vue";
 import {useGetCours, useGetTypesCours} from "../utils/useActionCours";
-import {onMounted, ref} from "vue";
+import {inject, onMounted, ref} from "vue";
 import {useDateFormat} from "@vueuse/core";
 import CoursCardCalendar from "../components/CoursCardCalendar.vue";
 import TypeCoursFilter from "../components/filtersCours/TypeCoursFilter.vue";
-import bannerImage from "../../images/imageBanner9.jpg";
+import bannerImage from "../../images/banners/imageBanner9.jpg";
 import Banner from "../components/Banner.vue";
 
 const date = ref(new Date());
@@ -27,7 +27,7 @@ const updateDaysOfWeek = () => {
     const monday = new Date(current);
     const dayOfWeek = monday.getDay();
     // Cherche le lundi de la semaine
-    monday.setDate(monday.getDate() - ((dayOfWeek + 6) % 7)); // Shifts to Monday
+    monday.setDate(monday.getDate() - ((dayOfWeek + 6) % 7));
     days.value = []; // Reset the array
     for (let i = 0; i < 6; i++) {
         const day = new Date(monday);
@@ -46,16 +46,14 @@ const handleDaySelected = (index) => {
 // Met à jour les jours de la semaine
 updateDaysOfWeek();
 const infos = ref([]);
-const weekInfos = ref([[], [], [], [], [], [], []]); // Initialisation globale
+const weekInfos = ref([[], [], [], [], [], [], []]); // Initialisation globale)
 const selectedTypeCours = ref(null);
 const statusCours = ref(null);
-const currentPage = ref(1);
-const maxPerPage = ref(1000);
-const totalPages = ref(1);
-const totalItems = ref(null);
+const alertStore = inject('alertStore');
+
 
 const getCoursPerWeek = async () => {
-    await useGetCours(routeGetCours, infos, currentPage, maxPerPage, totalItems, selectedTypeCours, date, statusCours, totalPages);
+    await useGetCours(routeGetCours, infos, selectedTypeCours, date, statusCours);
     // Classe les cours par date/heure
     infos.value.sort((a, b) => new Date(a.dateCours) - new Date(b.dateCours));
 
