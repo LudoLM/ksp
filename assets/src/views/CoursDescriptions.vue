@@ -30,7 +30,7 @@ import {useGetTypesCours} from "../utils/useActionCours";
 import CustomButton from "../components/forms/CustomButton.vue";
 import {useRouter} from "vue-router";
 import Banner from "../components/Banner.vue";
-import bannerImage from "../../images/imageBanner15.jpg";
+import bannerImage from "../../images/banners/imageBanner15.jpg";
 
 const coursDescriptions = ref([]);
 const router = useRouter();

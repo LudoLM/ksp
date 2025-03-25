@@ -6,7 +6,6 @@ use App\Entity\Cours;
 use App\Entity\StatusCours;
 use App\Entity\TypeCours;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -68,15 +67,13 @@ class CoursRepository extends ServiceEntityRepository
     //    }
 
     public function findAllSortByDate(
-        int $currentPage,
-        int $maxPerPage,
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
         ?\DateTime $dateLimit,
         ?StatusCours $statusCours,
-    ): Paginator {
+    ): array {
         $qb = $this->createQueryBuilder('c')
-            ->orderBy('c.dateCours', 'DESC');
+            ->orderBy('c.dateCours', 'ASC');
 
         // Ajouter les filtres dynamiques
         if ($typeCours instanceof TypeCours) {
@@ -92,10 +89,6 @@ class CoursRepository extends ServiceEntityRepository
         if ($dateLimit instanceof \DateTime) {
             $qb->andWhere('c.dateCours <= :dateLimit')
                 ->setParameter('dateLimit', $dateLimit);
-        } else {
-            // Ajouter la pagination
-            $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
-                ->setMaxResults($maxPerPage);
         }
 
         if ($statusCours instanceof StatusCours) {
@@ -103,18 +96,15 @@ class CoursRepository extends ServiceEntityRepository
                 ->setParameter('statusCours', $statusCours);
         }
 
-        // Retourner un Paginator
-        return new Paginator($qb->getQuery());
+        return $qb->getQuery()->getResult();
     }
 
     public function findAllSortByDateForUsers(
-        int $currentPage,
-        int $maxPerPage,
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
         ?\DateTime $dateLimit,
         ?StatusCours $statusCours,
-    ): Paginator {
+    ): array {
         $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'DESC')
             ->where('c.statusCours = 1 OR c.statusCours = 2 OR c.statusCours = 3 OR c.statusCours = 5 OR c.statusCours = 6');
@@ -133,10 +123,6 @@ class CoursRepository extends ServiceEntityRepository
         if ($dateLimit instanceof \DateTime) {
             $qb->andWhere('c.dateCours <= :dateLimit')
                 ->setParameter('dateLimit', $dateLimit);
-        } else {
-            // Si ce n'est pas dans le calendrier, ajouter la pagination
-            $qb->setFirstResult(($currentPage - 1) * $maxPerPage)
-                ->setMaxResults($maxPerPage);
         }
 
         if ($statusCours instanceof StatusCours) {
@@ -144,8 +130,7 @@ class CoursRepository extends ServiceEntityRepository
                 ->setParameter('statusCours', $statusCours);
         }
 
-        // Retourner un Paginator
-        return new Paginator($qb->getQuery());
+        return $qb->getQuery()->getResult();
     }
 
     public function getCoursFilling(): array
@@ -182,5 +167,18 @@ class CoursRepository extends ServiceEntityRepository
             ->setParameter('archived', 7)
             ->getQuery()
             ->getResult();
+    }
+
+    public function getYearsRangeForCours(): array
+    {
+        $result = $this->createQueryBuilder('c')
+            ->select('MIN(c.dateCours) as min', 'MAX(c.dateCours) as max')
+            ->getQuery()
+            ->getSingleResult();
+
+        return [
+            'min' => (new \DateTime($result['min']))->format('Y'),
+            'max' => (new \DateTime($result['max']))->format('Y'),
+        ];
     }
 }

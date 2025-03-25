@@ -253,7 +253,7 @@ h1 {
     text-align: start;
 }
 .banner {
-    background: url('../../images/imageBanner13.jpg') no-repeat center center / cover;
+    background: url('../../images/banners/imageBanner13.jpg') no-repeat center center / cover;
 
     .overlay {
         background: rgba(30, 27, 75, .9);

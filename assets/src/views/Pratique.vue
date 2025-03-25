@@ -61,7 +61,7 @@
 
 <script setup>
 import Banner from "../components/Banner.vue";
-import bannerImage from "../../images/imageBanner14.jpg";
+import bannerImage from "../../images/banners/imageBanner14.jpg";
 import { infos } from "../store/index";
 
 const store = infos();

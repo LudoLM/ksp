@@ -1,10 +1,8 @@
 import {apiFetch} from "./useFetchInterceptor";
 
-export async function useGetCours(route, infos, currentPage, maxPerPage, totalItems, selectedTypeCours, selectedDate, selectedStatusId, totalPages) {
+export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusId) {
     try {
       const params = new URLSearchParams({
-        currentPage: currentPage.value || 1,
-        maxPerPage: maxPerPage.value || 10,
         typeCoursId: selectedTypeCours.value === null ? "0" : selectedTypeCours.value,
         dateCoursStr: selectedDate.value,
         statusCoursId: selectedStatusId.value === null ? "0" : selectedStatusId.value,
@@ -16,11 +14,7 @@ export async function useGetCours(route, infos, currentPage, maxPerPage, totalIt
           "Content-Type": "application/json",
         },
       });
-      const result = JSON.parse(await response.json());
-      infos.value = result.data;
-      currentPage.value = result.pagination.currentPage;
-      totalItems.value = result.pagination.totalItems;
-      totalPages.value = result.pagination.totalPages;
+      infos.value = JSON.parse(await response.json());
     } catch (error) {
         console.error("Erreur lors de la récupération des cours:", error);
     }

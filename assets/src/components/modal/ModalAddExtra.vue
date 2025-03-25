@@ -1,9 +1,9 @@
 <template>
   <v-dialog v-model="localIsOpen" max-width="500">
-    <template v-slot:activator="{ props: activatorProps }">
-      <CustomButton v-bind="activatorProps">
+    <template v-slot:activator="{ props: activatorProps }" class="flex justify-center align-center">
+      <button v-bind="activatorProps">
         <slot></slot>
-      </CustomButton>
+      </button>
     </template>
 
     <v-card>
@@ -35,6 +35,7 @@
 import { ref, computed, onMounted } from 'vue';
 import CustomButton from '../forms/CustomButton.vue';
 import { useSubscription } from "../../utils/useSubscribing";
+import Logo from "../header/Logo.vue";
 
 // Définition des props
 const props = defineProps({
@@ -55,7 +56,6 @@ const props = defineProps({
     required: true,
   },
 });
-
 // Définition des événements
 const emit = defineEmits(['subscriptionResponse', 'update:isOpen']);
 
@@ -115,11 +115,10 @@ const handleAddExtraClick = async () => {
       message: result.response,
       statusChange: result.statusChange
     });
-  }
 
+  }
   usersAdded.value.push(selectedUser.value);
   selectedUser.value = null;
   closeDialog();
 };
-
 </script>

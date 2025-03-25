@@ -18,18 +18,11 @@ readonly class FilteringCoursService
     }
 
     public function filterCours(
-        int $currentPage,
-        int $maxPerPage,
         int $typeCoursId,
         string $dateCoursStr,
         int $statusCoursId,
         string $route,
-        bool $isAdminPath,
     ): array {
-        if ($currentPage <= 0 || $maxPerPage <= 0) {
-            throw new \InvalidArgumentException('Les paramètres de pagination doivent être supérieurs à zéro.');
-        }
-        // Récupérer l'entité TypeCours si `typeCours` est fourni
         $typeCours = null;
         if (0 !== $typeCoursId) {
             try {
@@ -53,12 +46,6 @@ readonly class FilteringCoursService
             }
         }
 
-        $dateLimit = null;
-        // recupere le 1er jour de la semaine de la variable dateCours si la route est getCoursCalendar
-        if ('cours_calendar' === $route) {
-            [$dateCours, $dateLimit] = DateHelper::adjustDatesForCalendarRoute($dateCours, $currentPage);
-        }
-
         $statusCours = null;
         if (0 !== $statusCoursId) {
             try {
@@ -68,31 +55,15 @@ readonly class FilteringCoursService
             }
         }
 
-        // Appeler le repository avec la pagination et les filtres
-        if ($isAdminPath) {
-            $coursPaginator = $this->coursRepository->findAllSortByDate($currentPage, $maxPerPage, $typeCours, $dateCours, $dateLimit, $statusCours);
-        } else {
-            $coursPaginator = $this->coursRepository->findAllSortByDateForUsers($currentPage, $maxPerPage, $typeCours, $dateCours, $dateLimit, $statusCours);
+        $dateLimit = null;
+        // recupere le 1er jour de la semaine de la variable dateCours si la route est getCoursCalendar
+        if ('cours_calendar' === $route) {
+            [$dateCours, $dateLimit] = DateHelper::adjustDatesForCalendarRoute($dateCours);
+
+            return $this->coursRepository->findAllSortByDateForUsers($typeCours, $dateCours, $dateLimit, $statusCours);
         }
+        [$dateCours, $dateLimit] = DateHelper::adjustDatesForIndexRoute($dateCours);
 
-        // Récupérer les cours
-        $cours = iterator_to_array($coursPaginator);
-
-        // Calculer les métadonnées de pagination
-        $totalItems = count($coursPaginator);
-        $totalPages = ceil($totalItems / $maxPerPage);
-
-        // Préparer la réponse
-        $responseData = [
-            'data' => $cours,
-            'pagination' => [
-                'currentPage' => $currentPage,
-                'maxPerPage' => $maxPerPage,
-                'totalItems' => $totalItems,
-                'totalPages' => $totalPages,
-            ],
-        ];
-
-        return $responseData;
+        return $this->coursRepository->findAllSortByDate($typeCours, $dateCours, $dateLimit, $statusCours);
     }
 }

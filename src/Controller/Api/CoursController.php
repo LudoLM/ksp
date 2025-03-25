@@ -47,23 +47,29 @@ class CoursController extends AbstractController
     #[Route('api/getCours', name: 'cours_index', methods: ['GET'])]
     public function coursIndex(
         Request $request,
-        #[MapQueryParameter] int $currentPage,
-        #[MapQueryParameter] int $maxPerPage,
         #[MapQueryParameter] int $typeCoursId,
         #[MapQueryParameter] string $dateCoursStr,
         #[MapQueryParameter] int $statusCoursId,
     ): JsonResponse {
-        // Si apres getPath c'est "/admin" alors isAdminPath = true
-        $isAdminPath = str_starts_with((string) $request->headers->get('referer'), $request->getSchemeAndHttpHost().'/admin');
         $route = $request->attributes->get('_route');
         try {
-            $responseData = $this->filteringCoursService->filterCours($currentPage, $maxPerPage, $typeCoursId, $dateCoursStr, $statusCoursId, $route, $isAdminPath);
+            $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route);
             $responseData = $this->serializer->serialize($responseData, 'json', ['groups' => 'cours:index']);
 
             return new JsonResponse($responseData, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], $e->getCode());
         }
+    }
+
+    #[Route('api/getYearsRangeForCours', name: 'Year', methods: ['GET'])]
+    public function getYearsRangeForCours(): JsonResponse
+    {
+        $yearsLimits = $this->coursRepository->getYearsRangeForCours();
+        $yearsRange = range($yearsLimits['min'], $yearsLimits['max']);
+        $jsonYearsRange = $this->serializer->serialize($yearsRange, 'json');
+
+        return new JsonResponse($jsonYearsRange);
     }
 
     #[Route('api/getCours/{id}', name: 'cours_detail', methods: ['GET'])]
@@ -155,7 +161,7 @@ class CoursController extends AbstractController
         $this->em->remove($cours);
         $this->em->flush();
 
-        return new JsonResponse(['success' => true, 'message' => 'Le cours a bien été effacé'], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return new JsonResponse(['success' => true, 'type' => 'success', 'message' => 'Le cours a bien été effacé'], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     #[Route('api/cours/open/{id}', name: 'cours_open', methods: ['PUT'])]
@@ -187,7 +193,12 @@ class CoursController extends AbstractController
         $this->em->persist($cours);
         $this->em->flush();
 
-        return new JsonResponse(['success' => true, 'message' => 'Le cours est maintenant ouvert aux inscriptions', 'statusChange' => $cours->getStatusCours()], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return new JsonResponse([
+            'success' => true,
+            'type' => 'success',
+            'message' => 'Le cours est maintenant ouvert aux inscriptions',
+            'statusChange' => $this->serializer->serialize($cours->getStatusCours(), 'json', ['groups' => 'cours:detail']),
+            \Symfony\Component\HttpFoundation\Response::HTTP_OK]);
     }
 
     #[Route('api/cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
@@ -202,7 +213,11 @@ class CoursController extends AbstractController
             }*/
             $this->em->flush();
 
-            return new JsonResponse(['success' => true, 'message' => 'Le cours a été annulé', 'statusChange' => $cours->getStatusCours()], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Le cours a été annulé',
+                'statusChange' => $this->serializer->serialize($cours->getStatusCours(), 'json', ['groups' => 'cours:detail']), \Symfony\Component\HttpFoundation\Response::HTTP_OK,
+            ]);
         } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST);
         }

@@ -9,7 +9,7 @@ import Title_banner from "../Title_banner.vue";
   </div>
   <div class="kspInfos bg-white">
     <div class="image">
-      <img src="../../../images/banner2.jpg" alt="salle de yoga">
+      <img src="../../../images/banners/banner2.jpg" alt="salle de yoga">
     </div>
     <div class="accroche">
       <h4>Soulagez vos douleurs et améliorez votre quotidien grâce à Kiné Sport Santé</h4>

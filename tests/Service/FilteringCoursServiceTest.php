@@ -2,6 +2,7 @@
 
 namespace App\Tests\Service;
 
+use App\Entity\Cours;
 use App\Entity\StatusCours;
 use App\Entity\TypeCours;
 use App\Exception\FilteringCoursException;
@@ -9,7 +10,7 @@ use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
 use App\Service\CoursControllerService\FilteringCoursService;
-use Doctrine\ORM\Tools\Pagination\Paginator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class FilteringCoursServiceTest extends TestCase
@@ -31,48 +32,64 @@ class FilteringCoursServiceTest extends TestCase
         );
     }
 
-    public function testFilterCoursWithValidData(): void
+    public static function filterProvider(): \Generator
     {
-        $currentPage = 1;
-        $maxPerPage = 10;
-        $typeCoursId = 1;
-        $dateCoursStr = '2023-10-01';
-        $statusCoursId = 1;
-        $route = 'api_cours_list';
-        $isAdminPath = true;
+        $dateLimit = new \DateTime('2023-11-05T00:00:00.000000+0000');
 
+        $cours1 = new Cours();
+        $cours1->setTypeCours(new TypeCours());
+        $cours1->setDateCours(new \DateTime('2023-10-31T00:00:00.000000+0000'));
+        $cours1->setStatusCours(new StatusCours());
+        $cours1->setDuree(60);
+        $cours1->setNbInscriptionMax(12);
+        $cours1->setSpecialNote(null);
+
+        yield 'cours_calendar_routes' => [
+            'route' => 'cours_calendar',
+            'expectedCallRepository' => 'findAllSortByDateForUsers',
+            'dateLimit' => $dateLimit,
+            'cours' => [
+                $cours1,
+            ],
+        ];
+
+        $dateLimit2 = new \DateTime('2023-12-01T00:00:00.000000+0000');
+
+        yield 'api_cours_list_routes' => [
+            'route' => 'api_cours_list',
+            'expectedCallRepository' => 'findAllSortByDate',
+            'dateLimit' => $dateLimit2,
+            'cours' => [
+                $cours1,
+            ],
+        ];
+    }
+
+    #[DataProvider('filterProvider')]
+    public function testFilterCoursWithValidData(string $route, string $expectedCallRepository, \DateTime $dateLimit, array $cours): void
+    {
+        $typeCoursId = 1;
+        $statusCoursId = 1;
+        $dateCoursStr = '2023-11-01';
         $typeCours = new TypeCours();
         $statusCours = new StatusCours();
-        $dateCours = new \DateTime($dateCoursStr);
 
         $this->typeCoursRepository->method('findOneBy')->with(['id' => $typeCoursId])->willReturn($typeCours);
         $this->statusCoursRepository->method('findOneBy')->with(['id' => $statusCoursId])->willReturn($statusCours);
+        $dateCours = 'findAllSortByDateForUsers' === $expectedCallRepository ? new \DateTime('2023-10-30T00:00:00.000000+0000') : new \DateTime('2023-11-01T00:00:00.000000+0000');
+        $this->coursRepository->method($expectedCallRepository)->with($typeCours, $dateCours, $dateLimit, $statusCours)->willReturn($cours);
 
-        $coursPaginator = $this->createMock(Paginator::class);
-        $coursPaginator->method('count')->willReturn(2);
-        $coursPaginator->method('getIterator')->willReturn(new \ArrayIterator([new \stdClass(), new \stdClass()]));
-        $this->coursRepository->method('findAllSortByDate')->with($currentPage, $maxPerPage, $typeCours, $dateCours, null, $statusCours)->willReturn($coursPaginator);
+        $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route);
 
-        $responseData = $this->filteringCoursService->filterCours($currentPage, $maxPerPage, $typeCoursId, $dateCoursStr, $statusCoursId, $route, $isAdminPath);
-
-        $this->assertArrayHasKey('data', $responseData);
-        $this->assertArrayHasKey('pagination', $responseData);
-        $this->assertCount(2, $responseData['data']);
-        $this->assertEquals($currentPage, $responseData['pagination']['currentPage']);
-        $this->assertEquals($maxPerPage, $responseData['pagination']['maxPerPage']);
-        $this->assertEquals(2, $responseData['pagination']['totalItems']);
-        $this->assertEquals(1, $responseData['pagination']['totalPages']);
+        $this->assertEquals($cours, $responseData);
     }
 
     public function testFilterCoursWithInvalidDate(): void
     {
-        $currentPage = 1;
-        $maxPerPage = 10;
         $typeCoursId = 1; // ID valide
         $dateCoursStr = 'invalid-date'; // Date invalide
         $statusCoursId = 1;
         $route = 'cours_calendar';
-        $isAdminPath = true;
 
         // Retourner un TypeCours valide pour l'ID fourni
         $this->typeCoursRepository->method('findOneBy')->with(['id' => $typeCoursId])->willReturn(new TypeCours());
@@ -83,56 +100,15 @@ class FilteringCoursServiceTest extends TestCase
         $this->expectExceptionMessage('La date fournie est invalide');
 
         // Appeler la méthode qui devrait lever l'exception pour la date invalide
-        $this->filteringCoursService->filterCours($currentPage, $maxPerPage, $typeCoursId, $dateCoursStr, $statusCoursId, $route, $isAdminPath);
-    }
-
-    public function testFilterCoursWithCalendarRoute(): void
-    {
-        $currentPage = 1;
-        $maxPerPage = 10;
-        $typeCoursId = 1;
-        $dateCoursStr = '2023-10-01';
-        $statusCoursId = 1;
-        $route = 'cours_calendar';
-        $isAdminPath = true;
-
-        $typeCours = new TypeCours(); // Mock TypeCours entity
-        $statusCours = new StatusCours(); // Mock StatusCours entity
-        $dateCours = new \DateTime($dateCoursStr);
-        $dateCours->modify('monday this week');
-        $dateLimit = clone $dateCours;
-        $dateLimit->modify('+6 days');
-
-        $this->typeCoursRepository->method('findOneBy')->with(['id' => $typeCoursId])->willReturn($typeCours);
-        $this->statusCoursRepository->method('findOneBy')->with(['id' => $statusCoursId])->willReturn($statusCours);
-
-        // Create a mock Paginator
-        $coursPaginator = $this->createMock(Paginator::class);
-        $coursPaginator->method('count')->willReturn(2);
-        $coursPaginator->method('getIterator')->willReturn(new \ArrayIterator([new \stdClass(), new \stdClass()]));
-
-        $this->coursRepository->method('findAllSortByDate')->with($currentPage, $maxPerPage, $typeCours, $dateCours, $dateLimit, $statusCours)->willReturn($coursPaginator);
-
-        $responseData = $this->filteringCoursService->filterCours($currentPage, $maxPerPage, $typeCoursId, $dateCoursStr, $statusCoursId, $route, $isAdminPath);
-
-        $this->assertArrayHasKey('data', $responseData);
-        $this->assertArrayHasKey('pagination', $responseData);
-        $this->assertCount(2, $responseData['data']);
-        $this->assertEquals($currentPage, $responseData['pagination']['currentPage']);
-        $this->assertEquals($maxPerPage, $responseData['pagination']['maxPerPage']);
-        $this->assertEquals(2, $responseData['pagination']['totalItems']);
-        $this->assertEquals(1, $responseData['pagination']['totalPages']);
+        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route);
     }
 
     public function testFilterCoursWithTypeCoursNotFound(): void
     {
-        $currentPage = 1;
-        $maxPerPage = 10;
         $typeCoursId = 999; // ID inexistant
         $dateCoursStr = '2023-10-01';
         $statusCoursId = 1;
         $route = 'cours_calendar';
-        $isAdminPath = true;
 
         // Configurer le mock pour retourner null lorsque l'ID n'existe pas
         $this->typeCoursRepository->method('findOneBy')->with(['id' => $typeCoursId])->willReturn(null);
@@ -143,6 +119,6 @@ class FilteringCoursServiceTest extends TestCase
         $this->expectExceptionMessage('Le type de cours fourni est invalide');
 
         // Appeler la méthode qui devrait lever l'exception
-        $this->filteringCoursService->filterCours($currentPage, $maxPerPage, $typeCoursId, $dateCoursStr, $statusCoursId, $route, $isAdminPath);
+        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route);
     }
 }

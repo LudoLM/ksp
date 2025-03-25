@@ -5,6 +5,7 @@
           :textColor="'rgba(30, 27, 75, .9)'"
           backgroundHeight="40vh"
           :hasButton="false"
+          :image="bannerImage"
       />
 
 
@@ -52,6 +53,7 @@ import { useRoute } from "vue-router";
 import {useGetCours, useGetStatusCours, useGetTypesCours} from "../utils/useActionCours";
 import CustomButton from "../components/forms/CustomButton.vue";
 import Banner from "../components/Banner.vue";
+import bannerImage from "../../images/banners/imageBanner9.jpg";
 
 const infos = ref([]);
 const selectedCoursId = ref(null);
