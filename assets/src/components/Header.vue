@@ -1,17 +1,5 @@
 <template>
   <div class="nav_wrapper">
-<!--    <header class="header_desktop">
-      <Logo/>
-      <Navbar/>
-      <div class="flex justify-between items-center space-x-4 ">
-        <DropdownUser/>
-      </div>
-    </header>
-    <header class="header_mobile">
-      <Navbar/>
-      <Logo/>
-      <DropdownUser/>
-    </header>-->
     <header :class="isMobile ? 'header_mobile' : 'header_desktop'">
       <template v-if="isMobile">
         <Navbar />

@@ -1,7 +1,10 @@
 <script setup>
-import {ref, watch} from "vue";
+import {inject, ref, watch} from "vue";
 import CustomButton from "../forms/CustomButton.vue";
 import { useSubscription, useUnSubscription } from "../../utils/useSubscribing";
+import {createAlertStore} from "../../store/alert";
+
+const alertStore = inject('alertStore');
 
 const props = defineProps({
     userId: {
@@ -61,22 +64,14 @@ const handleSubscription = async (isUserOnWaitingList) => {
                 isUserOnWaitingListValue: localData.value.isUserOnWaitingList,
 
             });
-            emit("subscriptionResponse", {
-                type: "success",
-                message: result.message,
-            });
+
+            alertStore.setAlert(result.message, "success");
 
         } else {
-            emit("subscriptionResponse", {
-                type: "error",
-                message: result.message,
-            });
+            alertStore.setAlert(result.message, "error");
         }
     } catch (error) {
-        emit("subscriptionResponse", {
-            type: "error",
-            message: "Une erreur inattendue s'est produite.",
-        });
+        alertStore.setAlert("Une erreur inattendue s'est produite.", "error");
         console.log(error);
     }
 };
@@ -101,21 +96,12 @@ const handleUnsubscription = async (isUserOnWaitingList) => {
                 isSubscribedValue: localData.value.isSubscribed,
                 isUserOnWaitingListValue: localData.value.isUserOnWaitingList,
             });
-            emit("unSubscriptionResponse", {
-                type: "success",
-                message: result.message,
-            });
+            alertStore.setAlert(result.message, "success");
         } else {
-            emit("unSubscriptionResponse", {
-                type: "error",
-                message: result.message,
-            });
+            alertStore.setAlert(result.message, "error");
         }
     } catch (error) {
-        emit("unSubscriptionResponse", {
-            type: "error",
-            message: "Une erreur inattendue s'est produite.",
-        });
+        alertStore.setAlert("Une erreur inattendue s'est produite.", "error");
         console.log(error);
     }
 };

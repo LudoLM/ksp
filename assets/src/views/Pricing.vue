@@ -2,6 +2,17 @@
 
 import bannerImage from "../../images/banners/imageBanner17.jpg";
 import Banner from "../components/Banner.vue";
+import CustomButton from "../components/forms/CustomButton.vue";
+import ModalConfirm from "../components/modal/ModalConfirm.vue";
+import {ref} from "vue";
+import {useUserStore} from "../store/user";
+
+
+const userId = useUserStore().userId;
+const loginDialog = ref(false);
+const redirectToLogin = () => {
+    router.push({ name: 'Login' });
+};
 
 </script>
 
@@ -56,9 +67,20 @@ import Banner from "../components/Banner.vue";
                 <h6>Séance à l'unité</h6>
             </div>
             <p class="text-lg mr-5">17€</p>
+            <ModalConfirm
+                v-if="!userId"
+                isPricingSizeButton
+                v-model:isOpen="loginDialog"
+                title="Connexion requise"
+                message="Veuillez vous authentifier pour vous inscrire à ce cours."
+                @login="redirectToLogin"
+            >
+                Acheter
+            </ModalConfirm>
             <stripe-buy-button
-            buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
-            publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
+                v-else
+                buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
+                publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
             >
             </stripe-buy-button>
         </div>
@@ -68,7 +90,18 @@ import Banner from "../components/Banner.vue";
                 <p>Renouvelable</p>
             </div>
             <p class="text-lg mr-5">80€</p>
+            <ModalConfirm
+                v-if="!userId"
+                isPricingSizeButton
+                v-model:isOpen="loginDialog"
+                title="Connexion requise"
+                message="Veuillez vous authentifier pour vous inscrire à ce cours."
+                @login="redirectToLogin"
+            >
+                Acheter
+            </ModalConfirm>
             <stripe-buy-button
+                v-else
                 buy-button-id="buy_btn_1Q46sYC6kEhASj1eduGCytqN"
                 publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
             >
@@ -80,7 +113,18 @@ import Banner from "../components/Banner.vue";
                 <p>Renouvelable</p>
             </div>
            <p class="text-lg mr-5">148€</p>
+            <ModalConfirm
+                v-if="!userId"
+                isPricingSizeButton
+                v-model:isOpen="loginDialog"
+                title="Connexion requise"
+                message="Veuillez vous authentifier pour vous inscrire à ce cours."
+                @login="redirectToLogin"
+            >
+                Acheter
+            </ModalConfirm>
            <stripe-buy-button
+              v-else
               buy-button-id="buy_btn_1Q4Mu7C6kEhASj1e5j6L1Tkm"
               publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
            >
@@ -92,7 +136,18 @@ import Banner from "../components/Banner.vue";
               <p>Prioritaire</p>
           </div>
           <p class="text-lg mr-5">440€</p>
+          <ModalConfirm
+              v-if="!userId"
+              isPricingSizeButton
+              v-model:isOpen="loginDialog"
+              title="Connexion requise"
+              message="Veuillez vous authentifier pour vous inscrire à ce cours."
+              @login="redirectToLogin"
+          >
+              Acheter
+          </ModalConfirm>
           <stripe-buy-button
+              v-else
               buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
               publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
           >
@@ -104,7 +159,18 @@ import Banner from "../components/Banner.vue";
               <p>Prioritaire</p>
           </div>
           <p class="text-lg mr-5">525€</p>
+          <ModalConfirm
+              v-if="!userId"
+              isPricingSizeButton
+              v-model:isOpen="loginDialog"
+              title="Connexion requise"
+              message="Veuillez vous authentifier pour vous inscrire à ce cours."
+              @login="redirectToLogin"
+          >
+              Acheter
+          </ModalConfirm>
           <stripe-buy-button
+              v-else
               buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
               publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
           >
@@ -154,6 +220,7 @@ import Banner from "../components/Banner.vue";
       font-size: clamp(1.5rem, 3.5vw, 2.5rem);
       color: rgb(85, 19, 96);
     }
+
 
     @media (max-width: 980px) {
         .modalitesWrapper{

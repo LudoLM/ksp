@@ -9,7 +9,7 @@
                         <div>{{ store.fullAddress }}</div>
                     </div>
                     <div class="contact">
-                        <a href="https://maps.app.goo.gl/ApZ1E35srhDT2ynK7">
+                        <a target="_blank" href="https://maps.app.goo.gl/ApZ1E35srhDT2ynK7">
                             <div class="flex gap-3">
                                 <img src="../../icons/pin.svg"/>
                                 Localiser
@@ -26,7 +26,7 @@
                 <div class="footer_column">
                     <h4>Suivez-moi</h4>
                     <div class="social">
-                        <a href="https://www.facebook.com/kinesportsante35">
+                        <a target="_blank" href="https://www.facebook.com/kinesportsante35">
                             <img src="../../icons/facebook.svg"/>
                         </a>
 

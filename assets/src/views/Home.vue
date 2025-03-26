@@ -61,8 +61,8 @@
                         <ul class="flex flex-col justify-lg-space-around gap-8 w-full mt-10">
                             <li class="flex items-center">Encadrement par un professionnel de santé</li>
                             <li class="flex items-center">Cours en petits groupes (10 personnes max)</li>
-                            <li class="flex items-center"><div class="w-3/4">Bilan sport santé possible (RDV sur Doctolib)</div><button><a target="_blank" href="https://www.doctolib.fr/masseur-kinesitherapeute/mordelles/servane-cosqueric-mordelles/booking/availabilities?specialityId=9&telehealth=false&placeId=practice-567335&motiveCategoryIds%5B%5D=338126&motiveIds%5B%5D=11667176&bookingFunnelSource=profile">Prendre RDV</a></button></li>
-                            <li class="flex items-center"><div class="w-3/4">Séance de coaching individuel proposé (RDV sur Doctolib)</div><button><a target="_blank" href="https://www.doctolib.fr/masseur-kinesitherapeute/mordelles/servane-cosqueric-mordelles/booking/availabilities?specialityId=9&telehealth=false&placeId=practice-567335&motiveCategoryIds%5B%5D=338126&motiveIds%5B%5D=11667177&bookingFunnelSource=profile">Prendre RDV</a></button></li>
+                            <li class="flex items-center"><div class="w-3/4">Bilan sport santé possible</div><button><a target="_blank" href="https://www.doctolib.fr/masseur-kinesitherapeute/mordelles/servane-cosqueric-mordelles/booking/availabilities?specialityId=9&telehealth=false&placeId=practice-567335&motiveCategoryIds%5B%5D=338126&motiveIds%5B%5D=11667176&bookingFunnelSource=profile">Prendre RDV sur Doctolib</a></button></li>
+                            <li class="flex items-center"><div class="w-3/4">Séance de coaching individuel proposé</div><button><a target="_blank" href="https://www.doctolib.fr/masseur-kinesitherapeute/mordelles/servane-cosqueric-mordelles/booking/availabilities?specialityId=9&telehealth=false&placeId=practice-567335&motiveCategoryIds%5B%5D=338126&motiveIds%5B%5D=11667177&bookingFunnelSource=profile">Prendre RDV sur Doctolib</a></button></li>
                             <li class="flex items-center">Exercices et conseils personnalisés</li>
                         </ul>
                     </div>
@@ -186,16 +186,15 @@ const store = infos();
         font-size: clamp(0.8rem, 1.5vw, 1rem);
     }
     button{
-        background: #e2a945;
+        background: #107aca;
         font-size: clamp(0.6rem, 1vw, .8rem);
         padding: 10px;
         border-radius: 5px;
         color: #F3F4F6;
-        width: 100px;
         margin-left: 2vw;
 
         &:hover{
-            background: #e5bb58;
+            background: #43aaec;
         }
     }
 }

@@ -167,6 +167,7 @@ onClickOutside(target, () => {
         }
     }
 
+
     .profil {
         display: flex;
         justify-content: space-between;
@@ -190,7 +191,7 @@ onClickOutside(target, () => {
         width: 130px;
         height: 40px;
         font-weight: 400;
-        font-size: clamp(.7rem, 1.2vw, .8rem);
+        font-size: clamp(.7rem, 1.2vw, .6rem);
     }
 
     .identifier{
@@ -204,7 +205,7 @@ onClickOutside(target, () => {
         border-radius: 5px;
         color: #dfdfdf;
         font-weight: 400;
-        font-size: clamp(.7rem, 1.2vw, .8rem);
+        font-size: clamp(.7rem, 1.2vw, .6rem);
     }
 
     .logout{

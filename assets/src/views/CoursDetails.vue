@@ -35,8 +35,6 @@ const formattedHour = computed(() => {
 });
 const alertStore = inject('alertStore');
 
-const emit = defineEmits(['handleSubscription', 'handleUnsubscription']);
-
 
 const redirectToLogin = () => {
     router.push({ name: 'Login' });
@@ -75,14 +73,6 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
     isSubscribed.value = isSubscribedValue;
     isUserOnWaitingList.value = isUserOnWaitingListValue;
 };
-
-const handleSubscriptionResponse = ({ type, message }) => {
-    alertStore.setAlert(message, type);
-};
-
-const handleUnSubscriptionResponse = ({ type, message }) => {
-    alertStore.setAlert(message, type);
-}
 </script>
 
 
@@ -118,17 +108,15 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
                     <div class="w-full ml-auto mr-auto mt-2">
                         <!--                    Barre delimitation-->
                         <div class="w-2/3 h-0.5 bg-gray-200 mx-auto mb-3"></div>
-                        <div class="button flex justify-center">
-                            <ButtonsCardUser v-if="!isAdminPath"
-                                             :userId="userId"
-                                             :coursId="cours.id"
-                                             :statusCours="cours.statusCours"
-                                             :isSubscribed="isSubscribed"
-                                             :isUserOnWaitingList="isUserOnWaitingList"
-                                             @updateCoursStatus="handleUpdateStatusCours"
-                                             @subscriptionResponse="handleSubscriptionResponse"
-                                             @unSubscriptionResponse="handleUnSubscriptionResponse"
-
+                        <div class="button flex justify-center gap-5">
+                            <ButtonsCardUser
+                                 v-if="!isAdminPath"
+                                 :userId="userId"
+                                 :coursId="cours.id"
+                                 :statusCours="cours.statusCours"
+                                 :isSubscribed="isSubscribed"
+                                 :isUserOnWaitingList="isUserOnWaitingList"
+                                 @updateCoursStatus="handleUpdateStatusCours"
                             />
 
 <!--                            Ouvre une modale pour désinscrire plusieurs participants-->
@@ -141,19 +129,18 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
                                     @updateUnsubscribeUsersValue="handleUpdateUnsubscribeUsersValue"
                                 />
                             </div>
-
-                            <ModalConfirm
-                                v-if="!userId && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
-                                v-model:isOpen="loginDialog"
-                                title="Connexion requise"
-                                message="Veuillez vous authentifier pour vous inscrire à ce cours."
-                                @login="redirectToLogin"
-                            >
-                                {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
-                            </ModalConfirm>
-                            <div>
-                                <CustomButton @click="stepBack">Retour</CustomButton>
-                            </div>
+                                <ModalConfirm
+                                    v-if="!userId && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
+                                    v-model:isOpen="loginDialog"
+                                    title="Connexion requise"
+                                    message="Veuillez vous authentifier pour vous inscrire à ce cours."
+                                    @login="redirectToLogin"
+                                >
+                                    {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
+                                </ModalConfirm>
+                                <div>
+                                    <CustomButton @click="stepBack">Retour</CustomButton>
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -165,12 +152,9 @@ const handleUnSubscriptionResponse = ({ type, message }) => {
 
 <style scoped lang="scss">
 
-
     p{
         font-size: clamp(0.8rem, 1vw, 1.4rem);
     }
-
-
 
 .coursDetails{
     margin-top: 123px;

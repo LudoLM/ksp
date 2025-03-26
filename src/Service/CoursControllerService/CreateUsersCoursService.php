@@ -33,7 +33,7 @@ class CreateUsersCoursService
         }
         //      Si l'heure du cours est passée - 30 minutes, on ne peut plus s'inscrire
         if ($this->addUserTimeCheckerService->isTooLateRegister($cours)) {
-            return new JsonResponse(['success' => false, 'response' => "Il est trop tard pour s'inscrire à ce cours"], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['success' => false, 'message' => "Il est trop tard pour s'inscrire à ce cours"], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
         }
         //      Calcul du nombre de participants au cours
         $usersCount = $this->countUsersInCoursService->countUsers($cours);
@@ -42,6 +42,11 @@ class CreateUsersCoursService
 
         //      Si l'admin ajoute un extra user, on ne vérifie pas si le cours est complet
         if ($user !== $this->security->getUser()) {
+            // Si l'utilisateur n'a pas assez de crédits, on ne peut pas s'inscrire
+            if ($user->getNombreCours() <= 0) {
+                return new JsonResponse(['success' => false, 'message' => $user->getPrenom().' '.$user->getNom()." n'a pas assez de crédits pour s'inscrire à ce cours"], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
+            }
+
             $this->addExtraUser($cours, $user, $statusChange);
 
             return new JsonResponse([
@@ -51,6 +56,11 @@ class CreateUsersCoursService
                 'usersCount' => $usersCount,
             ],
                 \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        }
+
+        // Si l'utilisateur n'a pas assez de crédits, on ne peut pas s'inscrire
+        if ($user->getNombreCours() <= 0) {
+            return new JsonResponse(['success' => false, 'message' => "Vous n'avez pas assez de crédits pour vous inscrire à ce cours"], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
         }
 
         //      Si le cours est désormais complet, on ne peut plus s'inscrire

@@ -80,7 +80,7 @@ const getUsers = async () => {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + localStorage.getItem('token'),
+      'Authorization': 'Bearer ' + localStorage.getItem('token'),
     },
   });
 
@@ -106,13 +106,13 @@ const handleAddExtraClick = async () => {
   if (result.success) {
     emit('subscriptionResponse', {
       type: 'success',
-      message: result.response,
+      message: result.message,
       statusChange: result.statusChange
     });
   } else {
     emit('subscriptionResponse', {
       type: 'error',
-      message: result.response,
+      message: result.message,
       statusChange: result.statusChange
     });
 
