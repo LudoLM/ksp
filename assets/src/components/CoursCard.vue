@@ -40,17 +40,6 @@
                 @handleAddExtraResponse="handleAddExtraResponse"
             />
 
-<!--            <ButtonsCardUser v-if="!isAdminPath"
-                 :userId="userId"
-                 :coursId="props.info.id"
-                 :statusCours="statusCours"
-                 :isSubscribed="isSubscribed"
-                 :isUserOnWaitingList="isUserOnWaitingList"
-                 @updateCoursStatus="handleUpdateStatusCours"
-                 @subscriptionResponse="handleSubscriptionresponse"
-                 @unSubscriptionResponse="handleUnsubscriptionresponse"
-            />-->
-
             <ModalConfirm
                 v-if="!userId && (statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet')"
                 v-model:isOpen="loginDialog"

@@ -170,7 +170,6 @@
     </div>
 </template>
 
-
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -206,8 +205,9 @@ const handleRedirection = () => {
 }
 
 const handleSubmit = async () => {
+
     try {
-        const response = await fetch('/api/register', {
+        const response = await fetch("/api/register", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

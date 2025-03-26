@@ -1,7 +1,9 @@
 <template>
   <v-dialog v-model="localIsOpen" max-width="500">
     <template v-slot:activator="{ props: activatorProps }">
-      <CustomButton v-bind="activatorProps">
+      <CustomButton
+          :class="isPricingSizeButton ? 'isPricingSizeButton' : ''"
+          v-bind="activatorProps">
         <slot></slot>
       </CustomButton>
     </template>
@@ -13,7 +15,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <CustomButton v-if="showLoginButton" @click="handleLoginClick">Login</CustomButton>
+        <CustomButton v-if="showLoginButton" @click="handleLoginClick">Se connecter</CustomButton>
         <CustomButton @click="closeDialog">Fermer</CustomButton>
       </v-card-actions>
     </v-card>
@@ -44,7 +46,12 @@ export default {
       type: Boolean,
       required: true,
     },
-  },
+    isPricingSizeButton: {
+      type: Boolean,
+      default: false,
+    },
+},
+
   setup(props, { emit }) {
 
     const localIsOpen = ref(props.isOpen);
@@ -68,3 +75,12 @@ export default {
   },
 };
 </script>
+
+
+<style scoped lang="scss">
+    .isPricingSizeButton{
+        width: clamp(200px, 50%, 300px);
+        height: 40px;
+        background: #6366f1;
+    }
+</style>

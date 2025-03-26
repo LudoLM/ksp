@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -25,9 +26,10 @@ class AuthController extends AbstractController
     ) {
     }
 
-    #[Route(path: 'api/register', name: 'app_register')]
+    #[Route(path: 'api/register', name: 'app_register', methods: ['POST'])]
     public function register(
-        #[MapRequestPayload] CreateUserDTO $createUserDTO,
+        #[MapRequestPayload]
+        CreateUserDTO $createUserDTO,
         ValidatorInterface $validator,
     ): JsonResponse {
         $user = $this->createUserDTOToUserDenormalizer->denormalize($createUserDTO, User::class);
@@ -42,7 +44,7 @@ class AuthController extends AbstractController
                 ];
             }
 
-            return new JsonResponse(['errors' => $errors], \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['errors' => $errors], Response::HTTP_BAD_REQUEST);
         }
 
         $this->em->persist($user);
