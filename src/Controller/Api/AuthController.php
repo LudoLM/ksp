@@ -16,6 +16,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[Route(path: 'api/', name: 'api_')]
 class AuthController extends AbstractController
 {
     public function __construct(
@@ -26,7 +27,7 @@ class AuthController extends AbstractController
     ) {
     }
 
-    #[Route(path: 'api/register', name: 'app_register', methods: ['POST'])]
+    #[Route(path: 'register', name: 'app_register', methods: ['POST'])]
     public function register(
         #[MapRequestPayload]
         CreateUserDTO $createUserDTO,
