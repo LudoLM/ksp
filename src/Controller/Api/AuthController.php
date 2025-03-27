@@ -33,7 +33,7 @@ class AuthController extends AbstractController
         ValidatorInterface $validator,
     ): JsonResponse {
         $user = $this->createUserDTOToUserDenormalizer->denormalize($createUserDTO, User::class);
-        // Valider l'entité user
+        // Valide en cas de non duplication de l'email
         $violations = $validator->validate($user);
 
         if (count($violations) > 0) {
