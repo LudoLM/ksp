@@ -3,6 +3,8 @@ services:
     networks:
       - proxy
     image: ${IMAGES_PREFIX:-}app-php
+    env_file:
+        - .env.local
     restart: unless-stopped
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
@@ -41,6 +43,8 @@ services:
   database:
       networks:
           - proxy
+      env_file:
+          - .env.local
       container_name: database
       image: mysql:latest
       restart: always
