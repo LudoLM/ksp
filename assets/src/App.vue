@@ -5,6 +5,7 @@ import AlertMessage from "./components/message/AlertMessage.vue";
 
 const alertStore = createAlertStore();
 provide('alertStore', alertStore);
+
 </script>
 
 <template>

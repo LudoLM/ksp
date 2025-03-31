@@ -39,7 +39,8 @@ const router = createRouter({
       component: LoginLayout,
       children: [
         { path: '/login', name: 'Login', component: () => import('../views/Signin.vue') },
-        { path: '/register', name: 'Register', component: () => import('../views/Signup.vue') }
+        { path: '/register', name: 'Register', component: () => import('../views/Signup.vue') },
+        { path: '/resetPassword/:id/:token', name: 'ResetPassword', component: () => import('../views/ResetPassword.vue') },
       ]
     },
     {

@@ -2,14 +2,15 @@
 
 import bannerImage from "../../images/banners/imageBanner17.jpg";
 import Banner from "../components/Banner.vue";
-import CustomButton from "../components/forms/CustomButton.vue";
 import ModalConfirm from "../components/modal/ModalConfirm.vue";
 import {ref} from "vue";
 import {useUserStore} from "../store/user";
+import {useRouter} from "vue-router";
 
 
 const userId = useUserStore().userId;
 const loginDialog = ref(false);
+const router = useRouter();
 const redirectToLogin = () => {
     router.push({ name: 'Login' });
 };

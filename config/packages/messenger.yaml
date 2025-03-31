@@ -15,6 +15,7 @@ framework:
             #'Symfony\Component\Mailer\Messenger\SendEmailMessage': async
              App\Message\SendCancelEmailMessage: async
              App\Message\UpdateStatusCoursMessage: async 
+             App\Message\RemoveResetTokenMessage: async
 
 # when@test:
 #    framework:

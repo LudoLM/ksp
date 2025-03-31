@@ -14,6 +14,14 @@ const props = defineProps({
             type: String,
             default: null,
         },
+        placeholder: {
+            type: String,
+            default: "Entrez votre mot de passe",
+        },
+        label: {
+            type: String,
+            default: "Mot de passe",
+        },
 })
 
 </script>
@@ -25,14 +33,14 @@ const props = defineProps({
             for="password"
             class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
         >
-            Mot de passe<span class="text-red-600">*</span>
+            {{ label }}<span class="text-red-600">*</span>
         </label>
         <div class="relative">
             <input
                 :type="showPassword ? 'text' : 'password'"
                 :value="modelValue"
                 id="password"
-                placeholder="Entrez votre mot de passe"
+                :placeholder="placeholder"
                 @input="$emit('update:modelValue', $event.target.value)"
                 class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
             />

@@ -152,20 +152,7 @@
             </div>
 
             <!-- Section de Droite -->
-            <div
-                class="banner relative items-center hidden w-full lg:w-1/2 h-full lg:grid lg:p-10"
-            >
-                <div class="overlay flex items-center justify-center">
-                    <div class="logoWrapper flex flex-col items-center max-w-xs">
-                        <router-link to="/" class="block mb-4">
-                            <h3>Kiné Sport Santé</h3>
-                        </router-link>
-                        <p class="text-center text-gray-300 dark:text-white/70">
-                            Soulagez vos douleurs et renforcez votre bien-être.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <SideBannerAuth/>
         </div>
     </div>
 </template>
@@ -178,6 +165,7 @@ import CustomPassword from "../components/forms/CustomPassword.vue";
 import {useValidationForm} from "../utils/useValidationForm";
 import {useUserStore} from "../store/user";
 import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
+import SideBannerAuth from "../components/SideBannerAuth.vue";
 
 const firstName = ref('')
 const lastName = ref('')
