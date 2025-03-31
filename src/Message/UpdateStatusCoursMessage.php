@@ -2,10 +2,10 @@
 
 namespace App\Message;
 
-class UpdateStatusCoursMessage
+readonly class UpdateStatusCoursMessage
 {
     public function __construct(
-        private readonly int $coursId,
+        private int $coursId,
     ) {
     }
 

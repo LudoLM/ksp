@@ -5,7 +5,7 @@ namespace App\MessageHandler;
 use App\Message\SendCancelEmailMessage;
 use App\Repository\UserRepository;
 use App\Repository\UsersCoursRepository;
-use App\Service\SendCancelEmailService;
+use App\Service\SendingEmail\SendCancelEmailService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]

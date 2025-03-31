@@ -33,8 +33,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     /**
      * @var string The hashed password
      */
-    #[ORM\Column]
+    #[ORM\Column(length: 255)]
     private string $password;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $resetPasswordToken = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
@@ -54,6 +57,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     #[Groups(['user:detail'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $commune = null;
+
     #[Groups(['user:detail'])]
     #[ORM\Column(length: 10)]
     #[Assert\NotBlank(message: 'Le numéro de téléphone ne doit pas être vide.')]
@@ -153,6 +157,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getResetPasswordToken(): ?string
+    {
+        return $this->resetPasswordToken;
+    }
+
+    public function setResetPasswordToken(string $resetPasswordToken): self
+    {
+        $this->resetPasswordToken = $resetPasswordToken;
 
         return $this;
     }

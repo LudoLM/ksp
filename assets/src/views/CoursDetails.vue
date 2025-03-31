@@ -33,8 +33,6 @@ const formattedHour = computed(() => {
     const minutes = String(dateStart.value.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
 });
-const alertStore = inject('alertStore');
-
 
 const redirectToLogin = () => {
     router.push({ name: 'Login' });
