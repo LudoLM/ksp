@@ -3,11 +3,13 @@
 namespace App\Controller\Api;
 
 use App\DTO\CreateUserDTO;
+use App\DTO\EditUserDTO;
 use App\DTO\ResetPasswordDTO;
 use App\Entity\User;
 use App\Serializer\CreateUserDTOToUserDenormalizer;
 use App\Serializer\ResetPasswordDTOToUserDenormalizer;
 use App\Service\SendingEmail\ForgotPasswordService;
+use App\Service\UserControllerService\CreateOrEditUserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,6 +31,7 @@ class AuthController extends AbstractController
         private readonly TokenStorageInterface $tokenStorage,
         private readonly CreateUserDTOToUserDenormalizer $createUserDTOToUserDenormalizer,
         private readonly ForgotPasswordService $forgotPasswordService,
+        private readonly CreateOrEditUserService $createOrEditUserService,
     ) {
     }
 
@@ -64,6 +67,26 @@ class AuthController extends AbstractController
             'message' => 'Utilisateur créé',
             'token' => $token,
         ]);
+    }
+
+    #[Route(path: 'editUser', name: 'app_edit_profile', methods: ['POST'])]
+    public function editProfile(
+        #[MapRequestPayload]
+        EditUserDTO $editUserDTO,
+    ): JsonResponse {
+        $user = $this->getUser();
+        try {
+            $this->createOrEditUserService->createOrEditUser($user, $editUserDTO);
+
+            return new JsonResponse([
+                'message' => 'Utilisateur modifié',
+            ]);
+        } catch (\Exception $exception) {
+            return new JsonResponse([
+                'type' => 'error',
+                'message' => $exception->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     #[Route(path: 'forgot-password', name: 'app_forget_password')]

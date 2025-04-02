@@ -21,14 +21,15 @@ const logout = () => {+
 };
 
 onMounted(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        const payload = token.split('.')[1];
-        const decoded = atob(payload);
-        const data = JSON.parse(decoded);
-        userStore.setUserEmail(data.username);
-        userStore.setUserId(data.id);
-        userStore.setUserPrenom(data.prenom);
+    if (userStore.userPrenom !== null) {
+        const token = localStorage.getItem('token');
+        if (token) {
+            const payload = token.split('.')[1];
+            const decoded = atob(payload);
+            const data = JSON.parse(decoded);
+            userStore.setUserEmail(data.username);
+            userStore.setUserId(data.id);
+        }
     }
 });
 

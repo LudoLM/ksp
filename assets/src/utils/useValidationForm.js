@@ -1,4 +1,6 @@
 
+
+//Recupère les messages d'erreurs de validation
 export async function useValidationForm(message, errors) {
 
     if (message.detail) {

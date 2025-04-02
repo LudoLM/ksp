@@ -165,6 +165,7 @@ const routes = computed(() =>
                 "AdminProfile",
                 "AdminCoursDetails",
                 "ResetPassword",
+                "EditProfile"
             ].includes(r.name)
     )
 );

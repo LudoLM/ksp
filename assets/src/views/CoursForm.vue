@@ -157,7 +157,9 @@ const formData = ref({
                     <CustomValidationButton
                         :title="origin.id ? 'Modifier' : 'Ajouter'"
                         class="w-full"
-                    />
+                    >
+                        Valider
+                    </CustomValidationButton>
                 </div>
             </form>
         </div>
