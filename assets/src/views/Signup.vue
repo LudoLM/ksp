@@ -38,10 +38,10 @@
                         <h1
                             class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md"
                         >
-                            Créer un compte
+                            {{ isEditProfileRoute ? "Modifier votre compte" : "Créer un compte" }}
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Renseignez les champs suivants
+                            {{ isEditProfileRoute ? "Modifier les champs souhaités" : "Renseignez les champs suivants" }}
                         </p>
                     </div>
                     <div>
@@ -69,7 +69,9 @@
                                         isRequired
                                     />
                                 </div>
-                                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                                <div
+                                    v-if="!isEditProfileRoute"
+                                    class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                     <!-- Email -->
                                     <CustomInput
                                         item="Email"
@@ -130,12 +132,13 @@
                                 </div>
                                 <!-- Bouton -->
                                 <CustomValidationButton
-                                    text="Valider"
                                     class="w-full"
-                                />
+                                >
+                                {{ isEditProfileRoute ? "Modifier" : "Valider" }}
+                                </CustomValidationButton>
                             </div>
                         </form>
-                        <div class="mt-5">
+                        <div class="mt-5" v-if="isEditProfileRoute">
                             <p
                                 class="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start"
                             >
@@ -158,14 +161,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import {computed, onMounted, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import CustomInput from "../components/forms/CustomInput.vue";
 import CustomPassword from "../components/forms/CustomPassword.vue";
 import {useValidationForm} from "../utils/useValidationForm";
 import {useUserStore} from "../store/user";
 import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
 import SideBannerAuth from "../components/SideBannerAuth.vue";
+import {apiFetch} from "../utils/useFetchInterceptor";
 
 const firstName = ref('')
 const lastName = ref('')
@@ -186,52 +190,106 @@ const errors = ref({
     phone: null,
 });
 const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
+const isEditProfileRoute =  ref(route.name === 'EditProfile');
+
+
+
+const getUser = async () => {
+    const response = await apiFetch("/api/user", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    return await response.json();
+
+};
+
 
 const handleRedirection = () => {
     router.go(-1);
 }
 
 const handleSubmit = async () => {
+    const url = ref('');
+    const data = ref({});
+    if (isEditProfileRoute.value) {
+        url.value = `/api/editUser`;
+        data.value = {
+            prenom: firstName.value,
+            nom: lastName.value,
+            adresse: adress.value,
+            cp: cp.value,
+            commune: city.value,
+            telephone: phone.value,
+        }
+    } else {
+        url.value = `/api/register`;
+        data.value = {
+            prenom: firstName.value,
+            nom: lastName.value,
+            email: email.value,
+            password: password.value,
+            adresse: adress.value,
+            cp: cp.value,
+            commune: city.value,
+            telephone: phone.value,
+        }
+    }
 
     try {
-        const response = await fetch("/api/register", {
+        const fetchMethod = isEditProfileRoute.value ? apiFetch : fetch;
+        const response = await fetchMethod(url.value, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({
-                prenom: firstName.value,
-                nom: lastName.value,
-                email: email.value,
-                password: password.value,
-                adresse: adress.value,
-                cp: cp.value,
-                commune: city.value,
-                telephone: phone.value,
-            }),
+            body: JSON.stringify(data.value),
         });
-        const data = await response.json();
+        const result = await response.json();
 
         if (!response.ok) {
-            await useValidationForm(data, errors);
+            await useValidationForm(result, errors);
         }
         else{
-            localStorage.setItem('token', data.token);
-            const payload = data.token.split('.')[1];
-            const decoded = atob(payload);
-            const dataToken = JSON.parse(decoded);
-            userStore.setUserEmail(dataToken.username);
-            userStore.setUserId(dataToken.id);
-            userStore.setUserPrenom(dataToken.prenom);
-            await router.push('/');
+            if (!isEditProfileRoute.value) {
+                localStorage.setItem('token', result.token);
+                const payload = result.token.split('.')[1];
+                const decoded = atob(payload);
+                const dataToken = JSON.parse(decoded);
+                userStore.setUserEmail(dataToken.username);
+                userStore.setUserId(dataToken.id);
+                userStore.setUserPrenom(dataToken.prenom);
+            }
+            else{
+                userStore.setUserPrenom(firstName.value);
+            }
+
+            await router.push(!isEditProfileRoute.value ? "/" : "/profile");
         }
 
     } catch (err) {
         console.error(err);
     }
 }
+
+
+onMounted(async () => {
+    if (isEditProfileRoute.value) {
+        const userData = await getUser();
+        firstName.value = userData.prenom || "";
+        lastName.value = userData.nom || "";
+        adress.value = userData.adresse || "";
+        cp.value = userData.codePostal || "";
+        city.value = userData.commune || "";
+        phone.value = userData.telephone || "";
+    }
+});
+
 </script>
 
 <style scoped>

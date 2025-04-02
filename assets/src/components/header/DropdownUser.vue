@@ -1,6 +1,6 @@
 <script setup>
 import { onClickOutside } from '@vueuse/core'
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useUserStore} from "../../store/user";
 import useGetElementsToken from "../../utils/useGetElementsToken";
 import { useRouter, useRoute } from 'vue-router';
@@ -21,14 +21,15 @@ const logout = () => {+
 };
 
 onMounted(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        const payload = token.split('.')[1];
-        const decoded = atob(payload);
-        const data = JSON.parse(decoded);
-        userStore.setUserEmail(data.username);
-        userStore.setUserId(data.id);
-        userStore.setUserPrenom(data.prenom);
+    if (userStore.userPrenom !== null) {
+        const token = localStorage.getItem('token');
+        if (token) {
+            const payload = token.split('.')[1];
+            const decoded = atob(payload);
+            const data = JSON.parse(decoded);
+            userStore.setUserEmail(data.username);
+            userStore.setUserId(data.id);
+        }
     }
 });
 
