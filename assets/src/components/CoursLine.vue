@@ -118,7 +118,7 @@ const handleAddExtraResponse = ({ type, message, statusChange }) => {
         display: grid;
         grid-template-areas:
             "libelle status"
-                "date users"
+            "date users"
             "actions actions";
         grid-template-columns: 1fr auto;
         gap: 1rem;
