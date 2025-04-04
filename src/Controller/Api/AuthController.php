@@ -29,7 +29,6 @@ class AuthController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly JWTTokenManagerInterface $JWTManager,
         private readonly TokenStorageInterface $tokenStorage,
-        private readonly CreateUserDTOToUserDenormalizer $createUserDTOToUserDenormalizer,
         private readonly ForgotPasswordService $forgotPasswordService,
         private readonly CreateOrEditUserService $createOrEditUserService,
     ) {
@@ -39,34 +38,20 @@ class AuthController extends AbstractController
     public function register(
         #[MapRequestPayload]
         CreateUserDTO $createUserDTO,
-        ValidatorInterface $validator,
     ): JsonResponse {
-        $user = $this->createUserDTOToUserDenormalizer->denormalize($createUserDTO, User::class);
-        // Valider l'entité user
-        $violations = $validator->validate($user);
+        try {
+            $token = $this->createOrEditUserService->createOrEditUser(null, $createUserDTO);
 
-        if (count($violations) > 0) {
-            $errors = [];
-            foreach ($violations as $violation) {
-                $errors[] = [
-                    $violation->getPropertyPath() => $violation->getMessage(),
-                ];
-            }
-
-            return new JsonResponse(['errors' => $errors], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse([
+                'message' => 'Utilisateur créé',
+                'token' => $token,
+            ]);
+        } catch (\Exception $exception) {
+            return new JsonResponse([
+                'type' => 'error',
+                'message' => $exception->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
         }
-
-        $this->em->persist($user);
-        $this->em->flush();
-
-        $token = $this->JWTManager->create($user);
-        $authenticatedToken = new UsernamePasswordToken($user, 'main', $user->getRoles());
-        $this->tokenStorage->setToken($authenticatedToken);
-
-        return new JsonResponse([
-            'message' => 'Utilisateur créé',
-            'token' => $token,
-        ]);
     }
 
     #[Route(path: 'editUser', name: 'app_edit_profile', methods: ['POST'])]
@@ -76,11 +61,13 @@ class AuthController extends AbstractController
     ): JsonResponse {
         $user = $this->getUser();
         try {
-            $this->createOrEditUserService->createOrEditUser($user, $editUserDTO);
+            $token = $this->createOrEditUserService->createOrEditUser($user, $editUserDTO);
 
             return new JsonResponse([
                 'message' => 'Utilisateur modifié',
+                'token' => $token,
             ]);
+
         } catch (\Exception $exception) {
             return new JsonResponse([
                 'type' => 'error',

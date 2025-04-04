@@ -256,19 +256,13 @@ const handleSubmit = async () => {
             await useValidationForm(result, errors);
         }
         else{
-            if (!isEditProfileRoute.value) {
-                localStorage.setItem('token', result.token);
-                const payload = result.token.split('.')[1];
-                const decoded = atob(payload);
-                const dataToken = JSON.parse(decoded);
-                userStore.setUserEmail(dataToken.username);
-                userStore.setUserId(dataToken.id);
-                userStore.setUserPrenom(dataToken.prenom);
-            }
-            else{
-                userStore.setUserPrenom(firstName.value);
-            }
-
+            localStorage.setItem('token', result.token);
+            const payload = result.token.split('.')[1];
+            const decoded = atob(payload);
+            const dataToken = JSON.parse(decoded);
+            userStore.setUserEmail(dataToken.username);
+            userStore.setUserId(dataToken.id);
+            userStore.setUserPrenom(dataToken.prenom);
             await router.push(!isEditProfileRoute.value ? "/" : "/profile");
         }
 
