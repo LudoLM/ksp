@@ -15,21 +15,21 @@ const route = useRoute();
 const role = computed(() => useGetElementsToken().roles[0].split("_")[1].toLowerCase());
 const userStore = useUserStore();
 
-const logout = () => {+
+const logout = () => {
   userStore.logout();
   router.push({name: 'Accueil'});
 };
 
 onMounted(() => {
-    if (userStore.userPrenom !== null) {
-        const token = localStorage.getItem('token');
-        if (token) {
-            const payload = token.split('.')[1];
-            const decoded = atob(payload);
-            const data = JSON.parse(decoded);
-            userStore.setUserEmail(data.username);
-            userStore.setUserId(data.id);
-        }
+    const token = localStorage.getItem('token');
+    if (token) {
+        const payload = token.split('.')[1];
+        const decoded = atob(payload);
+        const data = JSON.parse(decoded);
+        userStore.setUserEmail(data.username);
+        userStore.setUserId(data.id);
+        userStore.setUserPrenom(data.prenom);
+
     }
 });
 
@@ -49,12 +49,11 @@ onClickOutside(target, () => {
                         class="flex items-center gap-4"
                         @click.prevent="dropdownOpen = !dropdownOpen"
                     >
-                    <span class="hidden text-right lg:block">
-                        <span class="block text-sm font-medium text-black dark:text-white">{{ userPrenom }}</span>
-                    </span>
-
                     <span class="h-12 w-12 rounded-full bg-slate-200 flex justify-center items-center text-slate-400 text-lg uppercase font-medium">
                         {{ userPrenom.charAt(0) }}
+                    </span>
+                    <span class="hidden text-right lg:block">
+                        <span class="block text-sm font-medium text-black dark:text-white">{{ userPrenom }}</span>
                     </span>
 
                         <svg
