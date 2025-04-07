@@ -2,6 +2,7 @@
 
 import DownloadInvoice from "../../icons/userActions/DownloadInvoice.vue";
 import {apiFetch} from "../utils/useFetchInterceptor";
+import Tooltip from "./Tooltip.vue";
 
 const props = defineProps(
     {
@@ -74,7 +75,12 @@ const handleInvoicePDF = async (paiementId) => {
                     class="icons"
                     @click="handleInvoicePDF(paiement.id)"
                 >
-                    <DownloadInvoice size="18"/>
+                    <Tooltip
+                        :title="'Télécharger la facture.'"
+                        :tooltipPos="'left'"
+                    >
+                        <DownloadInvoice size="18"/>
+                    </Tooltip>
                 </button>
             </p>
         </div>

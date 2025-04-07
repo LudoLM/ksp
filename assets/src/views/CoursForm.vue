@@ -135,7 +135,7 @@ const formData = ref({
             />
 
             <!-- Buttons -->
-            <div class="flex justify-end mt-4">
+            <div class="flex justify-end mt-4 gap-2">
                 <router-link :to="{name: 'CreateTypeCours'}">
                     <CustomButton>Ajouter un type de Cours</CustomButton>
                 </router-link>

@@ -8,6 +8,7 @@ import LaunchCours from "../../../icons/adminActions/LaunchCours.vue";
 import InfosCours from "../../../icons/adminActions/InfosCours.vue";
 import AddExtraUser from "../../../icons/adminActions/AddExtraUser.vue";
 import EditCours from "../../../icons/adminActions/EditCours.vue";
+import Tooltip from "../Tooltip.vue";
 
 defineProps({
   statusCours:{
@@ -32,39 +33,53 @@ const emit = defineEmits([
 
 </script>
 <template>
-<!--    Ancienne version Cours Card Presentation-->
-<!--  <CustomButton v-if="props.statusCours.libelle === 'En création'" @click="emit('openCreation')">
-    Ouvrir
-  </CustomButton>
-  <CustomButton v-if="props.statusCours.libelle === 'En création'" @click="emit('updateCreation')">
-    Modifier
-  </CustomButton>
-  <CustomButton v-if="props.statusCours.libelle === 'En création'" @click="emit('deleteCreation')" :color="'red'">
-    Supprimer
-  </CustomButton>
-  <CustomButton v-if="(props.statusCours.libelle === 'Ouvert' || props.statusCours.libelle === 'Complet')" @click="emit('cancelCours')">
-    Annuler
-  </CustomButton>-->
 
-
-    <button class="hover:text-primary">
-        <router-link :to="{ name: 'AdminCoursDetails', params: { id: coursId }}">
-            <InfosCours size="18"/>
-        </router-link>
-    </button>
-    <button class="hover:text-primary" v-if="statusCours.libelle === 'En création'" @click="emit('deleteCreation')">
-        <DeleteCours size="18"/>
-    </button>
-    <button class="hover:text-primary" v-if="statusCours.libelle === 'En création'" @click="emit('updateCreation')">
-        <EditCours size="18"/>
-    </button>
-    <button class="hover:text-primary" v-if="(statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet')" @click="emit('cancelCours')">
-        <CancelCours size="18"/>
-    </button>
-    <button class="hover:text-primary" v-if="statusCours.libelle === 'En création'" @click="emit('openCreation')">
-        <LaunchCours size="18"/>
-    </button>
-
+    <Tooltip
+        :title="'Voir les détails du cours.'"
+    >
+        <button class="hover:text-primary">
+            <router-link :to="{ name: 'AdminCoursDetails', params: { id: coursId }}">
+                <InfosCours
+                    class="hover-text"
+                    data-text="Why did you hovered?"
+                    size="18"/>
+            </router-link>
+        </button>
+    </Tooltip>
+    <Tooltip
+        :title="'Supprimer le cours.'"
+        v-if="statusCours.libelle === 'En création'" @click="emit('deleteCreation')"
+    >
+        <button class="hover:text-primary">
+            <DeleteCours size="18"/>
+        </button>
+    </Tooltip>
+    <Tooltip
+        title="Modifier le cours."
+        v-if="statusCours.libelle === 'En création'" @click="emit('updateCreation')"
+    >
+        <button class="hover:text-primary" >
+            <EditCours size="18"/>
+        </button>
+    </Tooltip>
+    <Tooltip
+        :title="'Annuler le cours.'"
+        v-if="(statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet')"
+        @click="emit('cancelCours')"
+    >
+        <button class="hover:text-primary">
+            <CancelCours size="18"/>
+        </button>
+    </Tooltip>
+    <Tooltip
+        :title="'Ouvrir le cours.'"
+        v-if="statusCours.libelle === 'En création'"
+        @click="emit('openCreation')"
+    >
+        <button class="hover:text-primary">
+            <LaunchCours size="18"/>
+        </button>
+    </Tooltip>
   <ModalAddExtra
       v-if="statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet'"
       v-model:isOpen="addExtraDialog"
@@ -73,9 +88,13 @@ const emit = defineEmits([
       :cours="coursId"
       @subscriptionResponse="(data) => emit('handleAddExtraResponse', data)"
   >
-      <button class="hover:text-primary flex items-center justify-center">
-          <AddExtraUser size="18"/>
-      </button>
+      <Tooltip
+            :title="'Ajouter un extra.'"
+      >
+          <button class="hover:text-primary flex items-center justify-center">
+              <AddExtraUser size="18"/>
+          </button>
+      </Tooltip>
   </ModalAddExtra>
 </template>
 

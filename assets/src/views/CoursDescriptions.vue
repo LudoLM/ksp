@@ -15,7 +15,9 @@
                         <img class="imageMobile w-1/3" :src="require(`../../images/uploads/${cours.thumbnail}`)" alt="">
                         <p class="flex items-center grow text-justify">{{ cours.descriptif }}</p>
                         <div class="flex justify-end">
-                            <CustomButton class="flex justify-end" @click="handleRedirection(cours)">Prochains cours</CustomButton>
+                            <CustomButton
+                                class="flex justify-end mt-10"
+                                @click="handleRedirection(cours)">Prochains cours</CustomButton>
                         </div>
                     </div>
                 </div>
