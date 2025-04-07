@@ -1,7 +1,7 @@
 <script setup>
 import CustomButton from "../components/forms/CustomButton.vue";
 import {useGetCours, useGetTypesCours} from "../utils/useActionCours";
-import {inject, onMounted, ref} from "vue";
+import {onMounted, ref} from "vue";
 import {useDateFormat} from "@vueuse/core";
 import CoursCardCalendar from "../components/CoursCardCalendar.vue";
 import TypeCoursFilter from "../components/filtersCours/TypeCoursFilter.vue";
@@ -49,7 +49,6 @@ const infos = ref([]);
 const weekInfos = ref([[], [], [], [], [], [], []]); // Initialisation globale)
 const selectedTypeCours = ref(null);
 const statusCours = ref(null);
-const alertStore = inject('alertStore');
 
 
 const getCoursPerWeek = async () => {
@@ -115,7 +114,10 @@ onMounted(async () => {
             <p>{{ weekString }}</p>
         </div>
         <div class="buttons flex justify-center gap-1">
-            <CustomButton  :class="new Date(date) > new Date(currentDate) ? '' : 'invisible'" @click="handleGetCoursPerWeek('prev', 0)">
+            <CustomButton
+                :disabled="!(new Date(date) > new Date(currentDate))"
+                :color="new Date(date) > new Date(currentDate) ? 'purple' : 'gray'"
+                @click="handleGetCoursPerWeek('prev', 0)">
                 Semaine Précédente
             </CustomButton>
             <CustomButton @click="handleGetCoursPerWeek('next', 0)">
@@ -135,6 +137,11 @@ onMounted(async () => {
                 v-html="formatDay(day)"
                 :class="[daySelected === index ? 'days dayActif' : 'days', weekInfos[index].length > 0 ? 'has-cours' : '']">
             </div>
+        </div>
+        <div
+            v-if="weekInfos.every((info) => info.length === 0)"
+            class="col-span-6 mx-auto text-center p-4 m-20">
+            Aucun cours de la semaine
         </div>
         <!-- Format desktop-->
         <div v-for="(weekInfo, index) in weekInfos" :key="index" class="desktop">
@@ -168,6 +175,10 @@ onMounted(async () => {
 
 .mobile {
     display: none;
+}
+
+.desktop{
+    min-height: 5vh;
 }
 
 .days{
@@ -247,6 +258,14 @@ onMounted(async () => {
         .dayBefore {
             transform: rotate(180deg);
         }
+
+    }
+    .days{
+        opacity: .4;
+    }
+
+    .dayActif{
+        opacity: 1;
     }
 }
 </style>

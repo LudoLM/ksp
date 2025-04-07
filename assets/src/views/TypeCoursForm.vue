@@ -101,7 +101,6 @@ const handleSubmit = async (event) => {
         if (formData.value.image) {
             data.append("image", formData.value.image);
         }
-
         const url = origin.value === "EditTypeCours" ? urlEdition + typeCoursId.value : urlCreation;
 
         const response = await apiFetch(url, {
@@ -130,9 +129,9 @@ const handleSubmit = async (event) => {
         <div class="w-full max-w-2xl">
             <!-- Banner -->
             <Banner
-                :title="(origin.id ? 'Modifier' : 'Ajouter') + ' un type de cours'"
+                :title="(origin === 'EditTypeCours' ? 'Modifier' : 'Ajouter') + ' un type de cours'"
                 :textColor="'rgba(30, 27, 75, .9)'"
-                backgroundHeight="20vh"
+                backgroundHeight="40vh"
                 :hasButton="false"
             />
 

@@ -302,17 +302,23 @@ a.router-link-exact-active {
         color: #4f2794;
     }
 
-    &::after:not(.relative) {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: #4f2794;
-        transition: width 0.3s ease-in-out;
-    }
+    @media (min-width: 900px) {
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #4f2794;
+            transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
+        }
 
+        &:hover::after {
+            left: 0;
+            width: 100%;
+        }
+    }
 }
 
 .fixed {

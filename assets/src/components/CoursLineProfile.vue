@@ -3,6 +3,7 @@
 import {useDateFormat} from "@vueuse/core";
 import StatusCoursTag from "./StatusCoursTag.vue";
 import Unsubscribe from "../../icons/userActions/Unsubscribe.vue";
+import Tooltip from "./Tooltip.vue";
 
 const props = defineProps(
     {
@@ -45,7 +46,12 @@ const handleUnsubscription = () => {
                     v-if="item.statusCours.id === 1 || item.statusCours.id === 2"
                     @click="handleUnsubscription"
                     class="hover:text-primary flex items-center justify-center">
-                    <Unsubscribe size="18"/>
+                    <Tooltip
+                        :title="'Se désinscrire du cours.'"
+                        :tooltipPos="'left'"
+                    >
+                        <Unsubscribe size="18"/>
+                    </Tooltip>
                 </button>
             </div>
         </div>
