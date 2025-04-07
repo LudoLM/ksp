@@ -4,32 +4,65 @@ import {computed, onMounted, ref} from 'vue'
 import {useUserStore} from "../../store/user";
 import useGetElementsToken from "../../utils/useGetElementsToken";
 import { useRouter, useRoute } from 'vue-router';
-import SwitchToggle from "../SwitchToggle.vue";
+import TypeMode from "../../../icons/adminActions/TypeMode.vue";
+import LogoutIcon from "../../../icons/userActions/LogoutIcon.vue";
+import UserIcon from "../../../icons/userActions/UserIcon.vue";
+import {apiFetch} from "../../utils/useFetchInterceptor";
+import {storeToRefs} from "pinia";
 
 const target = ref(null)
 const dropdownOpen = ref(false)
-const userId = computed(() => userStore.userId);
-const userPrenom = computed(() => userStore.userPrenom);
+const userStore = useUserStore();
+const { userId, userPrenom, userNom, userEmail, userNombreCours } = storeToRefs(userStore);
+
+
 const router = useRouter();
 const route = useRoute();
 const role = computed(() => useGetElementsToken().roles[0].split("_")[1].toLowerCase());
-const userStore = useUserStore();
+
+// Computed pour savoir si on est en mode admin
+const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+
+// Destination dynamique
+const modeLink = computed(() => {
+    return isAdminRoute.value
+        ? { name: 'Accueil' }
+        : { name: 'Statistiques' }
+})
+
+// Label du bouton
+const modeLabel = computed(() => {
+    return isAdminRoute.value
+        ? 'Mode Utilisateur'
+        : 'Mode Admin'
+})
+
+const { isScrolled } = defineProps({
+    isScrolled: {
+        type: Boolean,
+        default: false
+    }
+});
 
 const logout = () => {
-  userStore.logout();
-  router.push({name: 'Accueil'});
+    userStore.logout();
+    router.push({name: 'Accueil'});
 };
 
-onMounted(() => {
+onMounted(async () => {
     const token = localStorage.getItem('token');
-    if (token) {
-        const payload = token.split('.')[1];
-        const decoded = atob(payload);
-        const data = JSON.parse(decoded);
-        userStore.setUserEmail(data.username);
-        userStore.setUserId(data.id);
-        userStore.setUserPrenom(data.prenom);
+    if (token){
+        const result = await apiFetch("/api/user", {
+            method: "GET",
+        });
 
+        const user = await result.json();
+        // Mettre à jour le store avec l'email de l'utilisateur et l'état d'authentification
+        userStore.setUserEmail(user.email);
+        userStore.setUserId(user.id);
+        userStore.setUserNom(user.nom);
+        userStore.setUserNombreCours(user.nombreCours)
+        userStore.setUserPrenom(user.prenom);
     }
 });
 
@@ -41,7 +74,10 @@ onClickOutside(target, () => {
 
 
 <template>
-    <div id="header_container">
+    <div
+        id="header_container"
+        :class="{ isScrolled }"
+    >
         <div id="compte">
             <div v-if="userId" class="profil flex gap-6">
                 <div class="relative" ref="target">
@@ -49,10 +85,17 @@ onClickOutside(target, () => {
                         class="flex items-center gap-4"
                         @click.prevent="dropdownOpen = !dropdownOpen"
                     >
-                    <span class="h-12 w-12 rounded-full bg-slate-200 flex justify-center items-center text-slate-400 text-lg uppercase font-medium">
+                    <span
+                        v-if="userId"
+                        class="pastille h-12 w-12 rounded-full flex justify-center items-center text-lg uppercase font-medium">
                         {{ userPrenom.charAt(0) }}
+                        <span class="quantityCours">
+                            {{ userNombreCours }}
+                        </span>
                     </span>
-                    <span class="hidden text-right lg:block">
+                        <span
+                            v-if="userPrenom"
+                            class="hidden text-right lg:block">
                         <span class="block text-sm font-medium text-black dark:text-white">{{ userPrenom }}</span>
                     </span>
 
@@ -74,75 +117,88 @@ onClickOutside(target, () => {
                         </svg>
                     </a>
 
+                    <transition name="dropdown-fade">
                     <!-- Dropdown Start -->
                     <div
                         v-show="dropdownOpen"
-                        class="absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
+                        :class="{ isScrolled }"
+                        class="dropdown absolute right-0 flex w-62.5 flex-col border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark"
                     >
-                        <ul class="flex flex-col gap-8 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
-                            <li v-show="role === 'admin'">
-                                <switch-toggle/>
+                        <ul class="flex flex-col gap-6 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
+                            <li
+                                v-if="userId"
+                                class="mb-4"
+                            >
+                                <div class="text-sm font-bold text-black dark:text-white">
+                                    {{ userPrenom + " " + userNom }}
+                                </div>
+                                <div class="text-xs font-medium text-black dark:text-white">
+                                    {{ userEmail }}
+                                </div>
+                                <div class="text-sm font-medium text-black dark:text-white mt-4 text-right">
+                                    <span class="font-bold text-lg">{{ userNombreCours }}</span> crédit{{ userNombreCours > 1 ? 's' : '' }}
+                                </div>
+                            </li>
+                            <li>
+                                <router-link
+                                    v-if="role === 'admin'"
+                                    :to="modeLink"
+                                    class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                                >
+                                    <span
+                                        class="flex items-center gap-4">
+                                        <TypeMode
+                                            class="icon"
+                                            size="18"
+                                        />
+                                        {{ modeLabel }}
+                                    </span>
+                                </router-link>
                             </li>
                             <li>
                                 <router-link
                                     :to='{name: route.path.startsWith("/admin") ? "AdminProfile" : "Profile"}'
-                                    class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+                                    class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
                                 >
-                                    <svg
-                                        class="fill-current"
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 22 22"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            d="M11 9.62499C8.42188 9.62499 6.35938 7.59687 6.35938 5.12187C6.35938 2.64687 8.42188 0.618744 11 0.618744C13.5781 0.618744 15.6406 2.64687 15.6406 5.12187C15.6406 7.59687 13.5781 9.62499 11 9.62499ZM11 2.16562C9.28125 2.16562 7.90625 3.50624 7.90625 5.12187C7.90625 6.73749 9.28125 8.07812 11 8.07812C12.7188 8.07812 14.0938 6.73749 14.0938 5.12187C14.0938 3.50624 12.7188 2.16562 11 2.16562Z"
-                                            fill=""
+                                    <span class="flex items-center gap-4">
+                                        <UserIcon
+                                            class="icon"
+                                            size="18"
                                         />
-                                        <path
-                                            d="M17.7719 21.4156H4.2281C3.5406 21.4156 2.9906 20.8656 2.9906 20.1781V17.0844C2.9906 13.7156 5.7406 10.9656 9.10935 10.9656H12.925C16.2937 10.9656 19.0437 13.7156 19.0437 17.0844V20.1781C19.0094 20.8312 18.4594 21.4156 17.7719 21.4156ZM4.53748 19.8687H17.4969V17.0844C17.4969 14.575 15.4344 12.5125 12.925 12.5125H9.07498C6.5656 12.5125 4.5031 14.575 4.5031 17.0844V19.8687H4.53748Z"
-                                            fill=""
-                                        />
-                                    </svg>
-                                    Mon profil
+                                        Mon profil
+                                    </span>
+                                </router-link>
+                            </li>
+                            <li>
+                                <router-link
+                                    :to="{ name: 'Accueil'}"
+                                    class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                                    @click="logout"
+                                >
+                           <span
+                               class="flex items-center gap-4"
+                           >
+                               <LogoutIcon
+                                   class="icon"
+                                   size="18"
+                               />
+                                Déconnexion
+                           </span>
                                 </router-link>
                             </li>
                         </ul>
-                        <button
-                            class="flex items-center gap-3.5 py-4 px-6 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
-                            @click="logout"
-                        >
-                            <svg
-                                class="fill-current"
-                                width="22"
-                                height="22"
-                                viewBox="0 0 22 22"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    d="M15.5375 0.618744H11.6531C10.7594 0.618744 10.0031 1.37499 10.0031 2.26874V4.64062C10.0031 5.05312 10.3469 5.39687 10.7594 5.39687C11.1719 5.39687 11.55 5.05312 11.55 4.64062V2.23437C11.55 2.16562 11.5844 2.13124 11.6531 2.13124H15.5375C16.3625 2.13124 17.0156 2.78437 17.0156 3.60937V18.3562C17.0156 19.1812 16.3625 19.8344 15.5375 19.8344H11.6531C11.5844 19.8344 11.55 19.8 11.55 19.7312V17.3594C11.55 16.9469 11.2062 16.6031 10.7594 16.6031C10.3125 16.6031 10.0031 16.9469 10.0031 17.3594V19.7312C10.0031 20.625 10.7594 21.3812 11.6531 21.3812H15.5375C17.2219 21.3812 18.5625 20.0062 18.5625 18.3562V3.64374C18.5625 1.95937 17.1875 0.618744 15.5375 0.618744Z"
-                                    fill=""
-                                />
-                                <path
-                                    d="M6.05001 11.7563H12.2031C12.6156 11.7563 12.9594 11.4125 12.9594 11C12.9594 10.5875 12.6156 10.2438 12.2031 10.2438H6.08439L8.21564 8.07813C8.52501 7.76875 8.52501 7.2875 8.21564 6.97812C7.90626 6.66875 7.42501 6.66875 7.11564 6.97812L3.67814 10.4844C3.36876 10.7938 3.36876 11.275 3.67814 11.5844L7.11564 15.0906C7.25314 15.2281 7.45939 15.3312 7.66564 15.3312C7.87189 15.3312 8.04376 15.2625 8.21564 15.125C8.52501 14.8156 8.52501 14.3344 8.21564 14.025L6.05001 11.7563Z"
-                                    fill=""
-                                />
-                            </svg>
-                            Déconnexion
-                        </button>
                     </div>
+                    </transition>
                 </div>
                 <!-- Dropdown End -->
             </div>
             <div v-else>
-              <div class="loginButtons">
-                <router-link :to='{name: "Register"}' class="createCount">Créer un compte</router-link>
-                <router-link :to='{name: "Login"}' class="identifier">
-                    <img src="" alt="">
-                    <span class="identifier_text">Se connecter</span></router-link>
-              </div>
+                <div class="loginButtons">
+                    <router-link :to='{name: "Register"}' class="createCount">Créer un compte</router-link>
+                    <router-link :to='{name: "Login"}' class="identifier">
+                        <img src="" alt="">
+                        <span class="identifier_text">Se connecter</span></router-link>
+                </div>
             </div>
         </div>
     </div>
@@ -151,29 +207,60 @@ onClickOutside(target, () => {
 <style scoped lang="scss">
 #header_container {
 
-    .infos {
-        display: flex;
-        flex-direction: column;
-        font-weight: 700;
+    color: #2e2e2e;
+    font-size: clamp(0.8rem, 1.4vw, 1.2rem);
 
-        #compte {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
+    .dropdown{
+        top: 87px;
+        border-radius: 3px;
+        transition: top 0.3s ease-in-out;
+        background: rgba(255, 255, 255, 0.95);
 
-            span {
-                margin-right: 10px;
-            }
+        .text-sm{
+            font-size: clamp(0.8rem, 1vw, 1rem);
         }
     }
 
+    .pastille{
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        color: rgba(0, 0, 0, 0.4);
+        position: relative;
+
+        .quantityCours{
+            position: absolute;
+            bottom: -3px;
+            right: -3px;
+            z-index: 10;
+            background: radial-gradient(#551360, #472371);
+            border-radius: 50%;
+            color: #fff;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+        }
+    }
+
+    span{
+        &:hover .icon{
+            color: #000;
+            border: 1px solid #000;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out, border 0.3s ease-in-out;
+        }
+    }
+
+    .isScrolled{
+        top: 60px;
+    }
 
     .profil {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding-right: 8px;
-        color: #5e2ca5;
     }
 
     .loginButtons{
@@ -218,7 +305,7 @@ onClickOutside(target, () => {
         border-radius: 5px;
         color: #dfdfdf;
         font-weight: 400;
-        font-size: .8rem;
+        font-size: clamp(0.8rem, 1.4vw, 1.2rem);
     }
 
     .user{
@@ -228,6 +315,33 @@ onClickOutside(target, () => {
             fill: #5e2ca5;
         }
     }
+
+
+    .icon{
+        box-sizing: border-box;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        color: rgba(0, 0, 0, 0.4);
+        border-radius: 50%;
+        padding: 10px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .dropdown-fade-enter-active,
+    .dropdown-fade-leave-active {
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .dropdown-fade-enter-from,
+    .dropdown-fade-leave-to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    .dropdown-fade-enter-to,
+    .dropdown-fade-leave-from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
 
     @media (min-width: 900px) {
         .createCount {

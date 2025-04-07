@@ -6,8 +6,9 @@ export const useUserStore = defineStore('user', {
     state: () => ({
         userEmail: null,
         userId: null,
+        userNom: null,
         userPrenom: null,
-        userJWTexp: null,
+        userNombreCours: 0,
     }),
     actions: {
         setUserEmail(email) {
@@ -18,26 +19,32 @@ export const useUserStore = defineStore('user', {
             this.userId = id;
         },
 
+        setUserNom(nom) {
+            this.userNom = nom;
+        },
+
         setUserPrenom(prenom) {
             this.userPrenom = prenom;
         },
 
-        setUserJWTExp(exp) {
-            this.userJWTexp = exp;
+        setUserNombreCours(nombre) {
+            this.userNombreCours = nombre;
         },
 
         logout() {
             this.userEmail = null;
             this.userId = null;
+            this.userNom = null;
             this.userPrenom = null;
-            this.userJWTexp = null;
+            this.userNombreCours = null;
             localStorage.removeItem('token');
         },
     },
     getters: {
         getUserId: (state) => state.userId,
+        getUserNom: (state) => state.userNom,
         getUserPrenom: (state) => state.userPrenom,
+        getUserNombreCours: (state) => state.userNombreCours,
         getUserEmail: (state) => state.userEmail,
-        getUserJWTexp: (state) => state.userJWTexp,
     }
 });

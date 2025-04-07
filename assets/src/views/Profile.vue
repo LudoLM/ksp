@@ -126,7 +126,7 @@
                 </div>
                 <div class="p-5 mb-6 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
                     <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-6">Cours inscrits</h4>
-                    <div class="max-w-full overflow-x-auto mb-20">
+                    <div class="max-w-full overflow-x-auto mb-6">
                         <div class="w-full table-auto">
                             <div class="theadCours bg-gray-800 text-white text-sm font-medium">
                                 <div class="px-4 py-2">Cours</div>
@@ -153,7 +153,7 @@
                 <!-- Recap des achats de l'utilisateur -->
                 <div class="p-5 mb-6 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
                     <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-6">Recap des achats</h4>
-                    <div class="max-w-full overflow-x-auto mb-20">
+                    <div class="max-w-full overflow-x-auto mb-6">
                         <div class="w-full table-auto">
                             <div class="theadInvoices bg-gray-800 text-white text-sm font-medium">
                                 <div class="px-4 py-2">Date</div>
@@ -174,7 +174,8 @@
                             </div>
                         </div>
                     </div>
-                </div></div>
+                </div>
+            </div>
         </div>
 
     </section>
@@ -182,13 +183,14 @@
 
 <script setup>
 import { computed, inject, onMounted, ref } from "vue";
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useUnSubscription } from "../utils/useSubscribing";
 import bannerImage from "../../images/banners/imageBanner17.jpg";
 import Banner from "../components/Banner.vue";
 import CoursLineProfile from "../components/CoursLineProfile.vue";
 import InvoicesLine from "../components/InvoicesLine.vue";
 import BuyCours from "../../icons/userActions/BuyCours.vue";
+import { useUserStore } from "../store/user";
 
 const user = ref({});
 const coursFiltered = computed(() =>
@@ -196,7 +198,7 @@ const coursFiltered = computed(() =>
 );
 const historiquePaiementsQuantity = ref(0);
 const router = useRouter();
-const route = useRoute();
+const userStore = useUserStore();
 const alertStore = inject('alertStore');
 
 const getUser = async () => {
@@ -219,7 +221,9 @@ const handleBuyCours = () => {
 
 
 const redirectToEditProfile = () =>{
-    router.push("EditProfile");
+    router.push({
+        name: 'EditProfile'
+    });
 }
 
 
@@ -231,6 +235,7 @@ const handleUnsubscription = async (coursId) => {
         // Filtrer le cours désinscrit localement
         user.value.usersCours = user.value.usersCours.filter(coursArr => coursArr.cours.id !== coursId);
         user.value.nombreCours += 1;
+        userStore.setUserNombreCours(result.userCoursQuantity);
     } else {
         alertStore.setAlert(result.message, result.type);
     }

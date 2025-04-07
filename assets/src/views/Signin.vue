@@ -108,14 +108,11 @@ import ModalResetPassword from "../components/modal/ModalResetPassword.vue";
 
 
 // Instancier le store en dehors de la fonction handleLogin
-const userStore = useUserStore();
 const username = ref('');
 const password = ref('');
 const error = ref('');
 const router = useRouter();
-const alertStore = inject('alertStore');
 const resetPasswordDialog = ref(false);
-const resetPasswordEmail = ref('');
 
 const handleRedirection = () => {
     router.go(-1);
@@ -140,18 +137,6 @@ const handleSubmit = async () => {
         const data = await response.json();
         // Stocker le token et mettre à jour le store
         localStorage.setItem('token', data.token);
-
-        // Décoder le token pour récupérer l'email de l'utilisateur
-        const payload = data.token.split('.')[1];
-        const decoded = atob(payload);
-        const elements = JSON.parse(decoded);
-
-        // Mettre à jour le store avec l'email de l'utilisateur et l'état d'authentification
-        userStore.setUserEmail(elements.username);
-        userStore.setUserId(elements.id);
-        userStore.setUserPrenom(elements.prenom);
-        userStore.setUserJWTExp(elements.exp);
-
         // Redirige vers la page d'accueil après la connexion réussie
         await router.push('/');
     } catch (err) {

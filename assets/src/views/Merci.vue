@@ -1,10 +1,12 @@
 <script setup>
 
 import {inject, onMounted, ref} from "vue";
-import {VAlert} from "vuetify/components";
+import {useUserStore} from "../store/user";
+import Banner from "../components/Banner.vue";
 
 const nbreCours = ref();
 const alertStore = inject('alertStore');
+const userStore = useUserStore();
 
 const handleStripePayment = async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -22,7 +24,7 @@ const handleStripePayment = async () => {
     const data = await response.json();
 
     if (response.ok) {
-      alertStore.setAlert(data.message, "success");
+        alertStore.setAlert(data.message, "success");
     } else {
       alertStore.setAlert(data.message, "error");
     }
@@ -43,6 +45,7 @@ const getUser = async () => {
 
   const userData = await response.json();
   nbreCours.value = userData.nombreCours;
+  userStore.setUserNombreCours(nbreCours.value);
 };
 
 onMounted(async () => {
@@ -54,9 +57,12 @@ onMounted(async () => {
 
 
 <template>
-  <div>
-    <h1>Merci</h1>
-    <p>Je vous remercie pour l'achat du pack, vous avez maintenant {{ nbreCours }} cours disponible{{ nbreCours > 1 ? "s" : "" }}.</p>
+    <Banner
+        title="Merci pour votre achat"
+        :backgroundColor="'rgba(30, 27, 75, .9)'"
+    />
+  <div class="m-20">
+    <p>Vous avez maintenant {{ nbreCours }} cours disponible{{ nbreCours > 1 ? "s" : "" }}.</p>
   </div>
 </template>
 

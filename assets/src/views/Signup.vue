@@ -138,7 +138,7 @@
                                 </CustomValidationButton>
                             </div>
                         </form>
-                        <div class="mt-5" v-if="isEditProfileRoute">
+                        <div class="mt-5" v-if="!isEditProfileRoute">
                             <p
                                 class="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start"
                             >
@@ -166,7 +166,6 @@ import {useRoute, useRouter} from 'vue-router'
 import CustomInput from "../components/forms/CustomInput.vue";
 import CustomPassword from "../components/forms/CustomPassword.vue";
 import {useValidationForm} from "../utils/useValidationForm";
-import {useUserStore} from "../store/user";
 import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
 import SideBannerAuth from "../components/SideBannerAuth.vue";
 import {apiFetch} from "../utils/useFetchInterceptor";
@@ -191,7 +190,6 @@ const errors = ref({
 });
 const router = useRouter();
 const route = useRoute();
-const userStore = useUserStore();
 const isEditProfileRoute =  ref(route.name === 'EditProfile');
 
 
@@ -257,12 +255,6 @@ const handleSubmit = async () => {
         }
         else{
             localStorage.setItem('token', result.token);
-            const payload = result.token.split('.')[1];
-            const decoded = atob(payload);
-            const dataToken = JSON.parse(decoded);
-            userStore.setUserEmail(dataToken.username);
-            userStore.setUserId(dataToken.id);
-            userStore.setUserPrenom(dataToken.prenom);
             await router.push(!isEditProfileRoute.value ? "/" : "/profile");
         }
 

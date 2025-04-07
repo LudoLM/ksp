@@ -84,7 +84,10 @@ class PackController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            return $this->json(['message' => 'Paiement effectué'], status: 200);
+            return $this->json([
+                'message' => 'Paiement effectué',
+                'userQuantity' => $user->getNombreCours(),
+            ], status: 200);
         }
 
         return $this->json(['message' => 'Paiement non effectué'], 400);

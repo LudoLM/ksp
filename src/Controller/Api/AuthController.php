@@ -6,7 +6,6 @@ use App\DTO\CreateUserDTO;
 use App\DTO\EditUserDTO;
 use App\DTO\ResetPasswordDTO;
 use App\Entity\User;
-use App\Serializer\CreateUserDTOToUserDenormalizer;
 use App\Serializer\ResetPasswordDTOToUserDenormalizer;
 use App\Service\SendingEmail\ForgotPasswordService;
 use App\Service\UserControllerService\CreateOrEditUserService;
@@ -20,7 +19,6 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(path: 'api/', name: 'api_')]
 class AuthController extends AbstractController
@@ -47,9 +45,18 @@ class AuthController extends AbstractController
                 'token' => $token,
             ]);
         } catch (\Exception $exception) {
+            $message = $exception->getMessage();
+            // Tente de décoder le message (au cas où c’est du JSON)
+            $decoded = json_decode($message, true);
+            // Si le message est un JSON valide avec une clé 'errors', renvoie-le directement
+            if (array_key_exists('errors', $decoded)) {
+                return new JsonResponse($decoded, Response::HTTP_BAD_REQUEST);
+            }
+
+            // Sinon, fallback classique
             return new JsonResponse([
                 'type' => 'error',
-                'message' => $exception->getMessage(),
+                'message' => $message,
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -67,7 +74,6 @@ class AuthController extends AbstractController
                 'message' => 'Utilisateur modifié',
                 'token' => $token,
             ]);
-
         } catch (\Exception $exception) {
             return new JsonResponse([
                 'type' => 'error',
