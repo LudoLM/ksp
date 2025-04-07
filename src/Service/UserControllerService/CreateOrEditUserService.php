@@ -21,7 +21,7 @@ readonly class CreateOrEditUserService
     ) {
     }
 
-    public function createOrEditUser($editableUser, $userDTO)
+    public function createOrEditUser($editableUser, $userDTO): string
     {
         if (null !== $editableUser) {
             $user = $this->createUserDTOToUserDenormalizer->denormalize($userDTO, User::class, context: ['object_to_populate' => $editableUser]);
@@ -44,7 +44,6 @@ readonly class CreateOrEditUserService
 
         $this->em->persist($user);
         $this->em->flush();
-
 
         $token = $this->JWTManager->create($user);
         $authenticatedToken = new UsernamePasswordToken($user, 'main', $user->getRoles());

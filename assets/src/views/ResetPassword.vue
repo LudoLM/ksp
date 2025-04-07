@@ -54,17 +54,6 @@
             alertStore.setAlert(success.value, 'success');
             // Stocker le token et mettre à jour le store
             localStorage.setItem('token', data.token);
-
-            // Décoder le token pour récupérer l'email de l'utilisateur
-            const payload = data.token.split('.')[1];
-            const decoded = atob(payload);
-            const elements = JSON.parse(decoded);
-
-            // Mettre à jour le store avec l'email de l'utilisateur et l'état d'authentification
-            userStore.setUserEmail(elements.username);
-            userStore.setUserId(elements.id);
-            userStore.setUserPrenom(elements.prenom);
-            userStore.setUserJWTExp(elements.exp);
             router.push("/");
         } catch (err) {
             error.value = err.message;

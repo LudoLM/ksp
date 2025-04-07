@@ -290,7 +290,8 @@ a.router-link-exact-active {
 
 #nav_links a {
     font-weight: 900;
-    font-size: clamp(0.8rem, 1.5vw, 1rem);
+    font-size: clamp(0.8rem, 1.2vw, .8rem);
+    text-transform: uppercase;
     text-decoration: none;
     position: relative;
     display: flex;
@@ -312,9 +313,6 @@ a.router-link-exact-active {
         transition: width 0.3s ease-in-out;
     }
 
-    &:hover::after {
-        width: 100%;
-    }
 }
 
 .fixed {

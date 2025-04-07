@@ -33,7 +33,10 @@ class CreateUsersCoursService
         }
         //      Si l'heure du cours est passée - 30 minutes, on ne peut plus s'inscrire
         if ($this->addUserTimeCheckerService->isTooLateRegister($cours)) {
-            return new JsonResponse(['success' => false, 'message' => "Il est trop tard pour s'inscrire à ce cours"], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
+            return new JsonResponse([
+                'success' => false,
+                'message' => "Il est trop tard pour s'inscrire à ce cours"],
+                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
         }
         //      Calcul du nombre de participants au cours
         $usersCount = $this->countUsersInCoursService->countUsers($cours);
@@ -44,7 +47,10 @@ class CreateUsersCoursService
         if ($user !== $this->security->getUser()) {
             // Si l'utilisateur n'a pas assez de crédits, on ne peut pas s'inscrire
             if ($user->getNombreCours() <= 0) {
-                return new JsonResponse(['success' => false, 'message' => $user->getPrenom().' '.$user->getNom()." n'a pas assez de crédits pour s'inscrire à ce cours"], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => $user->getPrenom().' '.$user->getNom()." n'a pas assez de crédits pour s'inscrire à ce cours"],
+                    \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
             }
 
             $this->addExtraUser($cours, $user, $statusChange);
@@ -103,7 +109,9 @@ class CreateUsersCoursService
             'success' => true,
             'message' => $isOnWaitingList ? "Vous êtes sur la liste d'attente" : 'Vous êtes bien inscrit au cours',
             'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']),
-            'usersCount' => $usersCount], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+            'usersCount' => $usersCount,
+            'userCoursQuantity' => $user->getNombreCours()],
+        \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function changeStatus(Cours $cours): StatusCours

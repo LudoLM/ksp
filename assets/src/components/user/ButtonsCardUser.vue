@@ -2,9 +2,10 @@
 import {inject, ref, watch} from "vue";
 import CustomButton from "../forms/CustomButton.vue";
 import { useSubscription, useUnSubscription } from "../../utils/useSubscribing";
-import {createAlertStore} from "../../store/alert";
+import {useUserStore} from "../../store/user";
 
 const alertStore = inject('alertStore');
+const userStore = useUserStore();
 
 const props = defineProps({
     userId: {
@@ -65,6 +66,7 @@ const handleSubscription = async (isUserOnWaitingList) => {
 
             });
 
+            userStore.setUserNombreCours(result.userCoursQuantity);
             alertStore.setAlert(result.message, "success");
 
         } else {
@@ -96,6 +98,7 @@ const handleUnsubscription = async (isUserOnWaitingList) => {
                 isSubscribedValue: localData.value.isSubscribed,
                 isUserOnWaitingListValue: localData.value.isUserOnWaitingList,
             });
+            userStore.setUserNombreCours(result.userCoursQuantity);
             alertStore.setAlert(result.message, "success");
         } else {
             alertStore.setAlert(result.message, "error");

@@ -133,7 +133,12 @@ class CoursController extends AbstractController
         $this->em->flush();
 
         // Retourne une réponse JSON pour indiquer que l'utilisateur a été supprimé avec succès
-        return new JsonResponse(['success' => true, 'message' => $isOnWaitingList ? 'Vous n\'êtes plus sur la liste d\'attente' : 'Vous avez bien été supprimé du cours', 'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']), 'usersCount' => $usersCount], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return new JsonResponse([
+            'success' => true,
+            'message' => $isOnWaitingList ? 'Vous n\'êtes plus sur la liste d\'attente' : 'Vous avez bien été supprimé du cours',
+            'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']), 'usersCount' => $usersCount,
+            'userCoursQuantity' => $user->getNombreCours(),
+        ], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     // Add route for create new cours

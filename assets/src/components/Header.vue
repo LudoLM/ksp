@@ -10,7 +10,9 @@
         <Logo />
         <Navbar />
         <div class="flex justify-between items-center space-x-4">
-          <DropdownUser />
+          <DropdownUser
+              :isScrolled ="isScrolled"
+          />
         </div>
       </template>
     </header>
@@ -25,6 +27,7 @@ import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 
 
 const windowWidth = ref(window.innerWidth);
+const isScrolled = ref(false);
 const isMobile = computed(() => windowWidth.value <= 900);
 
 const handleResize = () => {
@@ -35,9 +38,11 @@ const handleResize = () => {
 const handleScroll = () => {
   const navWrapper = document.querySelector(".nav_wrapper");
   if (window.scrollY > navWrapper.offsetHeight) {
+    isScrolled.value = true;
     navWrapper.classList.add("fixed");
   } else {
     navWrapper.classList.remove("fixed");
+    isScrolled.value = false;
   }
 };
 

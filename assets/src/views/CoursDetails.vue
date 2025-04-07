@@ -1,22 +1,22 @@
 <script setup>
-import {ref, computed, onMounted, inject} from 'vue';
+import {ref, computed, onMounted } from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import {useDateFormat} from '@vueuse/core';
 import {useGetCoursById} from "../utils/useActionCours";
 import CustomButton from "../components/forms/CustomButton.vue";
 import ButtonsCardUser from "../components/user/ButtonsCardUser.vue";
-import { useUserStore } from "../store/user";
 import StatusCoursTag from "../components/StatusCoursTag.vue";
 import ModalConfirm from "../components/modal/ModalConfirm.vue";
 import ModalUnsubscribeUsers from "../components/modal/ModalUnsubscribeUsers.vue";
+import useGetElementsToken from "../utils/useGetElementsToken";
 
 const route = useRoute();
 const router = useRouter();
 const coursId = route.params.id;
-const userStore = useUserStore();
-const userId = ref(userStore.userId);
 const cours = ref(null);
 const isAdminPath = route.path.startsWith('/admin');
+const token = localStorage.getItem('token');
+const userId = useGetElementsToken()?.id
 // Recupoerer la liste des participants
 const usersSubscribed = ref([]);
 // Recuperer la liste des participants en attente
@@ -53,7 +53,6 @@ const coursDetails = async () => {
 
 onMounted( async () => {
    await coursDetails();
-   userId.value = userStore.userId;
    isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && !usersCours.isOnWaitingList);
 
 });
@@ -128,7 +127,7 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                                 />
                             </div>
                                 <ModalConfirm
-                                    v-if="!userId && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
+                                    v-if="!token && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
                                     v-model:isOpen="loginDialog"
                                     title="Connexion requise"
                                     message="Veuillez vous authentifier pour vous inscrire à ce cours."
@@ -150,9 +149,9 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
 
 <style scoped lang="scss">
 
-    p{
-        font-size: clamp(0.8rem, 1vw, 1.4rem);
-    }
+p{
+    font-size: clamp(0.8rem, 1vw, 1.4rem);
+}
 
 .coursDetails{
     margin-top: 123px;
