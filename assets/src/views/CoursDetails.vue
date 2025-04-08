@@ -16,7 +16,8 @@ const coursId = route.params.id;
 const cours = ref(null);
 const isAdminPath = route.path.startsWith('/admin');
 const token = localStorage.getItem('token');
-const userId = useGetElementsToken()?.id
+const userId = ref(useGetElementsToken()?.id);
+
 // Recupoerer la liste des participants
 const usersSubscribed = ref([]);
 // Recuperer la liste des participants en attente
@@ -54,7 +55,6 @@ const coursDetails = async () => {
 onMounted( async () => {
    await coursDetails();
    isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && !usersCours.isOnWaitingList);
-
 });
 
 

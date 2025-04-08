@@ -22,6 +22,10 @@ const props = defineProps({
     hasButton: {
         type: Boolean,
         default: true
+    },
+    alt: {
+        type: String,
+        default: "Kiné Sport Santé"
     }
 });
 </script>
@@ -29,7 +33,7 @@ const props = defineProps({
 <template>
     <div class="banner" :style="{height: backgroundHeight}">
         <div class="overlay" :style="{backgroundColor: backgroundColor}"></div>
-        <img v-if="image !== undefined" :src="image" alt="">
+        <img v-if="image !== undefined" :src="image" :alt="alt">
         <div class="title">
             <h1 :style="{color: textColor}">{{ title }}</h1>
             <button :class="hasButton ? 'visible' : 'invisible'">

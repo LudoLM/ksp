@@ -3,12 +3,16 @@
         title="Kiné Sport Santé"
         :image="bannerImage"
         :backgroundColor="'rgba(71,35,113,.3)'"
+        alt="Salle de sport moderne avec des tapis d'exercice au sol et une grande baie vitrée offrant une vue lumineuse"
     />
     <div>
         <div class="centerPart">
             <div class="centerWrapper flex justify-center items-center">
                 <div class="image">
-                    <img src="../../images/banners/banner2.jpg" alt="">
+                    <img
+                        src="../../images/banners/banner2.jpg"
+                        alt="Ballon de gym dans une salle au décor minimaliste, avec lumière tamisée et ambiance zen"
+                    >
                 </div>
                 <div class="text">
                     <div class="flex flex-col justify-center items-end mr-2 mb-6">
@@ -17,7 +21,7 @@
                             <h6>{{ store.address }} {{ store.fullAddress }}</h6>
                             <a href="https://maps.app.goo.gl/ApZ1E35srhDT2ynK7">
                                 <div class="pinWrapper">
-                                    <img src="../../icons/pin.svg"/>
+                                    <img src="../../icons/pin.svg" alt=""/>
                                 </div>
                             </a>
                         </span>
@@ -39,7 +43,10 @@
                     </div>
                     <div class="image image_mobile">
                         <div class="w-1/2 flex justify-center items-center">
-                            <img class="rounded-full" src="../../images/servane.jpg" alt="">
+                            <img
+                                class="rounded-full" src="../../images/servane.jpg"
+                                alt="Portrait de la professeure souriante" />
+                            >
                         </div>
                     </div>
                     <p>"En choisissant le métier de masseur kinésithérapeute, je voulais aider et soigner les gens, tout en gardant comme objectif de pouvoir me rapprocher du milieu sportif. Avec mes spécialisations en rééducation du dos, des abdominaux et du périnée, et plus récemment mes formations en sport santé, je vous propose des cours de gym adaptés à vos besoins."</p>
