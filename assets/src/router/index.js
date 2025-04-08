@@ -1,4 +1,4 @@
-import { createApp } from 'vue';
+import {createApp, watch} from 'vue';
 import { createPinia } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
 import { createVuetify } from 'vuetify';
@@ -24,24 +24,24 @@ const router = createRouter({
       path: '/',
       component: DefaultLayout,
       children: [
-        { path: '', name: 'Accueil', component: Home },
-        { path: '/coursDescriptions', name: 'Les cours', component: () => import('../views/CoursDescriptions.vue') },
-        { path: '/calendar', name: 'Calendrier', component: () => import('../views/Calendar.vue') },
-        { path: '/packs', name: 'Packs', component: () => import('../views/Pricing.vue') },
-        { path: '/pratique', name: 'Pratique', component: () => import('../views/Pratique.vue') },
-        { path: '/coursDetails/:id', name: 'CoursDetails', component: () => import('../views/CoursDetails.vue') },
-        { path: '/merci', name: 'Merci', component: () => import('../views/Merci.vue') },
-        { path: '/profile', name: 'Profile', component: Profile },
+        { path: '', name: 'Accueil', component: Home, meta: {title: 'Kiné Sport Santé'} },
+        { path: '/coursDescriptions', name: 'Les cours', meta: {title: 'Nos cours'} ,component: () => import('../views/CoursDescriptions.vue') },
+        { path: '/calendar', name: 'Calendrier', meta: {title: 'Calendrier des cours'} ,component: () => import('../views/Calendar.vue') },
+        { path: '/packs', name: 'Packs', meta: {title: 'Packs proposés'} ,component: () => import('../views/Pricing.vue') },
+        { path: '/pratique', name: 'Pratique', meta: {title: 'Infos pratiques'} ,component: () => import('../views/Pratique.vue') },
+        { path: '/coursDetails/:id', name: 'CoursDetails', meta: {title: 'Détails'} ,component: () => import('../views/CoursDetails.vue') },
+        { path: '/merci', name: 'Merci', meta: {title: 'Crédits'} , component: () => import('../views/Merci.vue') },
+        { path: '/profile', name: 'Profile', meta: {title: 'Mon profil'} , component: Profile },
       ],
     },
     {
       path: '/',
       component: LoginLayout,
       children: [
-        { path: '/login', name: 'Login', component: () => import('../views/Signin.vue') },
-        { path: '/register', name: 'Register', component: () => import('../views/Signup.vue') },
-        { path: '/editProfile', name: 'EditProfile', component: () => import('../views/Signup.vue') },
-        { path: '/resetPassword/:id/:token', name: 'ResetPassword', component: () => import('../views/ResetPassword.vue') },
+        { path: '/login', name: 'Login', meta: {title: 'Authentification'} ,component: () => import('../views/Signin.vue') },
+        { path: '/register', name: 'Register', meta: {title: 'Création de compte'} ,component: () => import('../views/Signup.vue') },
+        { path: '/editProfile', name: 'EditProfile', meta: {title: 'Modifier son profil'} ,component: () => import('../views/Signup.vue') },
+        { path: '/resetPassword/:id/:token', name: 'ResetPassword', meta: {title: 'Réinitialiser mot de passe'} ,component: () => import('../views/ResetPassword.vue') },
       ]
     },
     {
@@ -50,7 +50,7 @@ const router = createRouter({
       meta: { requiresAdmin: true },
       name: 'admin',
       children: [
-        { path: '', name: 'Statistiques', component: () => import('../views/admin/DataStats.vue'), meta: { requiresAdmin: true } },
+        { path: '', name: 'Statistiques',component: () => import('../views/admin/DataStats.vue'), meta: { requiresAdmin: true, title:"Dashboard" } },
         { path: 'profile', name: 'AdminProfile', component: Profile, meta: { requiresAdmin: true } },
         {
           path: 'cours',
@@ -58,12 +58,12 @@ const router = createRouter({
           meta: { requiresAdmin: true },
           children: [
             /*{ path: 'coursList', name: 'CoursAdmin', label: 'Liste de cours', component: () => import('../views/CoursListTableAdmin.vue'), meta: { requiresAdmin: true } },*/
-            { path: 'coursList', name: 'CoursAdmin', label: 'Liste de cours', component: () => import('../views/admin/CoursListTableAdmin.vue'), meta: { requiresAdmin: true } },
-            { path: 'add', name: 'CreateCours', label: 'Créer cours', component: CoursForm, meta: { requiresAdmin: true } },
-            { path: 'edit/:id', name: 'EditCours', component: CoursForm, meta: { requiresAdmin: true } },
-            { path: 'coursType/add', name: 'CreateTypeCours', label: 'Créer Type de cours', component: TypeCoursForm, meta: { requiresAdmin: true } },
-            { path: 'coursType/edit', name: 'EditTypeCours', label: 'Modifier Type de cours', component: TypeCoursForm, meta: { requiresAdmin: true } },
-            { path: 'coursDetails/:id', name: 'AdminCoursDetails', component: () => import('../views/CoursDetails.vue'), meta: { requiresAdmin: true } },
+            { path: 'coursList', name: 'CoursAdmin', label: 'Liste de cours', component: () => import('../views/admin/CoursListTableAdmin.vue'), meta: { requiresAdmin: true, title:"Liste des cours" } },
+            { path: 'add', name: 'CreateCours', label: 'Créer cours', component: CoursForm, meta: { requiresAdmin: true, title: "Création de cours" } },
+            { path: 'edit/:id', name: 'EditCours', component: CoursForm, meta: { requiresAdmin: true, title: "Modifier un cours" } },
+            { path: 'coursType/add', name: 'CreateTypeCours', label: 'Créer Type de cours', component: TypeCoursForm, meta: { requiresAdmin: true, title: "Création de type de cours" } },
+            { path: 'coursType/edit', name: 'EditTypeCours', label: 'Modifier Type de cours', component: TypeCoursForm, meta: { requiresAdmin: true, title: "Modifier un type de cours" } },
+            { path: 'coursDetails/:id', name: 'AdminCoursDetails', component: () => import('../views/CoursDetails.vue'), meta: { requiresAdmin: true, title: "Détails" } },
           ],
         },
       ],
@@ -116,4 +116,17 @@ const app = createApp(App)
   .use(appPinia)
   .use(router)
   .use(vuetify)
+
+watch(
+  () => router.currentRoute.value,
+  (currentRoute) => {
+    if (currentRoute.meta && currentRoute.meta.title) {
+      document.title = currentRoute.meta.title;
+    } else {
+      document.title = 'Default Title';
+    }
+  },
+  { immediate: true }
+);
+
 app.mount('#app');

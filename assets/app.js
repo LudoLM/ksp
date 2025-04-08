@@ -9,6 +9,7 @@ import { registerVueControllerComponents } from '@symfony/ux-vue';
 
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.css';
+import '../assets/images/favicon.png'
 import './src/router/index.js';
 
 /*registerVueControllerComponents(require.context('./vue/controllers', true, /\.vue$/));*/
