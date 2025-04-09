@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     timezone: 'Europe/Paris'
+    app_url: '%env(APP_URL)%'
 
 services:
     # default configuration for services in *this* file
@@ -29,3 +30,7 @@ services:
             $security: '@security.helper'
         tags:
             - { name: 'kernel.event_listener', event: 'lexik_jwt_authentication.on_jwt_created', method: 'onJWTCreated' }
+
+    App\Service\SendingEmail\SendResetPasswordEmailService:
+        arguments:
+            $baseUrl: '%app_url%'  # Injecter le paramètre app_url

@@ -10,6 +10,7 @@ readonly class SendResetPasswordEmailService
 {
     public function __construct(
         private MailerInterface $mailer,
+        private string $baseUrl,
     ) {
     }
 
@@ -24,6 +25,7 @@ readonly class SendResetPasswordEmailService
             ->context([
                 'user' => $user,
                 'token' => $token,
+                'url' => $this->baseUrl,
             ]);
         $this->mailer->send($email);
     }
