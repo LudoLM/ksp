@@ -34,6 +34,10 @@ const updateCreation = () => {
     router.push({ name: 'EditCours', params: { id: props.item.id } });
 };
 
+const updateCours = () => {
+    router.push({ name: 'EditCours', params: { id: props.item.id } });
+};
+
 const cancelCours = async () => {
     const response = await useCancelCours(props.item.id);
     if (response.success) {
@@ -95,6 +99,7 @@ const handleAddExtraResponse = ({ type, message, statusChange }) => {
                     @cancelCours="cancelCours"
                     @deleteCreation="deleteCreation"
                     @updateCreation="updateCreation"
+                    @updateCours="updateCours"
                     @openCreation="openCreation"
                     @handleAddExtraResponse="handleAddExtraResponse"
                 />

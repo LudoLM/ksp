@@ -183,10 +183,9 @@ const handleSubmit = async (event) => {
                         <img :src="require(`../../images/uploads/${existingImage}`)" alt="Image actuelle" class="max-w-xs" />
                     </div>
                 </div>
-                <CustomValidationButton
-                    :title="origin === 'CreateTypeCours' ? 'Ajouter' : 'Modifier'"
-                    class="w-full"
-                />
+                <CustomValidationButton>
+                    {{ origin === 'CreateTypeCours' ? 'Ajouter' : 'Modifier' }}
+                </CustomValidationButton>
             </form>
         </div>
     </div>
