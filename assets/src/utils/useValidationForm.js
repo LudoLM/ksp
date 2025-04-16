@@ -2,7 +2,6 @@
 
 //Recupère les messages d'erreurs de validation
 export async function useValidationForm(message, errors) {
-
     if (message.detail) {
         errors.value = message.detail.split('\n').reduce((acc, error) => {
             const [key, msg] = error.split(': ');

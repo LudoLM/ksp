@@ -76,7 +76,8 @@ const formData = ref({
       const response = await apiFetch(origin.id ? urlEdition : urlCreation, {
         method: origin.id ? "PUT" : "POST",
         headers: {
-          "Content-Type": "application/json",
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
         },
         body: JSON.stringify(data),
       });
@@ -91,9 +92,10 @@ const formData = ref({
         await router.push({
             name: "CoursAdmin",
         });
-        alertStore.setAlert("Cours ajouté avec succès", "success");
+
+        alertStore.setAlert(origin.id ? "Cours modifié avec succès" : "Cours ajouté avec succès", "success");
       } else {
-        console.error("Erreur lors de la création du cours:", response);
+        console.error("Erreur lors de la création du cours:", result);
       }
     } catch (error) {
         alertStore.setAlert(error.message, error.type);
@@ -111,7 +113,7 @@ const formData = ref({
 
       formData.value.typeCours = coursData.typeCours.id;
       formData.value.dateCours = coursData.dateCours ? coursData.dateCours.slice(0, 16) : formData.value.dateCours;
-      formData.value.dureeCours = coursData.dureeCours;
+      formData.value.dureeCours = coursData.duree;
       formData.value.nbInscriptionMax = coursData.nbInscriptionMax;
       formData.value.specialNote = coursData.specialNote;
 
@@ -155,7 +157,6 @@ const formData = ref({
                 <CustomTextarea item="Note" id="specialNote" :error="errors.specialNote" v-model="formData.specialNote" class="w-full" />
                 <div class="mt-4 flex justify-center">
                     <CustomValidationButton
-                        :title="origin.id ? 'Modifier' : 'Ajouter'"
                         class="w-full"
                     >
                         Valider

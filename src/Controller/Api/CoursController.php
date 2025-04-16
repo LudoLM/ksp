@@ -12,6 +12,7 @@ use App\Repository\StatusCoursRepository;
 use App\Repository\TypeCoursRepository;
 use App\Repository\UserRepository;
 use App\Serializer\CreateCoursDTOToCoursDenormalizer;
+use App\Service\CoursControllerService\ActionsModifyOpenedCoursService;
 use App\Service\CoursControllerService\CreateUsersCoursService;
 use App\Service\CoursControllerService\FilteringCoursService;
 use App\Service\UpdateStatusCoursClickService;
@@ -19,6 +20,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -40,6 +42,7 @@ class CoursController extends AbstractController
         private readonly UpdateStatusCoursClickService $updateStatusCoursClickService,
         private readonly FilteringCoursService $filteringCoursService,
         private readonly CreateUsersCoursService $createUsersCoursService,
+        private readonly ActionsModifyOpenedCoursService $actionsModifyOpenedCoursService,
     ) {
     }
 
@@ -56,7 +59,7 @@ class CoursController extends AbstractController
             $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route);
             $responseData = $this->serializer->serialize($responseData, 'json', ['groups' => 'cours:index']);
 
-            return new JsonResponse($responseData, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+            return new JsonResponse($responseData, Response::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse(['success' => false, 'error' => $e->getMessage()], $e->getCode());
         }
@@ -138,7 +141,7 @@ class CoursController extends AbstractController
             'message' => $isOnWaitingList ? 'Vous n\'êtes plus sur la liste d\'attente' : 'Vous avez bien été supprimé du cours',
             'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']), 'usersCount' => $usersCount,
             'userCoursQuantity' => $user->getNombreCours(),
-        ], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        ], Response::HTTP_OK);
     }
 
     // Add route for create new cours
@@ -156,7 +159,7 @@ class CoursController extends AbstractController
         $this->em->persist($cours);
         $this->em->flush();
 
-        return new JsonResponse(['response' => true], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return new JsonResponse(['response' => true], Response::HTTP_OK);
     }
 
     // Delete route for delete cours
@@ -166,7 +169,7 @@ class CoursController extends AbstractController
         $this->em->remove($cours);
         $this->em->flush();
 
-        return new JsonResponse(['success' => true, 'type' => 'success', 'message' => 'Le cours a bien été effacé'], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return new JsonResponse(['success' => true, 'type' => 'success', 'message' => 'Le cours a bien été effacé'], Response::HTTP_OK);
     }
 
     #[Route('api/cours/open/{id}', name: 'cours_open', methods: ['PUT'])]
@@ -184,10 +187,6 @@ class CoursController extends AbstractController
 
         // Calculez le délai en millisecondes
         $delay = ($dateCours->getTimestamp() - $currentDateTime->getTimestamp()) * 1000;
-        // Si la date du cours est passé, on ne peut pas ouvrir le cours
-        if ($delay < 0) {
-            return new JsonResponse(['success' => false, 'type' => 'error', 'message' => 'Le date est déjà passé'], \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST);
-        }
 
         $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
         $this->messageBus->dispatch(
@@ -203,11 +202,11 @@ class CoursController extends AbstractController
             'type' => 'success',
             'message' => 'Le cours est maintenant ouvert aux inscriptions',
             'statusChange' => $this->serializer->serialize($cours->getStatusCours(), 'json', ['groups' => 'cours:detail']),
-            \Symfony\Component\HttpFoundation\Response::HTTP_OK]);
+            Response::HTTP_OK]);
     }
 
     #[Route('api/cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
-    public function cancelCours(Cours $cours, MessageBusInterface $messageBus): JsonResponse
+    public function cancelCours(Cours $cours): JsonResponse
     {
         try {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ANNULE->value]));
@@ -221,30 +220,36 @@ class CoursController extends AbstractController
             return new JsonResponse([
                 'success' => true,
                 'message' => 'Le cours a été annulé',
-                'statusChange' => $this->serializer->serialize($cours->getStatusCours(), 'json', ['groups' => 'cours:detail']), \Symfony\Component\HttpFoundation\Response::HTTP_OK,
+                'statusChange' => $this->serializer->serialize($cours->getStatusCours(), 'json', ['groups' => 'cours:detail']), Response::HTTP_OK,
             ]);
         } catch (\Exception $e) {
-            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 
     #[Route('api/cours/edit/{id}', name: 'cours_update', methods: ['PUT'])]
     public function editCours(
-        Cours $cours,
-        #[MapRequestPayload(
-            serializationContext: [
-                'groups' => ['cours:create'],
-            ]
-        )]
+        #[MapRequestPayload]
         CreateCoursDTO $coursDTO,
+        Cours $cours,
     ): JsonResponse {
+        $initialDate = $cours->getDateCours();
+        $initalDuration = $cours->getDuree();
+
         $coursDTOSerializer = new Serializer([new CreateCoursDTOToCoursDenormalizer($this->typeCoursRepository, $this->statusCoursRepository)]);
         $cours = $coursDTOSerializer->denormalize($coursDTO, Cours::class, context: ['object_to_populate' => $cours]);
-
         $this->em->persist($cours);
         $this->em->flush();
 
-        return new JsonResponse(['response' => true], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        if (StatusCoursEnum::OUVERT->getValue() === $cours->getStatusCours()->getLibelle()) {
+            try {
+                $this->actionsModifyOpenedCoursService->handle($cours, $initalDuration, $initialDate);
+            } catch (\Exception $e) {
+                return new JsonResponse(['success' => false, 'error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        return new JsonResponse(['response' => true], Response::HTTP_OK);
     }
 
     #[Route('api/getCoursFilling', name: 'cours_filling', methods: ['GET'])]
@@ -253,7 +258,7 @@ class CoursController extends AbstractController
         $coursFilling = $this->coursRepository->getCoursFilling();
         $jsonCoursFillings = $this->serializer->serialize($coursFilling, 'json', ['groups' => 'cours_filling:index']);
 
-        return new JsonResponse($jsonCoursFillings, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return new JsonResponse($jsonCoursFillings, Response::HTTP_OK);
     }
 
     #[Route('api/updateCoursClick', name: 'updateCoursClick', methods: ['GET'])]
@@ -261,7 +266,7 @@ class CoursController extends AbstractController
     {
         $this->updateStatusCoursClickService->update();
 
-        return new JsonResponse(['success' => true, 'message' => 'Les statuts des cours ont bien été mis à jour'], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return new JsonResponse(['success' => true, 'message' => 'Les statuts des cours ont bien été mis à jour'], Response::HTTP_OK);
     }
 
     #[Route('api/removeUsers/{id}', name: 'remove_users_cours', methods: ['POST'])]
@@ -295,6 +300,6 @@ class CoursController extends AbstractController
             'success' => true,
             'message' => 'Les participants ont bien été supprimés du cours',
             'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']),
-            'usersCount' => $usersCount], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+            'usersCount' => $usersCount], Response::HTTP_OK);
     }
 }

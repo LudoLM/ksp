@@ -11,7 +11,7 @@ class CreateCoursDTO
     public ?int $dureeCours = null;
 
     #[Assert\NotBlank(message: 'La date du cours ne peut pas être vide.')]
-    #[Assert\GreaterThanOrEqual('+1 day', message: "Le cours ne peut pas être créé sans un délai d'un jour.")]
+    #[Assert\GreaterThanOrEqual('+1 day', message: 'Le cours ne peut pas être créé ou modifié sans un délai de 24 heures.')]
     public ?\DateTimeInterface $dateCours = null;
 
     public ?string $specialNote = null;

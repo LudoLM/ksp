@@ -7,7 +7,7 @@ import CancelCours from "../../../icons/adminActions/CancelCours.vue";
 import LaunchCours from "../../../icons/adminActions/LaunchCours.vue";
 import InfosCours from "../../../icons/adminActions/InfosCours.vue";
 import AddExtraUser from "../../../icons/adminActions/AddExtraUser.vue";
-import EditCours from "../../../icons/adminActions/EditCours.vue";
+import EditCoursIcon from "../../../icons/adminActions/EditCoursIcon.vue";
 import Tooltip from "../Tooltip.vue";
 
 defineProps({
@@ -26,6 +26,7 @@ const addExtraDialog = ref(false);
 const emit = defineEmits([
   'openCreation',
   'updateCreation',
+  'updateCours',
   'deleteCreation',
   'cancelCours',
   'handleAddExtraResponse'
@@ -59,7 +60,7 @@ const emit = defineEmits([
         v-if="statusCours.libelle === 'En création'" @click="emit('updateCreation')"
     >
         <button class="hover:text-primary" >
-            <EditCours size="18"/>
+            <EditCoursIcon size="18"/>
         </button>
     </Tooltip>
     <Tooltip
@@ -69,6 +70,16 @@ const emit = defineEmits([
     >
         <button class="hover:text-primary">
             <CancelCours size="18"/>
+        </button>
+    </Tooltip>
+    <Tooltip
+        title="Modifier le cours."
+        v-if="statusCours.libelle === 'Ouvert'" @click="emit('updateCours')"
+    >
+        <button class="hover:text-primary" >
+            <EditCoursIcon
+                size="18"
+            />
         </button>
     </Tooltip>
     <Tooltip

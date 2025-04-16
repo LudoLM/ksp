@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <title>Annulation de cours</title>
+</head>
+<body>
+<div class="body">
+    <div class="container">
+        <div class="header text-center">
+        </div>
+        <div class="content">
+            <p class="text-center">Bonjour {{ participant.prenom }}!</p>
+            <p class="block">
+                Le cours de {{ cours.typeCours.libelle}}  du {{ initialDate|date('d/m/Y') }} à {{ initialDate|date('H:i') }} (Durée: {{ initialDuration }} mns) a été modifié.
+            </p>
+            <p><strong>Nouvel horaire: </strong>{{ cours.dateCours|date('d/m/Y') }} à {{ cours.dateCours|date('H:i') }} (Durée: {{ cours.duree }} mns)  <a href={{ url }}/coursDetails/{{ cours.id }}>Voir le cours</a></p>
+            <p>
+                Veuillez nous excuser pour la gêne occasionnée.
+            </p>
+            <p>
+                Cordialement,
+                <br>
+                <br>
+                 {{ user }}
+        </div>
+    </div>
+</div>
+</body>
+</html>
