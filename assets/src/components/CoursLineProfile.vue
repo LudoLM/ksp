@@ -4,6 +4,8 @@ import {useDateFormat} from "@vueuse/core";
 import StatusCoursTag from "./StatusCoursTag.vue";
 import Unsubscribe from "../../icons/userActions/Unsubscribe.vue";
 import Tooltip from "./Tooltip.vue";
+import ModalConfirm from "./modals/ModalConfirm.vue";
+import {ref} from "vue";
 
 const props = defineProps(
     {
@@ -11,6 +13,7 @@ const props = defineProps(
     }
 )
 const emit = defineEmits(['unsubscription']);
+const confirmDialog = ref(false);
 
 const handleUnsubscription = () => {
     emit('unsubscription', {
@@ -42,17 +45,23 @@ const handleUnsubscription = () => {
         <!-- Actions -->
         <div class="actions">
             <div class="flex justify-start items-center gap-8">
-                <button
+                <ModalConfirm
+                    v-model:isOpen="confirmDialog"
+                    title="Confirmation requise"
+                    message="Etes vous sûr de vouloir vous désinscrire de ce cours ?"
+                    @confirmActions="handleUnsubscription"
                     v-if="item.statusCours.id === 1 || item.statusCours.id === 2"
-                    @click="handleUnsubscription"
-                    class="hover:text-primary flex items-center justify-center">
-                    <Tooltip
-                        :title="'Se désinscrire du cours.'"
-                        :tooltipPos="'left'"
-                    >
-                        <Unsubscribe size="18"/>
-                    </Tooltip>
-                </button>
+                >
+                    <button
+                        class="hover:text flex items-center justify-center">
+                        <Tooltip
+                            :title="'Se désinscrire du cours.'"
+                            :tooltipPos="'left'"
+                        >
+                            <Unsubscribe size="18"/>
+                        </Tooltip>
+                    </button>
+                </ModalConfirm>
             </div>
         </div>
     </div>
