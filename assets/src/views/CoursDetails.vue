@@ -6,8 +6,8 @@ import {useGetCoursById} from "../utils/useActionCours";
 import CustomButton from "../components/forms/CustomButton.vue";
 import ButtonsCardUser from "../components/user/ButtonsCardUser.vue";
 import StatusCoursTag from "../components/StatusCoursTag.vue";
-import ModalConfirm from "../components/modal/ModalConfirm.vue";
-import ModalUnsubscribeUsers from "../components/modal/ModalUnsubscribeUsers.vue";
+import ModalConnect from "../components/modals/ModalConnect.vue";
+import ModalUnsubscribeUsers from "../components/modals/ModalUnsubscribeUsers.vue";
 import useGetElementsToken from "../utils/useGetElementsToken";
 
 const route = useRoute();
@@ -126,18 +126,18 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                                     @updateUnsubscribeUsersValue="handleUpdateUnsubscribeUsersValue"
                                 />
                             </div>
-                                <ModalConfirm
-                                    v-if="!token && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
-                                    v-model:isOpen="loginDialog"
-                                    title="Connexion requise"
-                                    message="Veuillez vous authentifier pour vous inscrire à ce cours."
-                                    @login="redirectToLogin"
-                                >
-                                    {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
-                                </ModalConfirm>
-                                <div>
-                                    <CustomButton @click="stepBack">Retour</CustomButton>
-                                </div>
+                            <ModalConnect
+                                v-if="!token && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
+                                v-model:isOpen="loginDialog"
+                                title="Connexion requise"
+                                message="Veuillez vous authentifier pour vous inscrire à ce cours."
+                                @login="redirectToLogin"
+                            >
+                                {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
+                            </ModalConnect>
+                            <div>
+                                <CustomButton @click="stepBack">Retour</CustomButton>
+                            </div>
                         </div>
                     </div>
                 </div>

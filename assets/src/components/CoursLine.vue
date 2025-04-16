@@ -6,6 +6,7 @@ import ButtonsCardAdmin from "./admin/ButtonsCardAdmin.vue";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
 import {inject, ref} from "vue";
 import {useRouter} from "vue-router";
+import ModalConfirm from "./modals/ModalConfirm.vue";
 
 const alertStore = inject('alertStore');
 const router = useRouter();

@@ -2,7 +2,7 @@
 
 import bannerImage from "../../images/banners/imageBanner17.jpg";
 import Banner from "../components/Banner.vue";
-import ModalConfirm from "../components/modal/ModalConfirm.vue";
+import ModalConnect from "../components/modals/ModalConnect.vue";
 import {ref} from "vue";
 import {useUserStore} from "../store/user";
 import {useRouter} from "vue-router";
@@ -68,7 +68,7 @@ const redirectToLogin = () => {
                 <h6>Séance à l'unité</h6>
             </div>
             <p class="text-lg mr-5">17€</p>
-            <ModalConfirm
+            <ModalConnect
                 v-if="!userId"
                 isPricingSizeButton
                 v-model:isOpen="loginDialog"
@@ -77,7 +77,7 @@ const redirectToLogin = () => {
                 @login="redirectToLogin"
             >
                 Acheter
-            </ModalConfirm>
+            </ModalConnect>
             <stripe-buy-button
                 v-else
                 buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
@@ -91,7 +91,7 @@ const redirectToLogin = () => {
                 <p>Renouvelable</p>
             </div>
             <p class="text-lg mr-5">80€</p>
-            <ModalConfirm
+            <ModalConnect
                 v-if="!userId"
                 isPricingSizeButton
                 v-model:isOpen="loginDialog"
@@ -100,7 +100,7 @@ const redirectToLogin = () => {
                 @login="redirectToLogin"
             >
                 Acheter
-            </ModalConfirm>
+            </ModalConnect>
             <stripe-buy-button
                 v-else
                 buy-button-id="buy_btn_1Q46sYC6kEhASj1eduGCytqN"
@@ -114,7 +114,7 @@ const redirectToLogin = () => {
                 <p>Renouvelable</p>
             </div>
            <p class="text-lg mr-5">148€</p>
-            <ModalConfirm
+            <ModalConnect
                 v-if="!userId"
                 isPricingSizeButton
                 v-model:isOpen="loginDialog"
@@ -123,7 +123,7 @@ const redirectToLogin = () => {
                 @login="redirectToLogin"
             >
                 Acheter
-            </ModalConfirm>
+            </ModalConnect>
            <stripe-buy-button
               v-else
               buy-button-id="buy_btn_1Q4Mu7C6kEhASj1e5j6L1Tkm"
@@ -137,7 +137,7 @@ const redirectToLogin = () => {
               <p>Prioritaire</p>
           </div>
           <p class="text-lg mr-5">440€</p>
-          <ModalConfirm
+          <ModalConnect
               v-if="!userId"
               isPricingSizeButton
               v-model:isOpen="loginDialog"
@@ -146,7 +146,7 @@ const redirectToLogin = () => {
               @login="redirectToLogin"
           >
               Acheter
-          </ModalConfirm>
+          </ModalConnect>
           <stripe-buy-button
               v-else
               buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
@@ -160,7 +160,7 @@ const redirectToLogin = () => {
               <p>Prioritaire</p>
           </div>
           <p class="text-lg mr-5">525€</p>
-          <ModalConfirm
+          <ModalConnect
               v-if="!userId"
               isPricingSizeButton
               v-model:isOpen="loginDialog"
@@ -169,7 +169,7 @@ const redirectToLogin = () => {
               @login="redirectToLogin"
           >
               Acheter
-          </ModalConfirm>
+          </ModalConnect>
           <stripe-buy-button
               v-else
               buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"

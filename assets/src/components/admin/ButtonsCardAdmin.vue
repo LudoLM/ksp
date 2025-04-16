@@ -1,6 +1,6 @@
 <script setup>
 
-import ModalAddExtra from "../modal/ModalAddExtra.vue";
+import ModalAddExtra from "../modals/ModalAddExtra.vue";
 import {ref} from "vue";
 import DeleteCours from "../../../icons/adminActions/DeleteCours.vue";
 import CancelCours from "../../../icons/adminActions/CancelCours.vue";
@@ -9,6 +9,7 @@ import InfosCours from "../../../icons/adminActions/InfosCours.vue";
 import AddExtraUser from "../../../icons/adminActions/AddExtraUser.vue";
 import EditCoursIcon from "../../../icons/adminActions/EditCoursIcon.vue";
 import Tooltip from "../Tooltip.vue";
+import ModalConfirm from "../modals/ModalConfirm.vue";
 
 defineProps({
   statusCours:{
@@ -23,6 +24,7 @@ defineProps({
 })
 
 const addExtraDialog = ref(false);
+const confirmDialog = ref(false);
 const emit = defineEmits([
   'openCreation',
   'updateCreation',
@@ -38,59 +40,71 @@ const emit = defineEmits([
     <Tooltip
         :title="'Voir les détails du cours.'"
     >
-        <button class="hover:text-primary">
+        <button class="hover:text">
             <router-link :to="{ name: 'AdminCoursDetails', params: { id: coursId }}">
                 <InfosCours
-                    class="hover-text"
                     data-text="Why did you hovered?"
                     size="18"/>
             </router-link>
         </button>
     </Tooltip>
-    <Tooltip
-        :title="'Supprimer le cours.'"
-        v-if="statusCours.libelle === 'En création'" @click="emit('deleteCreation')"
+    <ModalConfirm
+        v-model:isOpen="confirmDialog"
+        title="Confirmation requise"
+        message="Etes-vous sûr de vouloir supprimer ce cours ?"
+        @confirmActions="emit('deleteCreation')"
+        v-if="statusCours.libelle === 'En création'"
     >
-        <button class="hover:text-primary">
-            <DeleteCours size="18"/>
-        </button>
-    </Tooltip>
+        <Tooltip
+            :title="'Supprimer le cours.'"
+        >
+            <button class="hover:text">
+                <DeleteCours size="18"/>
+            </button>
+        </Tooltip>
+    </ModalConfirm>
     <Tooltip
         title="Modifier le cours."
-        v-if="statusCours.libelle === 'En création'" @click="emit('updateCreation')"
+        v-if="statusCours.libelle === 'En création'"
+        @click="emit('updateCreation')"
     >
-        <button class="hover:text-primary" >
+        <button
+            @click="confirmDialog"
+        >
             <EditCoursIcon size="18"/>
         </button>
     </Tooltip>
-    <Tooltip
-        :title="'Annuler le cours.'"
+    <ModalConfirm
+        v-model:isOpen="confirmDialog"
+        title="Confirmation requise"
+        message="Etes-vous sûr de vouloir annuler à ce cours ?"
+        @confirmActions="emit('cancelCours')"
         v-if="(statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet')"
-        @click="emit('cancelCours')"
     >
-        <button class="hover:text-primary">
-            <CancelCours size="18"/>
-        </button>
-    </Tooltip>
-    <Tooltip
-        title="Modifier le cours."
-        v-if="statusCours.libelle === 'Ouvert'" @click="emit('updateCours')"
-    >
-        <button class="hover:text-primary" >
-            <EditCoursIcon
-                size="18"
-            />
-        </button>
-    </Tooltip>
-    <Tooltip
-        :title="'Ouvrir le cours.'"
+        <Tooltip
+            :title="'Annuler le cours.'"
+        >
+            <button>
+                <CancelCours size="18"/>
+            </button>
+
+        </Tooltip>
+    </ModalConfirm>
+    <ModalConfirm
+        v-model:isOpen="confirmDialog"
+        title="Confirmation requise"
+        message="Etes-vous sûr de vouloir vous ouvrir ce cours ?"
+        @confirmActions="emit('openCreation')"
         v-if="statusCours.libelle === 'En création'"
-        @click="emit('openCreation')"
     >
-        <button class="hover:text-primary">
-            <LaunchCours size="18"/>
-        </button>
-    </Tooltip>
+        <Tooltip
+            :title="'Ouvrir le cours.'"
+        >
+            <button>
+                <LaunchCours size="18"/>
+            </button>
+        </Tooltip>
+    </ModalConfirm>
   <ModalAddExtra
       v-if="statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet'"
       v-model:isOpen="addExtraDialog"
@@ -102,7 +116,7 @@ const emit = defineEmits([
       <Tooltip
             :title="'Ajouter un extra.'"
       >
-          <button class="hover:text-primary flex items-center justify-center">
+          <button class="flex items-center justify-center">
               <AddExtraUser size="18"/>
           </button>
       </Tooltip>

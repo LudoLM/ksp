@@ -104,7 +104,7 @@ import CustomInput from "../components/forms/CustomInput.vue";
 import {useUserStore} from "../store/user";
 import CustomPassword from "../components/forms/CustomPassword.vue";
 import SideBannerAuth from "../components/SideBannerAuth.vue";
-import ModalResetPassword from "../components/modal/ModalResetPassword.vue";
+import ModalResetPassword from "../components/modals/ModalResetPassword.vue";
 
 
 // Instancier le store en dehors de la fonction handleLogin

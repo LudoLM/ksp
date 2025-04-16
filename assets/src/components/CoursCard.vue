@@ -40,7 +40,7 @@
                 @handleAddExtraResponse="handleAddExtraResponse"
             />
 
-            <ModalConfirm
+            <ModalConnect
                 v-if="!userId && (statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet')"
                 v-model:isOpen="loginDialog"
                 title="Connexion requise"
@@ -48,7 +48,7 @@
                 @login="redirectToLogin"
             >
               {{ statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
-            </ModalConfirm>
+            </ModalConnect>
 
           </div>
         </div>
@@ -67,7 +67,7 @@ import { useDateFormat } from '@vueuse/core';
 import { useUserStore } from "../store/user";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
 import { useRouter } from 'vue-router';
-import ModalConfirm from "./modal/ModalConfirm.vue";
+import ModalConnect from "./modals/ModalConnect.vue";
 import ButtonsCardAdmin from "./admin/ButtonsCardAdmin.vue";
 import StatusCoursTag from "./StatusCoursTag.vue";
 
