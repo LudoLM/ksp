@@ -43,7 +43,7 @@ class CoursFixtures extends Fixture
             $date->setTime((int) $date->format('H'), (int) $date->format('i'), 0);
 
             // Affecter la date au cours
-            $cours[$i]->setDateCours($date);
+            $cours[$i]->setDateCours(\DateTimeImmutable::createFromMutable($date));
 
             $cours[$i]->setDuree($faker->numberBetween(5, 10) * 10);
             $cours[$i]->setNbInscriptionMax($faker->numberBetween(6, 12));

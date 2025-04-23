@@ -22,7 +22,7 @@ final readonly class SendUpdateCoursEmailMessage
         return $this->currentUserId;
     }
 
-    public function getInitialDate(): \DateTime
+    public function getInitialDate(): \DateTimeInterface
     {
         return $this->initialDate;
     }
@@ -31,6 +31,4 @@ final readonly class SendUpdateCoursEmailMessage
     {
         return $this->initialDuration;
     }
-
-
 }

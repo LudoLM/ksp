@@ -178,11 +178,6 @@ class CoursController extends AbstractController
         // Obtenez la date du cours
         $dateCours = $cours->getDateCours();
 
-        // Vérifiez si c'est bien un objet DateTime, sinon créez-en un avec le bon fuseau horaire
-        if (!$dateCours instanceof \DateTime) {
-            $dateTime = new \DateTime();
-            $dateTime->setTimestamp($dateCours->getTimestamp());
-        }
         $currentDateTime = new \DateTime('now');
 
         // Calculez le délai en millisecondes
@@ -241,7 +236,7 @@ class CoursController extends AbstractController
         $this->em->persist($cours);
         $this->em->flush();
 
-        if (StatusCoursEnum::OUVERT->getValue() === $cours->getStatusCours()->getLibelle()) {
+        if (StatusCoursEnum::OUVERT->value === $cours->getStatusCours()->getLibelle()) {
             try {
                 $this->actionsModifyOpenedCoursService->handle($cours, $initalDuration, $initialDate);
             } catch (\Exception $e) {

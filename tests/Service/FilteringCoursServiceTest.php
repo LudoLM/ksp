@@ -42,7 +42,7 @@ class FilteringCoursServiceTest extends TestCase
         $cours1->setStatusCours(new StatusCours());
         $cours1->setDuree(60);
         $cours1->setNbInscriptionMax(12);
-        $cours1->setSpecialNote(null);
+        $cours1->setSpecialNote('');
 
         yield 'cours_calendar_routes' => [
             'route' => 'cours_calendar',

@@ -4,7 +4,6 @@ namespace App\Service\SendingEmail;
 
 use App\Entity\User;
 use App\Entity\UsersCours;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 

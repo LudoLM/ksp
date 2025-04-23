@@ -56,24 +56,4 @@ class StatusCours
     {
         return $this->cours;
     }
-
-    public function addCour(Cours $cour): static
-    {
-        if (!$this->cours->contains($cour)) {
-            $this->cours->add($cour);
-            $cour->setStatusCours($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCour(Cours $cour): static
-    {
-        // set the owning side to null (unless already changed)
-        if ($this->cours->removeElement($cour) && $cour->getStatusCours() === $this) {
-            $cour->setStatusCours(null);
-        }
-
-        return $this;
-    }
 }

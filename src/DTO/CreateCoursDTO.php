@@ -11,7 +11,7 @@ class CreateCoursDTO
     public ?int $dureeCours = null;
 
     #[Assert\NotBlank(message: 'La date du cours ne peut pas être vide.')]
-    #[Assert\GreaterThanOrEqual('+1 day', message: 'Le cours ne peut pas être créé ou modifié sans un délai de 24 heures.')]
+    /* #[Assert\GreaterThanOrEqual('+1 day', message: 'Le cours ne peut pas être créé ou modifié sans un délai de 24 heures.')] */
     public ?\DateTimeInterface $dateCours = null;
 
     public ?string $specialNote = null;
@@ -22,12 +22,12 @@ class CreateCoursDTO
     #[Assert\NotBlank(message: 'Le type de cours ne peut pas être vide.')]
     public ?int $typeCours = null;
 
-    public function getDureeCours(): ?int
+    public function getDureeCours(): int
     {
         return $this->dureeCours;
     }
 
-    public function getDateCours(): ?\DateTimeInterface
+    public function getDateCours(): \DateTimeInterface
     {
         return $this->dateCours;
     }

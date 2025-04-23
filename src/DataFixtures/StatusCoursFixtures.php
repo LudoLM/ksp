@@ -13,7 +13,7 @@ class StatusCoursFixtures extends Fixture
     {
         foreach (StatusCoursEnum::cases() as $index => $statusCoursEnum) {
             $statusCours = new StatusCours();
-            $statusCours->setLibelle($statusCoursEnum->getValue());
+            $statusCours->setLibelle($statusCoursEnum->value);
             $manager->persist($statusCours);
             $this->addReference('statusCours'.$index, $statusCours);
         }

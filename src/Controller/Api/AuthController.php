@@ -20,7 +20,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
-#[Route(path: 'api/', name: 'api_')]
 class AuthController extends AbstractController
 {
     public function __construct(
@@ -32,7 +31,7 @@ class AuthController extends AbstractController
     ) {
     }
 
-    #[Route(path: 'register', name: 'app_register', methods: ['POST'])]
+    #[Route(path: 'api/register', name: 'api_app_register', methods: ['POST'])]
     public function register(
         #[MapRequestPayload]
         CreateUserDTO $createUserDTO,
@@ -61,7 +60,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route(path: 'editUser', name: 'app_edit_profile', methods: ['POST'])]
+    #[Route(path: 'api/editUser', name: 'api_app_edit_profile', methods: ['POST'])]
     public function editProfile(
         #[MapRequestPayload]
         EditUserDTO $editUserDTO,
@@ -82,7 +81,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route(path: 'forgot-password', name: 'app_forget_password')]
+    #[Route(path: 'api/forgot-password', name: 'api_app_forget_password')]
     public function forgotPassword(
         Request $request,
     ): JsonResponse {
@@ -101,7 +100,7 @@ class AuthController extends AbstractController
         return $this->forgotPasswordService->handleForgotPassword($emailReceived);
     }
 
-    #[Route(path: 'reset-password', name: 'app_reset_password')]
+    #[Route(path: 'api/reset-password', name: 'api_app_reset_password')]
     public function resetPassword(
         #[MapRequestPayload]
         ResetPasswordDTO $resetPasswordDTO,

@@ -3,6 +3,7 @@
 namespace App\Service\CoursControllerService;
 
 use App\Entity\Cours;
+use App\Entity\User;
 use App\Message\SendUpdateCoursEmailMessage;
 use App\Message\UpdateStatusCoursMessage;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -32,9 +33,15 @@ readonly class ActionsModifyOpenedCoursService
                 [new DelayStamp($delay)]
             );
 
+            $user = $this->security->getUser();
+            if ($user instanceof User) {
+                $userId = $user->getId();
+            } else {
+                throw new \LogicException("User n'est pas une instance de User");
+            }
             // Envoi d'un mail aux personnes inscrites
             foreach ($cours->getUsersCours() as $usersCours) {
-                $this->messageBus->dispatch(new SendUpdateCoursEmailMessage($usersCours->getId(), $this->security->getUser()->getId(), $initialDate, $initalDuration));
+                $this->messageBus->dispatch(new SendUpdateCoursEmailMessage($usersCours->getId(), $userId, $initialDate, $initalDuration));
             }
         }
     }

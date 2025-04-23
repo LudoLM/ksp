@@ -65,8 +65,8 @@ const emit = defineEmits([
     </ModalConfirm>
     <Tooltip
         title="Modifier le cours."
-        v-if="statusCours.libelle === 'En création'"
-        @click="emit('updateCreation')"
+        v-if="statusCours.libelle === 'En création' || statusCours.libelle === 'Ouvert'"
+        @click="emit(statusCours.libelle === 'En création' ? 'updateCreation' : 'updateCours')"
     >
         <button
             @click="confirmDialog"
