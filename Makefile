@@ -54,7 +54,7 @@ rector: ## Run Rector
 messengerConsume: ## Start the messenger consumer
 	@$(DOCKER_COMP) exec php bin/console messenger:consume async
 
-analyse: cs rector phpstan ## Run PHPStan, PHP CS Fixer and Rector
+analyse: cs rector phpstan test ## Run PHPStan, PHP CS Fixer and Rector
 
 ## —— Composer 🧙 ——————————————————————————————————————————————————————————————
 composer: ## Run composer, pass the parameter "c=" to run a given command, example: make composer c='req symfony/orm-pack'
