@@ -18,21 +18,21 @@ class Cours
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours:update', 'user:detail', 'cours_filling:index'])]
     private ?int $id = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column]
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update'])]
-    private ?int $duree = null;
+    private int $duree;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:detail', 'cours_filling:index'])]
     private \DateTimeInterface $dateCours;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255, nullable: false)]
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update'])]
-    private ?string $specialNote = null;
+    private string $specialNote;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(nullable: false)]
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours_filling:index'])]
-    private ?int $nbInscriptionMax = null;
+    private int $nbInscriptionMax;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
@@ -66,62 +66,69 @@ class Cours
         $this->id = $id;
     }
 
-    public function getDuree(): ?int
+    public function getDuree(): int
     {
         return $this->duree;
     }
 
-    public function setDuree(?int $duree): void
+    public function setDuree(int $duree): void
     {
         $this->duree = $duree;
     }
 
-    public function getDateCours(): ?\DateTimeInterface
+    public function getDateCours(): \DateTimeInterface
     {
         return $this->dateCours;
     }
 
-    public function setDateCours(?\DateTimeInterface $dateCours): void
+    public function getDateImmutable(): \DateTimeImmutable
+    {
+        $dateCours = \DateTime::createFromInterface($this->dateCours);
+
+        return \DateTimeImmutable::createFromMutable($dateCours);
+    }
+
+    public function setDateCours(\DateTimeInterface $dateCours): void
     {
         $this->dateCours = $dateCours;
     }
 
-    public function getSpecialNote(): ?string
+    public function getSpecialNote(): string
     {
         return $this->specialNote;
     }
 
-    public function setSpecialNote(?string $specialNote): void
+    public function setSpecialNote(string $specialNote): void
     {
         $this->specialNote = $specialNote;
     }
 
-    public function getNbInscriptionMax(): ?int
+    public function getNbInscriptionMax(): int
     {
         return $this->nbInscriptionMax;
     }
 
-    public function setNbInscriptionMax(?int $nbInscriptionMax): void
+    public function setNbInscriptionMax(int $nbInscriptionMax): void
     {
         $this->nbInscriptionMax = $nbInscriptionMax;
     }
 
-    public function getTypeCours(): ?TypeCours
+    public function getTypeCours(): TypeCours
     {
         return $this->typeCours;
     }
 
-    public function setTypeCours(?TypeCours $typeCours): void
+    public function setTypeCours(TypeCours $typeCours): void
     {
         $this->typeCours = $typeCours;
     }
 
-    public function getStatusCours(): ?StatusCours
+    public function getStatusCours(): StatusCours
     {
         return $this->statusCours;
     }
 
-    public function setStatusCours(?StatusCours $statusCours): void
+    public function setStatusCours(StatusCours $statusCours): void
     {
         $this->statusCours = $statusCours;
     }

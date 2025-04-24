@@ -81,26 +81,6 @@ class TypeCours
         return $this->cours;
     }
 
-    public function addCour(Cours $cour): self
-    {
-        if (!$this->cours->contains($cour)) {
-            $this->cours->add($cour);
-            $cour->setTypeCours($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCour(Cours $cour): self
-    {
-        // set the owning side to null (unless already changed)
-        if ($this->cours->removeElement($cour) && $cour->getTypeCours() === $this) {
-            $cour->setTypeCours(null);
-        }
-
-        return $this;
-    }
-
     public function getThumbnail(): ?string
     {
         return $this->thumbnail;

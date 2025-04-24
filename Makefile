@@ -24,8 +24,6 @@ build: ## Builds the Docker images
 up: ## Start the docker hub in detached mode (no logs)
 	@$(DOCKER_COMP) --env-file .env.local up --detach
 
-start: build up ## Build and start the containers
-
 down: ## Stop the docker hub
 	@$(DOCKER_COMP) down --remove-orphans
 
@@ -53,7 +51,10 @@ cs: ## Run PHP CS Fixer
 rector: ## Run Rector
 	@$(DOCKER_COMP) exec php vendor/bin/rector process
 
-analyse: phpstan cs rector ## Run PHPStan, PHP CS Fixer and Rector
+messengerConsume: ## Start the messenger consumer
+	@$(DOCKER_COMP) exec php bin/console messenger:consume async
+
+analyse: cs rector phpstan test ## Run PHPStan, PHP CS Fixer and Rector
 
 ## —— Composer 🧙 ——————————————————————————————————————————————————————————————
 composer: ## Run composer, pass the parameter "c=" to run a given command, example: make composer c='req symfony/orm-pack'

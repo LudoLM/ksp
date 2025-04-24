@@ -11,6 +11,7 @@ use App\Repository\StatusCoursRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class CreateUsersCoursService
@@ -36,7 +37,7 @@ class CreateUsersCoursService
             return new JsonResponse([
                 'success' => false,
                 'message' => "Il est trop tard pour s'inscrire à ce cours"],
-                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
+                Response::HTTP_FORBIDDEN);
         }
         //      Calcul du nombre de participants au cours
         $usersCount = $this->countUsersInCoursService->countUsers($cours);
@@ -50,7 +51,7 @@ class CreateUsersCoursService
                 return new JsonResponse([
                     'success' => false,
                     'message' => $user->getPrenom().' '.$user->getNom()." n'a pas assez de crédits pour s'inscrire à ce cours"],
-                    \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
+                    Response::HTTP_FORBIDDEN);
             }
 
             $this->addExtraUser($cours, $user, $statusChange);
@@ -61,17 +62,17 @@ class CreateUsersCoursService
                 'statusChange' => $this->serializer->serialize($cours->getStatusCours(), 'json', ['groups' => 'cours:detail']),
                 'usersCount' => $usersCount,
             ],
-                \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+                Response::HTTP_OK);
         }
 
         // Si l'utilisateur n'a pas assez de crédits, on ne peut pas s'inscrire
         if ($user->getNombreCours() <= 0) {
-            return new JsonResponse(['success' => false, 'message' => "Vous n'avez pas assez de crédits pour vous inscrire à ce cours"], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['success' => false, 'message' => "Vous n'avez pas assez de crédits pour vous inscrire à ce cours"], Response::HTTP_FORBIDDEN);
         }
 
         //      Si le cours est désormais complet, on ne peut plus s'inscrire
         if ($usersCount >= $cours->getNbInscriptionMax() && !$isOnWaitingList) {
-            return new JsonResponse(['success' => false, 'message' => 'Le cours est complet', 'statusChange' => $statusChange, 'usersCount' => $usersCount], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+            return new JsonResponse(['success' => false, 'message' => 'Le cours est complet', 'statusChange' => $statusChange, 'usersCount' => $usersCount], Response::HTTP_OK);
         }
 
         //      Si le cours n'est pas complet, je vérifie si l'utilisateur est déjà inscrit ou en attente
@@ -111,7 +112,7 @@ class CreateUsersCoursService
             'statusChange' => $this->serializer->serialize($statusChange, 'json', ['groups' => 'cours:detail']),
             'usersCount' => $usersCount,
             'userCoursQuantity' => $user->getNombreCours()],
-        \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+            Response::HTTP_OK);
     }
 
     public function changeStatus(Cours $cours): StatusCours
