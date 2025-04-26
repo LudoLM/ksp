@@ -89,6 +89,10 @@ class CoursController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $user = null === $data['userId'] ? $this->getUser() : $this->userRepository->find($data['userId']);
+        // Vérifiez que $user est une instance de la classe user
+        if (!$user instanceof User) {
+            throw new \Exception('Type de l\'utilisateur invalide');
+        }
         $cours = $this->coursRepository->find($data['coursId']);
         $isOnWaitingList = $data['isOnWaitingList'];
 
@@ -100,7 +104,7 @@ class CoursController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $cours = $this->coursRepository->find($data['coursId']);
-        $isOnWaitingList = $data['isOnWaitingList'];
+        $isOnWaitingList = (bool) $data['isOnWaitingList'];
         $user = $this->getUser();
 
         // Vérifiez que $user est une instance de la classe utilisateur
@@ -108,7 +112,6 @@ class CoursController extends AbstractController
             throw new \Exception('Type de l\'utilisateur invalide');
         }
 
-        $isOnWaitingList = 'true' === $isOnWaitingList;
         $statusChange = $cours->getStatusCours();
         // Suppression de l'utilisateur du cours
         foreach ($cours->getUsersCours() as $usersCours) {
@@ -120,7 +123,7 @@ class CoursController extends AbstractController
             $user->setNombreCours($user->getNombreCours() + 1);
         }
 
-        //        Si le cours est complet et qu'il y a de la place, je change le statut du cours et envoie un mail aux personnes en attente
+        // Si le cours est complet et qu'il y a de la place, je change le statut du cours et envoie un mail aux personnes en attente
         if (count(array_filter($cours->getUsersCours()->toArray(), fn ($usersCours): bool => true !== $usersCours->isOnWaitingList())) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
             $statusChange = $cours->getStatusCours();
