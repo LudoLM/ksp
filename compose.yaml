@@ -47,25 +47,18 @@ services:
           - .env.local
       container_name: database
       image: mysql:latest
+      command: --max_allowed_packet=32505856
+      ports:
+        - "3306:3306"
       restart: always
       environment:
           MYSQL_DATABASE: 'db'
-          MYSQL_USER: 'admin'
-          MYSQL_PASSWORD: 'root'
-          MYSQL_ROOT_PASSWORD: 'root'
+          MYSQL_USER: ${DB_USER}
+          MYSQL_PASSWORD: ${DB_PASSWORD}
+          MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       volumes:
           - db-data:/var/lib/mysql
 
-  phpmyadmin:
-      networks:
-          - proxy
-      image: phpmyadmin/phpmyadmin:latest
-      restart: always
-      environment:
-          PMA_HOST: database
-          PMA_PORT: 3306
-      ports:
-          - "8081:80"
 
 ###> doctrine/doctrine-bundle ###
 #  database:
