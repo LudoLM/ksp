@@ -1,51 +1,30 @@
-# Symfony Docker
+# Application de Paiement et de Réservation en Ligne
 
-A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony](https://symfony.com) web framework,
-with [FrankenPHP](https://frankenphp.dev) and [Caddy](https://caddyserver.com/) inside!
+Bienvenue sur la plateforme de réservation et de paiement en ligne du centre KSS, spécialement conçue pour les cours de Pilates, stretching, gym douce, et bien plus encore. Cette application vise à simplifier l'accès aux activités de bien-être en offrant une expérience utilisateur fluide et intuitive.
 
-![CI](https://github.com/dunglas/symfony-docker/workflows/CI/badge.svg)
+## Fonctionnalités principales
 
-## Getting Started
+- **Profil utilisateur** : Permet de créer et de gérer un profil utilisateur pour personnaliser l'expérience et accéder rapidement aux informations.
+- **Profil administrateur** : Un espace dédié aux administrateurs pour gérer les cours, les inscriptions, les utilisateurs, les types de cours et les statistiques.
+- **Consultation des cours** : Permet de parcourir une liste détaillée des cours disponibles, incluant des descriptions, les horaires et les notes spéciales.
+- **Inscriptions en ligne** : Permet de s'inscrire/désinscrire aux cours de son choix directement depuis l'application.
+- **Paiement sécurisé** : Permet d'effectuer des paiements en ligne de manière sécurisée grâce à l'intégration de **Stripe**.
+- **Gestion de liste d'attente** : Permet de s'inscrire sur une liste d'attente pour les cours et de recevoir des emails lorsque des places se libèrent.
+- **Historique des paiements** : Permet de suivre les transactions et de consulter et télécharger l'historique de paiement pour une meilleure gestion des dépenses.
+- **Authentification sécurisée** : Utilise **JWT (JSON Web Tokens)** pour une authentification sécurisée et fiable.
 
-1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --no-cache` to build fresh images
-3. Run `docker compose up --pull always -d --wait` to set up and start a fresh Symfony project
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Run `docker compose down --remove-orphans` to stop the Docker containers.
 
-## Features
+## Objectifs
 
-* Production, development and CI ready
-* Just 1 service by default
-* Blazing-fast performance thanks to [the worker mode of FrankenPHP](https://github.com/dunglas/frankenphp/blob/main/docs/worker.md) (automatically enabled in prod mode)
-* [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
-* Automatic HTTPS (in dev and prod)
-* HTTP/3 and [Early Hints](https://symfony.com/blog/new-in-symfony-6-3-early-hints) support
-* Real-time messaging thanks to a built-in [Mercure hub](https://symfony.com/doc/current/mercure.html)
-* [Vulcain](https://vulcain.rocks) support
-* Native [XDebug](docs/xdebug.md) integration
-* Super-readable configuration
+L'objectif principal de cette application est de rendre l'accès aux cours de bien-être plus accessible et pratique. En centralisant la réservation et le paiement en ligne, nous espérons encourager plus de personnes à intégrer ces activités dans leur quotidien, tout en leur offrant une solution simple et efficace.
+Côté administration, l'application vise à faciliter la gestion des cours et des utilisateurs, permettant ainsi aux administrateurs de se concentrer sur l'amélioration de l'expérience utilisateur.
 
-**Enjoy!**
+## Technologies utilisées
 
-## Docs
+- **Frontend** : Vue 3, Tailwind CSS
+- **Backend** : PHP 8.3, Symfony 6.4, API REST
+- **Base de données** : MySQL
+- **Paiement en ligne** : Stripe
+- **Authentification** : JWT (JSON Web Tokens)
 
-1. [Options available](docs/options.md)
-2. [Using Symfony Docker with an existing project](docs/existing-project.md)
-3. [Support for extra services](docs/extra-services.md)
-4. [Deploying in production](docs/production.md)
-5. [Debugging with Xdebug](docs/xdebug.md)
-6. [TLS Certificates](docs/tls.md)
-7. [Using MySQL instead of PostgreSQL](docs/mysql.md)
-8. [Using Alpine Linux instead of Debian](docs/alpine.md)
-9. [Using a Makefile](docs/makefile.md)
-10. [Updating the template](docs/updating.md)
-11. [Troubleshooting](docs/troubleshooting.md)
 
-## License
-
-Symfony Docker is available under the MIT License.
-
-## Credits
-
-Created by [Kévin Dunglas](https://dunglas.dev), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
