@@ -22,6 +22,7 @@ readonly class FilteringCoursService
         string $dateCoursStr,
         int $statusCoursId,
         string $route,
+        bool $isOpenRequired,
     ): array {
         $typeCours = null;
         if (0 !== $typeCoursId) {
@@ -56,12 +57,43 @@ readonly class FilteringCoursService
         }
 
         $dateLimit = null;
-        // recupere le 1er jour de la semaine de la variable dateCours si la route est getCoursCalendar
-        if ('cours_calendar' === $route) {
+        if ('cours_next_cours' === $route) {
+            if ($isOpenRequired) {
+                $getFirstCours = $this->coursRepository->findNextCours($typeCours, $dateCours);
+
+                if (!$getFirstCours instanceof \App\Entity\Cours) {
+                    if (null === $typeCours) {
+                        throw new FilteringCoursException('Aucun cours prévu à partir de cette date', 404);
+                    }
+                    throw new FilteringCoursException('Aucun cours de '.$typeCours->getLibelle().' prévu à partir de cette date', 404);
+                }
+
+                return [
+                    'type' => 'info_next_cours',
+                    'typeCours' => $getFirstCours->getTypeCours()->getLibelle(),
+                    'nextCoursDate' => $getFirstCours->getDateCours(),
+                ];
+            }
+
             [$dateCours, $dateLimit] = DateHelper::adjustDatesForCalendarRoute($dateCours);
 
-            return $this->coursRepository->findAllSortByDateForUsers($typeCours, $dateCours, $dateLimit, $statusCours);
+            return $this->coursRepository->findAllSortByDateForUsers($typeCours, $dateCours, $dateLimit);
         }
+        if ('cours_calendar' === $route) {
+            if ($isOpenRequired) {
+                $getFirstCours = $this->coursRepository->findNextCours($typeCours, $dateCours);
+                if (!$getFirstCours instanceof \App\Entity\Cours) {
+                    throw new FilteringCoursException('Aucun cours de '.$typeCours->getLibelle().' prévu à partir de cette date', 404);
+                }
+
+                return [$getFirstCours];
+            }
+
+            [$dateCours, $dateLimit] = DateHelper::adjustDatesForCalendarRoute($dateCours);
+
+            return $this->coursRepository->findAllSortByDateForUsers($typeCours, $dateCours, $dateLimit);
+        }
+
         [$dateCours, $dateLimit] = DateHelper::adjustDatesForIndexRoute($dateCours);
 
         return $this->coursRepository->findAllSortByDate($typeCours, $dateCours, $dateLimit, $statusCours);

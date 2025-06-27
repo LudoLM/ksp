@@ -1,23 +1,61 @@
 import {apiFetch} from "./useFetchInterceptor";
-
-export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusId) {
+import {isRef} from "vue";
+export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusId, isOpenRequired = false) {
     try {
-      const params = new URLSearchParams({
-        typeCoursId: selectedTypeCours.value === null ? "0" : selectedTypeCours.value,
-        dateCoursStr: selectedDate.value,
-        statusCoursId: selectedStatusId.value === null ? "0" : selectedStatusId.value,
-      });
+      const typeCoursValue = isRef(selectedTypeCours) ? selectedTypeCours.value : selectedTypeCours;
+      const dateCoursValue = isRef(selectedDate) ? selectedDate.value : selectedDate;
+      const statusCoursValue = isRef(selectedStatusId) ? selectedStatusId.value : selectedStatusId;
+      const isOpenRequiredValue = isRef(isOpenRequired) ? isOpenRequired.value : isOpenRequired;
 
+
+      let params = new URLSearchParams({
+        typeCoursId: typeCoursValue === null ? "0" : typeCoursValue,
+        dateCoursStr: dateCoursValue,
+        statusCoursId: statusCoursValue === null ? "0" : statusCoursValue,
+        isOpenRequired: isOpenRequiredValue,
+
+      });
       const response = await fetch(`/api/${route.value}?${params.toString()}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
-      infos.value = JSON.parse(await response.json());
+      if (response.ok) {
+        infos.value = await response.json();
+      }
+      else {
+        infos.value = await useGetOnlyNextCours(typeCoursValue, dateCoursValue, statusCoursValue);
+      }
     } catch (error) {
-        console.error("Erreur lors de la récupération des cours:", error);
+        console.error(error.message);
     }
+}
+
+
+export async function useGetOnlyNextCours(selectedTypeCours, selectedDate, selectedStatusId) {
+  try{
+    const typeCoursValue = isRef(selectedTypeCours) ? selectedTypeCours.value : selectedTypeCours;
+    const dateCoursValue = isRef(selectedDate) ? selectedDate.value : selectedDate;
+    const statusCoursValue = isRef(selectedStatusId) ? selectedStatusId.value : selectedStatusId;
+
+    let params = new URLSearchParams({
+      typeCoursId: typeCoursValue === null ? "0" : typeCoursValue,
+      dateCoursStr: dateCoursValue,
+      statusCoursId: statusCoursValue === null ? "0" : statusCoursValue,
+      isOpenRequired: true,
+    });
+
+    const response = await fetch(`/api/getOnlyNextCours?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(error.message);
+  }
 }
 
 

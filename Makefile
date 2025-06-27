@@ -27,7 +27,7 @@ up: ## Start the docker hub in detached mode (no logs)
 down: ## Stop the docker hub
 	@$(DOCKER_COMP) down --remove-orphans
 
-start: build up
+start: build up messengerConsume
 
 restart: down start ## Restart the docker hub
 

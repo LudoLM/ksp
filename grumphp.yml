@@ -27,10 +27,10 @@ grumphp:
                 priority: 0
             configuration: 'phpstan.neon'
             memory_limit: '216M'
-        phpcsfixer2:
-            metadata:
-                priority: 0
-            config: '.php-cs-fixer.dist.php'
+        #phpcsfixer2:
+            #metadata:
+                #priority: 0
+            #config: '.php-cs-fixer.dist.php'
         rector:
             metadata:
                 priority: 0

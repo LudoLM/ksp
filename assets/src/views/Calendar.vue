@@ -1,104 +1,139 @@
 <script setup>
 import CustomButton from "../components/forms/CustomButton.vue";
-import {useGetCours, useGetTypesCours} from "../utils/useActionCours";
-import {onMounted, ref} from "vue";
-import {useDateFormat} from "@vueuse/core";
+import {useCalendarStore} from "../store/calendar";
+import {computed, onBeforeMount, ref, watch} from "vue";
 import CoursCardCalendar from "../components/CoursCardCalendar.vue";
 import TypeCoursFilter from "../components/filtersCours/TypeCoursFilter.vue";
 import bannerImage from "../../images/banners/imageBanner9.jpg";
 import Banner from "../components/Banner.vue";
+import DeleteCours from "../../icons/adminActions/DeleteCours.vue";
+import Tooltip from "../components/Tooltip.vue";
+import { useRouter } from "vue-router";
 
-const date = ref(new Date());
-const currentDate = ref(new Date());
-const routeGetCours = ref("getCoursCalendar");
+const calendarStore = useCalendarStore();
+const dateToday = ref(new Date());
 
-// Formate la date pour l'envoyer au serveur
-date.value = date.value.toISOString().split('T')[0];
-const days = ref([]);
-const weekString = ref('');
-const uniqueTypeCoursList = ref([]);
+const typeCoursIdFromUrl = parseInt(new URLSearchParams(window.location.search).get('typeCoursId'));
+const isOpenRequiredFromUrl = ref(!! new URLSearchParams(window.location.search).get('isOpenRequired'));
 
-// get query params
-const coursId = parseInt(new URLSearchParams(window.location.search).get('coursId'));
+const router = useRouter();
+const previousRoutePath = ref(router.options.history.state.back || '');
+const date = computed(() => previousRoutePath === "/coursDescriptions" ? new Date() : calendarStore.date);
+const daySelected = computed(() => calendarStore.daySelected);
+const selectedTypeCours = computed(() => calendarStore.selectedTypeCours);
+const weekString = computed(() => calendarStore.weekString);
+const days = computed(() => calendarStore.days);
+const infos = computed(() => calendarStore.infos);
+const weekInfos = computed(() => calendarStore.weekInfos);
+const uniqueTypeCoursList = computed(() => calendarStore.uniqueTypeCoursList);
 
-// Récupère les jours de la semaine
-const updateDaysOfWeek = () => {
-    const current = new Date(date.value);
-    const monday = new Date(current);
-    const dayOfWeek = monday.getDay();
-    // Cherche le lundi de la semaine
-    monday.setDate(monday.getDate() - ((dayOfWeek + 6) % 7));
-    days.value = []; // Reset the array
-    for (let i = 0; i < 6; i++) {
-        const day = new Date(monday);
-        day.setDate(monday.getDate() + i);
-        days.value.push(day.toISOString().split('T')[0]);
+
+// Gère le clic sur les boutons de navigation semaine
+const handleGetCoursPerWeek = async (direction) => {
+    if (isOpenRequiredFromUrl.value){
+        isOpenRequiredFromUrl.value = false;
+        updateUrl(false)
     }
-    weekString.value = useDateFormat(monday, 'DD MMMM YYYY').value + ' au ' + useDateFormat(monday.setDate(monday.getDate() + 6), 'DD MMMM YYYY').value;
 
-};
-const daySelected = ref(0);
-// Gère le clic sur les boutons de la semaine
-const handleDaySelected = (index) => {
-    daySelected.value += index;
-};
+    if (direction === "next") {
+        calendarStore.nextWeek();
+    } else if( direction === "prev") {
+        calendarStore.prevWeek();
+        calendarStore.setDaySelected(5);
 
-// Met à jour les jours de la semaine
-updateDaysOfWeek();
-const infos = ref([]);
-const weekInfos = ref([[], [], [], [], [], [], []]); // Initialisation globale)
-const selectedTypeCours = ref(null);
-const statusCours = ref(null);
-
-
-const getCoursPerWeek = async () => {
-    await useGetCours(routeGetCours, infos, selectedTypeCours, date, statusCours);
-    // Classe les cours par date/heure
-    infos.value.sort((a, b) => new Date(a.dateCours) - new Date(b.dateCours));
-
-    // Réinitialisez et mettez à jour weekInfos
-    weekInfos.value = [[], [], [], [], [], [], []];
-    infos.value.forEach(info => {
-        const rawDay = new Date(info.dateCours).getDay();
-        const day = (rawDay + 6) % 7; // Ajuste pour que Lundi = 0, Dimanche = 6
-        if (weekInfos.value[day]) {
-            weekInfos.value[day].push(info);
-        } else {
-            console.error(`Indice de jour invalide: ${day}`);
-        }
-    });
+    }
+    else {
+        calendarStore.nextCours();
+    }
 };
 
-const handleGetCoursPerWeek = async (direction, daySelectedParam) => {
-    daySelected.value = daySelectedParam;
-    const current = new Date(date.value);
-    // Ajoute ou soustrait 7 jours
-    current.setDate(current.getDate() + (direction === "next" ? 7 : -7));
-    date.value = current.toISOString().split('T')[0];
-    // Mets à jour les jours de la semaine
-    updateDaysOfWeek();
-    // Recharge les cours
-    await getCoursPerWeek();
-};
-
+// Gère le changement de type de cours
 const handleUpdateSelectedTypeCours = (value) => {
-    selectedTypeCours.value = value;
-    getCoursPerWeek();
+    calendarStore.setSelectedTypeCours(parseInt(value));
+    updateUrl(false);
 };
 
+// Formate le jour pour l'affichage
 const formatDay = (day) => {
-    const date = new Date(day); // Convertir en objet Date
+    const date = new Date(day);
     const daysOfWeek = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-    const dayOfWeek = daysOfWeek[date.getDay()]; // Obtenir le nom du jour
-    const dayPart = day.split('-')[2]; // Obtenir le jour
-    return `<p>${dayOfWeek.substring(0, 3)} </p><p> ${dayPart}</p>`; // Utilisation de <br> pour un saut de ligne
+    const dayOfWeek = daysOfWeek[date.getDay()];
+    const dayPart = day.split('-')[2];
+    return `<p>${dayOfWeek.substring(0, 3)} </p><p> ${dayPart}</p>`;
 };
 
-onMounted(async () => {
-    // Si coursId est défini, met à jour le type de cours sélectionné sinon récupère les cours de la semaine
-    coursId ? handleUpdateSelectedTypeCours(coursId) : await getCoursPerWeek();
-    uniqueTypeCoursList.value = await useGetTypesCours();
+// Met à jour l'URL (peut rester local ou être une action du store si elle modifie l'état du store)
+const updateUrl = (keepIsOpenRequired) => {
+    const newParams = new URLSearchParams(window.location.search);
+
+    if (newParams.has('isOpenRequired') && !keepIsOpenRequired) {
+        newParams.delete('isOpenRequired');
+    }
+    if (calendarStore.selectedTypeCours !== 0) {
+        newParams.set('typeCoursId', calendarStore.selectedTypeCours);
+    } else {
+        newParams.delete('typeCoursId');
+    }
+    window.history.replaceState({}, '', `${window.location.pathname}?${newParams}`);
+};
+
+
+onBeforeMount( async ()=> {
+    // Initialisez le 'selectedTypeCours' du store avec la valeur de l'URL si elle existe
+    if (!isNaN(typeCoursIdFromUrl) && typeCoursIdFromUrl !== 0) {
+        calendarStore.setSelectedTypeCours(typeCoursIdFromUrl, isOpenRequiredFromUrl.value);
+        await calendarStore.fetchCoursPerWeek(isOpenRequiredFromUrl.value);
+    }
+    else{
+        await calendarStore.fetchCoursPerWeek();
+    }
+    // Récupérez la liste des types de cours
+    await calendarStore.fetchTypesCours();
 });
+
+
+const nextDateIndex = ref(null);
+
+// Watch les changements de date et de type de cours -> pour mettre à jour les cours de la semaine
+watch([date, selectedTypeCours], async () => {
+    calendarStore.firstNextCoursInNextWeeks = null;
+    await calendarStore.fetchCoursPerWeek();
+});
+
+const displayDateNextCoursString = function(date, typeCours) {
+    return `Prochain cours ${calendarStore.selectedTypeCours.value !== 0 ? " de " + typeCours : ""} disponible le ${new Date(date).toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    })}`;
+};
+
+// Récupère la date du prochain cours dans la semaine s'il n'est pas passé
+const nextDateInTheWeek = computed(() => {
+    const getCoursInRestOfWeek = calendarStore.weekInfos.slice(calendarStore.daySelected).find(info => info.length > 0);
+
+    // S'il reste des cours dans la semaine après le jour sélectionné
+    if(getCoursInRestOfWeek){
+        nextDateIndex.value = getCoursInRestOfWeek ? new Date(getCoursInRestOfWeek[0].dateCours).getDay() -1 : null;
+        return displayDateNextCoursString(getCoursInRestOfWeek[0].dateCours, getCoursInRestOfWeek[0].typeCours.libelle);
+    }
+    // S'il n'y a pas de cours dans la semaine après le jour sélectionné, on prend le premier cours des semaines à venir
+    else if(!getCoursInRestOfWeek && calendarStore.firstNextCoursInNextWeeks && calendarStore.firstNextCoursInNextWeeks.nextCoursDate) {
+        nextDateIndex.value = null;
+        return displayDateNextCoursString(calendarStore.firstNextCoursInNextWeeks.nextCoursDate.date, calendarStore.firstNextCoursInNextWeeks.typeCours);
+    }
+});
+
+
+// Récupère la date du prochain cours dans les semaines à venir pour les semaines sans cours
+const nextDateInNextWeek = computed(() => {
+    if (infos.value.type === "info_next_cours") {
+        return displayDateNextCoursString(infos.value.nextCoursDate.date, infos.value.typeCours);
+    }
+});
+
+
 
 </script>
 
@@ -115,57 +150,104 @@ onMounted(async () => {
         </div>
         <div class="buttons flex justify-center gap-1">
             <CustomButton
-                :disabled="!(new Date(date) > new Date(currentDate))"
-                :color="new Date(date) > new Date(currentDate) ? 'purple' : 'gray'"
-                @click="handleGetCoursPerWeek('prev', 0)">
+                :disabled="calendarStore.shouldPreviousWeekDisabled"
+                :color="calendarStore.shouldPreviousWeekDisabled ? 'gray' : 'purple'"
+                @click="handleGetCoursPerWeek('prev')">
                 Semaine Précédente
             </CustomButton>
-            <CustomButton @click="handleGetCoursPerWeek('next', 0)">
+            <CustomButton
+                @click="handleGetCoursPerWeek('next')"
+            >
                 Semaine Suivante
             </CustomButton>
         </div>
-        <TypeCoursFilter
-            :uniqueTypeCoursList="uniqueTypeCoursList"
-            :coursId="coursId"
-            @update:selectedTypeCours="handleUpdateSelectedTypeCours"
-        />
+        <div class="flex justify-center items-center gap-2">
+            <TypeCoursFilter
+                :uniqueTypeCoursList="uniqueTypeCoursList"
+                :typeCoursId="selectedTypeCours"
+                @update:selectedTypeCours="handleUpdateSelectedTypeCours"
+            />
+            <Tooltip
+                :title="'Réinitialiser les filtres et revenir à la semaine actuelle'"
+                tooltip-pos="right"
+            >
+                <button
+                    class="hover:text deleteIcon"
+                    @click="calendarStore.resetCalendar(); updateUrl(false)"
+                >
+                    <DeleteCours size="18"/>
+                </button>
+            </Tooltip>
+        </div>
     </div>
 
     <div class="grid grid-cols-6 gap-4 mx-10">
-        <div v-for="(day, index) in days" :key="day" class="flex justify-center" @click="daySelected = index">
+        <div v-for="(day, index) in days" :key="day" class="flex justify-center" @click="calendarStore.setDaySelected(index)">
             <div
                 v-html="formatDay(day)"
-                :class="[daySelected === index ? 'days dayActif' : 'days', weekInfos[index].length > 0 ? 'has-cours' : '']">
+                :class="[calendarStore.daySelected === index ? 'days dayActif' : 'days', weekInfos[index]?.length > 0 ? 'has-cours' : '']"
+            >
+
             </div>
         </div>
         <div
             v-if="weekInfos.every((info) => info.length === 0)"
-            class="col-span-6 mx-auto text-center p-4 m-20">
-            Aucun cours de la semaine
+            class="col-span-6 mx-auto text-center p-4 m-20 desktop">
+            <a
+                v-if="infos.type === 'info_next_cours'"
+                @click="calendarStore.setDate(infos.nextCoursDate.date); handleGetCoursPerWeek()"
+            >
+                {{ nextDateInNextWeek }}
+            </a>
+            <p v-else>
+                {{ infos.message }}
+            </p>
         </div>
-        <!-- Format desktop-->
-        <div v-for="(weekInfo, index) in weekInfos" :key="index" class="desktop">
-            <div v-for="info in weekInfo" :key="info.id" class="flex flex-col items-center">
+        <div v-for="(weekInfo, index) in weekInfos" :key="index">
+            <div v-for="info in weekInfo" :key="info.id" class="flex flex-col items-center desktop">
                 <CoursCardCalendar :info="info"/>
             </div>
         </div>
     </div>
     <div class="mobile">
-        <!-- Format Mobile -->
-        <div :class="daySelected !== 0 || new Date(date) > new Date(currentDate) ? 'dayBefore' : 'dayBefore invisible'" @click="daySelected !== 0 ?handleDaySelected(-1) : handleGetCoursPerWeek('prev', 5)"></div>
+        <div :class="daySelected !== 0 || new Date(date) > new Date(dateToday) ? 'dayBefore' : 'dayBefore invisible'" @click="calendarStore.daySelected !== 0 ?  calendarStore.setDaySelected(calendarStore.daySelected -1) :  handleGetCoursPerWeek('prev')"></div>
         <div class="active">
-            <!-- Affiche les cours en fonction de la date daySelected -->
-            <div v-if="weekInfos[daySelected]?.length > 0">
-                <div v-for="info in weekInfos[daySelected]" :key="info.id" class="flex flex-col items-center">
+            <div
+                v-if="weekInfos[daySelected]?.length > 0">
+                <div
+                    v-for="info in weekInfos[daySelected]"
+                    :key="info.id"
+                    class="flex flex-col items-center"
+                >
                     <CoursCardCalendar :info="info" />
                 </div>
             </div>
-            <div v-else class="flex justify-center items-center h-70">
-                <p>Aucun cours</p>
+            <div v-else class="flex justify-center items-center h-70 text-center nextDateDisplayed">
+                <a
+                    v-if="infos.type === 'info_next_cours'"
+                    @click="
+                    calendarStore.setDate(infos.nextCoursDate.date);
+                    calendarStore.setDaySelected(new Date(infos.nextCoursDate.date).getDay() - 1);
+                "
+                >
+                    {{ nextDateInNextWeek }}
+                </a>
+                <a
+                    v-else-if="nextDateInTheWeek"
+                    @click="
+                    calendarStore.setDate(!nextDateIndex ? calendarStore.firstNextCoursInNextWeeks.nextCoursDate.date : calendarStore.date);
+                    calendarStore.setDaySelected(nextDateIndex ? nextDateIndex : new Date(calendarStore.firstNextCoursInNextWeeks.nextCoursDate.date).getDay() - 1);
+                    "
+                >
+                    {{ nextDateInTheWeek }}
+                </a>
+                <p v-else>
+                    {{ calendarStore.firstNextCoursInNextWeeks &&  calendarStore.firstNextCoursInNextWeeks.message ? calendarStore.firstNextCoursInNextWeeks.message : infos.message }}
+                </p>
             </div>
         </div>
+        <div :class="daySelected !== 5 ? 'dayAfter' : 'dayAfter'" @click="daySelected !== 5 ?  calendarStore.setDaySelected(calendarStore.daySelected +1) : handleGetCoursPerWeek('next')"></div>
 
-        <div :class="daySelected !== 5 ? 'dayAfter' : 'dayAfter'" @click="daySelected !== 5 ?handleDaySelected(+1) : handleGetCoursPerWeek('next', 0)"></div>
     </div>
 </template>
 
@@ -179,6 +261,11 @@ onMounted(async () => {
 
 .desktop{
     min-height: 5vh;
+}
+
+a{
+    color: #472371;
+    text-decoration: underline;
 }
 
 .days{
@@ -198,6 +285,27 @@ onMounted(async () => {
 
 .dayActif {
     border-bottom: 1px solid #5e2ca5;
+}
+
+.nextDateDisplayed{
+    font-size: clamp(0.9rem, 1.4vw, 1.4rem);
+}
+
+
+.deleteIcon{
+    padding: 10px;
+    border: 1px solid #E5E7EB;
+    border-radius: 5px;
+    transition: border 0.3s ease-in-out;
+    font-size: clamp(0.8rem, 1.5vw, 1rem);
+
+    &>p{
+        font-size: clamp(0.8rem, 1.5vw, 1rem);
+    }
+
+    &:hover {
+        border-color: darkred;
+    }
 }
 
 @media (min-width: 980px) {

@@ -1,6 +1,6 @@
 <script setup>
 
-defineProps({
+const props = defineProps({
     title: {
         type: String,
         required: true
@@ -82,6 +82,21 @@ defineProps({
 
     [data-tooltip-pos="left"]:hover:before,
     [data-tooltip-pos="left"]:hover:after {
+        transform: translate(0, -50%); }
+
+    [data-tooltip-pos="right"]:before,
+    [data-tooltip-pos="right"]:after {
+        bottom: auto;
+        right: auto;
+        left: 100%;
+        top: 50%;
+        transform: translate(-10px, -50%); }
+
+    [data-tooltip-pos="right"]:after {
+        margin-left: 11px; }
+
+    [data-tooltip-pos="right"]:hover:before,
+    [data-tooltip-pos="right"]:hover:after {
         transform: translate(0, -50%); }
 
 

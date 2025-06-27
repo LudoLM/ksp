@@ -6,11 +6,12 @@ class DateHelper
 {
     public static function adjustDatesForCalendarRoute(\DateTime $dateCours): array
     {
-        $dateCours->modify('monday this week');
-        $dateLimit = clone $dateCours;
+        $dateStart = clone $dateCours;
+        $dateStart->modify('monday this week');
+        $dateLimit = clone $dateStart;
         $dateLimit->modify('+6 days');
 
-        return [$dateCours, $dateLimit];
+        return [$dateStart, $dateLimit];
     }
 
     public static function adjustDatesForIndexRoute(\DateTime $dateCours): array

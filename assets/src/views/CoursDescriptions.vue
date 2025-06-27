@@ -33,9 +33,11 @@ import CustomButton from "../components/forms/CustomButton.vue";
 import {useRouter} from "vue-router";
 import Banner from "../components/Banner.vue";
 import bannerImage from "../../images/banners/imageBanner15.jpg";
+import {useCalendarStore} from "../store/calendar";
 
 const coursDescriptions = ref([]);
 const router = useRouter();
+const calendarStore = useCalendarStore();
 
 onMounted(async () => {
     coursDescriptions.value = await useGetTypesCours();
@@ -43,7 +45,8 @@ onMounted(async () => {
 
 
 const handleRedirection = (cours) => {
-    router.push({ name: 'Calendrier', query: { coursId: cours.id } });
+    calendarStore.$reset();
+    router.push({ name: 'Calendrier', query: { typeCoursId: cours.id, isOpenRequired: true } });
 }
 
 </script>
