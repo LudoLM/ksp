@@ -8,25 +8,26 @@ const props = defineProps({
         type: Array,
         required: true,
     },
-    coursId: {
+    typeCoursId: {
         type: Number,
-    },
+        default: 0,
+    }
 });
-
-// Vérifier et utiliser une valeur par défaut locale pour éviter NaN
-const selectedTypeCours = ref(props.coursId || 0);
-
+const selectedTypeCours = ref(props.typeCoursId);
 const emit = defineEmits(['update:selectedTypeCours']);
+
+watch(() => props.typeCoursId, (newVal) => {
+    selectedTypeCours.value = newVal;
+}, { immediate: true });
 
 watch(selectedTypeCours, (newValue) => {
     emit('update:selectedTypeCours', newValue);
 });
 
+
 </script>
 
-
 <template>
-
     <div id="form-wrapper" ref="form" class="space-y-4">
         <div class="selects">
             <!-- Sélection du type de cours -->
@@ -42,7 +43,3 @@ watch(selectedTypeCours, (newValue) => {
 
     </div>
 </template>
-
-<style scoped>
-
-</style>

@@ -48,20 +48,31 @@ class CoursController extends AbstractController
 
     #[Route('api/getCoursCalendar', name: 'cours_calendar', methods: ['GET'])]
     #[Route('api/getCours', name: 'cours_index', methods: ['GET'])]
+    #[Route('api/getOnlyNextCours', name: 'cours_next_cours', methods: ['GET'])]
     public function coursIndex(
         Request $request,
         #[MapQueryParameter] int $typeCoursId,
         #[MapQueryParameter] string $dateCoursStr,
         #[MapQueryParameter] int $statusCoursId,
+        #[MapQueryParameter] bool $isOpenRequired = false,
     ): JsonResponse {
         $route = $request->attributes->get('_route');
         try {
-            $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route);
+            $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired);
+
+            // S'il n'y a pas de cours cette semaine, on renvoie un message d'erreur
+            if ([] === $responseData) {
+                throw new \Exception('Aucun cours cette semaine', 500);
+            }
+            if (array_key_exists('type', $responseData) && 'info_next_cours' === $responseData['type']) {
+                return new JsonResponse($responseData, Response::HTTP_OK);
+            }
+            // Sinon, on sérialise les données
             $responseData = $this->serializer->serialize($responseData, 'json', ['groups' => 'cours:index']);
 
-            return new JsonResponse($responseData, Response::HTTP_OK);
+            return new JsonResponse($responseData, Response::HTTP_OK, json : true);
         } catch (\Exception $e) {
-            return new JsonResponse(['success' => false, 'error' => $e->getMessage()], $e->getCode());
+            return new JsonResponse(['message' => $e->getMessage()], $e->getCode());
         }
     }
 

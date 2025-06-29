@@ -40,7 +40,7 @@ const redirectToLogin = () => {
 };
 
 const stepBack = () => {
-    router.back();
+    router.push({ name: 'Calendrier' });
 };
 
 const coursDetails = async () => {

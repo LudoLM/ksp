@@ -1,6 +1,6 @@
 <template>
     <Banner
-        title="Liste des cours"
+        :title="title"
         :hasButton=false
         :backgroundColor="'rgba(30, 27, 75, .9)'"
         :image="bannerImage"
