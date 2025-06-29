@@ -101,7 +101,7 @@ watch([date, selectedTypeCours], async () => {
 });
 
 const displayDateNextCoursString = function(date, typeCours) {
-    return `Prochain cours ${calendarStore.selectedTypeCours.value !== 0 ? " de " + typeCours : ""} disponible le ${new Date(date).toLocaleDateString('fr-FR', {
+    return `Prochain cours ${selectedTypeCours.value !== 0 ? " de " + typeCours : ""} disponible le ${new Date(date).toLocaleDateString('fr-FR', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',

@@ -17,8 +17,8 @@ const getMondayOfSpecificDate = (inputDate) => {
 
 export const useCalendarStore = defineStore('calendar', {
   state: () => ({
-    date: new Date(),
-    daySelected: new Date().getDay() - 1,
+    date: new Date().getDay() === 0 ? new Date(new Date().setDate(new Date().getDate() + 7)) : new Date(),
+    daySelected: new Date().getDay() === 0 ? 0 : new Date().getDay() - 1,
     selectedTypeCours: 0,
     infos: [],
     weekInfos: [[], [], [], [], [], [], []],
@@ -132,8 +132,8 @@ export const useCalendarStore = defineStore('calendar', {
       this.date = new Date(this.date);
     },
     resetCalendar() {
-      this.date = new Date();
-      this.daySelected = this.date.getDay() - 1;
+      this.date = new Date().getDay() === 0 ? new Date(new Date().setDate(new Date().getDate() + 7)) : new Date();
+      this.daySelected = new Date().getDay() === 0 ? 0 : new Date().getDay() - 1;
       this.selectedTypeCours = 0;
     },
   },
