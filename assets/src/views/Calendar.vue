@@ -9,6 +9,7 @@ import Banner from "../components/Banner.vue";
 import DeleteCours from "../../icons/adminActions/DeleteCours.vue";
 import Tooltip from "../components/Tooltip.vue";
 import { useRouter } from "vue-router";
+import {storeToRefs} from "pinia";
 
 const calendarStore = useCalendarStore();
 const dateToday = ref(new Date());
@@ -24,9 +25,8 @@ const selectedTypeCours = computed(() => calendarStore.selectedTypeCours);
 const weekString = computed(() => calendarStore.weekString);
 const days = computed(() => calendarStore.days);
 const infos = computed(() => calendarStore.infos);
-const weekInfos = computed(() => calendarStore.weekInfos);
+const { weekInfos } = storeToRefs(calendarStore);
 const uniqueTypeCoursList = computed(() => calendarStore.uniqueTypeCoursList);
-
 
 // Gère le clic sur les boutons de navigation semaine
 const handleGetCoursPerWeek = async (direction) => {
@@ -203,11 +203,13 @@ const nextDateInNextWeek = computed(() => {
                 {{ infos.message }}
             </p>
         </div>
+
         <div v-for="(weekInfo, index) in weekInfos" :key="index">
             <div v-for="info in weekInfo" :key="info.id" class="flex flex-col items-center desktop">
                 <CoursCardCalendar :info="info"/>
             </div>
         </div>
+
     </div>
     <div class="mobile">
         <div :class="daySelected !== 0 || new Date(date) > new Date(dateToday) ? 'dayBefore' : 'dayBefore invisible'" @click="calendarStore.daySelected !== 0 ?  calendarStore.setDaySelected(calendarStore.daySelected -1) :  handleGetCoursPerWeek('prev')"></div>
