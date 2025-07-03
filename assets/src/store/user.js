@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-export const useUserStore = defineStore('user', {
+export const useUserStore = defineStore('userStore', {
 
 
     state: () => ({
@@ -46,5 +46,15 @@ export const useUserStore = defineStore('user', {
         getUserPrenom: (state) => state.userPrenom,
         getUserNombreCours: (state) => state.userNombreCours,
         getUserEmail: (state) => state.userEmail,
-    }
+    },
+    persist: {
+      enabled: true, // Active la persistance pour ce store
+      strategies: [
+        {
+          key: 'userStore', // Une clé unique pour le localStorage
+          storage: localStorage, // Utilise le localStorage
+          paths: ['userId', 'userToken'], // Les propriétés du store à persister
+        },
+      ],
+    },
 });

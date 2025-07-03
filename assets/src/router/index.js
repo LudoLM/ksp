@@ -14,6 +14,7 @@ import { useUserStore } from '../store/user';
 import { createAlertStore } from '../store/alert';
 import useGetElementsToken from '../utils/useGetElementsToken';
 import LoginLayout from "../layouts/LoginLayout.vue";
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 const alertStore = createAlertStore(); // Instance unique d'alertStore
 
@@ -112,6 +113,7 @@ router.beforeEach((to, from, next) => {
 });
 
 const appPinia = createPinia();
+appPinia.use(piniaPluginPersistedstate)
 const app = createApp(App)
   .use(appPinia)
   .use(router)
