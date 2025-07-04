@@ -10,6 +10,8 @@ import {useGetTypesCours} from "../utils/useActionCours";
 import {apiFetch} from "../utils/useFetchInterceptor";
 import Banner from "../components/Banner.vue";
 import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
+import CustomCheckboxPriority from "../components/forms/CustomCheckboxPriority.vue";
+
 
 const router = useRouter();
 const origin = useRoute().params;
@@ -59,6 +61,8 @@ const formData = ref({
   dureeCours: coursData.value ? coursData.value.dureeCours : 60,
   nbInscriptionMax: 12,
   specialNote: "Cours sympathique",
+  hasPriority: true,
+  hasLimitOfOneCoursPerWeek: true,
 });
 
   const handleSubmit = async (event) => {
@@ -70,6 +74,8 @@ const formData = ref({
       dureeCours: parseInt(formData.value.dureeCours),
       nbInscriptionMax: parseInt(formData.value.nbInscriptionMax),
       specialNote: formData.value.specialNote,
+      hasPriority: formData.value.hasPriority,
+      hasLimitOfOneCoursPerWeek: formData.value.hasLimitOfOneCoursPerWeek,
     };
 
     try {
@@ -102,6 +108,7 @@ const formData = ref({
     }
   };
 
+
   const getCoursData = async () => {
     try {
       const response = await apiFetch("/api/getCours/" + origin.id, {
@@ -116,6 +123,8 @@ const formData = ref({
       formData.value.dureeCours = coursData.duree;
       formData.value.nbInscriptionMax = coursData.nbInscriptionMax;
       formData.value.specialNote = coursData.specialNote;
+      formData.value.hasPriority = coursData.hasPriority;
+      formData.value.hasLimitOfOneCoursPerWeek = coursData.hasLimitOfOneCoursPerWeek
 
 
     } catch (error) {
@@ -155,6 +164,20 @@ const formData = ref({
                     <CustomInput item="Nombre de places" type="number" id="nbInscriptionMax" :error="errors.nbInscriptionMax" v-model="formData.nbInscriptionMax" required />
                 </div>
                 <CustomTextarea item="Note" id="specialNote" :error="errors.specialNote" v-model="formData.specialNote" class="w-full" />
+                <div class="flex justify-around items-center">
+                    <CustomCheckboxPriority
+                        v-model="formData.hasPriority"
+                        id="hasPriority"
+                    >
+                        Prioritaire aux abonnés
+                    </CustomCheckboxPriority>
+                    <CustomCheckboxPriority
+                        v-model="formData.hasLimitOfOneCoursPerWeek"
+                        id="hasLimitOfOneCoursPerWeek"
+                    >
+                        Limite 2 cours/semaine
+                    </CustomCheckboxPriority>
+                </div>
                 <div class="mt-4 flex justify-center">
                     <CustomValidationButton
                         class="w-full"

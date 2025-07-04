@@ -47,6 +47,7 @@ class FilteringCoursServiceTest extends TestCase
         yield 'cours_calendar_routes' => [
             'route' => 'cours_calendar',
             'isOpenRequired' => false,
+            'isPrioritized' => false,
             'expectedCallRepository' => 'findAllSortByDateForUsers',
             'dateLimit' => $dateLimit,
             'cours' => [
@@ -59,6 +60,7 @@ class FilteringCoursServiceTest extends TestCase
         yield 'api_cours_list_routes' => [
             'route' => 'api_cours_list',
             'isOpenRequired' => true,
+            'isPrioritized' => false,
             'expectedCallRepository' => 'findAllSortByDate',
             'dateLimit' => $dateLimit2,
             'cours' => [
@@ -68,7 +70,7 @@ class FilteringCoursServiceTest extends TestCase
     }
 
     #[DataProvider('filterProvider')]
-    public function testFilterCoursWithValidData(string $route, bool $isOpenRequired, string $expectedCallRepository, \DateTime $dateLimit, array $cours): void
+    public function testFilterCoursWithValidData(string $route, bool $isOpenRequired, bool $isPrioritized, string $expectedCallRepository, \DateTime $dateLimit, array $cours): void
     {
         $typeCoursId = 1;
         $statusCoursId = 1;
@@ -81,7 +83,7 @@ class FilteringCoursServiceTest extends TestCase
         $dateCours = 'findAllSortByDateForUsers' === $expectedCallRepository ? new \DateTime('2023-10-30T00:00:00.000000+0000') : new \DateTime('2023-11-01T00:00:00.000000+0000');
         $this->coursRepository->method($expectedCallRepository)->with($typeCours, $dateCours, $dateLimit)->willReturn($cours);
 
-        $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired);
+        $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized);
 
         $this->assertEquals($cours, $responseData);
     }
@@ -93,6 +95,7 @@ class FilteringCoursServiceTest extends TestCase
         $statusCoursId = 1;
         $route = 'cours_calendar';
         $isOpenRequired = false;
+        $isPrioritized = false;
 
         // Retourner un TypeCours valide pour l'ID fourni
         $this->typeCoursRepository->method('findOneBy')->with(['id' => $typeCoursId])->willReturn(new TypeCours());
@@ -103,7 +106,7 @@ class FilteringCoursServiceTest extends TestCase
         $this->expectExceptionMessage('La date fournie est invalide');
 
         // Appeler la méthode qui devrait lever l'exception pour la date invalide
-        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired);
+        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized);
     }
 
     public function testFilterCoursWithTypeCoursNotFound(): void
@@ -113,6 +116,7 @@ class FilteringCoursServiceTest extends TestCase
         $statusCoursId = 1;
         $route = 'cours_calendar';
         $isOpenRequired = false;
+        $isPrioritized = false;
 
         // Configurer le mock pour retourner null lorsque l'ID n'existe pas
         $this->typeCoursRepository->method('findOneBy')->with(['id' => $typeCoursId])->willReturn(null);
@@ -123,6 +127,6 @@ class FilteringCoursServiceTest extends TestCase
         $this->expectExceptionMessage('Le type de cours fourni est invalide');
 
         // Appeler la méthode qui devrait lever l'exception
-        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired);
+        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized);
     }
 }

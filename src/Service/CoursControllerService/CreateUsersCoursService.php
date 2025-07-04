@@ -8,6 +8,7 @@ use App\Manager\UsersCoursManager;
 use App\Service\CoursControllerService\AddUserService\AddUserTimeCheckerService;
 use App\Service\CoursControllerService\AddUserService\CheckIfCoursIsFullService;
 use App\Service\CoursControllerService\AddUserService\CoursParticipationService;
+use App\Service\CoursControllerService\AddUserService\handleCheckSubscriptionsInAWeek;
 use App\Service\CoursControllerService\AddUserService\HandleUserCreditService;
 use App\Service\CoursControllerService\AddUserService\UserCreditCheckerService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,6 +30,7 @@ readonly class CreateUsersCoursService
         private CheckIfCoursIsFullService $checkIfCoursIsFullService,
         private CoursParticipationService $coursParticipationService,
         private HandleUserCreditService $handleUserCreditService,
+        private handleCheckSubscriptionsInAWeek $handleCheckSubscriptionsInAWeekService,
     ) {
     }
 
@@ -53,6 +55,16 @@ readonly class CreateUsersCoursService
             $this->checkIfCoursIsFullService->changeStatusIfCoursIsfull($cours);
             // Si l'utilisateur n'est pas en attente alors on décrémente le nombre de cours de l'utilisateur
             $this->handleUserCreditService->decrement($isOnWaitingList);
+
+            // Si l'utilisateur n'est pas prioritized, on throw une exception
+            if ($cours->hasPriority() && !$user->isPrioritized()) {
+                throw new \Exception('Vous n\'êtes pas prioritaire pour ce cours');
+            }
+
+            if ($cours->hasLimitOfOneCoursPerWeek()) {
+                // si l'utilisateur n'a pas déjà 2 reservations poour la meme semaine
+                $this->handleCheckSubscriptionsInAWeekService->checkIfUserAlreadyHasTwoSubscriptionsInTheSameWeek($user, $cours);
+            }
 
             // Sauvegarde des modifications en base de données
             $this->em->persist($cours);

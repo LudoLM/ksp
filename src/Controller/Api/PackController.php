@@ -45,6 +45,7 @@ class PackController extends AbstractController
         $nbCours = $stripe->checkout->sessions->allLineItems($id, ['expand' => ['data.price.product']]);
         // on retrive les LI pour avoir le nombre de cours
         $nbCours = json_decode((string) $nbCours->toJSON(), true);
+
         $credits = $nbCours['data'][0]['price']['product']['metadata']['nombreCours'];
         if ('paid' === $session->payment_status) {
             $packName = $nbCours['data'][0]['price']['product']['name'];
@@ -55,6 +56,9 @@ class PackController extends AbstractController
             $user = $this->getUser();
             if ($user instanceof User) {
                 $historiquePaiement->setUser($user);
+                if ($credits > 10) {
+                    $user->setIsPrioritized(true);
+                }
             } else {
                 throw new \Exception('L\'utilisateur n\'est pas valide');
             }

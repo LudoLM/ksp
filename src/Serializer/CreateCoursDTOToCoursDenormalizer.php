@@ -24,8 +24,10 @@ class CreateCoursDTOToCoursDenormalizer implements DenormalizerInterface
         }
         if (array_key_exists('object_to_populate', $context) && $context['object_to_populate'] instanceof Cours) {
             $cours = $context['object_to_populate'];
+            $cours->setUpdatedAt(new \DateTime());
         } else {
             $cours = new Cours();
+            $cours->setCreatedAt(new \DateTime());
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::EN_CREATION->value]));
         }
         $cours->setDuree($data->getDureeCours());
@@ -33,6 +35,8 @@ class CreateCoursDTOToCoursDenormalizer implements DenormalizerInterface
         $cours->setSpecialNote($data->getSpecialNote());
         $cours->setNbInscriptionMax($data->getNbInscriptionMax());
         $cours->setTypeCours($this->typeCoursRepository->find($data->getTypeCours()));
+        $cours->setHasPriority($data->hasPriority);
+        $cours->setHasLimitOfOneCoursPerWeek($data->hasLimitOfOneCoursPerWeek);
 
         return $cours;
     }

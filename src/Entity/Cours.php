@@ -26,6 +26,18 @@ class Cours
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:detail', 'cours_filling:index'])]
     private \DateTimeInterface $dateCours;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['cours:index', 'cours:create'])]
+    private \DateTimeInterface $createdAt;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['cours:index', 'cours:create', 'cours:update', 'cours:detail'])]
+    private ?\DateTimeInterface $launchedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['cours:index', 'cours:update'])]
+    private ?\DateTimeInterface $updatedAt = null;
+
     #[ORM\Column(length: 255, nullable: false)]
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update'])]
     private string $specialNote;
@@ -33,6 +45,14 @@ class Cours
     #[ORM\Column(nullable: false)]
     #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours_filling:index'])]
     private int $nbInscriptionMax;
+
+    #[ORM\Column(nullable: false)]
+    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours_filling:index'])]
+    private bool $hasPriority;
+
+    #[ORM\Column(nullable: false)]
+    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours_filling:index'])]
+    private bool $hasLimitOfOneCoursPerWeek;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
@@ -88,6 +108,36 @@ class Cours
         return \DateTimeImmutable::createFromMutable($dateCours);
     }
 
+    public function getCreatedAt(): \DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    public function getLaunchedAt(): \DateTimeInterface
+    {
+        return $this->launchedAt;
+    }
+
+    public function setLaunchedAt(\DateTimeInterface $launchedAt): void
+    {
+        $this->launchedAt = $launchedAt;
+    }
+
+    public function getUpdatedAt(): \DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
     public function setDateCours(\DateTimeInterface $dateCours): void
     {
         $this->dateCours = $dateCours;
@@ -131,6 +181,26 @@ class Cours
     public function setStatusCours(StatusCours $statusCours): void
     {
         $this->statusCours = $statusCours;
+    }
+
+    public function hasPriority(): bool
+    {
+        return $this->hasPriority;
+    }
+
+    public function setHasPriority(bool $hasPriority): void
+    {
+        $this->hasPriority = $hasPriority;
+    }
+
+    public function hasLimitOfOneCoursPerWeek(): bool
+    {
+        return $this->hasLimitOfOneCoursPerWeek;
+    }
+
+    public function setHasLimitOfOneCoursPerWeek(bool $hasLimitOfOneCoursPerWeek): void
+    {
+        $this->hasLimitOfOneCoursPerWeek = $hasLimitOfOneCoursPerWeek;
     }
 
     /**

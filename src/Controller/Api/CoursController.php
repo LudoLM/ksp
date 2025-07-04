@@ -57,8 +57,14 @@ class CoursController extends AbstractController
         #[MapQueryParameter] bool $isOpenRequired = false,
     ): JsonResponse {
         $route = $request->attributes->get('_route');
+        $user = $this->getUser();
+
+        $isPrioritized = false;
+        if ($user instanceof User) {
+            $isPrioritized = $user->isPrioritized();
+        }
         try {
-            $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired);
+            $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized);
 
             // S'il n'y a pas de cours cette semaine, on renvoie un message d'erreur
             if ([] === $responseData) {
@@ -104,6 +110,7 @@ class CoursController extends AbstractController
         if (!$user instanceof User) {
             throw new \Exception('Type de l\'utilisateur invalide');
         }
+
         $cours = $this->coursRepository->find($data['coursId']);
         $isOnWaitingList = $data['isOnWaitingList'];
 
@@ -198,6 +205,7 @@ class CoursController extends AbstractController
         $delay = ($dateCours->getTimestamp() - $currentDateTime->getTimestamp()) * 1000;
 
         $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
+        $cours->setLaunchedAt(new \DateTime('now'));
         $this->messageBus->dispatch(
             new UpdateStatusCoursMessage(
                 $cours->getId()),

@@ -6,6 +6,9 @@ use App\Entity\TypeCours;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository<\App\Entity\TypeCours>
+ */
 class TypeCoursRepository extends ServiceEntityRepository
 {
     /**

@@ -17,7 +17,7 @@ class InvoiceController extends AbstractController
         $payload = json_decode($request->getContent(), true);
         $paiement = $historiquePaiementRepository->find($payload['paiementId']);
 
-        if (!$paiement) {
+        if (null === $paiement) {
             return new Response('Paiement non trouvé', Response::HTTP_NOT_FOUND);
         }
         if ($this->getUser() !== $paiement->getUser()) {

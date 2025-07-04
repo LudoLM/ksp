@@ -22,6 +22,10 @@ class CreateCoursDTO
     #[Assert\NotBlank(message: 'Le type de cours ne peut pas être vide.')]
     public ?int $typeCours = null;
 
+    public bool $hasPriority;
+
+    public bool $hasLimitOfOneCoursPerWeek;
+
     public function getDureeCours(): int
     {
         return $this->dureeCours;
