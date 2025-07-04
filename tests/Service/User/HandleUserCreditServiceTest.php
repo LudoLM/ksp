@@ -11,8 +11,8 @@ use Symfony\Bundle\SecurityBundle\Security;
 class HandleUserCreditServiceTest extends TestCase
 {
     private HandleUserCreditService $handleUserCreditService;
-    private Security $security;
-    private User $user;
+    private \PHPUnit\Framework\MockObject\MockObject $security;
+    private \PHPUnit\Framework\MockObject\MockObject $user;
 
     protected function setUp(): void
     {

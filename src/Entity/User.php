@@ -71,6 +71,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     #[ORM\Column]
     private int $nombreCours;
 
+    #[ORM\Column(nullable: false)]
+    #[Groups(['user:detail'])]
+    private bool $isPrioritized;
+
     /**
      * @var Collection<int, HistoriquePaiement>
      */
@@ -252,6 +256,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
         $this->telephone = $telephone;
 
         return $this;
+    }
+
+    public function isPrioritized(): bool
+    {
+        return $this->isPrioritized;
+    }
+
+    public function setIsPrioritized(bool $isPrioritized): void
+    {
+        $this->isPrioritized = $isPrioritized;
     }
 
     public function __toString(): string

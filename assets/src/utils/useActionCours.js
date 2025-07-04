@@ -1,5 +1,7 @@
 import {apiFetch} from "./useFetchInterceptor";
 import {isRef} from "vue";
+
+
 export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusId, isOpenRequired = false) {
     try {
       const typeCoursValue = isRef(selectedTypeCours) ? selectedTypeCours.value : selectedTypeCours;
@@ -17,9 +19,7 @@ export async function useGetCours(route, infos, selectedTypeCours, selectedDate,
       });
       const response = await fetch(`/api/${route.value}?${params.toString()}`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers : makeRequestHeaders()
       });
       if (response.ok) {
         infos.value = await response.json();
@@ -48,9 +48,7 @@ export async function useGetOnlyNextCours(selectedTypeCours, selectedDate, selec
 
     const response = await fetch(`/api/getOnlyNextCours?${params.toString()}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers : makeRequestHeaders()
     });
     return await response.json();
   } catch (error) {
@@ -192,4 +190,15 @@ export async function useCancelCours(coursId) {
     catch (error) {
         return error;
     }
+}
+
+function makeRequestHeaders() {
+    const token = localStorage.getItem('token');
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
 }

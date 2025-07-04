@@ -16,10 +16,10 @@ use Symfony\Component\Messenger\MessageBusInterface;
 #[CoversClass(UpdateStatusCoursHelper::class)]
 class UpdateStatusCoursHelperTest extends TestCase
 {
-    private StatusCoursRepository $statusCoursRepository;
+    private \PHPUnit\Framework\MockObject\MockObject $statusCoursRepository;
     private UpdateStatusCoursHelper $updateStatusCoursHelper;
-    private EntityManagerInterface $entityManager;
-    private MessageBusInterface $messageBus;
+    private \PHPUnit\Framework\MockObject\MockObject $entityManager;
+    private \PHPUnit\Framework\MockObject\MockObject $messageBus;
 
     public function setUp(
     ): void {
@@ -65,7 +65,6 @@ class UpdateStatusCoursHelperTest extends TestCase
     public function testSetNewStatus(StatusCoursEnum $initialStatus, StatusCoursEnum $expectedStatus): void
     {
         // Mock du repository
-
         $expectedStatusCours = new StatusCours();
         $expectedStatusCours->setLibelle($expectedStatus->value);
 

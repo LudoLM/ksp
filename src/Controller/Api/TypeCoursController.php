@@ -85,7 +85,7 @@ class TypeCoursController extends AbstractController
         EntityManagerInterface $em,
     ): JsonResponse {
         $typeCours = $this->typeCoursRepository->find($id);
-        if (!$typeCours) {
+        if (null === $typeCours) {
             return new JsonResponse(['error' => 'Type de cours non trouvé'], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
         }
 

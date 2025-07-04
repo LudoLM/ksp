@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import {useCalendarStore} from "./calendar";
 
 export const useUserStore = defineStore('userStore', {
 
@@ -38,6 +39,7 @@ export const useUserStore = defineStore('userStore', {
             this.userPrenom = null;
             this.userNombreCours = null;
             localStorage.removeItem('token');
+            useCalendarStore().$reset();
         },
     },
     getters: {

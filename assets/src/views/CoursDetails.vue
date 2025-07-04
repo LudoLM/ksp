@@ -25,6 +25,7 @@ const usersOnStandby = ref([]);
 const loginDialog = ref(false);
 const UnsubscribeUsersDialog = ref(false);
 const usersCount = ref(0);
+const dateLimit = ref(null);
 const isSubscribed = ref(false);
 const isUserOnWaitingList = ref(false);
 const dateStart = computed(() => new Date(cours.value?.dateCours));
@@ -46,6 +47,7 @@ const stepBack = () => {
 const coursDetails = async () => {
   const result = await useGetCoursById(coursId);
   cours.value = JSON.parse(result);
+  dateLimit.value = getDateLimit(cours.value.launchedAt);
   usersCount.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === false).length;
   usersSubscribed.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === false);
   usersOnStandby.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === true);
@@ -56,6 +58,12 @@ onMounted( async () => {
    await coursDetails();
    isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && !usersCours.isOnWaitingList);
 });
+
+const getDateLimit = (launchedAt) => {
+    const date = new Date(launchedAt);
+    date.setDate(date.getDate() + 7); // Ajoute 7 jours
+    return date > new Date() ? useDateFormat(date, 'DD/MM/YYYY').value : null;
+};
 
 
 const handleUpdateUnsubscribeUsersValue = ({ statusCoursValue, usersSubscribedValue }) => {
@@ -88,6 +96,10 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                                 <div class='onStandby text-red-500' v-if="isUserOnWaitingList">En attente</div>
                             </div>
                         </div>
+                    </div>
+                    <div>
+                        <div class="constraintsInfos text-gray-400">{{ cours.hasPriority && dateLimit ? "Priorité jusqu'au " + dateLimit : "" }}</div>
+                        <div class="constraintsInfos text-gray-400">{{ !cours.hasLimitOfOneCoursPerWeek ? "Ce cours n'est pas limité à 2 par semaine" : "" }}</div>
                     </div>
                     <div>
                         <h2 class="text-white mb-4">{{ cours.typeCours.libelle }}</h2>
@@ -197,7 +209,7 @@ p{
     }
 }
 
-.isSubscribedTag, .isUserOnWaitingListTag, .specialNote, .descriptif, .duree, .dispo, .isSubscribed, .onStandby {
+.isSubscribedTag, .isUserOnWaitingListTag, .specialNote, .descriptif, .duree, .dispo, .isSubscribed, .onStandby, .constraintsInfos {
     font-size: clamp(0.8rem, 1vw, 1rem);
 }
 

@@ -10,6 +10,7 @@ import DeleteCours from "../../icons/adminActions/DeleteCours.vue";
 import Tooltip from "../components/Tooltip.vue";
 import { useRouter } from "vue-router";
 import {storeToRefs} from "pinia";
+import {useUserStore} from "../store/user";
 
 const calendarStore = useCalendarStore();
 const dateToday = ref(new Date());

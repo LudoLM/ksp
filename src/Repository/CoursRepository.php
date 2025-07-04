@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Cours;
-use App\Entity\StatusCours;
 use App\Entity\TypeCours;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -70,7 +69,6 @@ class CoursRepository extends ServiceEntityRepository
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
         ?\DateTime $dateLimit,
-        ?StatusCours $statusCours,
     ): array {
         $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'ASC');
@@ -91,11 +89,6 @@ class CoursRepository extends ServiceEntityRepository
                 ->setParameter('dateLimit', $dateLimit);
         }
 
-        if ($statusCours instanceof StatusCours) {
-            $qb->andWhere('c.statusCours = :statusCours')
-                ->setParameter('statusCours', $statusCours);
-        }
-
         return $qb->getQuery()->getResult();
     }
 
@@ -103,6 +96,7 @@ class CoursRepository extends ServiceEntityRepository
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
         ?\DateTime $dateLimit,
+        bool $isPrioritized,
     ): array {
         $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'ASC')
@@ -124,12 +118,18 @@ class CoursRepository extends ServiceEntityRepository
                 ->setParameter('dateLimit', $dateLimit);
         }
 
+        if (!$isPrioritized) {
+            $qb->andWhere('c.hasPriority = false OR c.launchedAt < :launchedAt')
+                ->setParameter('launchedAt', (new \DateTime())->modify('-1 week'));
+        }
+
         return $qb->getQuery()->getResult();
     }
 
     public function findNextCours(
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
+        bool $isPrioritized,
     ): ?Cours {
         $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'ASC')
@@ -143,6 +143,12 @@ class CoursRepository extends ServiceEntityRepository
         if ($dateCours instanceof \DateTime) {
             $qb->andWhere('c.dateCours > :dateCours')
                 ->setParameter('dateCours', $dateCours);
+        }
+
+        // s'il l'utilisateur n'est pas isPrioritized alors il faut que le cours a été créé il y a + d'une semaine ou qu'il soit à hasPriority false
+        if (!$isPrioritized) {
+            $qb->andWhere('c.hasPriority = false OR c.launchedAt < :launchedAt')
+                ->setParameter('launchedAt', (new \DateTime())->modify('-1 week'));
         }
 
         $qb->setMaxResults(1);

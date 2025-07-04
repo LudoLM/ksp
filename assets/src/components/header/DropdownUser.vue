@@ -9,6 +9,7 @@ import LogoutIcon from "../../../icons/userActions/LogoutIcon.vue";
 import UserIcon from "../../../icons/userActions/UserIcon.vue";
 import {apiFetch} from "../../utils/useFetchInterceptor";
 import {storeToRefs} from "pinia";
+import {useCalendarStore} from "../../store/calendar";
 
 const target = ref(null)
 const dropdownOpen = ref(false)
@@ -44,9 +45,10 @@ const { isScrolled } = defineProps({
     }
 });
 
-const logout = () => {
-    userStore.logout();
-    router.push({name: 'Accueil'});
+const logout = async () => {
+    await userStore.logout();
+    await useCalendarStore().$reset()
+    await router.push({name: 'Accueil'});
 };
 
 onMounted(async () => {

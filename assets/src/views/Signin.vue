@@ -98,13 +98,13 @@
 </template>
 
 <script setup>
-import { ref, inject } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import CustomInput from "../components/forms/CustomInput.vue";
-import {useUserStore} from "../store/user";
 import CustomPassword from "../components/forms/CustomPassword.vue";
 import SideBannerAuth from "../components/SideBannerAuth.vue";
 import ModalResetPassword from "../components/modals/ModalResetPassword.vue";
+import {useCalendarStore} from "../store/calendar";
 
 
 // Instancier le store en dehors de la fonction handleLogin
@@ -130,16 +130,16 @@ const handleSubmit = async () => {
 
         if (!response.ok) {
             const responseError = await response.json();
-
             throw new Error(responseError.message);
         }
 
         const data = await response.json();
         // Stocker le token et mettre à jour le store
         localStorage.setItem('token', data.token);
+        useCalendarStore().$reset();
         // Redirige vers la page d'accueil après la connexion réussie
         await router.push('/');
-    } catch (err) {
+    } catch (error) {
         error.value = "Les informations d'identification sont incorrectes";
     }
 }

@@ -10,6 +10,7 @@ const props = defineProps({
     },
 });
 
+
 const formattedHour = computed(() => {
     const date = new Date(props.info.dateCours);
     const hours = date.getHours();

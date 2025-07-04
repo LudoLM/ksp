@@ -6,6 +6,9 @@ use App\Entity\HistoriquePaiement;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository<\App\Entity\HistoriquePaiement>
+ */
 class HistoriquePaiementRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)

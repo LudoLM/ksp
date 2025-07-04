@@ -3,17 +3,20 @@
 import bannerImage from "../../images/banners/imageBanner17.jpg";
 import Banner from "../components/Banner.vue";
 import ModalConnect from "../components/modals/ModalConnect.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {useUserStore} from "../store/user";
 import {useRouter} from "vue-router";
+import {storeToRefs} from "pinia";
 
 
-const userId = useUserStore().userId;
+const { userId } = storeToRefs(useUserStore());
 const loginDialog = ref(false);
 const router = useRouter();
 const redirectToLogin = () => {
     router.push({ name: 'Login' });
 };
+
+
 
 </script>
 
@@ -149,7 +152,7 @@ const redirectToLogin = () => {
           </ModalConnect>
           <stripe-buy-button
               v-else
-              buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
+              buy-button-id="buy_btn_1RfkFTC6kEhASj1enOcDtmph"
               publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
           >
           </stripe-buy-button>
@@ -159,7 +162,7 @@ const redirectToLogin = () => {
               <h6>Forfait annuel 72 cours</h6>
               <p>Prioritaire</p>
           </div>
-          <p class="text-lg mr-5">525€</p>
+          <p class="text-lg mr-5">500€</p>
           <ModalConnect
               v-if="!userId"
               isPricingSizeButton
@@ -172,7 +175,7 @@ const redirectToLogin = () => {
           </ModalConnect>
           <stripe-buy-button
               v-else
-              buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
+              buy-button-id="buy_btn_1RfkTNC6kEhASj1edXN07ZtV"
               publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
           >
           </stripe-buy-button>
