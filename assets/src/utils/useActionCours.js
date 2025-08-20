@@ -2,11 +2,11 @@ import {apiFetch} from "./useFetchInterceptor";
 import {isRef} from "vue";
 
 
-export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusId, isOpenRequired = false) {
+export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusCours, isOpenRequired = false) {
     try {
       const typeCoursValue = isRef(selectedTypeCours) ? selectedTypeCours.value : selectedTypeCours;
       const dateCoursValue = isRef(selectedDate) ? selectedDate.value : selectedDate;
-      const statusCoursValue = isRef(selectedStatusId) ? selectedStatusId.value : selectedStatusId;
+      const statusCoursValue = isRef(selectedStatusCours) ? selectedStatusCours.value : selectedStatusCours;
       const isOpenRequiredValue = isRef(isOpenRequired) ? isOpenRequired.value : isOpenRequired;
 
 

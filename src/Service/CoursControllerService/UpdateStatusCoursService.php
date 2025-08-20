@@ -5,6 +5,11 @@ namespace App\Service\CoursControllerService;
 use App\Entity\Cours;
 use App\Enum\StatusCoursEnum;
 use App\Helper\UpdateStatusCoursHelper;
+use App\Message\UpdateStatusCoursMessage;
+use App\Repository\StatusCoursRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 class UpdateStatusCoursService
 {
@@ -12,6 +17,9 @@ class UpdateStatusCoursService
 
     public function __construct(
         private readonly UpdateStatusCoursHelper $updateStatusCoursHelper,
+        private readonly MessageBusInterface $messageBus,
+        private readonly StatusCoursRepository $statusCoursRepository,
+        private readonly EntityManagerInterface $em,
     ) {
     }
 
@@ -39,5 +47,33 @@ class UpdateStatusCoursService
     {
         $dateCoursWithDurationAndTimeAfter = $cours->getDateImmutable()->modify('+'.self::DELAI_ARCHIVE * 24 * 60 .' minutes');
         $this->updateStatusCoursHelper->checkCoursUpdatable($cours, StatusCoursEnum::ARCHIVE, $dateCoursWithDurationAndTimeAfter, 0);
+    }
+
+    public function dispatchCoursStatusUpdate(Cours $cours): void
+    {
+        // Obtenez la date du cours
+        $dateCours = $cours->getDateCours();
+
+        $currentDateTime = new \DateTime('now');
+
+        // Calculez le délai en millisecondes
+        $delay = ($dateCours->getTimestamp() - $currentDateTime->getTimestamp()) * 1000;
+
+        $this->messageBus->dispatch(
+            new UpdateStatusCoursMessage(
+                $cours->getId()),
+            [new DelayStamp($delay)]
+        );
+    }
+
+    public function prepareAndLaunchCours(Cours $cours): void
+    {
+        $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
+        $cours->setLaunchedAt(new \DateTime('now'));
+
+        $this->dispatchCoursStatusUpdate($cours);
+
+        $this->em->persist($cours);
+        $this->em->flush();
     }
 }

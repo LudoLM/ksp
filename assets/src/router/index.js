@@ -15,6 +15,8 @@ import { createAlertStore } from '../store/alert';
 import useGetElementsToken from '../utils/useGetElementsToken';
 import LoginLayout from "../layouts/LoginLayout.vue";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 
 const alertStore = createAlertStore(); // Instance unique d'alertStore
 
@@ -65,6 +67,7 @@ const router = createRouter({
             { path: 'coursType/add', name: 'CreateTypeCours', label: 'Créer Type de cours', component: TypeCoursForm, meta: { requiresAdmin: true, title: "Création de type de cours" } },
             { path: 'coursType/edit', name: 'EditTypeCours', label: 'Modifier Type de cours', component: TypeCoursForm, meta: { requiresAdmin: true, title: "Modifier un type de cours" } },
             { path: 'coursDetails/:id', name: 'AdminCoursDetails', component: () => import('../views/CoursDetails.vue'), meta: { requiresAdmin: true, title: "Détails" } },
+            { path: 'createWeekType', name: 'CreateWeekType', label: 'Gérer semaine type', component: () => import('../views/admin/CreateWeekType.vue'), meta: { requiresAdmin: true, title: "Gestion de semaines types" }},
           ],
         },
       ],
@@ -118,6 +121,7 @@ const app = createApp(App)
   .use(appPinia)
   .use(router)
   .use(vuetify)
+  .component('VueDatePicker', VueDatePicker);
 
 watch(
   () => router.currentRoute.value,

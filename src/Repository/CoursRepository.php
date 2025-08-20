@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Cours;
+use App\Entity\StatusCours;
 use App\Entity\TypeCours;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -69,6 +70,7 @@ class CoursRepository extends ServiceEntityRepository
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
         ?\DateTime $dateLimit,
+        ?StatusCours $statusCours = null,
     ): array {
         $qb = $this->createQueryBuilder('c')
             ->orderBy('c.dateCours', 'ASC');
@@ -89,6 +91,12 @@ class CoursRepository extends ServiceEntityRepository
                 ->setParameter('dateLimit', $dateLimit);
         }
 
+        if ($statusCours instanceof StatusCours) {
+            $qb
+                ->andWhere('c.statusCours = :statuscours')
+                ->setParameter('statuscours', $statusCours);
+        }
+
         return $qb->getQuery()->getResult();
     }
 
@@ -97,14 +105,14 @@ class CoursRepository extends ServiceEntityRepository
         ?\DateTime $dateCours,
         ?\DateTime $dateLimit,
         bool $isPrioritized,
+        bool $isAdmin,
+        ?StatusCours $statusCours = null,
     ): array {
         $qb = $this->createQueryBuilder('c')
-            ->orderBy('c.dateCours', 'ASC')
-            ->where('c.statusCours IN (1, 2, 3, 5)');
+            ->orderBy('c.dateCours', 'ASC');
 
-        // Ajouter les filtres dynamiques
         if ($typeCours instanceof TypeCours) {
-            $qb->andWhere('c.typeCours = :typeCours')
+            $qb->where('c.typeCours = :typeCours')
                 ->setParameter('typeCours', $typeCours);
         }
 
@@ -118,7 +126,12 @@ class CoursRepository extends ServiceEntityRepository
                 ->setParameter('dateLimit', $dateLimit);
         }
 
-        if (!$isPrioritized) {
+        if ($statusCours instanceof StatusCours) {
+            $qb->andwhere('c.statusCours = :statuscours')
+                ->setParameter('statuscours', $statusCours);
+        }
+
+        if (!$isPrioritized && !$isAdmin) {
             $qb->andWhere('c.hasPriority = false OR c.launchedAt < :launchedAt')
                 ->setParameter('launchedAt', (new \DateTime())->modify('-1 week'));
         }
@@ -130,14 +143,20 @@ class CoursRepository extends ServiceEntityRepository
         ?TypeCours $typeCours,
         ?\DateTime $dateCours,
         bool $isPrioritized,
+        ?StatusCours $statusCours,
+        bool $isAdmin,
     ): ?Cours {
         $qb = $this->createQueryBuilder('c')
-            ->orderBy('c.dateCours', 'ASC')
-            ->where('c.statusCours IN (1)');
+            ->orderBy('c.dateCours', 'ASC');
 
         if ($typeCours instanceof TypeCours) {
             $qb->andWhere('c.typeCours = :typeCours')
                 ->setParameter('typeCours', $typeCours);
+        }
+
+        if ($statusCours instanceof StatusCours) {
+            $qb->andWhere('c.statusCours = :statusCours')
+                ->setParameter('statusCours', $statusCours);
         }
 
         if ($dateCours instanceof \DateTime) {
@@ -145,8 +164,8 @@ class CoursRepository extends ServiceEntityRepository
                 ->setParameter('dateCours', $dateCours);
         }
 
-        // s'il l'utilisateur n'est pas isPrioritized alors il faut que le cours a été créé il y a + d'une semaine ou qu'il soit à hasPriority false
-        if (!$isPrioritized) {
+        // s'il l'utilisateur n'est pas isPrioritized ou admin alors il faut que le cours a été créé il y a + d'une semaine ou qu'il soit à hasPriority false
+        if (!$isPrioritized && !$isAdmin) {
             $qb->andWhere('c.hasPriority = false OR c.launchedAt < :launchedAt')
                 ->setParameter('launchedAt', (new \DateTime())->modify('-1 week'));
         }

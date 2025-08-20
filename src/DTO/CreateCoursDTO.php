@@ -8,19 +8,19 @@ class CreateCoursDTO
 {
     #[Assert\NotBlank(message: 'La durée ne peut pas être vide.')]
     #[Assert\GreaterThanOrEqual(1, message: 'La durée du cours doit être positive')]
-    public ?int $dureeCours = null;
+    public int $dureeCours;
 
     #[Assert\NotBlank(message: 'La date du cours ne peut pas être vide.')]
-    /* #[Assert\GreaterThanOrEqual('+1 day', message: 'Le cours ne peut pas être créé ou modifié sans un délai de 24 heures.')] */
-    public ?\DateTimeInterface $dateCours = null;
+    #[Assert\GreaterThanOrEqual('+1 day', message: 'Le cours ne peut pas être créé ou modifié sans un délai de 24 heures.')]
+    public \DateTimeInterface $dateCours;
 
     public ?string $specialNote = null;
     #[Assert\NotBlank(message: "Le nombre d'inscription max ne peut pas être vide.")]
     #[Assert\GreaterThanOrEqual(1, message: "Le nombre d'inscriptions max doit être positive.")]
-    public ?int $nbInscriptionMax = null;
+    public int $nbInscriptionMax;
 
     #[Assert\NotBlank(message: 'Le type de cours ne peut pas être vide.')]
-    public ?int $typeCours = null;
+    public int $typeCours;
 
     public bool $hasPriority;
 

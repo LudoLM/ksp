@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\TypeCoursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -15,16 +16,16 @@ class TypeCours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', 'week_type:index'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', 'user:detail'])]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', 'user:detail', 'week_type:index'])]
     #[Assert\NotBlank(message: 'Le nom ne peut pas être vide.')]
     private string $libelle;
 
-    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::TEXT)]
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
+    #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', 'week_type:index'])]
     #[Assert\NotBlank(message: 'Le descriptif ne peut pas être vide.')]
     private string $descriptif;
 
@@ -34,7 +35,7 @@ class TypeCours
     #[ORM\OneToMany(mappedBy: 'typeCours', targetEntity: Cours::class, orphanRemoval: true)]
     private Collection $cours;
 
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', 'week_type:index'])]
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "L'image ne peut pas être vide.")]
     private string $thumbnail;

@@ -79,8 +79,16 @@
                         </router-link>
                     </li>
                     <li>
-                        <a @click="handleRefreshCours">Rafraichir les cours</a>
+                        <router-link
+                            :to="{ name: 'CreateWeekType' }"
+                            class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                        >
+                            Créer une semaine type
+                        </router-link>
                     </li>
+<!--                    <li>
+                        <a @click="handleRefreshCours">Rafraichir les cours</a>
+                    </li>-->
                 </ul>
             </div>
         </div>
@@ -165,7 +173,8 @@ const routes = computed(() =>
                 "AdminProfile",
                 "AdminCoursDetails",
                 "ResetPassword",
-                "EditProfile"
+                "EditProfile",
+                "CreateWeekType"
             ].includes(r.name)
     )
 );

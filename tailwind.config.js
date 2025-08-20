@@ -33,6 +33,8 @@ module.exports = {
                 primary: '#3C50E0',
                 secondary: '#80CAEE',
                 tertiary: '#FFBA00',
+                templateMainColor: '#472371',
+                templateSecondColor: '#5e2ca5',
                 stroke: '#E2E8F0',
                 gray: {
                     ...colors.gray,

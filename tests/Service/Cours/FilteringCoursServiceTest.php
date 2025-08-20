@@ -48,6 +48,7 @@ class FilteringCoursServiceTest extends TestCase
             'route' => 'cours_calendar',
             'isOpenRequired' => false,
             'isPrioritized' => false,
+            'isAdmin' => false,
             'expectedCallRepository' => 'findAllSortByDateForUsers',
             'dateLimit' => $dateLimit,
             'cours' => [
@@ -61,6 +62,7 @@ class FilteringCoursServiceTest extends TestCase
             'route' => 'api_cours_list',
             'isOpenRequired' => true,
             'isPrioritized' => false,
+            'isAdmin' => false,
             'expectedCallRepository' => 'findAllSortByDate',
             'dateLimit' => $dateLimit2,
             'cours' => [
@@ -70,7 +72,7 @@ class FilteringCoursServiceTest extends TestCase
     }
 
     #[DataProvider('filterProvider')]
-    public function testFilterCoursWithValidData(string $route, bool $isOpenRequired, bool $isPrioritized, string $expectedCallRepository, \DateTime $dateLimit, array $cours): void
+    public function testFilterCoursWithValidData(string $route, bool $isOpenRequired, bool $isPrioritized, bool $isAdmin, string $expectedCallRepository, \DateTime $dateLimit, array $cours): void
     {
         $typeCoursId = 1;
         $statusCoursId = 1;
@@ -83,7 +85,7 @@ class FilteringCoursServiceTest extends TestCase
         $dateCours = 'findAllSortByDateForUsers' === $expectedCallRepository ? new \DateTime('2023-10-30T00:00:00.000000+0000') : new \DateTime('2023-11-01T00:00:00.000000+0000');
         $this->coursRepository->method($expectedCallRepository)->with($typeCours, $dateCours, $dateLimit)->willReturn($cours);
 
-        $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized);
+        $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized, $isAdmin);
 
         $this->assertEquals($cours, $responseData);
     }
@@ -96,9 +98,13 @@ class FilteringCoursServiceTest extends TestCase
         $route = 'cours_calendar';
         $isOpenRequired = false;
         $isPrioritized = false;
+        $isAdmin = false;
 
         // Retourner un TypeCours valide pour l'ID fourni
         $this->typeCoursRepository->method('findOneBy')->with(['id' => $typeCoursId])->willReturn(new TypeCours());
+
+        // Simule que le statut est trouvé, permettant au service d'atteindre la validation de la date.
+        $this->statusCoursRepository->method('findOneBy')->with(['id' => $statusCoursId])->willReturn(new StatusCours());
 
         // Attendre l'exception spécifique avec le message et le code appropriés
         $this->expectException(FilteringCoursException::class);
@@ -106,7 +112,7 @@ class FilteringCoursServiceTest extends TestCase
         $this->expectExceptionMessage('La date fournie est invalide');
 
         // Appeler la méthode qui devrait lever l'exception pour la date invalide
-        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized);
+        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized, $isAdmin);
     }
 
     public function testFilterCoursWithTypeCoursNotFound(): void
@@ -117,6 +123,7 @@ class FilteringCoursServiceTest extends TestCase
         $route = 'cours_calendar';
         $isOpenRequired = false;
         $isPrioritized = false;
+        $isAdmin = false;
 
         // Configurer le mock pour retourner null lorsque l'ID n'existe pas
         $this->typeCoursRepository->method('findOneBy')->with(['id' => $typeCoursId])->willReturn(null);
@@ -127,6 +134,6 @@ class FilteringCoursServiceTest extends TestCase
         $this->expectExceptionMessage('Le type de cours fourni est invalide');
 
         // Appeler la méthode qui devrait lever l'exception
-        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized);
+        $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized, $isAdmin);
     }
 }

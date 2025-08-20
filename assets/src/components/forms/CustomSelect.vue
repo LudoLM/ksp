@@ -10,13 +10,18 @@
       },
       item: String,
       id: String,
+      width: {
+          type:String,
+          default: "w-full"
+      }
     });
+
 
     const emit = defineEmits(['update:modelValue']);
 </script>
 
 <template>
-    <div class="space-y-6 w-full">
+    <div class="space-y-6 mb-4">
         <!-- Single Select Input -->
         <div>
             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400" v-if="item !== ''">
@@ -26,11 +31,11 @@
                 <select
                     :id="id"
                     :value="modelValue"
-                    @change="emit('update:modelValue', $event.target.value)"
-                    class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                    @change="(e) => emit('update:modelValue', Number(e.target.value))"
+                    class="dark:bg-dark-900 h-10 text-sm md:h-10 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                 >
                     <option value="0" v-if="id">{{ id }}</option>
-                    <option v-for="cours in options" :key="cours.id" :value="cours.id" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{{ cours.libelle }}</option>
+                    <option v-for="option in options" :key="option.id" :value="option.id" class="text-gray-700 dark:bg-gray-900 dark:text-gray-400">{{ option.libelle ? option.libelle : option.name }}</option>
                 </select>
                 <span
                     class="absolute z-30 text-gray-700 -translate-y-1/2 pointer-events-none right-4 top-1/2 dark:text-gray-400"

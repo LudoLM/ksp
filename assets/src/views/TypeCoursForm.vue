@@ -168,7 +168,7 @@ const handleSubmit = async (event) => {
 
                     <CustomFileInput
                         item="Nouvelle image"
-                        class="w-full"
+                        class="w-full mt-6"
                         @change="onFileChange"
                         :error="errors.thumbnail"
                     />

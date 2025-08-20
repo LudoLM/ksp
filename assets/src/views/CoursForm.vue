@@ -87,11 +87,10 @@ const formData = ref({
         },
         body: JSON.stringify(data),
       });
-
       const result = await response.json();
-
       if (!response.ok) {
         await useValidationForm(result, errors);
+
       }
 
       if (response.status === 200){

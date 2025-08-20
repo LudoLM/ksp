@@ -2,7 +2,8 @@
 import {defineStore} from 'pinia';
 import {ref} from 'vue';
 import {useDateFormat} from "@vueuse/core";
-import {useGetCours, useGetOnlyNextCours, useGetTypesCours} from "../utils/useActionCours";
+import {useGetCours, useGetOnlyNextCours, useGetTypesCours, useGetStatusCours} from "../utils/useActionCours";
+import Logo from "../components/header/Logo.vue";
 
 // --- Fonction utilitaire pour calculer le lundi d'une date ---
 const getMondayOfSpecificDate = (inputDate) => {
@@ -20,10 +21,12 @@ export const useCalendarStore = defineStore('calendar', {
     date: new Date().getDay() === 0 ? new Date(new Date().setDate(new Date().getDate() + 7)) : new Date(),
     daySelected: new Date().getDay() === 0 ? 0 : new Date().getDay() - 1,
     selectedTypeCours: 0,
+    selectedStatusCours: 0,
     infos: [],
     weekInfos: [[], [], [], [], [], [], []],
     firstNextCoursInNextWeeks: null,
     uniqueTypeCoursList: [],
+    uniqueStatusCoursList: [],
     weekString: '',
     days: [],
   }),
@@ -52,10 +55,9 @@ export const useCalendarStore = defineStore('calendar', {
     async fetchCoursPerWeek(isOpenRequired = false) {
       try {
         const dateFormatted = ref(this.date.toISOString().split('T')[0]);
-        const statusCours = ref(null)
         const tempInfos = ref([]);
         const route = ref("getCoursCalendar");
-        await useGetCours(route, tempInfos, this.selectedTypeCours, dateFormatted, statusCours, isOpenRequired);
+        await useGetCours(route, tempInfos, this.selectedTypeCours, dateFormatted, this.selectedStatusCours, isOpenRequired,);
         this.infos = tempInfos.value;
         // Si isOpenRequired est vrai, on récupère uniquement le prochain cours, on change la date et on affiche le jour du cours
         if (isOpenRequired && this.infos && this.infos.length > 0) {
@@ -83,7 +85,7 @@ export const useCalendarStore = defineStore('calendar', {
 
         // Si le dernier jour de la semaine n'a pas de cours et qu'il y a des cours dans la semaine, on récupère le prochain cours
         if (this.weekInfos[6].length === 0 && !this.weekInfos.every((info) => info.length === 0)) {
-          this.firstNextCoursInNextWeeks = await useGetOnlyNextCours(this.selectedTypeCours, this.days[5], "0");
+          this.firstNextCoursInNextWeeks = await useGetOnlyNextCours(this.selectedTypeCours, this.days[5], this.selectedStatusCours);
         }
 
       } catch (error) {
@@ -95,6 +97,9 @@ export const useCalendarStore = defineStore('calendar', {
     },
     async fetchTypesCours() {
       this.uniqueTypeCoursList = await useGetTypesCours();
+    },
+    async fetchStatusCours() {
+      this.uniqueStatusCoursList = await useGetStatusCours();
     },
     updateDaysOfWeek() {
       const monday = this.getMondayOfDisplayedWeek;
@@ -116,6 +121,9 @@ export const useCalendarStore = defineStore('calendar', {
     setSelectedTypeCours(typeId) {
       this.selectedTypeCours = typeId;
     },
+    setSelectedStatusCours(statusId){
+      this.selectedStatusCours = statusId;
+    },
     nextWeek() {
       const current = new Date(this.date);
       this.setDaySelected(0);
@@ -134,7 +142,8 @@ export const useCalendarStore = defineStore('calendar', {
     resetCalendar() {
       this.date = new Date().getDay() === 0 ? new Date(new Date().setDate(new Date().getDate() + 7)) : new Date();
       this.daySelected = new Date().getDay() === 0 ? 0 : new Date().getDay() - 1;
-      this.selectedTypeCours = 0;
+      this.setSelectedTypeCours(0);
+      this.setSelectedStatusCours(0);
     },
   },
 });

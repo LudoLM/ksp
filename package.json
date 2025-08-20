@@ -25,6 +25,7 @@
         "webpack-notifier": "^1.15.0"
     },
     "dependencies": {
+        "@vuepic/vue-datepicker": "^11.0.2",
         "@vueuse/core": "^10.11.0",
         "apexcharts": "^4.7.0",
         "pinia": "^3.0.3",
