@@ -4,9 +4,8 @@ import {useDateFormat} from "@vueuse/core";
 import StatusCoursTag from "./StatusCoursTag.vue";
 import ButtonsCardAdmin from "./admin/ButtonsCardAdmin.vue";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
-import {inject, ref} from "vue";
+import {computed, inject, ref} from "vue";
 import {useRouter} from "vue-router";
-import ModalConfirm from "./modals/ModalConfirm.vue";
 
 const alertStore = inject('alertStore');
 const router = useRouter();
@@ -18,8 +17,8 @@ const props = defineProps(
     }
 )
 const emit = defineEmits(['cancelCours', 'deleteCreation', 'updateCreation', 'openCreation', 'handleAddExtraResponse']);
-const statusCours = ref(props.item.statusCours);
-const usersCount = ref(props.item.usersCours.filter(cours => cours.isOnWaitingList === false).length);
+const statusCours = computed(() => props.item.statusCours);
+const usersCount = computed(() => props.item.usersCours.filter(cours => cours.isOnWaitingList === false).length);
 
 const deleteCreation = async () => {
     const response = await useDeleteCours(props.item.id);

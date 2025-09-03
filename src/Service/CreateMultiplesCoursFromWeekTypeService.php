@@ -50,7 +50,6 @@ readonly class CreateMultiplesCoursFromWeekTypeService
                 $cours->setSpecialNote($coursWeekType->specialNote);
                 $cours->setNbInscriptionMax($coursWeekType->nbInscriptionMax);
                 $cours->setCreatedAt(new \DateTime());
-                $cours->setLaunchedAt(new \DateTime());
                 $cours->setDateCours($dateSelected);
                 $cours->setStatusCours($statusCours);
                 $cours->setHasPriority($coursWeekType->hasPriority);

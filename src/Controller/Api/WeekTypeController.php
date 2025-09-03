@@ -100,11 +100,14 @@ class WeekTypeController extends AbstractController
         #[MapRequestPayload] IntervalDateDTO $intervalDateDTO,
     ): JsonResponse {
         $cours = $this->coursRepository->findAllSortByDate(null, $intervalDateDTO->startDate, $intervalDateDTO->endDate->modify('1 day'), $this->statusCoursRepository->find('4'));
-
         foreach ($cours as $coursItem) {
             $this->updateStatusCoursService->prepareAndLaunchCours($coursItem);
         }
+        $this->em->flush();
 
-        return new JsonResponse(['message' => 'Les cours en création de la semaine ont été ouverts avec succès'], Response::HTTP_OK);
+        return $this->json([
+            'message' => 'Les cours en création de la semaine ont été ouverts avec succès',
+            'cours' => $cours,
+        ], Response::HTTP_OK, [], ['groups' => 'cours:index']);
     }
 }

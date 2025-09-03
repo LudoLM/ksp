@@ -20,11 +20,11 @@
                 />
                 <TypeCoursFilter
                     :uniqueTypeCoursList="uniqueTypeCoursList"
-                    @update:selectedTypeCours="updateTypeCoursList"
+                    v-model:typeCoursId="selectedTypeCoursId"
                 />
                 <StatusCoursFilter
                     :uniqueStatusCoursList="uniqueStatusCoursList"
-                    @update:selectedStatusCours="updateStatusCoursList"
+                    v-model:selectedStatusId="selectedStatusId"
                 />
                 <CustomButton
                     color='red'
@@ -42,12 +42,12 @@
                     <div class="py-4 px-4 font-medium text-left">Actions</div>
                 </div>
                 <div v-if="coursData.length > 0">
-                    <div v-for="(item, index) in coursData" :key="item.id + currentPage" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
-                        <CoursLine
-                            :item="item"
-                            @deleteCreation="handleUpdateDeleteCreation"
-                        />
-                    </div>
+                    <CoursWeekList
+                        :coursData = coursData
+                        :currentPage="currentPage"
+                        @deleteCreation="handleUpdateDeleteCreation"
+                        @weekOpened="handleWeekOpened"
+                    />
                 </div>
                 <div v-else class="flex justify-center items-center h-70">
                     <p>Aucun cours</p>
@@ -64,7 +64,7 @@
 </style>
 
 <script setup>
-import {ref, onMounted, watch, inject} from 'vue';
+import {ref, onMounted, watch} from 'vue';
 import { useRoute } from "vue-router";
 import {
     useGetCours,
@@ -74,24 +74,23 @@ import {
 import Banner from "../../components/Banner.vue";
 import bannerImage from "../../../images/banners/imageBanner5.jpg";
 import CustomButton from "../../components/forms/CustomButton.vue";
-import CoursLine from "../../components/CoursLine.vue";
 import TypeCoursFilter from "../../components/filtersCours/TypeCoursFilter.vue";
 import StatusCoursFilter from "../../components/filtersCours/StatusCoursFilter.vue";
 import MonthsFilter from "../../components/filtersCours/MonthsFilter.vue";
 import YearsFilter from "../../components/filtersCours/YearsFilter.vue";
+import CoursWeekList from "../../components/admin/CoursWeekList.vue";
 
 const selectedCoursId = ref(null);
 const coursData = ref([]);
 const selectedMonth = ref(String(new Date().getMonth() + 1).padStart(2, '0'));
 const selectedYear = ref(new Date().getFullYear());
 const selectedDate = ref(new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0') + '-01T00:00:00Z');
-const selectedStatusId = ref(null);
-const selectedTypeCoursId = ref(null);
+const selectedStatusId = ref(0);
+const selectedTypeCoursId = ref(0);
 const currentPage = ref(1);
 const uniqueTypeCoursList = ref([]);
 const uniqueStatusCoursList = ref([]);
 const route = useRoute();
-const alertStore = inject('alertStore');
 const title = 'Liste des cours';
 const routeGetCours = ref("getCours");
 
@@ -108,18 +107,38 @@ watch(() => route.query, () => {
     window.location.reload();
 });
 
+watch(selectedTypeCoursId, async (newValue, oldValue) => {
+    // s'exécutera à chaque fois que selectedTypeCoursId change
+    currentPage.value = 1;
+    await useGetCours(routeGetCours, coursData, selectedTypeCoursId, selectedDate, selectedStatusId);
+});
 
+watch(selectedStatusId, async (newValue, oldValue) => {
+    // s'exécutera à chaque fois que selectedStatusId change
+    currentPage.value = 1;
+    await useGetCours(routeGetCours, coursData, selectedTypeCoursId, selectedDate, selectedStatusId);
+});
 const handleUpdateDeleteCreation = ({ id }) => {
     // Supprimer le cours de la liste
     coursData.value = coursData.value.filter(info => info.id !== id);
 };
 
-// Mise à jour des filtres lorsqu'un événement est reçu
-const updateTypeCoursList = async (value) => {
-    selectedTypeCoursId.value = value;
-    currentPage.value = 1;
-    await useGetCours(routeGetCours, coursData, selectedTypeCoursId, selectedDate, selectedStatusId);
+const handleWeekOpened = (updatedCours) => {
+    // Créer une copie du tableau existant
+    const updatedData = [...coursData.value];
+
+    // Mettre à jour les cours modifiés dans le tableau
+    updatedCours.forEach(newCours => {
+        const index = updatedData.findIndex(oldCours => oldCours.id === newCours.id);
+        if (index !== -1) {
+            updatedData[index] = newCours;
+        }
+    });
+
+    // Remplacer l'ancienne référence par la nouvelle pour déclencher la réactivité
+    coursData.value = updatedData;
 };
+// Mise à jour des filtres lorsqu'un événement est reçu
 
 const updateSelectedMonthList = async (month) => {
     selectedMonth.value = month;
@@ -135,17 +154,12 @@ const updateSelectedYearList = async (year) => {
     await useGetCours(routeGetCours, coursData, selectedTypeCoursId, selectedDate, selectedStatusId);
 };
 
-const updateStatusCoursList = async (value) => {
-    selectedStatusId.value = value;
-    currentPage.value = 1;
-    await useGetCours(routeGetCours, coursData, selectedTypeCoursId, selectedDate, selectedStatusId);
-};
-
 const resetInfos = async () => {
     selectedMonth.value = String(new Date().getMonth() + 1).padStart(2, '0');
     selectedYear.value = new Date().getFullYear();
     selectedDate.value = `${new Date().getFullYear()}-${selectedMonth.value}-01T00:00:00Z`;
-    selectedTypeCoursId.value = null;
+    selectedTypeCoursId.value = 0;
+    selectedStatusId.value = 0;
     await useGetCours(routeGetCours, coursData, selectedTypeCoursId, selectedDate, selectedStatusId);
 };
 

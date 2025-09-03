@@ -35,6 +35,7 @@ module.exports = {
                 tertiary: '#FFBA00',
                 templateMainColor: '#472371',
                 templateSecondColor: '#5e2ca5',
+                templateThirdColor:'#e2a945',
                 stroke: '#E2E8F0',
                 gray: {
                     ...colors.gray,

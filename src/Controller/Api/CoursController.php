@@ -197,6 +197,7 @@ class CoursController extends AbstractController
     {
         try {
             $this->updateStatusCoursService->prepareAndLaunchCours($cours);
+            $this->em->flush();
 
             return new JsonResponse([
                 'success' => true,

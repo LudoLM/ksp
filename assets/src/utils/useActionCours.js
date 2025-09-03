@@ -1,5 +1,6 @@
 import {apiFetch} from "./useFetchInterceptor";
 import {isRef} from "vue";
+import {useCalendarStore} from "../store/calendar";
 
 
 export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusCours, isOpenRequired = false) {
@@ -190,6 +191,33 @@ export async function useCancelCours(coursId) {
     catch (error) {
         return error;
     }
+}
+
+export async function handleLaunchAllCours(days) {
+  const calendarStore = useCalendarStore();
+  const firstAndLastDays = {
+    "startDate" : days.value[0],
+    "endDate" : days.value[5]
+  }
+  const response = await apiFetch("/api/week/open", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(firstAndLastDays)
+  });
+
+  const result = await response.json();
+
+  if(response.ok){
+    alertStore.setAlert(result.message, "success");
+  }
+  else{
+    alertStore.setAlert(result.message, "error");
+  }
+
+  calendarStore.setSelectedStatusCours(0);
+  await calendarStore.fetchCoursPerWeek();
 }
 
 function makeRequestHeaders() {

@@ -14,14 +14,15 @@ const props = defineProps({
     }
 });
 const selectedTypeCours = ref(props.typeCoursId);
-const emit = defineEmits(['update:selectedTypeCours']);
+
+const emit = defineEmits(['update:typeCoursId']);
 
 watch(() => props.typeCoursId, (newVal) => {
     selectedTypeCours.value = newVal;
 }, { immediate: true });
 
 watch(selectedTypeCours, (newValue) => {
-    emit('update:selectedTypeCours', newValue);
+    emit('update:typeCoursId', newValue);
 });
 
 

@@ -74,6 +74,5 @@ class UpdateStatusCoursService
         $this->dispatchCoursStatusUpdate($cours);
 
         $this->em->persist($cours);
-        $this->em->flush();
     }
 }

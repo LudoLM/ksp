@@ -15,14 +15,14 @@ const props = defineProps({
 });
 
 const selectedStatusCours = ref(props.statusCoursId);
-const emit = defineEmits(['update:selectedStatusCours']);
+const emit = defineEmits(['update:selectedStatusId']);
 
 watch(() => props.statusCoursId, (newVal) => {
     selectedStatusCours.value = newVal;
 }, { immediate: true });
 
 watch(selectedStatusCours, (newValue) => {
-    emit('update:selectedStatusCours', newValue);
+    emit('update:selectedStatusId', newValue);
 });
 </script>
 
@@ -30,7 +30,6 @@ watch(selectedStatusCours, (newValue) => {
 <template>
     <div id="form-wrapper" ref="form" class="space-y-4">
         <div class="selects">
-            <!-- Sélection du statuts de cours -->
             <div class="form-item">
                 <CustomSelect
                     :options="props.uniqueStatusCoursList"

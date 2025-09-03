@@ -80,7 +80,6 @@ class CoursRepository extends ServiceEntityRepository
             $qb->andWhere('c.typeCours = :typeCours')
                 ->setParameter('typeCours', $typeCours);
         }
-
         if ($dateCours instanceof \DateTime) {
             $qb->andWhere('c.dateCours >= :dateCours')
                 ->setParameter('dateCours', $dateCours);

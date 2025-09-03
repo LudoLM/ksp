@@ -6,7 +6,7 @@ import {useGetCours, useGetOnlyNextCours, useGetTypesCours, useGetStatusCours} f
 import Logo from "../components/header/Logo.vue";
 
 // --- Fonction utilitaire pour calculer le lundi d'une date ---
-const getMondayOfSpecificDate = (inputDate) => {
+export const getMondayOfSpecificDate = (inputDate) => {
   const date = new Date(inputDate);
   const dayOfWeek = date.getDay();
   date.setDate(date.getDate() - ((dayOfWeek + 6) % 7));
@@ -14,6 +14,15 @@ const getMondayOfSpecificDate = (inputDate) => {
   date.setHours(0, 0, 0, 0);
   return date;
 };
+
+export const getSundayOfSpecificDate = (date) => {
+  const dayOfWeek = date.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
+  const sunday = new Date(date); // Clone la date pour ne pas modifier l'originale
+  sunday.setDate(date.getDate() + (7 - dayOfWeek)); // Ajoute des jours pour arriver au dimanche
+  sunday.setHours(23, 59, 59, 999); // Réinitialise l'heure à la fin du jour
+  return sunday;
+};
+
 
 
 export const useCalendarStore = defineStore('calendar', {

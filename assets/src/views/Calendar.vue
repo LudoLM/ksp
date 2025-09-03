@@ -24,8 +24,6 @@ const router = useRouter();
 const previousRoutePath = ref(router.options.history.state.back || '');
 const date = computed(() => previousRoutePath === "/coursDescriptions" ? new Date() : calendarStore.date);
 const daySelected = computed(() => calendarStore.daySelected);
-const selectedTypeCours = computed(() => calendarStore.selectedTypeCours);
-const selectedStatusCours = computed(() => calendarStore.selectedStatusCours);
 const weekString = computed(() => calendarStore.weekString);
 const days = computed(() => calendarStore.days);
 const infos = computed(() => calendarStore.infos);
@@ -33,6 +31,12 @@ const { weekInfos } = storeToRefs(calendarStore);
 const role = computed(() => useGetElementsToken() ? useGetElementsToken().roles[0].split("_")[1].toLowerCase() : null);
 const uniqueTypeCoursList = computed(() => calendarStore.uniqueTypeCoursList);
 const alertStore = inject('alertStore');
+
+
+const {
+    selectedTypeCours,
+    selectedStatusCours,
+} = storeToRefs(calendarStore);
 
 //Filtre les status accessible selon le role
 const uniqueStatusCoursList = computed(() =>
@@ -61,17 +65,7 @@ const handleGetCoursPerWeek = async (direction) => {
     }
 };
 
-// Gère le changement de type de cours
-const handleUpdateSelectedTypeCours = (value) => {
-    calendarStore.setSelectedTypeCours(parseInt(value));
-    updateUrl(false);
-};
 
-//Gere le changement de status de cours
-const handleUpdateSelectedStatusCours = (value) => {
-    calendarStore.setSelectedStatusCours(parseInt(value));
-    updateUrl(false);
-};
 
 // Formate le jour pour l'affichage
 const formatDay = (day) => {
@@ -119,9 +113,22 @@ onBeforeMount( async ()=> {
 
 const nextDateIndex = ref(null);
 
-// Watch les changements de date et de type et de status de cours -> pour mettre à jour les cours de la semaine
+
+// Watcher 1 : Met à jour le store et l'URL lorsque les filtres changent
+watch([selectedTypeCours, selectedStatusCours], () => {
+    // Met à jour les valeurs dans le store du calendrier
+    calendarStore.setSelectedTypeCours(selectedTypeCours.value);
+    calendarStore.setSelectedStatusCours(selectedStatusCours.value);
+
+    // Met à jour l'URL pour refléter les nouveaux filtres
+    updateUrl(false);
+});
+
+// Watcher 2 : Déclenche la récupération de données lorsque l'une des 3 valeurs importantes change
 watch([date, selectedTypeCours, selectedStatusCours], async () => {
+    // Réinitialise la valeur de la première leçon pour la pagination
     calendarStore.firstNextCoursInNextWeeks = null;
+    // Récupère les données du calendrier avec les nouveaux filtres et la nouvelle date
     await calendarStore.fetchCoursPerWeek();
 });
 
@@ -210,30 +217,29 @@ const nextDateInNextWeek = computed(() => {
             </CustomButton>
         </div>
         <div class="flex flex-col justify-center items-center gap-2">
-            <div class="flex justify-center items-center gap-2">
+            <div class="flex justify-center items-center gap-2 mx-2 mb-2">
                 <TypeCoursFilter
                     :uniqueTypeCoursList="uniqueTypeCoursList"
-                    :typeCoursId="selectedTypeCours"
-                    @update:selectedTypeCours="handleUpdateSelectedTypeCours"
+                    v-model:typeCoursId="selectedTypeCours"
                 />
                 <StatusCoursFilter
                     :uniqueStatusCoursList="uniqueStatusCoursList"
-                    :statusCoursId="selectedStatusCours"
-                    @update:selectedStatusCours="handleUpdateSelectedStatusCours"
+                    v-model:selectedStatusId="selectedStatusCours"
                 />
-            </div>
-            <div class="flex justify-center items-center gap-2">
                 <Tooltip
                     :title="'Réinitialiser les filtres et revenir à la semaine actuelle'"
                     tooltip-pos="right"
                 >
                     <button
-                        class="mb-4 hover:text deleteIcon"
+                        class="hover:text deleteIcon"
                         @click="calendarStore.resetCalendar(); updateUrl(false)"
                     >
                         <DeleteCours size="18"/>
                     </button>
                 </Tooltip>
+            </div>
+
+            <div class="flex justify-center items-center gap-2">
                 <CustomButton
                     v-if="role === 'admin' && weekInfos.some(day =>day.some(cours => cours.statusCours.id === 4))"
                     @click="handleLaunchAllCours()"
