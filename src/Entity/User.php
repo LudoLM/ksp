@@ -28,6 +28,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     public string $email;
 
     #[ORM\Column]
+    #[Groups(['user:detail'])]
     private array $roles = [];
 
     /**
@@ -78,14 +79,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     /**
      * @var Collection<int, HistoriquePaiement>
      */
-    #[Groups(['user:detail'])]
+    #[Groups(['user:profile'])]
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: HistoriquePaiement::class, orphanRemoval: true)]
     private Collection $historiquePaiements;
 
     /**
      * @var Collection<int, UsersCours>
      */
-    #[Groups(['user:detail'])]
+    #[Groups(['user:profile'])]
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UsersCours::class, orphanRemoval: true)]
     private Collection $usersCours;
 

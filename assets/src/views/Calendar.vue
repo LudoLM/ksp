@@ -12,10 +12,12 @@ import { useRouter } from "vue-router";
 import {storeToRefs} from "pinia";
 import {apiFetch} from "../utils/useFetchInterceptor";
 import StatusCoursFilter from "../components/filtersCours/StatusCoursFilter.vue";
-import useGetElementsToken from "../utils/useGetElementsToken";
+import {useUserStore} from "../store/user";
 
 const calendarStore = useCalendarStore();
 const dateToday = ref(new Date());
+const userStore = useUserStore();
+const isAdmin = storeToRefs(userStore);
 
 const typeCoursIdFromUrl = parseInt(new URLSearchParams(window.location.search).get('typeCoursId'));
 const isOpenRequiredFromUrl = ref(!! new URLSearchParams(window.location.search).get('isOpenRequired'));
@@ -27,20 +29,13 @@ const daySelected = computed(() => calendarStore.daySelected);
 const weekString = computed(() => calendarStore.weekString);
 const days = computed(() => calendarStore.days);
 const infos = computed(() => calendarStore.infos);
-const { weekInfos } = storeToRefs(calendarStore);
-const role = computed(() => useGetElementsToken() ? useGetElementsToken().roles[0].split("_")[1].toLowerCase() : null);
+const { weekInfos, selectedTypeCours, selectedStatusCours } = storeToRefs(calendarStore);
 const uniqueTypeCoursList = computed(() => calendarStore.uniqueTypeCoursList);
 const alertStore = inject('alertStore');
 
-
-const {
-    selectedTypeCours,
-    selectedStatusCours,
-} = storeToRefs(calendarStore);
-
 //Filtre les status accessible selon le role
 const uniqueStatusCoursList = computed(() =>
-    role.value ==="admin" ?
+    userStore.isAdmin ?
     calendarStore.uniqueStatusCoursList.filter(s => ![6, 7].includes(s.id)) :
     calendarStore.uniqueStatusCoursList.filter(s => ![4, 6, 7].includes(s.id))
 
@@ -164,9 +159,6 @@ const handleLaunchAllCours = async () => {
     }
     const response = await apiFetch("/api/week/open", {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
         body: JSON.stringify(firstAndLastDays)
     });
 
@@ -241,7 +233,7 @@ const nextDateInNextWeek = computed(() => {
 
             <div class="flex justify-center items-center gap-2">
                 <CustomButton
-                    v-if="role === 'admin' && weekInfos.some(day =>day.some(cours => cours.statusCours.id === 4))"
+                    v-if="isAdmin && weekInfos.some(day =>day.some(cours => cours.statusCours.id === 4))"
                     @click="handleLaunchAllCours()"
                     class="mb-4"
                 >

@@ -52,8 +52,6 @@
             const data = await response.json();
             success.value = data.message;
             alertStore.setAlert(success.value, 'success');
-            // Stocker le token et mettre à jour le store
-            localStorage.setItem('token', data.token);
             router.push("/");
         } catch (err) {
             error.value = err.message;

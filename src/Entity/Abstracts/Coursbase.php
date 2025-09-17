@@ -33,7 +33,7 @@ abstract class Coursbase
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:detail', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:profile', 'week_type:index'])]
     protected TypeCours $typeCours;
 
     #[ORM\Column(length: 255, nullable: true)]

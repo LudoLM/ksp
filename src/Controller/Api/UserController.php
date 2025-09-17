@@ -31,6 +31,19 @@ class UserController extends AbstractController
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
     }
 
+    #[Route('/api/userHistory', name: 'api_user_history', methods: ['GET'])]
+    public function getUserPaymentHistory(): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user instanceof UserInterface) {
+            return new JsonResponse(['message' => 'Utilisateur non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        $payments = $this->serializer->serialize($user, 'json', ['groups' => 'user:profile']);
+
+        return new JsonResponse($payments, Response::HTTP_OK, [], true);
+    }
+
     #[Route('/api/usersNotInCours/{cours}', name: 'api_users', methods: ['GET'])]
     public function getUsersData(UserRepository $userRepository, Cours $cours): JsonResponse
     {

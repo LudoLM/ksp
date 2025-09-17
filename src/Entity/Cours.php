@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 class Cours extends Coursbase
 {
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:detail', 'cours_filling:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:profile', 'cours_filling:index'])]
     private \DateTimeInterface $dateCours;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -31,7 +31,7 @@ class Cours extends Coursbase
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:detail'])]
+    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:profile'])]
     private StatusCours $statusCours;
 
     /**

@@ -115,7 +115,6 @@ const handleCreateWeekType = async () => {
         const response = await apiFetch('/api/weekType/create', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
             body: JSON.stringify({
@@ -209,9 +208,6 @@ const handleAddWeek = async () => {
         }
         const response = await apiFetch("/api/week/assign", {
             method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
                 weekTypeId: Number(weekTypeSelectedId.value),
                 dateMonday: useConvertFormatDate(date.value[0]),

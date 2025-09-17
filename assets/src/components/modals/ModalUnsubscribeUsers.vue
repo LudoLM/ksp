@@ -102,10 +102,6 @@ const handleCheckboxToggle = ($event) => {
 const handleMultiUnSubscription = async () => {
     const response = await apiFetch(`/api/removeUsers/${props.cours.id}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
         body: JSON.stringify({ usersChecked: usersChecked.value })
     });
     if (response.ok) {

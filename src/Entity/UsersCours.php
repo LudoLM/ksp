@@ -14,7 +14,7 @@ class UsersCours
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['user:detail', 'cours:index', 'cours:detail'])]
+    #[Groups(['user:profile', 'cours:index', 'cours:detail'])]
     #[ORM\Column]
     private bool $isOnWaitingList;
 
@@ -26,7 +26,7 @@ class UsersCours
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
-    #[Groups(['user:detail'])]
+    #[Groups(['user:profile'])]
     #[ORM\ManyToOne(inversedBy: 'usersCours')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Cours $cours = null;

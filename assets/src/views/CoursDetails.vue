@@ -8,15 +8,15 @@ import ButtonsCardUser from "../components/user/ButtonsCardUser.vue";
 import StatusCoursTag from "../components/StatusCoursTag.vue";
 import ModalConnect from "../components/modals/ModalConnect.vue";
 import ModalUnsubscribeUsers from "../components/modals/ModalUnsubscribeUsers.vue";
-import useGetElementsToken from "../utils/useGetElementsToken";
+import {useUserStore} from "../store/user";
 
 const route = useRoute();
 const router = useRouter();
 const coursId = route.params.id;
 const cours = ref(null);
 const isAdminPath = route.path.startsWith('/admin');
-const token = localStorage.getItem('token');
-const userId = ref(useGetElementsToken()?.id);
+const userStore = useUserStore();
+const { isAuthenticated, userId } = userStore;
 
 // Recupoerer la liste des participants
 const usersSubscribed = ref([]);
@@ -56,7 +56,7 @@ const coursDetails = async () => {
 
 onMounted( async () => {
    await coursDetails();
-   isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId.value && !usersCours.isOnWaitingList);
+   isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId && !usersCours.isOnWaitingList);
 });
 
 const getDateLimit = (launchedAt) => {
@@ -83,7 +83,7 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
 
 <template>
     <div class="coursDetails">
-        <div v-if="cours" class="details_wrapper w-full relative">
+        <<div v-if="cours" class="details_wrapper w-full relative">
             <img class="w-full" :src="require(`../../images/uploads/${cours.typeCours.thumbnail}`)" alt="">
             <div class="infos_wrapper">
                 <div class="infos_container">
@@ -127,7 +127,6 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                                  :isUserOnWaitingList="isUserOnWaitingList"
                                  @updateCoursStatus="handleUpdateStatusCours"
                             />
-
 <!--                            Ouvre une modale pour désinscrire plusieurs participants-->
                             <div v-if="isAdminPath && (cours.statusCours.id === 1 || cours.statusCours.id === 2)">
                                 <ModalUnsubscribeUsers
@@ -139,7 +138,7 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                                 />
                             </div>
                             <ModalConnect
-                                v-if="!token && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
+                                v-if="!isAuthenticated && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
                                 v-model:isOpen="loginDialog"
                                 title="Connexion requise"
                                 message="Veuillez vous authentifier pour vous inscrire à ce cours."

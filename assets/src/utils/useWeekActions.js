@@ -14,7 +14,6 @@ export function useWeekActions() {
 
       const response = await apiFetch("/api/week/open", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(firstAndLastDays)
       });
 

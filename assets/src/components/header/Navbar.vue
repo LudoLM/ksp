@@ -86,9 +86,6 @@
                             Créer une semaine type
                         </router-link>
                     </li>
-<!--                    <li>
-                        <a @click="handleRefreshCours">Rafraichir les cours</a>
-                    </li>-->
                 </ul>
             </div>
         </div>
@@ -134,7 +131,6 @@ import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {useUserStore} from "../../store/user";
 import { onClickOutside } from "@vueuse/core";
-import { apiFetch } from "../../utils/useFetchInterceptor";
 import Hamburger from "../Hamburger.vue";
 import { infos } from "../../store/index";
 
@@ -152,6 +148,7 @@ const isAdminPath = computed(() => route.path.startsWith("/admin"));
 onClickOutside(target, () => {
     dropdownOpen.value = false;
 });
+
 
 const routes = computed(() =>
     router.getRoutes().filter((r) =>
@@ -187,30 +184,12 @@ const closeNavLinks = () => {
     isNavOpen.value = false;
 };
 
-const logout = () => {+
+const logout = () => {
     userStore.logout();
     closeNavLinks();
     router.push({name: 'Accueil'});
 };
 
-const handleRefreshCours = async () => {
-    try {
-        const response = await apiFetch("/api/updateCoursClick", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("token"),
-            },
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            console.log(data.message);
-        }
-    } catch (error) {
-        console.log(error);
-    }
-};
 </script>
 
 <style lang="scss" scoped>

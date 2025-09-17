@@ -66,7 +66,7 @@ const handleSubscription = async (isUserOnWaitingList) => {
 
             });
 
-            userStore.setUserNombreCours(result.userCoursQuantity);
+            userStore.userNombreCours = result.userCoursQuantity;
             alertStore.setAlert(result.message, "success");
 
         } else {
@@ -98,7 +98,7 @@ const handleUnsubscription = async (isUserOnWaitingList) => {
                 isSubscribedValue: localData.value.isSubscribed,
                 isUserOnWaitingListValue: localData.value.isUserOnWaitingList,
             });
-            userStore.setUserNombreCours(result.userCoursQuantity);
+            userStore.userNombreCours = result.userCoursQuantity;
             alertStore.setAlert(result.message, "success");
         } else {
             alertStore.setAlert(result.message, "error");

@@ -3,13 +3,13 @@
 import DownloadInvoice from "../../icons/userActions/DownloadInvoice.vue";
 import {apiFetch} from "../utils/useFetchInterceptor";
 import Tooltip from "./Tooltip.vue";
+import {useUserStore} from "../store/user";
 
 const props = defineProps(
     {
         paiement: Object
     }
 )
-
 
 const formatDateTime = (date) => {
     return new Date(date).toLocaleString().split(" ");
@@ -20,10 +20,6 @@ const handleInvoicePDF = async (paiementId) => {
     try {
         const response = await apiFetch("/api/getInvoicePDF", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + localStorage.getItem("token"),
-            },
             body: JSON.stringify({ paiementId: paiementId }),
         });
 

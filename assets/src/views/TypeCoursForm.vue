@@ -11,6 +11,7 @@ import CustomTextarea from "../components/forms/CustomTextarea.vue";
 import Banner from "../components/Banner.vue";
 import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
 import CustomFileInput from "../components/forms/CustomFileInput.vue";
+import {useUserStore} from "../store/user";
 
 const formData = ref({
     nom: null,
@@ -70,7 +71,6 @@ const fetchData = async () => {
     try {
         await apiFetch("/api/getTypeCours", {
             method: "GET",
-            headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
         });
         typeCoursList.value = await useGetTypesCours();
 

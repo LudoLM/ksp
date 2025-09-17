@@ -2,4 +2,18 @@ lexik_jwt_authentication:
     secret_key: '%env(resolve:JWT_SECRET_KEY)%'
     public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
     pass_phrase: '%env(JWT_PASSPHRASE)%'
-    token_ttl: 3600
+    token_ttl: 600 # Durée de validité du token en secondes (ici 10 minutes)
+        
+    # Désactive tous les extracteurs sauf le cookie
+    token_extractors:
+        cookie:
+            enabled: true
+            name: BEARER  # Doit correspondre au nom du cookie
+        authorization_header:
+            enabled: false  # Désactive l'extraction depuis le header
+    # Configuration pour définir le cookie du token JWT
+    set_cookies:
+        BEARER:
+            samesite: strict
+            secure: true
+            httpOnly: true

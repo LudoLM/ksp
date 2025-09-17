@@ -2,6 +2,7 @@
 
 import ChartThree from "./ChartThree.vue";
 import {computed, onMounted, ref} from "vue";
+import {apiFetch} from "../../utils/useFetchInterceptor";
 
 const cours = ref([]);
 
@@ -19,12 +20,8 @@ const tauxRemplissage30Jours = computed(() => totals.value.capacite30Jours > 0 ?
 const tauxRemplissage90Jours = computed(() => totals.value.capacite90Jours > 0 ? (totals.value.inscrits90Jours / totals.value.capacite90Jours) * 100 : 0);
 
 const fetchCours = async () => {
-    const response = await fetch(`/api/getCoursFilling`, {
+    const response = await apiFetch(`/api/getCoursFilling`, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token'),
-        },
     });
     cours.value = await response.json();
 };

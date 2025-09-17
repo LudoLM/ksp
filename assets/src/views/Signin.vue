@@ -55,11 +55,13 @@
                                     <CustomPassword
                                         v-model="password"
                                     />
-                                    <div
-                                        :class="error ? 'opacity-100' : 'opacity-0'"
-                                        class="h-auto text-red-600 transition-opacity duration-300"
-                                    >
-                                        {{ error }}
+                                    <div class="min-h-[1rem] flex items-center">
+                                        <div
+                                            v-if="error"
+                                            class="text-red-600 transition-opacity duration-300 text-sm text-start"
+                                        >
+                                            {{ error }}
+                                        </div>
                                     </div>
                                     <ModalResetPassword
                                         :isOpen="resetPasswordDialog"
@@ -105,12 +107,14 @@ import CustomPassword from "../components/forms/CustomPassword.vue";
 import SideBannerAuth from "../components/SideBannerAuth.vue";
 import ModalResetPassword from "../components/modals/ModalResetPassword.vue";
 import {useCalendarStore} from "../store/calendar";
+import {useUserStore} from "../store/user";
+import {getUser} from "../utils/useActionUser";
 
 
 // Instancier le store en dehors de la fonction handleLogin
 const username = ref('');
 const password = ref('');
-const error = ref('');
+const error = ref(null);
 const router = useRouter();
 const resetPasswordDialog = ref(false);
 
@@ -119,6 +123,7 @@ const handleRedirection = () => {
 }
 
 const handleSubmit = async () => {
+    error.value = null;
     try {
         const response = await fetch('/api/login', {
             method: 'POST',
@@ -126,21 +131,19 @@ const handleSubmit = async () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ username: username.value, password: password.value }),
+            credentials: 'include',
         });
 
         if (!response.ok) {
             const responseError = await response.json();
             throw new Error(responseError.message);
         }
-
-        const data = await response.json();
-        // Stocker le token et mettre à jour le store
-        localStorage.setItem('token', data.token);
+        await getUser();
         useCalendarStore().$reset();
         // Redirige vers la page d'accueil après la connexion réussie
         await router.push('/');
-    } catch (error) {
-        error.value = "Les informations d'identification sont incorrectes";
+    } catch (e) {
+        error.value = e.message;
     }
 }
 
@@ -168,7 +171,4 @@ const handleSubmit = async () => {
         cursor: pointer;
     }
 
-    .error{
-        color: red;
-    }
 </style>

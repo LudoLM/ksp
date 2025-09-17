@@ -1,6 +1,7 @@
 import {apiFetch} from "./useFetchInterceptor";
 import {isRef} from "vue";
 import {useCalendarStore} from "../store/calendar";
+import {useUserStore} from "../store/user";
 
 
 export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusCours, isOpenRequired = false) {
@@ -110,10 +111,6 @@ export async function useDeleteCours(coursId) {
     try {
         const response = await apiFetch(`/api/cours/delete/${coursId}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
         });
 
         if (response.ok) {
@@ -127,43 +124,10 @@ export async function useDeleteCours(coursId) {
     }
 }
 
-/**
- * Récupère la liste des packs disponibles.
- * @returns {Promise<Object[]>} - Une promesse résolue avec la liste des packs.
- */
-export async function useGetPacks() {
-    try {
-        const response = await fetch('/api/packs', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Réponse du serveur:', data);
-            return data;
-        } else {
-            console.log('Échec de la récupération des packs');
-            return [];
-        }
-    }
-    catch (error) {
-        console.error('Erreur:', error);
-        return [];
-    }
-}
-
 export async function useOpenCours(coursId) {
     try {
         const response = await apiFetch(`/api/cours/open/${coursId}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
         });
 
         return await response.json();
@@ -177,10 +141,6 @@ export async function useCancelCours(coursId) {
     try {
         const response = await apiFetch(`/api/cours/cancel/${coursId}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
         });
         if (response.ok) {
             return await response.json();
@@ -201,9 +161,6 @@ export async function handleLaunchAllCours(days) {
   }
   const response = await apiFetch("/api/week/open", {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(firstAndLastDays)
   });
 
@@ -221,7 +178,7 @@ export async function handleLaunchAllCours(days) {
 }
 
 function makeRequestHeaders() {
-    const token = localStorage.getItem('token');
+    const token = useUserStore().accessToken;
     const headers = {
         'Content-Type': 'application/json',
     };

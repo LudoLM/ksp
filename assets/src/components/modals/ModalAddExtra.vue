@@ -35,7 +35,7 @@
 import { ref, computed, onMounted } from 'vue';
 import CustomButton from '../forms/CustomButton.vue';
 import { useSubscription } from "../../utils/useSubscribing";
-import Logo from "../header/Logo.vue";
+import {useUserStore} from "../../store/user";
 
 // Définition des props
 const props = defineProps({
@@ -78,10 +78,6 @@ const userOptions = computed(() =>
 const getUsers = async () => {
   const response = await fetch(`/api/usersNotInCours/${props.cours}`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + localStorage.getItem('token'),
-    },
   });
 
 

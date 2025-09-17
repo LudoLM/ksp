@@ -1,0 +1,10 @@
+gesdinet_jwt_refresh_token:
+    ttl: 604800
+    user_provider: app_user_provider
+    refresh_token_class: App\Entity\RefreshToken
+    single_use: true
+    cookie:
+        enabled: true        # active le cookie
+        http_only: true      # protège contre XSS
+        secure: true         # HTTPS obligatoire en prod
+        same_site: strict    # same-site policy

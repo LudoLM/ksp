@@ -169,6 +169,8 @@ import {useValidationForm} from "../utils/useValidationForm";
 import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
 import SideBannerAuth from "../components/SideBannerAuth.vue";
 import {apiFetch} from "../utils/useFetchInterceptor";
+import {useUserStore} from "../store/user";
+
 
 const firstName = ref('')
 const lastName = ref('')
@@ -192,16 +194,10 @@ const router = useRouter();
 const route = useRoute();
 const isEditProfileRoute =  ref(route.name === 'EditProfile');
 
-
-
 const getUser = async () => {
     const response = await apiFetch("/api/user", {
         method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
     });
-
     return await response.json();
 
 };
@@ -243,18 +239,18 @@ const handleSubmit = async () => {
         const response = await fetchMethod(url.value, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(data.value),
         });
         const result = await response.json();
-
         if (!response.ok) {
             await useValidationForm(result, errors);
         }
         else{
-            localStorage.setItem('token', result.token);
+            const user = await getUser();
+            useUserStore().setUser(user);
             await router.push(!isEditProfileRoute.value ? "/" : "/profile");
         }
 

@@ -1,5 +1,4 @@
 import {createApp, watch} from 'vue';
-import { createPinia } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
 import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
@@ -11,14 +10,11 @@ import Profile from '../views/Profile.vue';
 import TypeCoursForm from '../views/TypeCoursForm.vue';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
 import { useUserStore } from '../store/user';
-import { createAlertStore } from '../store/alert';
-import useGetElementsToken from '../utils/useGetElementsToken';
 import LoginLayout from "../layouts/LoginLayout.vue";
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
-
-const alertStore = createAlertStore(); // Instance unique d'alertStore
+import {createPinia, storeToRefs} from "pinia";
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -33,8 +29,8 @@ const router = createRouter({
         { path: '/packs', name: 'Packs', meta: {title: 'Packs proposés'} ,component: () => import('../views/Pricing.vue') },
         { path: '/pratique', name: 'Pratique', meta: {title: 'Infos pratiques'} ,component: () => import('../views/Pratique.vue') },
         { path: '/coursDetails/:id', name: 'CoursDetails', meta: {title: 'Détails'} ,component: () => import('../views/CoursDetails.vue') },
-        { path: '/merci', name: 'Merci', meta: {title: 'Crédits'} , component: () => import('../views/Merci.vue') },
-        { path: '/profile', name: 'Profile', meta: {title: 'Mon profil'} , component: Profile },
+        { path: '/merci', name: 'Merci', meta: {title: 'Crédits', requiresAuth: true} , component: () => import('../views/Merci.vue') },
+        { path: '/profile', name: 'Profile', meta: {title: 'Mon profil', requiresAuth: true} , component: Profile },
       ],
     },
     {
@@ -88,30 +84,27 @@ const vuetify = createVuetify({
 });
 
 // Garde de navigation globale
-router.beforeEach((to, from, next) => {
-  const tokenExpiration = useGetElementsToken()?.exp;
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore();
-
-  // 1. Vérifie si le token est expiré
-  if (tokenExpiration && tokenExpiration <= Date.now() / 1000) {
-    alertStore.setAlert('Votre session a expiré. Veuillez vous reconnecter.', 'info');
-    userStore.logout();
-    return next({ path: '/' });
+  const {isAuthenticated, isAdmin} = storeToRefs(userStore);
+  // 1. Vérifie si la route nécessite une authentification
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // Si l'utilisateur n'est pas authentifié, on le redirige la page d'accueil
+    if (!isAuthenticated.value) {
+      return next({path: '/'});
+    }
   }
 
   // 2. Vérifie si la route nécessite un rôle admin
+  // Cette condition ne sera vérifiée que si l'utilisateur est déjà authentifié (grâce au point 1)
   if (to.matched.some(record => record.meta.requiresAdmin)) {
-    const userRole = localStorage.getItem('token')
-      ? useGetElementsToken().roles[0]
-      : null;
-
-    if (!userRole || userRole !== 'ROLE_ADMIN') {
-      alertStore.setAlert("Vous n'avez pas les droits pour accéder à cette page.", 'error');
+    // Si l'utilisateur n'est pas admin, on le redirige vers la page d'accueil
+    if (!isAdmin.value) {
       return next({ path: '/' });
     }
   }
 
-  // 3. Si aucune condition ne bloque, continue la navigation
+  // 3. Si toutes les vérifications passent, on continue la navigation
   next();
 });
 
@@ -136,3 +129,5 @@ watch(
 );
 
 app.mount('#app');
+
+export default router;

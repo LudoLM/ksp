@@ -5,7 +5,6 @@
     import {inject, onMounted, ref} from "vue";
     import FillingCharts from "../../components/admin/FillingCharts.vue";
     import {apiFetch} from "../../utils/useFetchInterceptor";
-    import {VAlert} from "vuetify/components";
 
     const paiements = ref([]);
     const quantitiesById = ref([]);
@@ -21,10 +20,6 @@
             const endDateString = new Date(endDate.value).toISOString().slice(0, 16);
             const response = await apiFetch(`/api/historiquePaiements?startDate=${startDateString}&endDate=${endDateString}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                },
             })
             if (response.ok){
                 paiements.value = await response.json();

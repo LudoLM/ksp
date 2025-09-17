@@ -1,25 +1,19 @@
 <script setup>
 import { onClickOutside } from '@vueuse/core'
-import {computed, onMounted, ref} from 'vue'
+import {computed, ref} from 'vue'
 import {useUserStore} from "../../store/user";
-import useGetElementsToken from "../../utils/useGetElementsToken";
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import TypeMode from "../../../icons/adminActions/TypeMode.vue";
 import LogoutIcon from "../../../icons/userActions/LogoutIcon.vue";
 import UserIcon from "../../../icons/userActions/UserIcon.vue";
-import {apiFetch} from "../../utils/useFetchInterceptor";
 import {storeToRefs} from "pinia";
-import {useCalendarStore} from "../../store/calendar";
 
 const target = ref(null)
 const dropdownOpen = ref(false)
 const userStore = useUserStore();
-const { userId, userPrenom, userNom, userEmail, userNombreCours } = storeToRefs(userStore);
+const { userId, userPrenom, userNom, userEmail, userNombreCours, isAdmin } = storeToRefs(userStore);
 
-
-const router = useRouter();
 const route = useRoute();
-const role = computed(() => useGetElementsToken().roles[0].split("_")[1].toLowerCase());
 
 // Computed pour savoir si on est en mode admin
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
@@ -47,26 +41,9 @@ const { isScrolled } = defineProps({
 
 const logout = async () => {
     await userStore.logout();
-    await useCalendarStore().$reset()
-    await router.push({name: 'Accueil'});
 };
 
-onMounted(async () => {
-    const token = localStorage.getItem('token');
-    if (token){
-        const result = await apiFetch("/api/user", {
-            method: "GET",
-        });
 
-        const user = await result.json();
-        // Mettre à jour le store avec l'email de l'utilisateur et l'état d'authentification
-        userStore.setUserEmail(user.email);
-        userStore.setUserId(user.id);
-        userStore.setUserNom(user.nom);
-        userStore.setUserNombreCours(user.nombreCours)
-        userStore.setUserPrenom(user.prenom);
-    }
-});
 
 onClickOutside(target, () => {
     dropdownOpen.value = false
@@ -143,7 +120,7 @@ onClickOutside(target, () => {
                             </li>
                             <li>
                                 <router-link
-                                    v-if="role === 'admin'"
+                                    v-if="isAdmin"
                                     :to="modeLink"
                                     class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
                                 >

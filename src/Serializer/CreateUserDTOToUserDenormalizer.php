@@ -32,6 +32,7 @@ readonly class CreateUserDTOToUserDenormalizer implements DenormalizerInterface
                 $data->password
             );
             $user->setPassword($hashedPassword);
+            $user->setIsPrioritized(false);
         }
 
         $user->setPrenom($data->prenom);

@@ -20,7 +20,7 @@
                                         Prénom
                                     </p>
                                     <p class="text-sm text-gray-800 dark:text-white/90 font-bold">
-                                        {{ user.prenom }}
+                                        {{ userPrenom }}
                                     </p>
                                 </div>
 
@@ -29,7 +29,7 @@
                                         Nom
                                     </p>
                                     <p class="text-sm text-gray-800 dark:text-white/90 font-bold">
-                                        {{ user.nom }}
+                                        {{ userNom }}
                                     </p>
                                 </div>
 
@@ -38,16 +38,16 @@
                                         Email
                                     </p>
                                     <p class="text-sm text-gray-800 dark:text-white/90 font-bold">
-                                        {{ user.email }}
+                                        {{ userEmail }}
                                     </p>
                                 </div>
 
                                 <div>
                                     <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                                        Télephone
+                                        Téléphone
                                     </p>
                                     <p class="text-sm text-gray-800 dark:text-white/90 font-bold">
-                                        {{ user.telephone }}
+                                        {{ userTelephone }}
                                     </p>
                                 </div>
 
@@ -56,7 +56,7 @@
                                         Ville
                                     </p>
                                     <p class="text-sm text-gray-800 dark:text-white/90 font-bold">
-                                        {{ user.commune }}
+                                        {{ userVille }}
                                     </p>
                                 </div>
                                 <div>
@@ -64,7 +64,7 @@
                                         Code Postal
                                     </p>
                                     <p class="text-sm text-gray-800 dark:text-white/90 font-bold">
-                                        {{ user.codePostal }}
+                                        {{ userCodePostal }}
                                     </p>
                                 </div>
                                 <div>
@@ -72,7 +72,7 @@
                                         Adresse
                                     </p>
                                     <p class="text-sm text-gray-800 dark:text-white/90 font-bold">
-                                        {{ user.adresse }}
+                                        {{ userAdresse }}
                                     </p>
                                 </div>
                             </div>
@@ -104,13 +104,13 @@
                 <div class="p-5 mb-6 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
                     <div class="coursDispo flex gap-6 lg:flex-row lg:items-start lg:justify-between items-center">
                         <h4 class="title text-lg font-semibold text-gray-800 dark:text-white/90">
-                            Cours disponible{{ user.nombreCours > 1 ? "s" : "" }}
+                            Cours disponible{{ userNombreCours > 1 ? "s" : "" }}
                         </h4>
 
                         <div class="quantity grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
                             <div>
                                 <p class="font-medium text-gray-800 dark:text-white/90 text-lg">
-                                    {{ user.nombreCours }}
+                                    {{ userNombreCours }}
                                 </p>
                             </div>
                         </div>
@@ -163,7 +163,7 @@
                                 <div class="px-4 py-2">Facture</div>
                             </div>
                             <div v-if="historiquePaiementsQuantity > 0">
-                                <div v-for="(paiement, index) in user.historiquePaiements" :key="paiement.id" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
+                                <div v-for="(paiement, index) in userHistory.historiquePaiements" :key="paiement.id" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
                                     <InvoicesLine
                                         :paiement="paiement"
                                     />
@@ -191,27 +191,24 @@ import CoursLineProfile from "../components/CoursLineProfile.vue";
 import InvoicesLine from "../components/InvoicesLine.vue";
 import BuyCours from "../../icons/userActions/BuyCours.vue";
 import { useUserStore } from "../store/user";
+import {apiFetch} from "../utils/useFetchInterceptor";
+import {storeToRefs} from "pinia";
 
-const user = ref({});
+const userHistory = ref({});
 const coursFiltered = computed(() =>
-    user.value.usersCours ? user.value.usersCours.filter(coursArr => !coursArr.isOnWaitingList) : []
+    userHistory.value.usersCours ? userHistory.value.usersCours.filter(coursArr => !coursArr.isOnWaitingList) : []
 );
 const historiquePaiementsQuantity = ref(0);
 const router = useRouter();
 const userStore = useUserStore();
 const alertStore = inject('alertStore');
+const { userId, userPrenom, userNom, userEmail, userNombreCours, userTelephone, userCodePostal, userAdresse, userVille } = storeToRefs(userStore);
 
-const getUser = async () => {
-    const response = await fetch("/api/user", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-        },
+const getUserHistory = async () => {
+    const response = await apiFetch("/api/userHistory", {
     });
-
-    user.value = await response.json();
-    historiquePaiementsQuantity.value = user.value.historiquePaiements.length;
+    userHistory.value = await response.json();
+    historiquePaiementsQuantity.value = userHistory.value.historiquePaiements !== undefined ? userHistory.value.historiquePaiements.length : 0;
 
 };
 
@@ -235,14 +232,14 @@ const handleUnsubscription = async (coursId) => {
         // Filtrer le cours désinscrit localement
         user.value.usersCours = user.value.usersCours.filter(coursArr => coursArr.cours.id !== coursId);
         user.value.nombreCours += 1;
-        userStore.setUserNombreCours(result.userCoursQuantity);
+        userStore.userNombreCours = result.userCoursQuantity;
     } else {
         alertStore.setAlert(result.message, result.type);
     }
 };
 
 onMounted(() => {
-    getUser();
+    getUserHistory();
 });
 
 </script>

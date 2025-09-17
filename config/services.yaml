@@ -38,3 +38,5 @@ services:
     App\Service\SendingEmail\SendUpdateCoursEmailService:
         arguments:
             $baseUrl: '%app_url%'  # Injecter le paramètre app_url
+
+

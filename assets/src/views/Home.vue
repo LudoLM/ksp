@@ -46,7 +46,6 @@
                             <img
                                 class="rounded-full" src="../../images/servane.jpg"
                                 alt="Portrait de la professeure souriante" />
-                            >
                         </div>
                     </div>
                     <p>"En choisissant le métier de masseur kinésithérapeute, je voulais aider et soigner les gens, tout en gardant comme objectif de pouvoir me rapprocher du milieu sportif. Avec mes spécialisations en rééducation du dos, des abdominaux et du périnée, et plus récemment mes formations en sport santé, je vous propose des cours de gym adaptés à vos besoins."</p>
@@ -87,7 +86,17 @@
 import { infos } from "../store/index";
 import bannerImage from "../../images/banners/banner4.jpg";
 import Banner from "../components/Banner.vue";
+import {useRoute} from "vue-router";
+import {createAlertStore} from "../store/alert";
+import {inject} from "vue";
 const store = infos();
+const route = useRoute();
+
+if (route.query.alert === 'logout') {
+    const alertStore = inject('alertStore');
+    alertStore.setAlert("Vous êtes déconnecté(e).", "info");
+}
+
 </script>
 
 

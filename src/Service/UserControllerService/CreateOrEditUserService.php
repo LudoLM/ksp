@@ -5,9 +5,6 @@ namespace App\Service\UserControllerService;
 use App\Entity\User;
 use App\Serializer\CreateUserDTOToUserDenormalizer;
 use Doctrine\ORM\EntityManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 readonly class CreateOrEditUserService
@@ -16,12 +13,10 @@ readonly class CreateOrEditUserService
         private EntityManagerInterface $em,
         private CreateUserDTOToUserDenormalizer $createUserDTOToUserDenormalizer,
         private ValidatorInterface $validator,
-        private JWTTokenManagerInterface $JWTManager,
-        private TokenStorageInterface $tokenStorage,
     ) {
     }
 
-    public function createOrEditUser($editableUser, $userDTO): string
+    public function createOrEditUser($editableUser, $userDTO): User
     {
         if (null !== $editableUser) {
             $user = $this->createUserDTOToUserDenormalizer->denormalize($userDTO, User::class, context: ['object_to_populate' => $editableUser]);
@@ -43,12 +38,7 @@ readonly class CreateOrEditUserService
         }
 
         $this->em->persist($user);
-        $this->em->flush();
 
-        $token = $this->JWTManager->create($user);
-        $authenticatedToken = new UsernamePasswordToken($user, 'main', $user->getRoles());
-        $this->tokenStorage->setToken($authenticatedToken);
-
-        return $token;
+        return $user;
     }
 }
