@@ -1,5 +1,5 @@
 <script setup>
-import {inject, onMounted, ref} from 'vue';
+import {onMounted, ref} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import CustomTextarea from "../components/forms/CustomTextarea.vue";
 import CustomInput from "../components/forms/CustomInput.vue";
@@ -11,6 +11,7 @@ import {apiFetch} from "../utils/useFetchInterceptor";
 import Banner from "../components/Banner.vue";
 import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
 import CustomCheckboxPriority from "../components/forms/CustomCheckboxPriority.vue";
+import {alertStore} from "../store/alert";
 
 
 const router = useRouter();
@@ -53,7 +54,6 @@ const tzoffset = (new Date()).getTimezoneOffset() * 60000;
 // Ajout d'un jour pour la date par défaut (l'utilisateur ne peut pas créer un cours le jour même)
 const ajoutJour = 60 * 60 * 1000 * 24;
 const localISOTime = (new Date(Date.now() - tzoffset + ajoutJour)).toISOString().slice(0, 16);
-const alertStore = inject('alertStore');
 
 const formData = ref({
   typeCours: null,

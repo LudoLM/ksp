@@ -1,18 +1,17 @@
 <script setup>
 
-    import { ref, inject } from 'vue';
+    import { ref } from 'vue';
     import CustomPassword from "../components/forms/CustomPassword.vue";
     import {useRoute, useRouter} from "vue-router";
     import SideBannerAuth from "../components/SideBannerAuth.vue";
     import {useUserStore} from "../store/user";
+    import {alertStore} from "../store/alert";
 
     const password = ref('');
     const confirmPassword = ref('');
     const error = ref('');
     const success = ref('');
     const route = useRoute();
-    const alertStore = inject('alertStore');
-    const userStore = useUserStore();
     const router = useRouter();
 
     const token = route.params.token;
@@ -52,7 +51,7 @@
             const data = await response.json();
             success.value = data.message;
             alertStore.setAlert(success.value, 'success');
-            router.push("/");
+            await router.push("/");
         } catch (err) {
             error.value = err.message;
             alertStore.setAlert(error.value, 'error');

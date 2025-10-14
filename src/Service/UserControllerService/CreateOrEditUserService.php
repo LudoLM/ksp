@@ -4,13 +4,11 @@ namespace App\Service\UserControllerService;
 
 use App\Entity\User;
 use App\Serializer\CreateUserDTOToUserDenormalizer;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 readonly class CreateOrEditUserService
 {
     public function __construct(
-        private EntityManagerInterface $em,
         private CreateUserDTOToUserDenormalizer $createUserDTOToUserDenormalizer,
         private ValidatorInterface $validator,
     ) {
@@ -36,8 +34,6 @@ readonly class CreateOrEditUserService
 
             throw new \InvalidArgumentException(json_encode(['errors' => $errors]));
         }
-
-        $this->em->persist($user);
 
         return $user;
     }

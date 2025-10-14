@@ -4,10 +4,10 @@ import {useDateFormat} from "@vueuse/core";
 import StatusCoursTag from "./StatusCoursTag.vue";
 import ButtonsCardAdmin from "./admin/ButtonsCardAdmin.vue";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
-import {computed, inject, ref} from "vue";
+import {computed} from "vue";
 import {useRouter} from "vue-router";
+import {alertStore} from "../store/alert";
 
-const alertStore = inject('alertStore');
 const router = useRouter();
 
 

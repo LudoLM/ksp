@@ -1,10 +1,10 @@
 <script setup>
-import {inject, ref, watch} from "vue";
+import {ref, watch} from "vue";
 import CustomButton from "../forms/CustomButton.vue";
 import { useSubscription, useUnSubscription } from "../../utils/useSubscribing";
 import {useUserStore} from "../../store/user";
+import {alertStore} from "../../store/alert";
 
-const alertStore = inject('alertStore');
 const userStore = useUserStore();
 
 const props = defineProps({

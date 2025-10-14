@@ -13,7 +13,7 @@ class HistoriquePaiement
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:profile'])]
+    #[Groups(['user:payments'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -22,10 +22,10 @@ class HistoriquePaiement
     #[ORM\ManyToOne(inversedBy: 'historiquePaiements')]
     private ?User $user = null;
 
-    #[Groups(['user:profile'])]
+    #[Groups(['user:payments'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $date;
-    #[Groups(['user:profile', 'historique_paiements:index'])]
+    #[Groups(['user:payments', 'historique_paiements:index'])]
     #[ORM\ManyToOne(inversedBy: 'historiquePaiements')]
     private ?Pack $pack = null;
 

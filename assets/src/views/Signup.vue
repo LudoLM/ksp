@@ -192,10 +192,11 @@ const errors = ref({
 });
 const router = useRouter();
 const route = useRoute();
-const isEditProfileRoute =  ref(route.name === 'EditProfile');
+const isEditProfileRoute =  ref(route.name === 'EditProfile' || route.name === 'AdminEditProfile');
 
-const getUser = async () => {
-    const response = await apiFetch("/api/user", {
+const getUser = async (userId) => {
+    const url = userId ? `/api/user/${userId}` : `/api/user`;
+    const response = await apiFetch(url, {
         method: "GET",
     });
     return await response.json();
@@ -211,7 +212,7 @@ const handleSubmit = async () => {
     const url = ref('');
     const data = ref({});
     if (isEditProfileRoute.value) {
-        url.value = `/api/editUser`;
+        url.value = route.params.id ? `/api/editUser/${route.params.id}` : `/api/editUser`;
         data.value = {
             prenom: firstName.value,
             nom: lastName.value,
@@ -249,9 +250,18 @@ const handleSubmit = async () => {
             await useValidationForm(result, errors);
         }
         else{
-            const user = await getUser();
-            useUserStore().setUser(user);
-            await router.push(!isEditProfileRoute.value ? "/" : "/profile");
+            //Si c'est une édition de profil et qu'on est admin, on retourne sur le profil de l'utilisateur édité
+            if (route.params.id && isEditProfileRoute.value) {
+                await getUser(route.params.id)
+                await router.push({ name: 'AdminProfile', params: { id: route.params.id } });
+
+            }
+            //Sinon on retourne sur la page d'accueil ou le profil de l'utilisateur
+            else{
+                const user = await getUser()
+                useUserStore().setUser(user);
+                await router.push({ name: !isEditProfileRoute.value ? 'Accueil' : 'Profile' });
+            }
         }
 
     } catch (err) {
@@ -262,7 +272,7 @@ const handleSubmit = async () => {
 
 onMounted(async () => {
     if (isEditProfileRoute.value) {
-        const userData = await getUser();
+        const userData = route.params.id ?  await getUser(route.params.id) : await getUser('');
         firstName.value = userData.prenom || "";
         lastName.value = userData.nom || "";
         adress.value = userData.adresse || "";

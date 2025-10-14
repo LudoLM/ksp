@@ -5,7 +5,9 @@ namespace App\Repository;
 use App\Entity\Cours;
 use App\Entity\StatusCours;
 use App\Entity\TypeCours;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -221,5 +223,22 @@ class CoursRepository extends ServiceEntityRepository
             'min' => (new \DateTime($result['min']))->format('Y'),
             'max' => (new \DateTime($result['max']))->format('Y'),
         ];
+    }
+
+    public function paginateUserCours(
+        User $user,
+        int $page = 1,
+        int $limit = 10,
+    ): \Doctrine\ORM\Tools\Pagination\Paginator {
+        $query = $this->createQueryBuilder('c')
+            ->innerJoin('c.usersCours', 'uc')
+            ->andWhere('uc.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('c.dateCours', 'DESC')
+            ->getQuery()
+            ->setFirstResult(($page - 1) * $limit) // Offset
+            ->setMaxResults($limit); // Limit
+
+        return new Paginator($query);
     }
 }

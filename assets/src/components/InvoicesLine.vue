@@ -4,6 +4,7 @@ import DownloadInvoice from "../../icons/userActions/DownloadInvoice.vue";
 import {apiFetch} from "../utils/useFetchInterceptor";
 import Tooltip from "./Tooltip.vue";
 import {useUserStore} from "../store/user";
+import {alertStore} from "../store/alert";
 
 const props = defineProps(
     {

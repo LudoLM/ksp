@@ -1,12 +1,12 @@
 <script setup>
 
-import {inject, onMounted, ref} from "vue";
+import {onMounted} from "vue";
 import {useUserStore} from "../store/user";
 import Banner from "../components/Banner.vue";
 import {apiFetch} from "../utils/useFetchInterceptor";
 import {storeToRefs} from "pinia";
+import {alertStore} from "../store/alert";
 
-const alertStore = inject('alertStore');
 const userStore = useUserStore();
 const {userNombreCours} = storeToRefs(userStore);
 

@@ -36,9 +36,10 @@
 </template>
 
 <script setup>
-import {inject, ref, watch} from 'vue';
+import {ref, watch} from 'vue';
 import CustomButton from "../forms/CustomButton.vue";
 import CustomInput from "../forms/CustomInput.vue";
+import { alertStore } from '../../store/alert';
 
 
 const props = defineProps({
@@ -58,7 +59,6 @@ const props = defineProps({
 
 });
 
-const alertStore = inject('alertStore');
 const emit = defineEmits(["update:isOpen", "forgotPassword", "update:modelValue"]);
 const localIsOpen = ref(props.isOpen);
 const resetPasswordEmail = ref('');
