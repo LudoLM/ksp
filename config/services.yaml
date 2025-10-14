@@ -6,6 +6,7 @@
 parameters:
     timezone: 'Europe/Paris'
     app_url: '%env(APP_URL)%'
+    app.refresh_tokens_cleanup_cron: '0 2 * * *' # Every day at 2:00 AM
 
 services:
     # default configuration for services in *this* file
@@ -38,5 +39,9 @@ services:
     App\Service\SendingEmail\SendUpdateCoursEmailService:
         arguments:
             $baseUrl: '%app_url%'  # Injecter le paramètre app_url
+            
+    App\Scheduler\RemoveRefreshTokensProvider:
+        arguments:
+            $cronExpression: '%app.refresh_tokens_cleanup_cron%' # Injecter le paramètre app.refresh_tokens_cleanup_cron
 
 
