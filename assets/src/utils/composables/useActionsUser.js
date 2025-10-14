@@ -4,29 +4,14 @@ import { apiFetch } from '../useFetchInterceptor';
 import {computed, ref} from "vue";
 import { alertStore } from '../../store/alert';
 import {storeToRefs} from "pinia";
-import {useAdminUsersManagement} from "./useAdminUsersManagement";
 import {useRoute} from "vue-router";
 
-// Données du profil affiché
-export const currentUser = ref({
-  userId: null,
-  prenom: null,
-  nom: null,
-  email: null,
-  nombreCours: null,
-  telephone: null,
-  codePostal: null,
-  adresse: null,
-  commune: null
-});
 
-export const userCoursHistory = ref([]);
-export const currentUserNewCount = ref(null);
-export const userPaymentsHistory = ref({
-  historiquePaiements: []
-});
 
 export function useActionsUser() {
+  const userCoursHistory = ref([]);
+  const currentUserNewCount = ref(null);
+  const userPaymentsHistory = ref({ historiquePaiements: []});
   const route = useRoute();
   const userStore = useUserStore();
 
@@ -34,7 +19,18 @@ export function useActionsUser() {
     return route.path.startsWith('/admin');
   });
 
-
+  // Données du profil affiché
+  const currentUser = ref({
+    userId: null,
+    prenom: null,
+    nom: null,
+    email: null,
+    nombreCours: null,
+    telephone: null,
+    codePostal: null,
+    adresse: null,
+    commune: null
+  });
 
   const getUser = async () => {
     try {
@@ -69,10 +65,12 @@ export function useActionsUser() {
       } else {
         const errorData = await response.json();
         alertStore.setAlert(errorData.message || "Erreur lors de la suppression du profil", "error");
+        return {success: false}
       }
     } catch (error) {
       console.error("Erreur lors de la suppression du profil:", error);
       alertStore.setAlert("Erreur lors de la suppression du profil", "error");
+      return {success: false}
     }
   };
 
@@ -163,9 +161,13 @@ export function useActionsUser() {
   };
 
   return {
+    currentUser,
+    userCoursHistory,
+    currentUserNewCount,
+    userPaymentsHistory,
+    isViewingOtherUser,
     getUser,
     deleteUser,
-    isViewingOtherUser,
     loadUserCoursHistory,
     loadUserPaymentsHistory,
     loadProfileData,

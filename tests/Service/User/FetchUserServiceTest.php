@@ -84,7 +84,7 @@ class FetchUserServiceTest extends TestCase
         $mockUser = $this->createMock(User::class);
 
         if (null !== $id) {
-            if ($userExists === true) {
+            if (true === $userExists) {
                 $this->userRepository
                     ->expects($this->once())
                     ->method('find')
@@ -107,7 +107,7 @@ class FetchUserServiceTest extends TestCase
             $this->security
                 ->expects($this->once())
                 ->method('getUser')
-                ->willReturn($isAuthenticated === true ? $mockUser : null);
+                ->willReturn(true === $isAuthenticated ? $mockUser : null);
         }
 
         if (null !== $expectedException) {

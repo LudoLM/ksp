@@ -10,14 +10,14 @@ import ModalConfirm from "../../components/modals/ModalConfirm.vue";
 import InfosItem from "../../../icons/adminActions/InfosItem.vue";
 import DeleteItem from "../../../icons/adminActions/DeleteItem.vue";
 import {useActionsUser} from "../../utils/composables/useActionsUser";
-import {useAdminUsersManagement, users, currentPage, metadata, searchUser} from "../../utils/composables/useAdminUsersManagement";
+import {useAdminUsersManagement} from "../../utils/composables/useAdminUsersManagement";
 
 const title = 'Gestion des utilisateurs';
 const route = useRoute();
 const router = useRouter();
 const confirmDialog = ref(false);
 const { deleteUser } = useActionsUser();
-const { getUsers, resetAllUserCounterCours } = useAdminUsersManagement();
+const { users, currentPage, metadata, searchUser, getUsers, resetAllUserCounterCours } = useAdminUsersManagement();
 
 
 //Gère le clic sur les boutons de pagination.

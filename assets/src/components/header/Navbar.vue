@@ -179,7 +179,9 @@ const routes = computed(() =>
                 "AdminCoursDetails",
                 "ResetPassword",
                 "EditProfile",
-                "CreateWeekType"
+                "CreateWeekType",
+                "ControlUser",
+                "AdminEditProfile"
             ].includes(r.name)
     )
 );

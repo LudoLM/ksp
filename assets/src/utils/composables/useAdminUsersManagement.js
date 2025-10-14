@@ -2,13 +2,14 @@ import {apiFetch} from "../useFetchInterceptor";
 import {alertStore} from "../../store/alert";
 import {ref} from "vue";
 
-export const users = ref([]);
-export const metadata = ref({ total_pages: 1 });
-export const currentPage = ref(1);
-export const searchUser = ref('');
-
 
 export function useAdminUsersManagement() {
+
+  const users = ref([]);
+  const metadata = ref({ total_pages: 1 });
+  const currentPage = ref(1);
+  const searchUser = ref('');
+
   const getUsers = async (page) => {
     const targetPage = page !== undefined ? page : currentPage.value;
     try {
@@ -45,8 +46,13 @@ export function useAdminUsersManagement() {
 
 
 return {
+  users,
+  metadata,
+  currentPage,
+  searchUser,
   getUsers,
   resetAllUserCounterCours
+
 }
 
 

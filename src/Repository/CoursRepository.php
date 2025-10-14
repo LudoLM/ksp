@@ -229,7 +229,7 @@ class CoursRepository extends ServiceEntityRepository
         User $user,
         int $page = 1,
         int $limit = 10,
-    ): \Doctrine\ORM\Tools\Pagination\Paginator {
+    ): Paginator {
         $query = $this->createQueryBuilder('c')
             ->innerJoin('c.usersCours', 'uc')
             ->andWhere('uc.user = :user')

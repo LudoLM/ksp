@@ -210,13 +210,13 @@ import CancelCours from "../../icons/adminActions/CancelCours.vue";
 import CustomInput from "../components/forms/CustomInput.vue";
 import DeleteItem from "../../icons/adminActions/DeleteItem.vue";
 import ModalConfirm from "../components/modals/ModalConfirm.vue";
-import { useActionsUser, userPaymentsHistory, userCoursHistory, currentUserNewCount, currentUser } from "../utils/composables/useActionsUser";
+import {useActionsUser } from "../utils/composables/useActionsUser";
 import {useUserStore} from "../store/user";
 
 const router = useRouter();
 const route = useRoute();
 const isModifyingCounterCours = ref(false);
-const { deleteUser, loadProfileData, loadUserCoursHistory, loadUserPaymentsHistory, isViewingOtherUser, handleUpdateCounterCours } = useActionsUser();
+const {userPaymentsHistory, currentUserNewCount, userCoursHistory, currentUser, deleteUser, loadProfileData, loadUserCoursHistory, loadUserPaymentsHistory, isViewingOtherUser, handleUpdateCounterCours } = useActionsUser();
 const confirmDialog = ref(false);
 const confirmMessage = computed(() => {
     const cours = currentUser.value?.nombreCours ?? 0;
@@ -224,9 +224,6 @@ const confirmMessage = computed(() => {
         ? `Êtes-vous sûr de vouloir supprimer ce compte ? ${cours} cours restant${cours > 1 ? 's' : ''} ${cours > 1 ? 'seront perdus' : 'sera perdu'}.`
         : `Êtes-vous sûr de vouloir supprimer ce compte ?`;
 });
-
-
-
 
 const handleDeleteUser = async (userId) => {
 

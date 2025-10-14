@@ -16,6 +16,7 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -34,6 +35,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/users', name: 'api_all_users', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent avoir accès à tous les utilisateurs.')]
     public function getAllUsers(
         #[MapQueryParameter(name: 'page')] int $page,
         #[MapQueryParameter(name: 'searchUser')] string $searchUser = '',
@@ -74,7 +76,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/deleteUser/{id<\d+>}', name: 'api_delete_user', methods: ['DELETE'])]
-    public function deleteUser(?int $id = null): \Symfony\Component\HttpFoundation\JsonResponse
+    public function deleteUser(?int $id = null): JsonResponse
     {
         try {
             $user = $this->fetchUserService->fetchUser($id);
@@ -149,6 +151,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/resetAllUserscounterCours', name: 'api_reset_all_users_counter_cours', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent reset tous les cours')]
     public function resetAllUserscounterCours(): JsonResponse
     {
         try {
@@ -165,6 +168,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/updateUserCoursCount/{id}', name: 'api_update_all_users_cours_count', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent modifier le compte de cours.')]
     public function updateUserCoursCount(
         #[MapRequestPayload] UpdateCoursCountDTO $updateCoursCountDTO,
         User $user,
