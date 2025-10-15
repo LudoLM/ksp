@@ -16,7 +16,7 @@ readonly class SendResetPasswordEmailService
 
     public function send(User $user, string $token): void
     {
-        $email = (new TemplatedEmail())
+        $email = new TemplatedEmail()
             ->from('ludolemelinaire@gmail.com')
             ->to($user->getEmail())
             ->subject('Réinitialisation de votre mot de passe')

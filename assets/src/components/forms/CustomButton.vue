@@ -27,7 +27,7 @@ const colors = {
 
 <template>
     <button
-        class="color-button block px-3 py-2 text-center text-sm text-white shadow-sm bg-brand-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        class="color-button block px-3 py-2 text-center text-xs md:text-sm text-white shadow-sm bg-brand-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
         :class="[
       colors[color]?.base,
       colors[color]?.hover,

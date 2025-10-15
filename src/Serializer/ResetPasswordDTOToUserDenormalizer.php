@@ -8,9 +8,6 @@ use App\Repository\UserRepository;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-/**
- * @method array getSupportedTypes(?string $format)
- */
 class ResetPasswordDTOToUserDenormalizer implements DenormalizerInterface
 {
     public function __construct(
@@ -19,7 +16,7 @@ class ResetPasswordDTOToUserDenormalizer implements DenormalizerInterface
     ) {
     }
 
-    public function denormalize(mixed $data, string $type, ?string $format = null, array $context = [])
+    public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
     {
         // TODO: Implement denormalize() method.
 
@@ -42,9 +39,16 @@ class ResetPasswordDTOToUserDenormalizer implements DenormalizerInterface
         return $user;
     }
 
-    public function supportsDenormalization(mixed $data, string $type, ?string $format = null)
+    public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
     {
         // TODO: Implement supportsDenormalization() method.
         return User::class === $type;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [
+            User::class => true,
+        ];
     }
 }

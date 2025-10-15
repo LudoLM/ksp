@@ -30,7 +30,7 @@ class handleCheckSubscriptionsInAWeek
         $mondayOfWeek = (clone $dateCours)->modify('monday this week');
         $usersCours = $user->getUsersCours();
 
-        return count(array_filter($usersCours->toArray(), function ($userCours) use ($mondayOfWeek): bool {
+        return count(array_filter($usersCours->toArray(), function (\App\Entity\UsersCours $userCours) use ($mondayOfWeek): bool {
             $coursDate = $userCours->getCours()->getDateCours();
 
             return $coursDate >= $mondayOfWeek && $coursDate < (clone $mondayOfWeek)->modify('+1 week') && true !== $userCours->isOnWaitingList() && $userCours->getCours()->hasLimitOfOneCoursPerWeek();

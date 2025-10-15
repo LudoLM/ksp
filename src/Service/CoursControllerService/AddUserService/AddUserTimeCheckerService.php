@@ -6,7 +6,7 @@ use App\Entity\Cours;
 
 class AddUserTimeCheckerService
 {
-    private const INSCRIPTION_LIMIT = 1800;
+    private const int INSCRIPTION_LIMIT = 1800;
 
     public function isTooLateRegister(Cours $cours): void
     {

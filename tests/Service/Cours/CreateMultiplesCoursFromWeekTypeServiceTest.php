@@ -97,7 +97,7 @@ class CreateMultiplesCoursFromWeekTypeServiceTest extends TestCase
         $dto = new AssignWeekDTO();
         $dto->weekTypeId = 1; // Ou passer en paramètre si weekTypeId varie
         $dto->dateMonday = '2025-10-20'; // Ou passer en paramètre si dateMonday varie
-        $dto->coursList = array_map(function ($cours): CoursSnapshotItemDTO {
+        $dto->coursList = array_map(function (array $cours): CoursSnapshotItemDTO {
             $coursDto = new CoursSnapshotItemDTO();
             // Assurez-vous d'attribuer explicitement toutes les propriétés attendues
             $coursDto->daySelected = $cours['daySelected'] ?? 0;

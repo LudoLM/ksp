@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Cours;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -72,6 +73,36 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->orderBy('u.nom', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function paginateUsers(
+        int $page = 1,
+        int $limit = 10,
+        string $searchUser = '',
+    ): Paginator {
+        $query = $this->createQueryBuilder('u')
+            ->where('u.nom LIKE :searchUser')
+            ->orWhere('u.prenom LIKE :searchUser')
+            ->orWhere('u.email LIKE :searchUser')
+            ->setParameter('searchUser', '%'.$searchUser.'%')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->orderBy('u.nom', 'ASC')
+            ->getQuery();
+
+        return new Paginator($query);
+    }
+
+    public function resetAllUsersCounterCours()
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->update()
+            ->set('u.nombreCours', 0)
+            ->set('u.isPrioritized', 0)
+            ->where('u.roles NOT LIKE :adminRole')
+            ->setParameter('adminRole', '%"ROLE_ADMIN"%');
+
+        return $qb->getQuery()->execute();
     }
 
     //    /**

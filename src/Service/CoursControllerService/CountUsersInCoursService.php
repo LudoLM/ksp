@@ -10,7 +10,7 @@ class CountUsersInCoursService
     {
         return count(array_filter(
             $cours->getUsersCours()->toArray(),
-            fn ($usersCours): bool => true !== $usersCours->isOnWaitingList()
+            fn (\App\Entity\UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList()
         ));
     }
 }

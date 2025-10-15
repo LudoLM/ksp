@@ -1,5 +1,5 @@
 <script setup>
-import {inject, onMounted, ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 import CustomInput from "../components/forms/CustomInput.vue";
 import CustomSelect from "../components/forms/CustomSelect.vue";
 import { useRouter } from 'vue-router';
@@ -12,6 +12,7 @@ import Banner from "../components/Banner.vue";
 import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
 import CustomFileInput from "../components/forms/CustomFileInput.vue";
 import {useUserStore} from "../store/user";
+import {alertStore} from "../store/alert";
 
 const formData = ref({
     nom: null,
@@ -28,7 +29,6 @@ const existingImage = ref(null);
 const imagePreview = ref(null);
 const urlCreation = "/api/typeCours/create";
 const urlEdition = "/api/typeCours/edit/";
-const alertStore = inject('alertStore');
 
 const errors = ref({
     libelle: null,

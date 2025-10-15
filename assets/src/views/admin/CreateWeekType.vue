@@ -2,7 +2,7 @@
 import Banner from "../../components/Banner.vue";
 import bannerImage from "../../../images/banners/imageBanner5.jpg";
 import {useGetTypesCours} from "../../utils/useActionCours";
-import {onMounted, ref, inject, watch, computed} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import CoursCardTypeCours from "../../components/CoursCardTypeCours.vue";
 import ModalAddCoursWeekType from "../../components/modals/ModalAddCoursWeekType.vue";
 import CustomButton from "../../components/forms/CustomButton.vue";
@@ -16,6 +16,7 @@ import CustomSelect from "../../components/forms/CustomSelect.vue";
 import {useConvertFormatDate} from "../../utils/useConvertFormatDate";
 import ModalDuplicateWeekType from "../../components/modals/ModalDuplicateWeekType.vue";
 import {useValidationForm} from "../../utils/useValidationForm";
+import {alertStore} from "../../store/alert";
 
 const title = 'Gestion de semaine type';
 const typeCoursList = ref([]);
@@ -37,8 +38,6 @@ const isCreateMode = ref(true)
 
 const weekType = ref([]);
 const weekTypeName = ref();
-
-const alertStore = inject('alertStore');
 
 const openModalForTypeCours = (typeCours) => {
     coursOrTypeCours.value = {
@@ -270,9 +269,6 @@ const handleAddWeek = async () => {
                         >Dupliquer
                         </CustomButton>
                     </div>
-
-                </div>
-                <div
 
                 </div>
             </Tab>

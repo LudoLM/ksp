@@ -87,13 +87,11 @@ import { infos } from "../store/index";
 import bannerImage from "../../images/banners/banner4.jpg";
 import Banner from "../components/Banner.vue";
 import {useRoute} from "vue-router";
-import {createAlertStore} from "../store/alert";
-import {inject} from "vue";
+import { alertStore } from '../store/alert';
 const store = infos();
 const route = useRoute();
 
 if (route.query.alert === 'logout') {
-    const alertStore = inject('alertStore');
     alertStore.setAlert("Vous êtes déconnecté(e).", "info");
 }
 

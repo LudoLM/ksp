@@ -41,6 +41,7 @@ const router = createRouter({
         { path: '/register', name: 'Register', meta: {title: 'Création de compte'} ,component: () => import('../views/Signup.vue') },
         { path: '/editProfile', name: 'EditProfile', meta: {title: 'Modifier son profil'} ,component: () => import('../views/Signup.vue') },
         { path: '/resetPassword/:id/:token', name: 'ResetPassword', meta: {title: 'Réinitialiser mot de passe'} ,component: () => import('../views/ResetPassword.vue') },
+        { path: '/editProfile/:id', name: 'AdminEditProfile', meta: {title: 'Modifier son profil', requiresAdmin: true} ,component: () => import('../views/Signup.vue') },
       ]
     },
     {
@@ -64,6 +65,8 @@ const router = createRouter({
             { path: 'coursType/edit', name: 'EditTypeCours', label: 'Modifier Type de cours', component: TypeCoursForm, meta: { requiresAdmin: true, title: "Modifier un type de cours" } },
             { path: 'coursDetails/:id', name: 'AdminCoursDetails', component: () => import('../views/CoursDetails.vue'), meta: { requiresAdmin: true, title: "Détails" } },
             { path: 'createWeekType', name: 'CreateWeekType', label: 'Gérer semaine type', component: () => import('../views/admin/CreateWeekType.vue'), meta: { requiresAdmin: true, title: "Gestion de semaines types" }},
+            { path: 'controlUser', name: 'ControlUser', label: 'Gérer utilisateurs', component: () => import('../views/admin/ControlUser.vue'), meta: { requiresAdmin: true, title: "Gestion des utilisateurs" }},
+            { path: 'profile/:id?', name: 'AdminProfile', label: 'Profil utilisateur' ,component: () => import('../views/Profile.vue'), meta: { requiresAdmin: true, title: "Profil utilisateur" }},
           ],
         },
       ],

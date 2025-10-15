@@ -7,9 +7,6 @@ use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-/**
- * @method array getSupportedTypes(?string $format)
- */
 class UpdateCoursDTOToCoursDenormalizer implements DenormalizerInterface
 {
     public function __construct(
@@ -18,7 +15,7 @@ class UpdateCoursDTOToCoursDenormalizer implements DenormalizerInterface
     ) {
     }
 
-    public function denormalize(mixed $data, string $type, ?string $format = null, array $context = [])
+    public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
     {
         /**
          * @param \App\DTO\SuperLightCoursDTO $data
@@ -32,8 +29,15 @@ class UpdateCoursDTOToCoursDenormalizer implements DenormalizerInterface
         return $cours;
     }
 
-    public function supportsDenormalization(mixed $data, string $type, ?string $format = null): bool
+    public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
     {
         return Cours::class === $type;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [
+            Cours::class => true,
+        ];
     }
 }

@@ -18,9 +18,9 @@ readonly class DesistementSubscriber implements EventSubscriberInterface
     {
         $cours = $event->getCours();
         $usersCours = $cours->getUsersCours();
-        $usersCours = array_filter($usersCours->toArray(), fn ($usersCours): ?bool => $usersCours->isOnWaitingList());
+        $usersCours = array_filter($usersCours->toArray(), fn (\App\Entity\UsersCours $usersCours): ?bool => $usersCours->isOnWaitingList());
         foreach ($usersCours as $user) {
-            $email = (new TemplatedEmail())
+            $email = new TemplatedEmail()
                 ->from('test@test.fr')
                 ->to($user->getUser()->getEmail())
                 ->subject('Place disponible pour le cours')
