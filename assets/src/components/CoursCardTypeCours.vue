@@ -2,7 +2,7 @@
 
 import Checked from "../../icons/Checked.vue";
 import EditCoursIcon from "../../icons/adminActions/EditCoursIcon.vue";
-import DeleteCours from "../../icons/adminActions/DeleteCours.vue";
+import DeleteItem from "../../icons/adminActions/DeleteItem.vue";
 
 const props = defineProps({
     cours: {
@@ -89,7 +89,7 @@ const emit = defineEmits([
                     <button
                         @click="emit('deleteCours', cours)"
                     >
-                        <DeleteCours size="16" />
+                        <DeleteItem size="16" />
                     </button>
                 </div>
 

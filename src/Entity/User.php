@@ -79,7 +79,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     /**
      * @var Collection<int, HistoriquePaiement>
      */
-    #[Groups(['user:profile'])]
+    #[Groups(['user:payments'])]
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: HistoriquePaiement::class, orphanRemoval: true)]
     private Collection $historiquePaiements;
 

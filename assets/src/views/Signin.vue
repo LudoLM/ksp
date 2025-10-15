@@ -107,8 +107,7 @@ import CustomPassword from "../components/forms/CustomPassword.vue";
 import SideBannerAuth from "../components/SideBannerAuth.vue";
 import ModalResetPassword from "../components/modals/ModalResetPassword.vue";
 import {useCalendarStore} from "../store/calendar";
-import {useUserStore} from "../store/user";
-import {getUser} from "../utils/useActionUser";
+import { useActionsUser } from "../utils/composables/useActionsUser";
 
 
 // Instancier le store en dehors de la fonction handleLogin
@@ -117,6 +116,7 @@ const password = ref('');
 const error = ref(null);
 const router = useRouter();
 const resetPasswordDialog = ref(false);
+const { getUser } = useActionsUser();
 
 const handleRedirection = () => {
     router.go(-1);

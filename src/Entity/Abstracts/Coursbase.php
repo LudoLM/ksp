@@ -12,7 +12,7 @@ abstract class Coursbase
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours:update', 'user:detail', 'cours_filling:index', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours:update', 'user:profile', 'cours_filling:index', 'week_type:index'])]
     protected ?int $id = null;
 
     #[ORM\Column]

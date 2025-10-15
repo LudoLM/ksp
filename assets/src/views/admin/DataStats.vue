@@ -2,9 +2,10 @@
 
     import ChartOne from "../../components/admin/ChartOne.vue";
     import TopProductsTable from "../../components/admin/TopProductsTable.vue";
-    import {inject, onMounted, ref} from "vue";
+    import {onMounted, ref} from "vue";
     import FillingCharts from "../../components/admin/FillingCharts.vue";
     import {apiFetch} from "../../utils/useFetchInterceptor";
+    import {alertStore} from "../../store/alert";
 
     const paiements = ref([]);
     const quantitiesById = ref([]);
@@ -12,7 +13,6 @@
     const nbreTotalVentes = ref(0);
     const startDate = ref(new Date('2024-01-01T00:00:00'));
     const endDate = ref(new Date());
-    const alertStore = inject('alertStore');
 
     const fetchPaiements = async () => {
         try {

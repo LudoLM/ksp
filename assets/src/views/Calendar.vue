@@ -1,18 +1,19 @@
 <script setup>
 import CustomButton from "../components/forms/CustomButton.vue";
 import {useCalendarStore} from "../store/calendar";
-import {computed, inject, onBeforeMount, ref, watch} from "vue";
+import {computed, onBeforeMount, ref, watch} from "vue";
 import CoursCardCalendar from "../components/CoursCardCalendar.vue";
 import TypeCoursFilter from "../components/filtersCours/TypeCoursFilter.vue";
 import bannerImage from "../../images/banners/imageBanner9.jpg";
 import Banner from "../components/Banner.vue";
-import DeleteCours from "../../icons/adminActions/DeleteCours.vue";
+import DeleteItem from "../../icons/adminActions/DeleteItem.vue";
 import Tooltip from "../components/Tooltip.vue";
 import { useRouter } from "vue-router";
 import {storeToRefs} from "pinia";
 import {apiFetch} from "../utils/useFetchInterceptor";
 import StatusCoursFilter from "../components/filtersCours/StatusCoursFilter.vue";
 import {useUserStore} from "../store/user";
+import {alertStore} from "../store/alert";
 
 const calendarStore = useCalendarStore();
 const dateToday = ref(new Date());
@@ -31,7 +32,6 @@ const days = computed(() => calendarStore.days);
 const infos = computed(() => calendarStore.infos);
 const { weekInfos, selectedTypeCours, selectedStatusCours } = storeToRefs(calendarStore);
 const uniqueTypeCoursList = computed(() => calendarStore.uniqueTypeCoursList);
-const alertStore = inject('alertStore');
 
 //Filtre les status accessible selon le role
 const uniqueStatusCoursList = computed(() =>
@@ -226,7 +226,7 @@ const nextDateInNextWeek = computed(() => {
                         class="hover:text deleteIcon"
                         @click="calendarStore.resetCalendar(); updateUrl(false)"
                     >
-                        <DeleteCours size="18"/>
+                        <DeleteItem size="18"/>
                     </button>
                 </Tooltip>
             </div>

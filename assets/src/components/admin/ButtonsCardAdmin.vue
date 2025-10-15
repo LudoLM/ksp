@@ -2,10 +2,10 @@
 
 import ModalAddExtra from "../modals/ModalAddExtra.vue";
 import {ref} from "vue";
-import DeleteCours from "../../../icons/adminActions/DeleteCours.vue";
+import DeleteItem from "../../../icons/adminActions/DeleteItem.vue";
 import CancelCours from "../../../icons/adminActions/CancelCours.vue";
 import LaunchCours from "../../../icons/adminActions/LaunchCours.vue";
-import InfosCours from "../../../icons/adminActions/InfosCours.vue";
+import InfosItem from "../../../icons/adminActions/InfosItem.vue";
 import AddExtraUser from "../../../icons/adminActions/AddExtraUser.vue";
 import EditCoursIcon from "../../../icons/adminActions/EditCoursIcon.vue";
 import Tooltip from "../Tooltip.vue";
@@ -42,7 +42,7 @@ const emit = defineEmits([
     >
         <button class="hover:text">
             <router-link :to="{ name: 'AdminCoursDetails', params: { id: coursId }}">
-                <InfosCours
+                <InfosItem
                     data-text="Why did you hovered?"
                     size="18"/>
             </router-link>
@@ -59,7 +59,7 @@ const emit = defineEmits([
             :title="'Supprimer le cours.'"
         >
             <button class="hover:text">
-                <DeleteCours size="18"/>
+                <DeleteItem size="18"/>
             </button>
         </Tooltip>
     </ModalConfirm>

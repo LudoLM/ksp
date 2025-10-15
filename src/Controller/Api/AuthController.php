@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Serializer\ResetPasswordDTOToUserDenormalizer;
 use App\Service\SendingEmail\ForgotPasswordService;
 use App\Service\UserControllerService\CreateOrEditUserService;
+use App\Service\UserControllerService\FetchUserService;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -30,6 +31,7 @@ class AuthController extends AbstractController
         private readonly CreateOrEditUserService $createOrEditUserService,
         private readonly RefreshTokenGeneratorInterface $refreshTokenGenerator,
         private readonly RefreshTokenManagerInterface $refreshTokenManager,
+        private readonly FetchUserService $fetchUserService,
     ) {
     }
 
@@ -72,19 +74,21 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route(path: 'api/editUser', name: 'api_app_edit_profile', methods: ['POST'])]
+    #[Route(path: 'api/editUser/{id<\d+>?}', name: 'api_app_edit_profile', methods: ['POST'])]
     public function editProfile(
         #[MapRequestPayload]
         EditUserDTO $editUserDTO,
+        ?int $id = null,
     ): JsonResponse {
-        $user = $this->getUser();
+        $user = $this->fetchUserService->fetchUser($id);
         try {
-            $token = $this->createOrEditUserService->createOrEditUser($user, $editUserDTO);
+            $this->createOrEditUserService->createOrEditUser($user, $editUserDTO);
+            $this->em->persist($user);
+            $this->em->flush();
 
             return new JsonResponse([
                 'message' => 'Utilisateur modifié',
-                'token' => $token,
-            ]);
+            ], Response::HTTP_OK);
         } catch (\Exception $exception) {
             return new JsonResponse([
                 'type' => 'error',

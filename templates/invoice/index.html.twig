@@ -69,7 +69,7 @@
     <section class="invoice-details">
         <p><strong>Date de la facture :</strong> {{ "now"|date("m/d/Y") }}</p>
         <p><strong>Numéro de la facture :</strong> #{{ paiement.id }}</p>
-        <p><strong>Client :</strong> {{ app.user.prenom }} {{ app.user.nom }}</p>
+        <p><strong>Client :</strong> {{ paiement.user.prenom }} {{ paiement.user.nom }}</p>
     </section>
 
     <table>

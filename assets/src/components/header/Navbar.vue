@@ -86,6 +86,14 @@
                             Créer une semaine type
                         </router-link>
                     </li>
+                    <li>
+                        <router-link
+                            :to="{ name: 'ControlUser' }"
+                            class="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out lg:text-base"
+                        >
+                            Gestion des utilisateurs
+                        </router-link>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -171,7 +179,9 @@ const routes = computed(() =>
                 "AdminCoursDetails",
                 "ResetPassword",
                 "EditProfile",
-                "CreateWeekType"
+                "CreateWeekType",
+                "ControlUser",
+                "AdminEditProfile"
             ].includes(r.name)
     )
 );
