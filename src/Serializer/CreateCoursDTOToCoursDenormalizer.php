@@ -17,7 +17,7 @@ class CreateCoursDTOToCoursDenormalizer implements DenormalizerInterface
     ) {
     }
 
-    public function denormalize($data, string $type, ?string $format = null, array $context = [])
+    public function denormalize($data, string $type, ?string $format = null, array $context = []): mixed
     {
         if (!$data instanceof CreateCoursDTO) {
             throw new \Exception('Expected instance of CreateCoursDTO');
@@ -41,8 +41,15 @@ class CreateCoursDTOToCoursDenormalizer implements DenormalizerInterface
         return $cours;
     }
 
-    public function supportsDenormalization($data, string $type, ?string $format = null): bool
+    public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
     {
         return Cours::class === $type;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [
+            Cours::class => true,
+        ];
     }
 }

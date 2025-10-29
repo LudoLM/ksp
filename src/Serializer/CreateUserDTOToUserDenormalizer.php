@@ -14,7 +14,7 @@ readonly class CreateUserDTOToUserDenormalizer implements DenormalizerInterface
     {
     }
 
-    public function denormalize($data, string $type, ?string $format = null, array $context = [])
+    public function denormalize($data, string $type, ?string $format = null, array $context = []): mixed
     {
         if (!$data instanceof CreateUserDTO && !$data instanceof EditUserDTO) {
             throw new \Exception('Instance de CreateUserDTO ou EditUSerDTO attendue');
@@ -45,8 +45,15 @@ readonly class CreateUserDTOToUserDenormalizer implements DenormalizerInterface
         return $user;
     }
 
-    public function supportsDenormalization($data, string $type, ?string $format = null): bool
+    public function supportsDenormalization($data, string $type, ?string $format = null, array $context = []): bool
     {
         return User::class === $type;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [
+            User::class => true,
+        ];
     }
 }

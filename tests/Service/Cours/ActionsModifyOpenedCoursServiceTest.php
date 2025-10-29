@@ -72,7 +72,6 @@ class ActionsModifyOpenedCoursServiceTest extends TestCase
         $user = new User();
         $reflectionClass = new \ReflectionClass($user);
         $reflectionProperty = $reflectionClass->getProperty('id');
-        $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($user, 100);
 
         $this->security
@@ -83,7 +82,6 @@ class ActionsModifyOpenedCoursServiceTest extends TestCase
         $userCours->setUser($user);
         $reflectionClass = new \ReflectionClass($userCours);
         $reflectionProperty = $reflectionClass->getProperty('id');
-        $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue($userCours, 100);
         $cours->addUsersCours($userCours);
 

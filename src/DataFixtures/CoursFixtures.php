@@ -12,10 +12,6 @@ use Faker\Generator;
 
 class CoursFixtures extends Fixture
 {
-    public function __construct(
-    ) {
-    }
-
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
