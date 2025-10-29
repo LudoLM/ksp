@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\DTO\CreateCoursDTO;
 use App\Entity\Cours;
 use App\Entity\User;
+use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
@@ -141,7 +142,7 @@ class CoursController extends AbstractController
         }
 
         // Si le cours est complet et qu'il y a de la place, je change le statut du cours et envoie un mail aux personnes en attente
-        if (count(array_filter($cours->getUsersCours()->toArray(), fn (\App\Entity\UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList())) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
+        if (count(array_filter($cours->getUsersCours()->toArray(), fn (UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList())) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
             $statusChange = $cours->getStatusCours();
             // Envoi d'un mail aux personnes en attente
@@ -149,7 +150,7 @@ class CoursController extends AbstractController
             $this->dispatcher->dispatch($eventCours);*/
         }
 
-        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), fn (\App\Entity\UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList()));
+        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), fn (UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList()));
 
         //        // Sauvegarde des modifications en base de données
         $this->em->persist($cours);
@@ -292,14 +293,14 @@ class CoursController extends AbstractController
             }
         }
         //        Si le cours est complet et qu'il y a de la place, je change le statut du cours et envoie un mail aux personnes en attente
-        if (count(array_filter($cours->getUsersCours()->toArray(), fn (\App\Entity\UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList())) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
+        if (count(array_filter($cours->getUsersCours()->toArray(), fn (UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList())) < $cours->getNbInscriptionMax() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
             $statusChange = $cours->getStatusCours();
             // Envoi d'un mail aux personnes en attente
             /*$eventCours = new DesistementEvent($cours);
             $this->dispatcher->dispatch($eventCours);*/
         }
-        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), fn (\App\Entity\UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList()));
+        $usersCount = count(array_filter($cours->getUsersCours()->toArray(), fn (UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList()));
 
         $this->em->persist($cours);
         $this->em->flush();
