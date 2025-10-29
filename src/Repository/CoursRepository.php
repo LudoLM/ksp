@@ -134,7 +134,7 @@ class CoursRepository extends ServiceEntityRepository
 
         if (!$isPrioritized && !$isAdmin) {
             $qb->andWhere('c.hasPriority = false OR c.launchedAt < :launchedAt')
-                ->setParameter('launchedAt', (new \DateTime())->modify('-1 week'));
+                ->setParameter('launchedAt', new \DateTime()->modify('-1 week'));
         }
 
         return $qb->getQuery()->getResult();
@@ -168,7 +168,7 @@ class CoursRepository extends ServiceEntityRepository
         // s'il l'utilisateur n'est pas isPrioritized ou admin alors il faut que le cours a été créé il y a + d'une semaine ou qu'il soit à hasPriority false
         if (!$isPrioritized && !$isAdmin) {
             $qb->andWhere('c.hasPriority = false OR c.launchedAt < :launchedAt')
-                ->setParameter('launchedAt', (new \DateTime())->modify('-1 week'));
+                ->setParameter('launchedAt', new \DateTime()->modify('-1 week'));
         }
 
         $qb->setMaxResults(1);
@@ -190,7 +190,7 @@ class CoursRepository extends ServiceEntityRepository
             ->andWhere('c.dateCours > :currentDate')
             ->andWhere('c.dateCours < :dateLimit')
             ->setParameter('currentDate', new \DateTime())
-            ->setParameter('dateLimit', (new \DateTime())->modify('+90days'))
+            ->setParameter('dateLimit', new \DateTime()->modify('+90days'))
             ->groupBy('c.id')
             ->getQuery()
             ->getResult();
@@ -220,8 +220,8 @@ class CoursRepository extends ServiceEntityRepository
             ->getSingleResult();
 
         return [
-            'min' => (new \DateTime($result['min']))->format('Y'),
-            'max' => (new \DateTime($result['max']))->format('Y'),
+            'min' => new \DateTime($result['min'])->format('Y'),
+            'max' => new \DateTime($result['max'])->format('Y'),
         ];
     }
 

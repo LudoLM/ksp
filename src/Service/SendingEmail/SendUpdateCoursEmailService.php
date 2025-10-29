@@ -17,7 +17,7 @@ readonly class SendUpdateCoursEmailService
 
     public function send(UsersCours $usersCours, User $currentUser, \DateTimeInterface $initialDate, int $initialDuration): void
     {
-        $email = (new TemplatedEmail())
+        $email = new TemplatedEmail()
             ->from('ludolemelinaire@gmail.com')
             ->to($usersCours->getUser()->getEmail())
             ->subject('Modification de cours')

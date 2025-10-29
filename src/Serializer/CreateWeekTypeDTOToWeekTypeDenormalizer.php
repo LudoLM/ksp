@@ -15,7 +15,7 @@ readonly class CreateWeekTypeDTOToWeekTypeDenormalizer implements DenormalizerIn
     ) {
     }
 
-    public function denormalize(mixed $data, string $type, ?string $format = null, array $context = [])
+    public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
     {
         if (!$data instanceof CreateWeekTypeDTO) {
             throw new \Exception('Instance de createWeekTypeDTO attendue');
@@ -47,8 +47,15 @@ readonly class CreateWeekTypeDTOToWeekTypeDenormalizer implements DenormalizerIn
         return $weekType;
     }
 
-    public function supportsDenormalization(mixed $data, string $type, ?string $format = null): bool
+    public function supportsDenormalization(mixed $data, string $type, ?string $format = null, array $context = []): bool
     {
         return WeekType::class === $type;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [
+            WeekType::class => true,
+        ];
     }
 }

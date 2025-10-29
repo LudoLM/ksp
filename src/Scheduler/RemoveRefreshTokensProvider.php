@@ -19,7 +19,7 @@ final class RemoveRefreshTokensProvider implements ScheduleProviderInterface
 
     public function getSchedule(): Schedule
     {
-        return $this->schedule ??= (new Schedule())
+        return $this->schedule ??= new Schedule()
             ->with(RecurringMessage::cron($this->cronExpression, new RemoveExpiredRefreshTokens())
             );
     }

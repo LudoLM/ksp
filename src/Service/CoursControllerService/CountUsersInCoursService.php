@@ -3,6 +3,7 @@
 namespace App\Service\CoursControllerService;
 
 use App\Entity\Cours;
+use App\Entity\UsersCours;
 
 class CountUsersInCoursService
 {
@@ -10,7 +11,7 @@ class CountUsersInCoursService
     {
         return count(array_filter(
             $cours->getUsersCours()->toArray(),
-            fn ($usersCours): bool => true !== $usersCours->isOnWaitingList()
+            fn (UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList()
         ));
     }
 }

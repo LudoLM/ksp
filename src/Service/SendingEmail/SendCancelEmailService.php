@@ -18,7 +18,7 @@ readonly class SendCancelEmailService
 
     public function send(UsersCours $usersCours, User $currentUser): void
     {
-        $email = (new TemplatedEmail())
+        $email = new TemplatedEmail()
             ->from($currentUser->getEmail())
             ->to($usersCours->getUser()->getEmail())
             ->subject('Annulation du cours')
