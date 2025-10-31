@@ -5,14 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="robots" content="noindex">
         <title>{{ page_title|default('KSS') }}</title>
-        <link rel="icon" type="image/png" href="{{ asset('build/images/favicon.png') }}" />
-        <link rel="stylesheet" href="{{ asset('build/app.css') }}">
+        <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" />
+        {{ vite_entry_link_tags('app') }}
+        {{ vite_entry_script_tags('app') }}
         <script async
                 src="https://js.stripe.com/v3/buy-button.js">
         </script>
 
-            {{ encore_entry_link_tags('app') }}
-            {{ encore_entry_script_tags('app') }}
     </head>
     <body>
         <div id="app">

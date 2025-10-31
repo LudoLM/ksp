@@ -9,6 +9,7 @@ import StatusCoursTag from "../components/StatusCoursTag.vue";
 import ModalConnect from "../components/modals/ModalConnect.vue";
 import ModalUnsubscribeUsers from "../components/modals/ModalUnsubscribeUsers.vue";
 import {useUserStore} from "../store/user";
+import {getImageUrl} from "../utils/useAssetHelper.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -84,7 +85,7 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
 <template>
     <div class="coursDetails">
         <<div v-if="cours" class="details_wrapper w-full relative">
-            <img class="w-full" :src="require(`../../images/uploads/${cours.typeCours.thumbnail}`)" alt="">
+            <img class="w-full" :src="getImageUrl(cours.typeCours.thumbnail)" alt="">
             <div class="infos_wrapper">
                 <div class="infos_container">
                     <div class="flex justify-between items-baseline">

@@ -2,6 +2,7 @@
 import {computed, ref} from "vue";
 import {useUserStore} from "../store/user";
 import StatusCoursTag from "./StatusCoursTag.vue";
+import {getImageUrl} from "../utils/useAssetHelper.js";
 
 const props = defineProps({
     info: {
@@ -42,7 +43,7 @@ const isSubscribed = computed(() => {
             :statusCours="info.statusCours"
         />
         <div class="card-image">
-            <img :src="require(`../../images/uploads/${info.typeCours.thumbnail}`)" alt="">
+            <img :src="getImageUrl(info.typeCours.thumbnail)" alt="">
         </div>
         <div class="card-infos ">
             <svg

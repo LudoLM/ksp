@@ -44,7 +44,7 @@
                     <div class="image image_mobile">
                         <div class="w-1/2 flex justify-center items-center">
                             <img
-                                class="rounded-full" src="../../images/servane.jpg"
+                                class="rounded-full" src="../../../public/images/servane.jpg"
                                 alt="Portrait de la professeure souriante" />
                         </div>
                     </div>
@@ -52,7 +52,7 @@
                 </div>
                 <div class="image image_desktop">
                     <div class="w-1/2">
-                        <img class="rounded-full" src="../../images/servane.jpg" alt="">
+                        <img class="rounded-full" src="../../../public/images/servane.jpg" alt="">
                     </div>
                 </div>
             </div>

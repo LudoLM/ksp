@@ -9,10 +9,10 @@
         <div class="w-full flex flex-col items-center mt-20">
             <div v-for="cours in coursDescriptions" :key="cours.id" class="coursInfo ">
                 <div class="descriptifWrapper">
-                    <img class="imageDesktop" :src="require(`../../images/uploads/${cours.thumbnail}`)" alt="">
+                    <img class="imageDesktop" :src="getImageUrl(cours.thumbnail)" alt="">
                     <div class="w-2/3 descriptif mx-10" >
                         <h3 class="">{{ cours.libelle }}</h3>
-                        <img class="imageMobile w-1/3" :src="require(`../../images/uploads/${cours.thumbnail}`)" alt="">
+                        <img class="imageMobile w-1/3" :src="getImageUrl(cours.thumbnail)"  alt="">
                         <p class="flex items-center grow text-justify">{{ cours.descriptif }}</p>
                         <div class="flex justify-end">
                             <CustomButton
@@ -34,10 +34,14 @@ import {useRouter} from "vue-router";
 import Banner from "../components/Banner.vue";
 import bannerImage from "../../images/banners/imageBanner15.jpg";
 import {useCalendarStore} from "../store/calendar";
+import {getImageUrl} from "../utils/useAssetHelper.js";
+
+
 
 const coursDescriptions = ref([]);
 const router = useRouter();
 const calendarStore = useCalendarStore();
+
 
 onMounted(async () => {
     coursDescriptions.value = await useGetTypesCours();

@@ -1,7 +1,7 @@
 <template>
     <div class="logo">
         <router-link :to="{ name: 'Accueil' }">
-            <img src="../../../images/logo.png" alt="logo de kine sport santé">
+            <img src="../../../../public/images/logo.png" alt="logo de kine sport santé">
         </router-link>
     </div>
 </template>

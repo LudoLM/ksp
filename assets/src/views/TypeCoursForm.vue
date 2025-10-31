@@ -11,8 +11,8 @@ import CustomTextarea from "../components/forms/CustomTextarea.vue";
 import Banner from "../components/Banner.vue";
 import CustomValidationButton from "../components/forms/CustomValidationButton.vue";
 import CustomFileInput from "../components/forms/CustomFileInput.vue";
-import {useUserStore} from "../store/user";
 import {alertStore} from "../store/alert";
+import {getImageUrl} from "../utils/useAssetHelper.js";
 
 const formData = ref({
     nom: null,
@@ -180,7 +180,7 @@ const handleSubmit = async (event) => {
 
                     <div v-else-if="existingImage">
                         <p>Image actuelle :</p>
-                        <img :src="require(`../../images/uploads/${existingImage}`)" alt="Image actuelle" class="max-w-xs" />
+                        <img :src="getImageUrl(existingImage)" alt="Image actuelle" class="max-w-xs" />
                     </div>
                 </div>
                 <CustomValidationButton>

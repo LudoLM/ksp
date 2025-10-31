@@ -3,6 +3,7 @@
 import Checked from "../../icons/Checked.vue";
 import EditCoursIcon from "../../icons/adminActions/EditCoursIcon.vue";
 import DeleteItem from "../../icons/adminActions/DeleteItem.vue";
+import {getImageUrl} from "../utils/useAssetHelper.js";
 
 const props = defineProps({
     cours: {
@@ -35,7 +36,7 @@ const emit = defineEmits([
         :class="typeCours ? 'min-h-[6.25rem]' : 'min-h-[15rem]'"
     >
         <div class="card-image">
-            <img :src="require(`../../images/uploads/${typeCours ? typeCours.thumbnail : cours.typeCours.thumbnail}`)" alt="">
+            <img :src="getImageUrl(typeCours ? typeCours.thumbnail : cours.typeCours.thumbnail)" alt="">
         </div>
         <div v-if="!cours" class="card-infos ">
             <svg xmlns="http://www.w3.org/2000/svg"

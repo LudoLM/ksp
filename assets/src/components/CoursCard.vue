@@ -3,7 +3,7 @@
   <div class='coursCard'>
       <div class="card_image">
         <div :class="isSubscribed ? 'isSubscribedTag' : 'hidden'">Je participe</div>
-        <img :src="require(`../../images/uploads/${info.typeCours.thumbnail}`)" alt="">
+        <img :src="getImageUrl(info.typeCours.thumbnail)" alt="">
       </div>
       <div class="card_infos">
         <div class="card_dateDebut">
@@ -70,6 +70,7 @@ import { useRouter } from 'vue-router';
 import ModalConnect from "./modals/ModalConnect.vue";
 import ButtonsCardAdmin from "./admin/ButtonsCardAdmin.vue";
 import StatusCoursTag from "./StatusCoursTag.vue";
+import {getImageUrl} from "../utils/useAssetHelper.js";
 
 const userStore = useUserStore();
 const userId = userStore.userId;
