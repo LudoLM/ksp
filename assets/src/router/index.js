@@ -9,6 +9,9 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import {createPinia, storeToRefs} from "pinia";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+import * as Sentry from "@sentry/vue";
+import { createSentryPiniaPlugin } from "@sentry/vue";
+
 
 const router = createRouter({
   history: createWebHistory(),
@@ -107,6 +110,7 @@ router.beforeEach(async (to, from, next) => {
 
 const appPinia = createPinia();
 appPinia.use(piniaPluginPersistedstate)
+appPinia.use(createSentryPiniaPlugin())
 const app = createApp(App)
   .use(appPinia)
   .use(router)
@@ -124,6 +128,17 @@ watch(
   },
   { immediate: true }
 );
+
+Sentry.init({
+  app,
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  // Adds request headers and IP for users, for more info visit:
+  // https://docs.sentry.io/platforms/javascript/guides/vue/configuration/options/#sendDefaultPii
+  integrations: (integrations) =>
+    integrations.filter((integration) => integration.name !== "Vue"),
+  sendDefaultPii: true,
+
+});
 
 app.mount('#app');
 
