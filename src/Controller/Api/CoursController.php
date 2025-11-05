@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\DTO\CreateCoursDTO;
+use App\DTO\UserIdsToRemoveDTO;
 use App\Entity\Cours;
 use App\Entity\User;
 use App\Enum\StatusCoursEnum;
@@ -23,7 +24,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -108,7 +108,7 @@ class CoursController extends AbstractController
         $user = null === $data['userId'] ? $this->getUser() : $this->userRepository->find($data['userId']);
         // Vérifiez que $user est une instance de la classe user
         if (!$user instanceof User) {
-            throw new \Exception('Type de l\'utilisateur invalide');
+            throw new \InvalidArgumentException('Type de l\'utilisateur invalide');
         }
 
         $cours = $this->coursRepository->find($data['coursId']);
@@ -128,7 +128,7 @@ class CoursController extends AbstractController
 
         // Vérifiez que $user est une instance de la classe utilisateur
         if (!$user instanceof User) {
-            throw new NotFoundHttpException('Type de l\'utilisateur invalide');
+            throw new \InvalidArgumentException('Type de l\'utilisateur invalide');
         }
         // Retire le participant du cours, recredite si besoin et met à jour le statut
         $this->usersCoursManager->processRemovalFromCours($cours, [$user->getId()], $isOnWaitingList);
@@ -257,12 +257,10 @@ class CoursController extends AbstractController
     #[Route('api/removeUsers/{id}', name: 'remove_users_cours', methods: ['POST'])]
     public function removeUsersFromCours(
         Cours $cours,
-        Request $request,
+        #[MapRequestPayload] UserIdsToRemoveDTO $userIdsToRemoveDTO,
     ): JsonResponse {
-        $participantIds = json_decode($request->getContent(), true)['usersChecked'];
-
         // Retire les participant du cours, recredite et met à jour le statut
-        $this->usersCoursManager->processRemovalFromCours($cours, $participantIds);
+        $this->usersCoursManager->processRemovalFromCours($cours, $userIdsToRemoveDTO->usersChecked);
         $this->em->flush();
 
         // Retourne une réponse JSON pour indiquer que l'utilisateur a été supprimé avec succès
