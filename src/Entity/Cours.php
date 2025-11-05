@@ -130,4 +130,19 @@ class Cours extends Coursbase
 
         return $this;
     }
+
+    public function getActiveSubscribedCount(): int
+    {
+        return count(
+            array_filter(
+                $this->usersCours->toArray(),
+                fn (UsersCours $userCours): bool => !$userCours->isOnWaitingList()
+            )
+        );
+    }
+
+    public function hasCapacityAvailable(): bool
+    {
+        return $this->getActiveSubscribedCount() < $this->getNbInscriptionMax();
+    }
 }

@@ -2,6 +2,7 @@ import {apiFetch} from "./useFetchInterceptor";
 import {isRef} from "vue";
 import {useCalendarStore} from "../store/calendar";
 import {useUserStore} from "../store/user";
+import {alertStore} from "../store/alert.js";
 
 
 export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusCours, isOpenRequired = false) {

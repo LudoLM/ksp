@@ -1,7 +1,6 @@
-import { inject } from 'vue';
 import {apiFetch} from "./useFetchInterceptor";
+import {alertStore} from "../store/alert.js";
 export function useWeekActions() {
-  const alertStore = inject('alertStore');
 
   const handleLaunchAllCours = async (days) => {
     try {
