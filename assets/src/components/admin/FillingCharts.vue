@@ -57,24 +57,32 @@ onMounted(async () => {
 
 <template>
 
-    <div class="flex flex-col align-center bg-white h-full shadow-default dark:bg-boxdark">
-        <h4 class="text-xl font-bold text-black dark:text-white text-center my-6">Remplissage des cours</h4>
-        <ChartThree
-            title="Sur 7 jours"
-            :tauxRemplissage="tauxRemplissage7Jours"
-            color='#3C50E0'
-            bgColor='#F0F2FF'
-        />
-        <ChartThree
-            title="Sur 30 jours"
-            :tauxRemplissage="tauxRemplissage30Jours"
-            color='#80CAEE'
-        />
-        <ChartThree
-            title="Sur 90 jours"
-            :tauxRemplissage="tauxRemplissage90Jours"
-            color='#FFBA00'
-        />
+    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark w-full">
+        <div class="py-6 px-4 md:px-6 xl:px-7.5">
+            <div class="flex flex-col gap-2">
+                <h4 class="text-gray-800 text-theme-sm font-semibold">Remplissage</h4>
+                <p class ="text-xs text-gray-400">Taux de remplissage des prochains jours</p>
+            </div>
+            <div class="flex justify-around items-center mt-4">
+                <ChartThree
+                    title="Sur 7 jours"
+                    :tauxRemplissage="tauxRemplissage7Jours"
+                    color='#3C50E0'
+                    bgColor='#F0F2FF'
+                />
+                <ChartThree
+                    title="Sur 30 jours"
+                    :tauxRemplissage="tauxRemplissage30Jours"
+                    color='#80CAEE'
+                />
+                <ChartThree
+                    title="Sur 90 jours"
+                    :tauxRemplissage="tauxRemplissage90Jours"
+                    color='#FFBA00'
+                />
+            </div>
+
+    </div>
     </div>
 
 </template>

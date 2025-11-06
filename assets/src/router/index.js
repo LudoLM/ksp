@@ -61,6 +61,7 @@ const router = createRouter({
             { path: 'createWeekType', name: 'CreateWeekType', label: 'Gérer semaine type', component: () => import('../views/admin/CreateWeekType.vue'), meta: { requiresAdmin: true, title: "Gestion de semaines types" }},
             { path: 'controlUser', name: 'ControlUser', label: 'Gérer utilisateurs', component: () => import('../views/admin/ControlUser.vue'), meta: { requiresAdmin: true, title: "Gestion des utilisateurs" }},
             { path: 'profile/:id?', name: 'AdminProfile', label: 'Profil utilisateur' ,component: () => import('../views/Profile.vue'), meta: { requiresAdmin: true, title: "Profil utilisateur" }},
+
           ],
         },
       ],

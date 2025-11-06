@@ -128,15 +128,20 @@ const apexOptions = {
 
 <template>
     <div
-        class="col-span-12 mt-10 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8"
+        class="w-full col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8"
     >
+        <div class="flex flex-col gap-2 mb-10">
+            <h4 class="text-gray-800 text-theme-sm font-semibold">Historique des ventes </h4>
+            <p class ="text-xs text-gray-400">Vente par periode</p>
+        </div>
+
         <div class="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
             <div class="flex w-full flex-wrap">
                 <!-- Liste des packs -->
                 <div
                     v-for="(pack, index) in packs"
                     :key="index"
-                    class="flex min-w-47.5"
+                    class="flex min-w-47.5 text-xs sm:text-sm"
                 >
           <span
               :class="[
@@ -165,7 +170,7 @@ const apexOptions = {
                         {{ year -1}}
                     </button>
                     <button
-                        class="rounded py-1 px-3 text-sm font-bold text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark"
+                        class="rounded py-1 px-3 text-xs sm:text-sm font-bold text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark"
                     >
                         {{ year !== new Date().getFullYear() ? year : "Actuel" }}
                     </button>
