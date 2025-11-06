@@ -61,72 +61,81 @@
 
 <template>
     <div class="col-10 rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark w-full">
-        <div class="py-6 px-4 md:px-6 xl:px-7.5 flex items-center justify-between">
-            <h4 class="text-xl font-bold text-black dark:text-white">Top Produits</h4>
-            <div class="filters flex justify-around item-baseline gap-4">
-                <!-- Sélection de debut de la selection -->
-                <div class="form-item">
-                    <CustomInput
-                        type="date"
-                        item="De"
-                        v-model="startDate"
-                        id="dateCours"
-                        @change="$emit('updateDates', startDate, endDate)"
-                    />
-                </div>
-                <!-- Sélection de fin de la selection -->
-                <div class="form-item">
-                    <CustomInput
-                        type="date"
-                        item="A"
-                        v-model="endDate"
-                        id="dateCours"
-                        @change="$emit('updateDates', startDate, endDate)"
-                    />
-                </div>
-                <div class="form-item form-group mb-4 flex justify-center items-center">
-                    <!-- Reset-->
-                    <CustomButton
-                        @click="resetInfos"
-                        color="red"
-                        class="self-center"
-                    >
-                        Reset
-                    </CustomButton>
+        <div class="py-6 px-4 md:px-6 xl:px-7.5 flex flex-col justify-between gap-10">
+            <div class="flex flex-col gap-2">
+                <h4 class="text-gray-800 text-theme-sm font-semibold">Top Produits</h4>
+                <p class ="text-xs text-gray-400">Résultats des vente de packs</p>
             </div>
-                <div class="form-item form-group mb-4 flex justify-center items-center">
-                    <!-- Reset-->
-                    <CustomButton
-                        @click="exportCsv"
-                        class="self-center"
-                    >
-                        Exporter
-                    </CustomButton>
+            <div class="filters flex flex-col flex-start item-center gap-4 sm:flex-row">
+                <!-- Sélection de debut de la selection -->
+                <div class="flex flex-col sm:flex-row gap-2 w-1/2 sm:w-auto">
+                    <div class="form-item">
+                        <CustomInput
+                            type="date"
+                            item="De"
+                            :is-horizontal=true
+                            v-model="startDate"
+                            id="dateCours"
+                            @change="$emit('updateDates', startDate, endDate)"
+                        />
+                    </div>
+                    <!-- Sélection de fin de la selection -->
+                    <div class="form-item">
+                        <CustomInput
+                            type="date"
+                            item="A"
+                            :is-horizontal=true
+                            v-model="endDate"
+                            id="dateCours"
+                            @change="$emit('updateDates', startDate, endDate)"
+                        />
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <div class="form-item form-group mb-4 flex justify-center items-center">
+                        <!-- Reset-->
+                        <CustomButton
+                            @click="resetInfos"
+                            color="red"
+                            class="self-center mt-1"
+                        >
+                            Reset
+                        </CustomButton>
+                    </div>
+                    <div class="form-item form-group mb-4 flex justify-center items-center">
+                        <!-- Reset-->
+                        <CustomButton
+                            @click="exportCsv"
+                            class="self-center mt-1"
+                        >
+                            Exporter
+                        </CustomButton>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Table header -->
         <div
-            class="grid grid-cols-6 border-t border-stroke py-4.5 px-4 dark:border-strokedark sm:grid-cols-8 md:px-6 2xl:px-7.5"
+            class="grid grid-cols-6 border-t border-stroke py-4.5 px-4 dark:border-strokedark sm:grid-cols-8 sm:px-6 2xl:px-7.5"
         >
             <div class="col-span-3 flex items-center">
-                <p class="font-bold">Packs</p>
+                <p class="text-xs sm:text-sm font-bold">Packs</p>
             </div>
             <div class="col-span-1 hidden items-center sm:flex">
-                <p class="font-bold">Ventes</p>
+                <p class="text-xs sm:text-sm font-bold">Ventes</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="font-bold">PU HT</p>
+                <p class="text-xs sm:text-sm font-bold">PU HT</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="font-bold">PU TTC</p>
+                <p class="text-xs sm:text-sm font-bold">PU TTC</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="font-bold">Total HT</p>
+                <p class="text-xs sm:text-sm font-bold">Total HT</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="font-bold">Total TTC</p>
+                <p class="text-xs sm:text-sm font-bold">Total TTC</p>
             </div>
         </div>
 
@@ -138,47 +147,47 @@
         >
             <div class="col-span-3 flex items-center">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <p class="text-sm font-medium text-black dark:text-white">{{ pack.name }}</p>
+                    <p class="text-xs md:text-sm font-medium text-black dark:text-white">{{ pack.name }}</p>
                 </div>
             </div>
             <div class="col-span-1 hidden items-center sm:flex">
-                <p class="text-sm font-medium text-black dark:text-white">{{ pack.quantity }}</p>
+                <p class="text-xs md:text-sm font-medium text-black dark:text-white">{{ pack.quantity }}</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="text-sm font-medium text-black dark:text-white">{{ (pack.price / (1 + tva / 100) / 100).toFixed(2) }}</p>
+                <p class="text-xs md:text-sm font-medium text-black dark:text-white">{{ (pack.price / (1 + tva / 100) / 100).toFixed(2) }}</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="text-sm font-medium text-black dark:text-white">{{ (pack.price / 100).toFixed(2) }}</p>
+                <p class="text-xs md:text-sm font-medium text-black dark:text-white">{{ (pack.price / 100).toFixed(2) }}</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="text-sm font-medium text-meta-3">{{ (pack.price * pack.quantity / (1 + tva / 100) / 100).toFixed(2) }}</p>
+                <p class="text-xs md:text-sm font-medium text-meta-3">{{ (pack.price * pack.quantity / (1 + tva / 100) / 100).toFixed(2) }}</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="text-sm font-medium text-meta-3">{{ (pack.price *  pack.quantity / 100).toFixed(2) }}</p>
+                <p class="text-xs md:text-sm font-medium text-meta-3">{{ (pack.price *  pack.quantity / 100).toFixed(2) }}</p>
             </div>
 
         </div>
             <!-- Table Footer -->
         <div
-            class="grid grid-cols-6 border-t border-stroke py-4.5 px-4 bg-slate-700 text-white sm:grid-cols-8 md:px-6 2xl:px-7.5"
+            class="grid grid-cols-6 border-t border-stroke py-4.5 px-4  sm:grid-cols-8 md:px-6 2xl:px-7.5"
         >
             <div class="col-span-3 flex items-center">
-                <p class="font-bold">Total</p>
+                <p class="text-xs sm:text-sm font-bold">Total</p>
             </div>
             <div class="col-span-1 hidden items-center sm:flex">
-                <p class="font-bold">{{ nbreTotalVentes }}</p>
+                <p class="text-xs sm:text-sm font-bold">{{ nbreTotalVentes }}</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="font-bold"></p>
+                <p class="text-xs sm:text-sm font-bold"></p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="font-bold"></p>
+                <p class="text-xs sm:text-sm font-bold"></p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="font-bold">{{ (totalTotalTTC / (1 + tva / 100)).toFixed(2) }}</p>
+                <p class="text-xs sm:text-sm font-bold">{{ (totalTotalTTC / (1 + tva / 100)).toFixed(2) }}</p>
             </div>
             <div class="col-span-1 flex items-center">
-                <p class="font-bold">{{ totalTotalTTC.toFixed(2) }}</p>
+                <p class="text-xs sm:text-sm font-bold">{{ totalTotalTTC.toFixed(2) }}</p>
             </div>
         </div>
     </div>

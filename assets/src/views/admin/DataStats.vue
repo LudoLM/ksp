@@ -6,6 +6,10 @@
     import FillingCharts from "../../components/admin/FillingCharts.vue";
     import {apiFetch} from "../../utils/useFetchInterceptor";
     import {alertStore} from "../../store/alert";
+    import bannerImage from "../../../images/banners/imageBanner5.jpg";
+    import Banner from "../../components/Banner.vue";
+    import Report from "../../components/admin/Report.vue";
+    const title = 'Rapport d\'activité';
 
     const paiements = ref([]);
     const quantitiesById = ref([]);
@@ -64,27 +68,27 @@
 </script>
 
 <template>
-    <div class="container">
-        <div class="title_wrapper">
-            <h2>Statistiques</h2>
-        </div>
-        <div class="flex gap-8 mt-16">
-            <section class="w-3/4 flex flex-col justify-between">
-                <TopProductsTable
-                    :nbreTotalVentes="nbreTotalVentes"
-                    :totalTotalTTC="totalTotalTTC"
-                    :quantitiesById="quantitiesById"
-                    @updateDates="handleUpdateDates"
-                    @resetInfos="resetInfos"
-                />
-                <ChartOne
-                    :paiements="paiements"
-                />
-            </section>
-            <aside>
-                <FillingCharts />
-            </aside>
-        </div>
+    <Banner
+        :title="title"
+        :hasButton=false
+        :backgroundColor="'rgba(30, 27, 75, .9)'"
+        :image="bannerImage"
+    />
+    <div class="flex flex-col xl:flex-row gap-4 xl:gap-8 mt-4 xl:mt-16">
+        <section class="flex flex-col justify-between items-center w-full px-4 sm:px-6 md:px-8 gap-5">
+            <Report/>
+            <TopProductsTable
+                :nbreTotalVentes="nbreTotalVentes"
+                :totalTotalTTC="totalTotalTTC"
+                :quantitiesById="quantitiesById"
+                @updateDates="handleUpdateDates"
+                @resetInfos="resetInfos"
+            />
+            <ChartOne
+                :paiements="paiements"
+            />
+            <FillingCharts />
+        </section>
     </div>
 </template>
 

@@ -1,8 +1,8 @@
 <template>
-    <div>
+    <div :class="isHorizontal ? 'flex justify-between items-center gap-2' : ''">
         <label
             :for="id"
-            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400 text-xs sm:text-sm"
         >
             {{ item }}<span v-if="isRequired" class="text-red-600">*</span>
         </label>
@@ -28,6 +28,10 @@ export default {
         id: String,
         placeholder: String,
         modelValue: [String, Number, Date],
+        isHorizontal: {
+            type: Boolean,
+            default: false,
+        },
         error: {
             type: String,
             default: null,

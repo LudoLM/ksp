@@ -44,4 +44,6 @@ services:
         arguments:
             $cronExpression: '%app.refresh_tokens_cleanup_cron%' # Injecter le paramètre app.refresh_tokens_cleanup_cron
 
-
+    Stripe\StripeClient:
+        arguments:
+            - { api_key: '%env(STRIPE_PRIVATE_KEY)%' }
