@@ -11,5 +11,6 @@ return [
     'DB_USER' => null,
     'JWT_PASSPHRASE' => null,
     'MAILER_DSN' => null,
+    'SENTRY_DSN' => null,
     'STRIPE_PRIVATE_KEY' => null,
 ];
