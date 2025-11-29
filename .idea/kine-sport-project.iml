@@ -222,6 +222,8 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/twig/twig" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/webmozart/assert" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/pentatrion/vite-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/mercure" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/mercure-bundle" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

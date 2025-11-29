@@ -50,14 +50,14 @@ const coursDetails = async () => {
   cours.value = JSON.parse(result);
   dateLimit.value = getDateLimit(cours.value.launchedAt);
   usersCount.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === false).length;
-  usersSubscribed.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === false);
+  usersSubscribed.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === false && userCours.unsubscribedAt === null);
   usersOnStandby.value = cours.value.usersCours.filter(userCours => userCours.isOnWaitingList === true);
 }
 
 
 onMounted( async () => {
    await coursDetails();
-   isSubscribed.value = cours.value.usersCours.some(usersCours => usersCours.user.id === userId && !usersCours.isOnWaitingList);
+   isSubscribed.value = cours.value.usersCours.some(userCours => userCours.user.id === userId && !userCours.isOnWaitingList && userCours.unsubscribedAt === null);
 });
 
 const getDateLimit = (launchedAt) => {
@@ -84,7 +84,7 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
 
 <template>
     <div class="coursDetails">
-        <<div v-if="cours" class="details_wrapper w-full relative">
+        <div v-if="cours" class="details_wrapper w-full relative">
             <img class="w-full" :src="getImageUrl(cours.typeCours.thumbnail)" alt="">
             <div class="infos_wrapper">
                 <div class="infos_container">

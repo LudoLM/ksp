@@ -14,31 +14,31 @@ use Symfony\Component\Serializer\Attribute\Groups;
 class Cours extends Coursbase
 {
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:profile', 'cours_filling:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'user:profile', 'cours_filling:index', 'usersCours:read'])]
     private \DateTimeInterface $dateCours;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['cours:index', 'cours:create'])]
+    #[Groups(['cours:index'])]
     private \DateTimeInterface $createdAt;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['cours:index', 'cours:create', 'cours:update', 'cours:detail'])]
+    #[Groups(['cours:index', 'cours:detail'])]
     private ?\DateTimeInterface $launchedAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['cours:index', 'cours:update'])]
+    #[Groups(['cours:index'])]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:profile'])]
+    #[Groups(['cours:index', 'cours:detail', 'user:profile'])]
     private StatusCours $statusCours;
 
     /**
      * @var Collection<int, UsersCours>
      */
     #[ORM\OneToMany(mappedBy: 'cours', targetEntity: UsersCours::class, cascade: ['persist'], orphanRemoval: true)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours_filling:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'cours_filling:index'])]
     private Collection $usersCours;
 
     public function __construct()
@@ -136,7 +136,7 @@ class Cours extends Coursbase
         return count(
             array_filter(
                 $this->usersCours->toArray(),
-                fn (UsersCours $userCours): bool => !$userCours->isOnWaitingList()
+                fn (UsersCours $userCours): bool => !$userCours->isOnWaitingList() && !$userCours->getUnsubscribedAt() instanceof \DateTimeImmutable
             )
         );
     }

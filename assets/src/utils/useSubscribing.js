@@ -26,7 +26,7 @@ export async function useSubscription(coursId, isOnWaitingList, userId = null) {
 export async function useUnSubscription(coursId, isOnWaitingList) {
     try {
         const response = await apiFetch(`/api/removeUser`, {
-            method: 'DELETE',
+            method: 'PUT',
             body: JSON.stringify({coursId, isOnWaitingList})
         });
 
