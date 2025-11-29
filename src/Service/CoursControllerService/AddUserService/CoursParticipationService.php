@@ -6,11 +6,13 @@ use App\Entity\Cours;
 use App\Entity\User;
 use App\Entity\UsersCours;
 use App\Manager\UsersCoursManager;
+use App\Service\NotificationService\NotificationsUsersActionsService;
 
 readonly class CoursParticipationService
 {
     public function __construct(
         private UsersCoursManager $usersCoursManager,
+        private NotificationsUsersActionsService $notificationsUsersActionsService,
     ) {
     }
 
@@ -24,6 +26,8 @@ readonly class CoursParticipationService
             $usersCours = array_values($usersCoursFiltered)[0];
             $usersCours->setIsOnWaitingList(false);
             $usersCours->setCreatedAt(new \DateTimeImmutable());
+            $usersCours->setUnsubscribedAt(null);
+            $this->notificationsUsersActionsService->sendNotifications($usersCours);
         } //      Si l'utilisateur n'est pas inscrit, je l'ajoute à la liste des participants
         else {
             $this->usersCoursManager->addUserToCours($cours, $isOnWaitingList, $user);

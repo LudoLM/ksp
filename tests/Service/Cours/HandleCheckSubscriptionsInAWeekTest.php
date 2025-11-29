@@ -21,54 +21,77 @@ class HandleCheckSubscriptionsInAWeekTest extends TestCase
     // Data provider for test cases
     public static function userProvider(): \Generator
     {
-        yield 'user_with_two_subscriptions_in_same_week' => [
+        yield 'user_with_two_usersCours_in_same_week' => [
             'date' => new \DateTime('2023-10-30T00:00:00.000000+0000'),
             'hasLimit' => true,
             'date1' => new \DateTime('2023-10-31T00:00:00.000000+0000'),
             'hasLimit1' => true,
             'isOnWaitingList1' => false,
+            'date1Unsubscription' => null,
             'date2' => new \DateTime('2023-11-01T00:00:00.000000+0000'),
             'hasLimit2' => true,
             'isOnWaitingList2' => false,
+            'date2Unsubscription' => null,
             'expectedStatus' => 403,
             'expectedMessage' => 'Vous avez déjà deux reservations de cours pour cette semaine.',
         ];
 
-        yield 'user_with_no_subscriptions_in_same_week' => [
+        yield 'user_with_no_usersCours_in_same_week' => [
             'date' => new \DateTime('2023-10-30T00:00:00.000000+0000'),
             'hasLimit' => true,
             'date1' => new \DateTime('2023-12-31T00:00:00.000000+0000'),
             'hasLimit1' => true,
             'isOnWaitingList1' => false,
+            'date1Unsubscription' => null,
             'date2' => new \DateTime('2023-12-08T00:00:00.000000+0000'),
             'hasLimit2' => true,
             'isOnWaitingList2' => false,
+            'date2Unsubscription' => null,
             'expectedStatus' => null,
             'expectedMessage' => null,
         ];
 
-        yield 'user_with_three_subscriptions_in_same_weekButNoLimited' => [
+        yield 'user_with_three_usersCours_in_same_weekButNoLimited' => [
             'date' => new \DateTime('2023-10-30T00:00:00.000000+0000'),
             'hasLimit' => true,
             'date1' => new \DateTime('2023-10-31T00:00:00.000000+0000'),
             'hasLimit1' => true,
             'isOnWaitingList1' => false,
+            'date1Unsubscription' => null,
             'date2' => new \DateTime('2023-11-01T00:00:00.000000+0000'),
             'hasLimit2' => false,
             'isOnWaitingList2' => false,
+            'date2Unsubscription' => null,
             'expectedStatus' => null,
             'expectedMessage' => null,
         ];
 
-        yield 'user_with_three_subscriptions_in_same_weekButOneIsOnWaitingList' => [
+        yield 'user_with_three_usersCours_in_same_weekButOneIsOnWaitingList' => [
             'date' => new \DateTime('2023-10-30T00:00:00.000000+0000'),
             'hasLimit' => true,
             'date1' => new \DateTime('2023-10-31T00:00:00.000000+0000'),
             'hasLimit1' => true,
             'isOnWaitingList1' => false,
+            'date1Unsubscription' => null,
             'date2' => new \DateTime('2023-11-01T00:00:00.000000+0000'),
             'hasLimit2' => true,
             'isOnWaitingList2' => true,
+            'date2Unsubscription' => null,
+            'expectedStatus' => null,
+            'expectedMessage' => null,
+        ];
+
+        yield 'user_with_three_usersCours_in_same_weekButOneIsUnsubscription' => [
+            'date' => new \DateTime('2023-10-30T00:00:00.000000+0000'),
+            'hasLimit' => true,
+            'date1' => new \DateTime('2023-10-31T00:00:00.000000+0000'),
+            'hasLimit1' => true,
+            'isOnWaitingList1' => false,
+            'date1Unsubscription' => null,
+            'date2' => new \DateTime('2023-11-01T00:00:00.000000+0000'),
+            'hasLimit2' => false,
+            'isOnWaitingList2' => false,
+            'date2Unsubscription' => new \DateTimeImmutable('2023-11-01T00:00:00.000000+0000'),
             'expectedStatus' => null,
             'expectedMessage' => null,
         ];
@@ -81,9 +104,11 @@ class HandleCheckSubscriptionsInAWeekTest extends TestCase
         \DateTimeInterface $date1,
         bool $hasLimit1,
         bool $isOnWaitingList1,
+        ?\DateTimeInterface $date1Unsubscription,
         \DateTimeInterface $date2,
         bool $hasLimit2,
         bool $isOnWaitingList2,
+        ?\DateTimeInterface $date2Unsubscription,
         ?int $expectedStatus,
         ?string $expectedMessage,
     ): void {
@@ -103,8 +128,10 @@ class HandleCheckSubscriptionsInAWeekTest extends TestCase
         $cours2->setHasLimitOfOneCoursPerWeek($hasLimit2);
         $userCours1->setCours($cours1);
         $userCours1->setIsOnWaitingList($isOnWaitingList1);
+        $userCours1->setUnsubscribedAt($date1Unsubscription);
         $userCours2->setCours($cours2);
         $userCours2->setIsOnWaitingList($isOnWaitingList2);
+        $userCours2->setUnsubscribedAt($date2Unsubscription);
         $user->addUsersCour($userCours1);
         $user->addUsersCour($userCours2);
 
