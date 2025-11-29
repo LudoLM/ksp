@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UsersCoursRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Index;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UsersCoursRepository::class)]

@@ -12,6 +12,9 @@ import {useLastActivitiesStore} from "../../store/lastActivities.js";
 const target = ref(null)
 const dropdownOpen = ref(false)
 const userStore = useUserStore();
+const lastActivitiesStore = useLastActivitiesStore();
+const {countActivities} = storeToRefs(lastActivitiesStore);
+
 const { userId, userPrenom, userNom, userEmail, userNombreCours, isAdmin } = storeToRefs(userStore)
 const lastActivitiesStore = useLastActivitiesStore();
 const {countActivities} = storeToRefs(lastActivitiesStore);
@@ -84,8 +87,11 @@ onUnmounted(() => {
                             class="newsActions">
                             <img src="../../../icons/bell.svg"/>
                         </span>
-
-                    <span
+                        <span
+                    v-if="isAdmin && countActivities > 0"
+                            class="newsActions">
+                            <img src="../../../icons/bell.svg"/>
+                        </span><span
                         v-if="userPrenom"
                         class="hidden text-right lg:block">
                     <span
