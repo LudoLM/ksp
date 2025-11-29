@@ -3,7 +3,7 @@ import {useUserStore} from "../store/user";
 
 export async function useSubscription(coursId, isOnWaitingList, userId = null) {
     try {
-        const response = await apiFetch(`/api/add-user`, {
+        const response = await apiFetch(`/api/addUser`, {
             method: 'POST',
             body: JSON.stringify({coursId, isOnWaitingList, userId})
         });

@@ -7,6 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UsersCoursRepository::class)]
+#[ORM\Index(columns: ['createdAt', 'user'], name: 'idx_created_user')]
+#[ORM\Index(columns: ['unsubscribedAt', 'user'], name: 'idx_unsubscribed_user')]
 #[ORM\Index(columns: ['cours_id', 'is_on_waiting_list'], name: 'idx_users_cours_cours_waiting')]
 class UsersCours
 {
@@ -15,19 +17,24 @@ class UsersCours
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['user:profile', 'cours:index', 'cours:detail'])]
+    #[Groups(['user:profile', 'cours:index', 'cours:detail', 'usersCours:read'])]
     #[ORM\Column]
     private bool $isOnWaitingList;
 
+    #[Groups(['user:profile', 'usersCours:read'])]
     #[ORM\Column]
-    private \DateTimeImmutable $created_at;
+    private \DateTimeImmutable $createdAt;
 
-    #[Groups(['cours:index', 'cours:detail'])]
+    #[Groups(['user:profile', 'cours:index', 'cours:detail', 'usersCours:read'])]
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $unsubscribedAt = null;
+
+    #[Groups(['cours:index', 'cours:detail', 'usersCours:read'])]
     #[ORM\ManyToOne(inversedBy: 'usersCours')]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
-    #[Groups(['user:profile'])]
+    #[Groups(['user:profile', 'usersCours:read'])]
     #[ORM\ManyToOne(inversedBy: 'usersCours')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Cours $cours = null;
@@ -51,12 +58,24 @@ class UsersCours
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUnsubscribedAt(): ?\DateTimeImmutable
+    {
+        return $this->unsubscribedAt;
+    }
+
+    public function setUnsubscribedAt(?\DateTimeImmutable $unsubscribedAt): static
+    {
+        $this->unsubscribedAt = $unsubscribedAt;
 
         return $this;
     }

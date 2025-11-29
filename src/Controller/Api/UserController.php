@@ -9,6 +9,7 @@ use App\Repository\CoursRepository;
 use App\Repository\UserRepository;
 use App\Service\UserControllerService\FetchUserService;
 use OpenApi\Attributes as OA;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -186,5 +187,19 @@ class UserController extends AbstractController
         } catch (\Exception $exception) {
             return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    #[Route('/api/markAllAsRead', name: 'api_mark_all_as_read', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent marquer tous les messages comme lus.')]
+    public function markAllAsRead(EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+        $user->setLastVisit(new \DateTimeImmutable());
+        $em->flush();
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

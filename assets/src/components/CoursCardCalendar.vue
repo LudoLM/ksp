@@ -11,7 +11,6 @@ const props = defineProps({
     },
 });
 
-
 const formattedHour = computed(() => {
     const date = new Date(props.info.dateCours);
     const hours = date.getHours();
@@ -24,9 +23,11 @@ const isUserOnWaitingList = ref(props.info.usersCours.some(userCours => userCour
 
 const isSubscribed = computed(() => {
     if (!props.info?.usersCours) return false;
-    return props.info.usersCours.some(
-        (userCours) => userCours.user.id === userId &&
-            userCours.isOnWaitingList === false
+    return  props.info.usersCours.some(
+        (userCours) =>
+            userCours.user.id === userId &&
+            userCours.isOnWaitingList === false &&
+            userCours.unsubscribedAt === null
     );
 });
 

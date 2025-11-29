@@ -68,7 +68,7 @@ const coursDetails = async () => {
       usersCount.value = result.activeSubscribedCount;
     }
   }
-  
+
   if (cours.value) {
     dateLimit.value = getDateLimit(cours.value.launchedAt);
   }

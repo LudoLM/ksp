@@ -21,7 +21,7 @@ readonly class CountUsersInCoursService
     {
         return count(array_filter(
             $cours->getUsersCours()->toArray(),
-            fn (UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList()
+            fn (UsersCours $usersCours): bool => true !== $usersCours->isOnWaitingList() && !$usersCours->getUnsubscribedAt() instanceof \DateTimeImmutable,
         ));
     }
 

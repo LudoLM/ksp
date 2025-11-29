@@ -5,9 +5,12 @@ namespace App\Entity;
 use App\Repository\HistoriquePaiementRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Index;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: HistoriquePaiementRepository::class)]
+#[Index(fields: ['date'])]
+#[Index(fields: ['date', 'user'], name: 'idx_date_user')]
 class HistoriquePaiement
 {
     #[ORM\Id]

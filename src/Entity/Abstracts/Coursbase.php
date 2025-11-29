@@ -12,32 +12,32 @@ abstract class Coursbase
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours:update', 'user:profile', 'cours_filling:index', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'user:profile', 'cours_filling:index', 'week_type:index'])]
     protected ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'week_type:index'])]
     protected int $duree;
 
     #[ORM\Column(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours_filling:index', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'cours_filling:index', 'week_type:index'])]
     protected int $nbInscriptionMax;
 
     #[ORM\Column(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours_filling:index', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'cours_filling:index', 'week_type:index'])]
     protected bool $hasPriority;
 
     #[ORM\Column(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'cours_filling:index', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'cours_filling:index', 'week_type:index'])]
     protected bool $hasLimitOfOneCoursPerWeek;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'user:profile', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'user:profile', 'week_type:index', 'usersCours:read'])]
     protected TypeCours $typeCours;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['cours:index', 'cours:detail', 'cours:create', 'cours:update', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'week_type:index'])]
     private ?string $specialNote = null;
 
     // Getters and Setters for each property can be added here

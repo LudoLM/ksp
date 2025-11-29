@@ -21,7 +21,7 @@ class TypeCours
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', 'user:profile', 'week_type:index'])]
+    #[Groups(['cours:index', 'cours:detail', 'type_cours:index', 'user:profile', 'week_type:index', 'usersCours:read'])]
     #[Assert\NotBlank(message: 'Le nom ne peut pas être vide.')]
     private string $libelle;
 

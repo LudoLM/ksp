@@ -46,11 +46,11 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
     private ?\DateTimeInterface $resetPasswordTokenExpiresAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
+    #[Groups(['user:detail', 'cours:detail', 'cours:index', 'usersCours:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
+    #[Groups(['user:detail', 'cours:detail', 'cours:index', 'usersCours:read'])]
     private string $prenom;
 
     #[Groups(['user:detail'])]
@@ -94,6 +94,9 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
     #[Groups(['user:profile'])]
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UsersCours::class, orphanRemoval: true)]
     private Collection $usersCours;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $last_visit = null;
 
     public function __construct()
     {
@@ -301,6 +304,23 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
         $this->nombreCours = $nombreCours;
 
         return $this;
+    }
+
+    public function getLastVisit(): ?\DateTimeImmutable
+    {
+        return $this->last_visit;
+    }
+
+    /** @phpstan-ignore typePerfect.narrowPublicClassMethodParamType */
+    public function setLastVisit(?\DateTimeInterface $last_visit): void
+    {
+        if (!$last_visit instanceof \DateTimeInterface) {
+            $this->last_visit = null;
+
+            return;
+        }
+
+        $this->last_visit = \DateTimeImmutable::createFromInterface($last_visit);
     }
 
     /**

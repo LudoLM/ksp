@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\HistoriquePaiement;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -60,5 +61,30 @@ class HistoriquePaiementRepository extends ServiceEntityRepository
         ]);
 
         return $result->fetchAllAssociative();
+    }
+
+    public function getPaymentSinceLastVisit(User $user): array
+    {
+        $qb = $this->createQueryBuilder('hp')
+            ->where('hp.date BETWEEN :lastVisit AND :now')
+            ->setParameter('lastVisit', $user->getLastVisit())
+            ->setParameter('now', new \DateTime())
+            ->orderBy('hp.date', 'DESC');
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function getPaymentPerMonth($startDate, $endDate, string $userName): array
+    {
+        $qb = $this->createQueryBuilder('hp')
+            ->join('hp.user', 'u')
+            ->where('hp.date BETWEEN :start AND :end')
+            ->andWhere('u.nom LIKE :userName OR u.prenom LIKE :userName')
+            ->setParameter('start', $startDate)
+            ->setParameter('end', $endDate)
+            ->setParameter('userName', '%'.$userName.'%')
+            ->orderBy('hp.date', 'DESC');
+
+        return $qb->getQuery()->getResult();
     }
 }
