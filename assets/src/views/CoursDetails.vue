@@ -84,7 +84,7 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
 
 <template>
     <div class="coursDetails">
-        <<div v-if="cours" class="details_wrapper w-full relative">
+        <div v-if="cours" class="details_wrapper w-full relative">
             <img class="w-full" :src="getImageUrl(cours.typeCours.thumbnail)" alt="">
             <div class="infos_wrapper">
                 <div class="infos_container">
