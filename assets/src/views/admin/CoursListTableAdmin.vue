@@ -92,7 +92,7 @@ const uniqueTypeCoursList = ref([]);
 const uniqueStatusCoursList = ref([]);
 const route = useRoute();
 const title = 'Liste des cours';
-const routeGetCours = ref("getCours");
+const routeGetCours = ref("get-cours");
 
 
 // Appel de fetchData lors du montage

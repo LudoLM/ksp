@@ -3,7 +3,7 @@ import {useUserStore} from "../store/user";
 
 export async function useSubscription(coursId, isOnWaitingList, userId = null) {
     try {
-        const response = await apiFetch(`/api/addUser`, {
+        const response = await apiFetch(`/api/add-user`, {
             method: 'POST',
             body: JSON.stringify({coursId, isOnWaitingList, userId})
         });
@@ -25,8 +25,8 @@ export async function useSubscription(coursId, isOnWaitingList, userId = null) {
 
 export async function useUnSubscription(coursId, isOnWaitingList) {
     try {
-        const response = await apiFetch(`/api/removeUser`, {
-            method: 'DELETE',
+        const response = await apiFetch(`/api/remove-user`, {
+            method: 'PUT',
             body: JSON.stringify({coursId, isOnWaitingList})
         });
 

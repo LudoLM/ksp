@@ -20,7 +20,7 @@ const tauxRemplissage30Jours = computed(() => totals.value.capacite30Jours > 0 ?
 const tauxRemplissage90Jours = computed(() => totals.value.capacite90Jours > 0 ? (totals.value.inscrits90Jours / totals.value.capacite90Jours) * 100 : 0);
 
 const fetchCours = async () => {
-    const response = await apiFetch(`/api/getCoursFilling`, {
+    const response = await apiFetch(`/api/admin/get-cours-filling`, {
         method: 'GET',
     });
     cours.value = await response.json();

@@ -212,7 +212,7 @@ const handleSubmit = async () => {
     const url = ref('');
     const data = ref({});
     if (isEditProfileRoute.value) {
-        url.value = route.params.id ? `/api/editUser/${route.params.id}` : `/api/editUser`;
+        url.value = route.params.id ? `/api/edit-user/${route.params.id}` : `/api/edit-user`;
         data.value = {
             prenom: firstName.value,
             nom: lastName.value,

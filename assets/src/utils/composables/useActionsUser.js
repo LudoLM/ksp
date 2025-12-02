@@ -52,7 +52,7 @@ export function useActionsUser() {
   const deleteUser = async (userId) => {
     try {
       const targetUserId = userId ? userId : isViewingOtherUser.value ? route.params.id : userStore.userId;
-      const response = await apiFetch(`/api/deleteUser/${targetUserId}`, {
+      const response = await apiFetch(`/api/delete-user/${targetUserId}`, {
         method: 'DELETE'
       });
 
@@ -78,7 +78,7 @@ export function useActionsUser() {
   const loadUserCoursHistory = async (userId, newPage) => {
     try {
       const targetUserId = userId || userStore.userId;
-      const response = await apiFetch(`/api/userCoursHistory/${targetUserId}?page=${newPage || 1}`);
+      const response = await apiFetch(`/api/user/${targetUserId}?page=${newPage || 1}/cours-history`);
       userCoursHistory.value = await response.json();
     } catch (error) {
       console.error("Erreur de chargement de l'historique des cours:", error);
@@ -89,7 +89,7 @@ export function useActionsUser() {
   const loadUserPaymentsHistory = async (userId) => {
     try {
       const targetUserId = userId || userStore.userId;
-      const response = await apiFetch(`/api/userPaymentsHistory/${targetUserId}`);
+      const response = await apiFetch(`/api/user/${targetUserId}/payments-history`);
       userPaymentsHistory.value = await response.json();
     } catch (error) {
       console.error("Erreur de chargement de l'historique des paiements:", error);
@@ -133,7 +133,7 @@ export function useActionsUser() {
     }
 
     try {
-      const response = await apiFetch(`/api/updateUserCoursCount/${route.params.id}`, {
+      const response = await apiFetch(`/api/admin/user/${route.params.id}/cours-count`, {
         method: 'PUT',
         body: JSON.stringify({ nombreCours: parseInt(newCount) })
       });

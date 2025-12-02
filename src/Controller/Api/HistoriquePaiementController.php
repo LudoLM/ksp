@@ -3,13 +3,16 @@
 namespace App\Controller\Api;
 
 use App\Repository\HistoriquePaiementRepository;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 
+#[OA\Tag(name: 'HistoriquePaiement')]
 class HistoriquePaiementController extends AbstractController
 {
     public function __construct(
@@ -18,7 +21,8 @@ class HistoriquePaiementController extends AbstractController
     ) {
     }
 
-    #[Route('api/historiquePaiements', name: 'get_historique_paiements', methods: ['GET'])]
+    #[Route('api/admin/historique-paiements', name: 'get_historique_paiements', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent accéder à l\'historique des paiements.')]
     public function index(Request $request): Response
     {
         $startDate = $request->query->get('startDate');
