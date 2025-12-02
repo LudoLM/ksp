@@ -13,7 +13,7 @@ export function useAdminUsersManagement() {
   const getUsers = async (page) => {
     const targetPage = page !== undefined ? page : currentPage.value;
     try {
-      const res = await apiFetch(`/api/users?page=${targetPage}&searchUser=${searchUser.value}`).then((res) => res.json());
+      const res = await apiFetch(`/api/admin/users?page=${targetPage}&searchUser=${searchUser.value}`).then((res) => res.json());
 
       users.value = res.data;
       metadata.value = res.metadata;
@@ -31,7 +31,7 @@ export function useAdminUsersManagement() {
 
   const resetAllUserCounterCours = async () => {
     try {
-      const res = await apiFetch(`/api/resetAllUserscounterCours`, {
+      const res = await apiFetch(`/api/admin/users/reset-counters`, {
         method: 'PUT',
       })
       if (res.ok) {

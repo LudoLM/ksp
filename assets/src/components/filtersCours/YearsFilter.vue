@@ -23,7 +23,7 @@ const selectedYearCours = computed({
 // Charger les années à partir de l'API
 const fetchYears = async () => {
     try {
-        const response = await apiFetch("/api/getYearsRangeForCours");
+        const response = await apiFetch("/api/get-years-range-for-cours");
         const data = await response.json();
         years.value = JSON.parse(data);
 

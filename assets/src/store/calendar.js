@@ -65,7 +65,7 @@ export const useCalendarStore = defineStore('calendar', {
       try {
         const dateFormatted = ref(this.date.toISOString().split('T')[0]);
         const tempInfos = ref([]);
-        const route = ref("getCoursCalendar");
+        const route = ref("get-cours-calendar");
         await useGetCours(route, tempInfos, this.selectedTypeCours, dateFormatted, this.selectedStatusCours, isOpenRequired,);
         this.infos = tempInfos.value;
         // Si isOpenRequired est vrai, on récupère uniquement le prochain cours, on change la date et on affiche le jour du cours

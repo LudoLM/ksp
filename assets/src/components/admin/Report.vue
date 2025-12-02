@@ -14,7 +14,7 @@ const isLoading = ref(false);
 const fetchStripeData = async () => {
     isLoading.value = true;
 
-    const url = `/api/stripe-report?month=${selectedMonth.value + 1}&year=${selectedYear.value}`;
+    const url = `/api/admin/stripe-report?month=${selectedMonth.value + 1}&year=${selectedYear.value}`;
 
     try {
         const response = await apiFetch(url, {});

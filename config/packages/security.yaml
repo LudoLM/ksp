@@ -63,23 +63,20 @@ security:
             # switch_user: true
 
     # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+    # Note: Only the *first* access control that matches will be used        
     access_control:
-        - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
-        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
-        - { path: ^/api/register, roles: PUBLIC_ACCESS }
-        - { path: ^/api/reset-password, roles: PUBLIC_ACCESS }
-        - { path: ^/api/forgot-password, roles: PUBLIC_ACCESS }
-        - { path: ^/api/getCours, roles: PUBLIC_ACCESS }
-        - { path: ^/api/getCoursCalendar, roles: PUBLIC_ACCESS }
-        - { path: ^/api/getOnlyNextCours, roles: PUBLIC_ACCESS }
-        - { path: ^/api/getStatusCours, roles: PUBLIC_ACCESS }
-        - { path: ^/api/getTypesCours, roles: PUBLIC_ACCESS }
-        - { path: ^/api/cours, roles: ROLE_ADMIN }
-        - { path: ^/api/getWeekType, roles: ROLE_ADMIN }
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        
+        #Public endpoints
+        - { path: ^/api/(token/refresh|login_check|register|reset-password|forgot-password), roles: PUBLIC_ACCESS }
+        - { path: ^/api/(get-cours|get-cours-calendar|get-only-next-cours|get-status-cours|get-types-cours), roles: PUBLIC_ACCESS }
+        #Only expose API documentation in non-production environments
+        - { path: ^/api/doc, roles: PUBLIC_ACCESS }
 
+        #Admin endpoints
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
+
+        #Authenticated endpoints
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 when@test:
     security:
         password_hashers:

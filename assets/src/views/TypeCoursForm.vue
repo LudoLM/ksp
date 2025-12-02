@@ -27,8 +27,8 @@ const typeCoursList = ref([]);
 const origin = ref(route.name);
 const existingImage = ref(null);
 const imagePreview = ref(null);
-const urlCreation = "/api/typeCours/create";
-const urlEdition = "/api/typeCours/edit/";
+const urlCreation = "/api/admin/type-cours/create";
+const urlEdition = "/api/admin/type-cours/edit/";
 
 const errors = ref({
     libelle: null,
@@ -69,9 +69,6 @@ const onTypeCoursChange = (event) => {
 // Récupérer la liste des types de cours
 const fetchData = async () => {
     try {
-        await apiFetch("/api/getTypeCours", {
-            method: "GET",
-        });
         typeCoursList.value = await useGetTypesCours();
 
         if (origin.value === "EditTypeCours" && typeCoursList.value.length > 0) {

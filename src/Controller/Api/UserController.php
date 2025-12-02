@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\CoursRepository;
 use App\Repository\UserRepository;
 use App\Service\UserControllerService\FetchUserService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +21,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
+#[OA\Tag(name: 'User')]
 class UserController extends AbstractController
 {
     public const LIMIT_USERS_PER_PAGE = 15;
@@ -34,7 +36,7 @@ class UserController extends AbstractController
     ) {
     }
 
-    #[Route('/api/users', name: 'api_all_users', methods: ['GET'])]
+    #[Route('/api/admin/users', name: 'api_all_users', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent avoir accès à tous les utilisateurs.')]
     public function getAllUsers(
         #[MapQueryParameter(name: 'page')] int $page,
@@ -75,7 +77,7 @@ class UserController extends AbstractController
         return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/api/deleteUser/{id<\d+>}', name: 'api_delete_user', methods: ['DELETE'])]
+    #[Route('/api/delete-user/{id<\d+>}', name: 'api_delete_user', methods: ['DELETE'])]
     public function deleteUser(?int $id = null): JsonResponse
     {
         try {
@@ -93,7 +95,7 @@ class UserController extends AbstractController
         }
     }
 
-    #[Route('/api/userPaymentsHistory/{id<\d+>?}', name: 'api_user_history', methods: ['GET'])]
+    #[Route('/api/user/{id<\d+>?}/payments-history', name: 'api_user_history', methods: ['GET'])]
     public function getUserPaymentsHistory(?int $id): JsonResponse
     {
         try {
@@ -110,7 +112,7 @@ class UserController extends AbstractController
         return new JsonResponse($payments, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/api/userCoursHistory/{id<\d+>?}', name: 'api_user_cours_history', methods: ['GET'])]
+    #[Route('/api/user/{id<\d+>?}/cours-history', name: 'api_user_cours_history', methods: ['GET'])]
     public function getUserCoursHistory(
         ?int $id = null,
         #[MapQueryParameter] int $page = 1,
@@ -141,7 +143,8 @@ class UserController extends AbstractController
         return new JsonResponse($responsePayload, Response::HTTP_OK, []);
     }
 
-    #[Route('/api/usersNotInCours/{cours}', name: 'api_users', methods: ['GET'])]
+    #[Route('/api/admin/users-not-in-cours/{cours}', name: 'api_users', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent avoir accès à tous les utilisateurs.')]
     public function getUsersData(UserRepository $userRepository, Cours $cours): JsonResponse
     {
         $users = $userRepository->getLightUsersAll($cours);
@@ -150,7 +153,7 @@ class UserController extends AbstractController
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/api/resetAllUserscounterCours', name: 'api_reset_all_users_counter_cours', methods: ['PUT'])]
+    #[Route('/api/admin/users/reset-counters', name: 'api_reset_all_users_counter_cours', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent reset tous les cours')]
     public function resetAllUserscounterCours(): JsonResponse
     {
@@ -167,7 +170,7 @@ class UserController extends AbstractController
         }
     }
 
-    #[Route('/api/updateUserCoursCount/{id}', name: 'api_update_all_users_cours_count', methods: ['PUT'])]
+    #[Route('/api/admin/user/{id}/cours-count  ', name: 'api_update_all_users_cours_count', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent modifier le compte de cours.')]
     public function updateUserCoursCount(
         #[MapRequestPayload] UpdateCoursCountDTO $updateCoursCountDTO,
