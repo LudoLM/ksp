@@ -2,28 +2,24 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\HistoriquePaiement;
 use App\Repository\HistoriquePaiementRepository;
 use App\Security\Voter\UserVoter;
 use App\Service\DomPDFService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
+#[OA\Tag(name: 'Invoice')]
 class InvoiceController extends AbstractController
 {
-    #[Route('api/getInvoicePDF', name: 'app_invoice_pdf')]
-    public function getStreamResponse(Request $request, DomPDFService $domPDFService, HistoriquePaiementRepository $historiquePaiementRepository): Response
+    #[Route('api/get-invoice-PDF/{id}', name: 'app_invoice_pdf', methods: ['GET'])]
+    public function getStreamResponse(HistoriquePaiement $paiement, DomPDFService $domPDFService, HistoriquePaiementRepository $historiquePaiementRepository): Response
     {
         try {
-            $payload = json_decode($request->getContent(), true);
-            $paiement = $historiquePaiementRepository->find($payload['paiementId']);
-
-            if (null === $paiement) {
-                return new Response('Paiement non trouvé', Response::HTTP_NOT_FOUND);
-            }
             $this->denyAccessUnlessGranted(UserVoter::VIEW, $paiement->getUser());
             $html = $this->renderView('invoice/index.html.twig', [
                 'paiement' => $paiement,

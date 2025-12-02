@@ -22,7 +22,7 @@
         try {
             const startDateString = new Date(startDate.value).toISOString().slice(0, 16);
             const endDateString = new Date(endDate.value).toISOString().slice(0, 16);
-            const response = await apiFetch(`/api/historiquePaiements?startDate=${startDateString}&endDate=${endDateString}`, {
+            const response = await apiFetch(`/api/admin/historique-paiements?startDate=${startDateString}&endDate=${endDateString}`, {
                 method: 'GET',
             })
             if (response.ok){

@@ -16,8 +16,8 @@ use App\Service\CoursControllerService\ActionsModifyOpenedCoursService;
 use App\Service\CoursControllerService\CreateUsersCoursService;
 use App\Service\CoursControllerService\FilteringCoursService;
 use App\Service\CoursControllerService\UpdateStatusCoursService;
-use App\Service\UpdateStatusCoursClickService;
 use Doctrine\ORM\EntityManagerInterface;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,8 +25,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 
+#[OA\Tag(name: 'Cours')]
 class CoursController extends AbstractController
 {
     public function __construct(
@@ -35,7 +37,6 @@ class CoursController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly StatusCoursRepository $statusCoursRepository,
         private readonly UserRepository $userRepository,
-        private readonly UpdateStatusCoursClickService $updateStatusCoursClickService,
         private readonly FilteringCoursService $filteringCoursService,
         private readonly CreateUsersCoursService $createUsersCoursService,
         private readonly ActionsModifyOpenedCoursService $actionsModifyOpenedCoursService,
@@ -45,9 +46,9 @@ class CoursController extends AbstractController
     ) {
     }
 
-    #[Route('api/getCoursCalendar', name: 'cours_calendar', methods: ['GET'])]
-    #[Route('api/getCours', name: 'cours_index', methods: ['GET'])]
-    #[Route('api/getOnlyNextCours', name: 'cours_next_cours', methods: ['GET'])]
+    #[Route('api/get-cours-calendar', name: 'cours_calendar', methods: ['GET'])]
+    #[Route('api/get-cours', name: 'cours_index', methods: ['GET'])]
+    #[Route('api/get-only-next-cours', name: 'cours_next_cours', methods: ['GET'])]
     public function coursIndex(
         Request $request,
         #[MapQueryParameter] int $typeCoursId,
@@ -82,7 +83,7 @@ class CoursController extends AbstractController
         }
     }
 
-    #[Route('api/getYearsRangeForCours', name: 'Year', methods: ['GET'])]
+    #[Route('api/get-years-range-for-cours', name: 'year', methods: ['GET'])]
     public function getYearsRangeForCours(): JsonResponse
     {
         $yearsLimits = $this->coursRepository->getYearsRangeForCours();
@@ -92,7 +93,7 @@ class CoursController extends AbstractController
         return new JsonResponse($jsonYearsRange);
     }
 
-    #[Route('api/getCours/{id}', name: 'cours_detail', methods: ['GET'])]
+    #[Route('api/get-cours/{id}', name: 'cours_detail', methods: ['GET'])]
     public function coursFiltered(int $id): JsonResponse
     {
         $cours = $this->coursRepository->find($id);
@@ -101,7 +102,7 @@ class CoursController extends AbstractController
         return new JsonResponse($jsonCours);
     }
 
-    #[Route('api/addUser', name: 'cours_add_user', methods: ['POST'])]
+    #[Route('api/add-user', name: 'cours_add_user', methods: ['POST'])]
     public function addUserToCours(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -117,7 +118,7 @@ class CoursController extends AbstractController
         return $this->createUsersCoursService->createUsersCours($cours, $user, $isOnWaitingList);
     }
 
-    #[Route('api/removeUser', name: 'cours_remove_user')]
+    #[Route('api/remove-user', name: 'cours_remove_user', methods: ['PUT'])]
     public function removeUserFromCours(
         Request $request,
     ): JsonResponse {
@@ -145,8 +146,8 @@ class CoursController extends AbstractController
     }
 
     // Add route for create new cours
-    #[Route('api/cours/create', name: 'cours_create', methods: ['POST'])]
-    // IsGranted("ROLE_ADMIN")
+    #[Route('api/admin/cours/create', name: 'cours_create', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent créer des cours.')]
     public function createCours(
         #[MapRequestPayload(
             serializationContext: [
@@ -162,7 +163,8 @@ class CoursController extends AbstractController
     }
 
     // Delete route for delete cours
-    #[Route('api/cours/delete/{id}', name: 'cours_delete', methods: ['DELETE'])]
+    #[Route('api/admin/cours/delete/{id}', name: 'cours_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent supprimer les cours.')]
     public function deleteCours(Cours $cours): JsonResponse
     {
         $this->em->remove($cours);
@@ -171,7 +173,8 @@ class CoursController extends AbstractController
         return new JsonResponse(['success' => true, 'type' => 'success', 'message' => 'Le cours a bien été effacé'], Response::HTTP_OK);
     }
 
-    #[Route('api/cours/open/{id}', name: 'cours_open', methods: ['PUT'])]
+    #[Route('api/admin/cours/open/{id}', name: 'cours_open', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent ouvrir les cours.')]
     public function openCours(Cours $cours): JsonResponse
     {
         try {
@@ -193,7 +196,8 @@ class CoursController extends AbstractController
         }
     }
 
-    #[Route('api/cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
+    #[Route('api/admin/cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent annuler les cours.')]
     public function cancelCours(Cours $cours): JsonResponse
     {
         try {
@@ -214,7 +218,8 @@ class CoursController extends AbstractController
         }
     }
 
-    #[Route('api/cours/edit/{id}', name: 'cours_update', methods: ['PUT'])]
+    #[Route('api/admin/cours/edit/{id}', name: 'cours_update', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent modifier les cours.')]
     public function editCours(
         #[MapRequestPayload]
         CreateCoursDTO $coursDTO,
@@ -237,7 +242,8 @@ class CoursController extends AbstractController
         return new JsonResponse(['response' => true], Response::HTTP_OK);
     }
 
-    #[Route('api/getCoursFilling', name: 'cours_filling', methods: ['GET'])]
+    #[Route('api/admin/get-cours-filling', name: 'cours_filling', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent accéder au remplissage des cours.')]
     public function getCoursFilling(): JsonResponse
     {
         $coursFilling = $this->coursRepository->getCoursFilling();
@@ -246,15 +252,8 @@ class CoursController extends AbstractController
         return new JsonResponse($jsonCoursFillings, Response::HTTP_OK);
     }
 
-    #[Route('api/updateCoursClick', name: 'updateCoursClick', methods: ['GET'])]
-    public function updateCoursClick(): JsonResponse
-    {
-        $this->updateStatusCoursClickService->update();
-
-        return new JsonResponse(['success' => true, 'message' => 'Les statuts des cours ont bien été mis à jour'], Response::HTTP_OK);
-    }
-
-    #[Route('api/removeUsers/{id}', name: 'remove_users_cours', methods: ['POST'])]
+    #[Route('api/admin/remove-users/{id}', name: 'remove_users_cours', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function removeUsersFromCours(
         Cours $cours,
         #[MapRequestPayload] UserIdsToRemoveDTO $userIdsToRemoveDTO,

@@ -44,6 +44,21 @@
 	# Disable Topics tracking if not enabled explicitly: https://github.com/jkarlin/topics
 	header ?Permissions-Policy "browsing-topics=()"
 
+    # --- Nelmio /api/doc ---
+    handle_path /api/doc* {
+        php {
+            root /app/public
+        }
+    }
+
+    # --- API Symfony ---
+    handle_path /api/* {
+        php {
+            root /app/public
+        }
+    }
+
+
 	@phpRoute {
 		not path /.well-known/mercure*
 		not file {path}

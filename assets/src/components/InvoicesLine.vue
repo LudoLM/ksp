@@ -19,9 +19,8 @@ const formatDateTime = (date) => {
 
 const handleInvoicePDF = async (paiementId) => {
     try {
-        const response = await apiFetch("/api/getInvoicePDF", {
-            method: "POST",
-            body: JSON.stringify({ paiementId: paiementId }),
+        const response = await apiFetch(`/api/get-invoice-PDF/${paiementId}`, {
+            method: "GET",
         });
 
 

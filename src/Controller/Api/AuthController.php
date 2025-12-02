@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,6 +23,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Authentication')]
 class AuthController extends AbstractController
 {
     public function __construct(
@@ -74,7 +76,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route(path: 'api/editUser/{id<\d+>?}', name: 'api_app_edit_profile', methods: ['POST'])]
+    #[Route(path: 'api/edit-user/{id<\d+>?}', name: 'api_app_edit_profile', methods: ['PUT'])]
     public function editProfile(
         #[MapRequestPayload]
         EditUserDTO $editUserDTO,
@@ -97,7 +99,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route(path: 'api/forgot-password', name: 'api_app_forget_password')]
+    #[Route(path: 'api/forgot-password', name: 'api_app_forget_password', methods: ['POST'])]
     public function forgotPassword(
         Request $request,
     ): JsonResponse {
@@ -116,7 +118,7 @@ class AuthController extends AbstractController
         return $this->forgotPasswordService->handleForgotPassword($emailReceived);
     }
 
-    #[Route(path: 'api/reset-password', name: 'api_app_reset_password')]
+    #[Route(path: 'api/reset-password', name: 'api_app_reset_password', methods: ['PUT'])]
     public function resetPassword(
         #[MapRequestPayload]
         ResetPasswordDTO $resetPasswordDTO,

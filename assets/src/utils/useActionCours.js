@@ -49,7 +49,7 @@ export async function useGetOnlyNextCours(selectedTypeCours, selectedDate, selec
       isOpenRequired: true,
     });
 
-    const response = await fetch(`/api/getOnlyNextCours?${params.toString()}`, {
+    const response = await fetch(`/api/get-only-next-cours?${params.toString()}`, {
       method: "GET",
       headers : makeRequestHeaders()
     });
@@ -62,7 +62,7 @@ export async function useGetOnlyNextCours(selectedTypeCours, selectedDate, selec
 
 export async function useGetCoursById(coursId) {
         try {
-            const response = await fetch(`/api/getCours/${coursId}`);
+            const response = await fetch(`/api/get-cours/${coursId}`);
             return await response.json();
         } catch (error) {
             console.error('Error fetching cours details:', error);
@@ -72,7 +72,7 @@ export async function useGetCoursById(coursId) {
 
 export async function useGetTypesCours() {
     try {
-        const response = await fetch('/api/getTypesCours', {
+        const response = await fetch('/api/get-types-cours', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export async function useGetTypesCours() {
 export async function useGetStatusCours() {
 
     try {
-        const response = await fetch('/api/getStatusCours', {
+        const response = await fetch('/api/get-status-cours', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ export async function useGetStatusCours() {
 
 export async function useDeleteCours(coursId) {
     try {
-        const response = await apiFetch(`/api/cours/delete/${coursId}`, {
+        const response = await apiFetch(`/api/admin/cours/delete/${coursId}`, {
             method: 'DELETE',
         });
 
@@ -127,7 +127,7 @@ export async function useDeleteCours(coursId) {
 
 export async function useOpenCours(coursId) {
     try {
-        const response = await apiFetch(`/api/cours/open/${coursId}`, {
+        const response = await apiFetch(`/api/admin/cours/open/${coursId}`, {
             method: 'PUT',
         });
 
@@ -140,7 +140,7 @@ export async function useOpenCours(coursId) {
 
 export async function useCancelCours(coursId) {
     try {
-        const response = await apiFetch(`/api/cours/cancel/${coursId}`, {
+        const response = await apiFetch(`/api/admin/cours/cancel/${coursId}`, {
             method: 'PUT',
         });
         if (response.ok) {
@@ -160,7 +160,7 @@ export async function handleLaunchAllCours(days) {
     "startDate" : days.value[0],
     "endDate" : days.value[5]
   }
-  const response = await apiFetch("/api/week/open", {
+  const response = await apiFetch("/api/admin/week/open", {
     method: "PUT",
     body: JSON.stringify(firstAndLastDays)
   });

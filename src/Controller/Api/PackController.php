@@ -8,11 +8,13 @@ use App\Entity\User;
 use App\Repository\HistoriquePaiementRepository;
 use App\Repository\PackRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use OpenApi\Attributes as OA;
 use Stripe\StripeClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Pack')]
 class PackController extends AbstractController
 {
     #[Route('api/packs', name: 'packs_list', methods: ['GET'])]
