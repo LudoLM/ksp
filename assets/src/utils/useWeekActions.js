@@ -11,7 +11,7 @@ export function useWeekActions() {
         endDate: days[days.length - 1]
       };
 
-      const response = await apiFetch("/api/week/open", {
+      const response = await apiFetch("/api/admin/week/open", {
         method: "PUT",
         body: JSON.stringify(firstAndLastDays)
       });

@@ -100,7 +100,7 @@ const handleCheckboxToggle = ($event) => {
 }
 
 const handleMultiUnSubscription = async () => {
-    const response = await apiFetch(`/api/removeUsers/${props.cours.id}`, {
+    const response = await apiFetch(`/api/admin/remove-users/${props.cours.id}`, {
         method: 'POST',
         body: JSON.stringify({ usersChecked: usersChecked.value })
     });

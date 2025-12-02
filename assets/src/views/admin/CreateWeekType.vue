@@ -111,7 +111,7 @@ const handleDeleteCours = (data) => {
 
 const handleCreateWeekType = async () => {
     try {
-        const response = await apiFetch('/api/weekType/create', {
+        const response = await apiFetch('/api/admin/week-types/create', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -159,7 +159,7 @@ const date = ref(null);
 const showDateError = ref(false)
 const fetchtWeekTypeDetails = async (mode, weekTypeId) => {
     try {
-        const response = await apiFetch(`/api/getWeekTypeById/${weekTypeId}`, {
+        const response = await apiFetch(`/api/admin/week-types/${weekTypeId}`, {
             method: "GET",
         });
         const result = await response.json()
@@ -190,7 +190,7 @@ watch(date, (newDate) => {
 
 const fetchSuperLightWeekType = async () => {
     try {
-        const response = await apiFetch("/api/getSuperLightAllWeekType", {
+        const response = await apiFetch("/api/admin/week-types/light", {
             method: "GET",
         });
         weekTypeOptions.value = await response.json();
@@ -205,7 +205,7 @@ const handleAddWeek = async () => {
         if(date.value === null) {
             showDateError.value = true;
         }
-        const response = await apiFetch("/api/week/assign", {
+        const response = await apiFetch("/api/admin/week/assign", {
             method: "POST",
             body: JSON.stringify({
                 weekTypeId: Number(weekTypeSelectedId.value),

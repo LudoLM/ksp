@@ -17,8 +17,8 @@ import {alertStore} from "../store/alert";
 const router = useRouter();
 const origin = useRoute().params;
 const coursData = ref(null);
-const urlCreation = "/api/cours/create";
-const urlEdition = "/api/cours/edit/" + origin.id;
+const urlCreation = "/api/admin/cours/create";
+const urlEdition = "/api/admin/cours/edit/" + origin.id;
 const errors = ref(
   {
     typeCours: null,
@@ -110,7 +110,7 @@ const formData = ref({
 
   const getCoursData = async () => {
     try {
-      const response = await apiFetch("/api/getCours/" + origin.id, {
+      const response = await apiFetch("/api/get-cours/" + origin.id, {
         method: "GET"
       });
 

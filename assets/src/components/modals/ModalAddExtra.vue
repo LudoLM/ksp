@@ -76,7 +76,7 @@ const userOptions = computed(() =>
 
 
 const getUsers = async () => {
-  const response = await fetch(`/api/usersNotInCours/${props.cours}`, {
+  const response = await fetch(`/api/admin/users-not-in-cours/${props.cours}`, {
     method: 'GET',
   });
 

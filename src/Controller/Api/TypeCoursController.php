@@ -5,14 +5,17 @@ namespace App\Controller\Api;
 use App\Entity\TypeCours;
 use App\Repository\TypeCoursRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[OA\Tag(name: 'TypeCours')]
 class TypeCoursController extends AbstractController
 {
     public function __construct(
@@ -21,7 +24,7 @@ class TypeCoursController extends AbstractController
     ) {
     }
 
-    #[Route('/api/getTypesCours', name: 'type_cours_index', methods: ['GET'])]
+    #[Route('/api/get-types-cours', name: 'type_cours_index', methods: ['GET'])]
     public function typeCoursIndex(): JsonResponse
     {
         $typeCours = $this->typeCoursRepository->findAll();
@@ -30,7 +33,7 @@ class TypeCoursController extends AbstractController
         return new JsonResponse($jsonTypeCours, \Symfony\Component\HttpFoundation\Response::HTTP_OK, [], true);
     }
 
-    #[Route('/api/getTypeCours/{id}', name: 'type_cours_detail', methods: ['GET'])]
+    #[Route('/api/get-types-cours/{id}', name: 'type_cours_detail', methods: ['GET'])]
     public function typeCoursFiltered(int $id): JsonResponse
     {
         $typeCours = $this->typeCoursRepository->find($id);
@@ -39,7 +42,8 @@ class TypeCoursController extends AbstractController
         return new JsonResponse($jsonTypeCours);
     }
 
-    #[Route('/api/typeCours/create', name: 'type_cours_create', methods: ['POST'])]
+    #[Route('/api/admin/type-cours/create', name: 'type_cours_create', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous devez être administrateur pour créer un type de cours.')]
     public function typeCoursCreate(
         Request $request,
         EntityManagerInterface $em,
@@ -78,7 +82,8 @@ class TypeCoursController extends AbstractController
         return new JsonResponse(['success' => 'Type de cours créé avec succès!'], \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 
-    #[Route('/api/typeCours/edit/{id}', name: 'type_cours_update', methods: ['POST'])]
+    #[Route('/api/admin/type-cours/edit/{id}', name: 'type_cours_update', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Vous devez être administrateur pour modifier un typeCours.')]
     public function typeCoursEdit(
         int $id,
         Request $request,
