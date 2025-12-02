@@ -68,7 +68,7 @@ security:
         
         #Public endpoints
         - { path: ^/api/(token/refresh|login_check|register|reset-password|forgot-password), roles: PUBLIC_ACCESS }
-        - { path: ^/api/(getCours|getCoursCalendar|getOnlyNextCours|getStatusCours|getTypesCours), roles: PUBLIC_ACCESS }
+        - { path: ^/api/(get-cours|get-cours-calendar|get-only-next-cours|get-status-cours|get-types-cours), roles: PUBLIC_ACCESS }
         #Only expose API documentation in non-production environments
         - { path: ^/api/doc, roles: PUBLIC_ACCESS }
 
