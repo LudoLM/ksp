@@ -6,11 +6,13 @@ use App\Entity\Cours;
 use App\Entity\User;
 use App\Entity\UsersCours;
 use App\Service\CoursControllerService\CountUsersInCoursService;
+use App\Service\NotificationService\NotificationsUsersActionsService;
 
 class UsersCoursManager
 {
     public function __construct(
         private readonly CountUsersInCoursService $countUsersInCoursService,
+        private readonly NotificationsUsersActionsService $notificationsUsersActionsService,
     ) {
     }
 
@@ -19,8 +21,10 @@ class UsersCoursManager
         $usersCours = new UsersCours();
         $usersCours->setUser($user);
         $usersCours->setCreatedAt(new \DateTimeImmutable());
+        $usersCours->setUnsubscribedAt(null);
         $usersCours->setIsOnWaitingList($isOnWaitingList);
         $cours->addUsersCours($usersCours);
+        $this->notificationsUsersActionsService->sendNotifications($usersCours);
 
         return $cours;
     }
@@ -29,10 +33,11 @@ class UsersCoursManager
     {
         foreach ($cours->getUsersCours() as $usersCours) {
             if (in_array($usersCours->getUser()->getId(), $participantIds, true)) {
-                $cours->removeUsersCours($usersCours);
+                $usersCours->setUnsubscribedAt(new \DateTimeImmutable());
                 if (!$isOnWaitingList) {
                     $usersCours->getUser()->setNombreCours($usersCours->getUser()->getNombreCours() + 1);
                 }
+                $this->notificationsUsersActionsService->sendNotifications($usersCours);
             }
         }
         $this->countUsersInCoursService->reopenIfCapacityAvailable($cours);

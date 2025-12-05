@@ -9,6 +9,8 @@
 /public/bundles/
 /var/
 /vendor/
+
+/bolt.db
 ###< symfony/framework-bundle ###
 
 

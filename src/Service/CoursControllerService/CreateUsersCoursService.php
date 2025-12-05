@@ -62,7 +62,7 @@ readonly class CreateUsersCoursService
             }
 
             if ($cours->hasLimitOfOneCoursPerWeek()) {
-                // si l'utilisateur n'a pas déjà 2 reservations poour la meme semaine
+                // si l'utilisateur n'a pas déjà 2 reservations pour la meme semaine
                 $this->handleCheckSubscriptionsInAWeekService->checkIfUserAlreadyHasTwoSubscriptionsInTheSameWeek($user, $cours);
             }
 

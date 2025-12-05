@@ -1,19 +1,25 @@
 <script setup>
 import { onClickOutside } from '@vueuse/core'
-import {computed, ref} from 'vue'
+import {computed, onMounted, onUnmounted, ref} from 'vue'
 import {useUserStore} from "../../store/user";
-import { useRoute, useRouter } from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import TypeMode from "../../../icons/adminActions/TypeMode.vue";
 import LogoutIcon from "../../../icons/userActions/LogoutIcon.vue";
 import UserIcon from "../../../icons/userActions/UserIcon.vue";
 import {storeToRefs} from "pinia";
+import {useLastActivitiesStore} from "../../store/lastActivities.js";
 
 const target = ref(null)
 const dropdownOpen = ref(false)
 const userStore = useUserStore();
+const lastActivitiesStore = useLastActivitiesStore();
+const {countActivities} = storeToRefs(lastActivitiesStore);
+
 const { userId, userPrenom, userNom, userEmail, userNombreCours, isAdmin } = storeToRefs(userStore);
 
 const route = useRoute();
+const router = useRouter();
+
 
 // Computed pour savoir si on est en mode admin
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
@@ -43,11 +49,28 @@ const logout = async () => {
     await userStore.logout();
 };
 
+const redirectToDashboard = () => {
+    router.push({
+        name: 'Statistiques',
+        hash: '#usersActionsReporting'
+    });
 
+};
 
 onClickOutside(target, () => {
     dropdownOpen.value = false
 });
+
+onMounted(async () => {
+    if (isAdmin.value) {
+        await lastActivitiesStore.fetchLastActivities();
+        lastActivitiesStore.connectToMercure();
+    }
+});
+
+onUnmounted(() => {
+    lastActivitiesStore.disconnectFromMercure()
+})
 
 </script>
 
@@ -71,11 +94,18 @@ onClickOutside(target, () => {
                         <span class="quantityCours">
                             {{ userNombreCours }}
                         </span>
-                    </span>
                         <span
-                            v-if="userPrenom"
-                            class="hidden text-right lg:block">
-                        <span class="block text-sm font-medium text-black dark:text-white">{{ userPrenom }}</span>
+                            v-if="isAdmin && countActivities > 0"
+                            class="newsActions">
+                            <img src="../../../icons/bell.svg"/>
+                        </span>
+                    </span>
+                    <span
+                        v-if="userPrenom"
+                        class="hidden text-right lg:block">
+                    <span
+                        class="block text-sm font-medium text-black dark:text-white">{{ userPrenom }}
+                    </span>
                     </span>
 
                         <svg
@@ -116,6 +146,17 @@ onClickOutside(target, () => {
                                 </div>
                                 <div class="text-sm font-medium text-black dark:text-white mt-4 text-right">
                                     <span class="font-bold text-lg">{{ userNombreCours }}</span> crédit{{ userNombreCours > 1 ? 's' : '' }}
+                                </div>
+                                <div
+                                    v-if="isAdmin && countActivities > 0"
+                                    class="text-sm font-medium text-black dark:text-white mt-2 text-right cursor-pointer"
+                                    @click="redirectToDashboard"
+                                >
+                                    <span
+                                        class="font-bold text-xs">
+                                        {{ countActivities === 10 ? '+ de' : '' }}{{ countActivities }}
+                                    </span>
+                                    Notif{{ countActivities > 1 ? 's' : '' }}
                                 </div>
                             </li>
                             <li>
@@ -205,20 +246,31 @@ onClickOutside(target, () => {
         color: rgba(0, 0, 0, 0.4);
         position: relative;
 
-        .quantityCours{
+        span{
             position: absolute;
-            bottom: -3px;
-            right: -3px;
             z-index: 10;
-            background: radial-gradient(#551360, #472371);
             border-radius: 50%;
-            color: #fff;
             width: 20px;
             height: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 10px;
+        }
+
+        .quantityCours{
+            bottom: -3px;
+            right: -3px;
+            background: radial-gradient(#551360, #472371);
+            color: #fff;
+        }
+
+        .newsActions{
+            top: -3px;
+            right: -3px;
+            background-color: #fff;
+            border: 1px solid gray;
+            padding: 3px;
         }
     }
 

@@ -7,19 +7,22 @@ use App\Entity\User;
 use App\Entity\UsersCours;
 use App\Manager\UsersCoursManager;
 use App\Service\CoursControllerService\CountUsersInCoursService;
+use App\Service\NotificationService\NotificationsUsersActionsService;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class UsersCoursManagerTest extends TestCase
 {
+    private \PHPUnit\Framework\MockObject\MockObject&NotificationsUsersActionsService $notificationsUsersActionsService;
     public \PHPUnit\Framework\MockObject\MockObject $countUsersInCoursService;
     public $usersCoursManager;
 
     public function setUp(): void
     {
         $this->countUsersInCoursService = $this->createMock(CountUsersInCoursService::class);
-        $this->usersCoursManager = new UsersCoursManager($this->countUsersInCoursService);
+        $this->notificationsUsersActionsService = $this->createMock(NotificationsUsersActionsService::class);
+        $this->usersCoursManager = new UsersCoursManager($this->countUsersInCoursService, $this->notificationsUsersActionsService);
     }
 
     public static function dataProvider(): \Generator
@@ -71,11 +74,11 @@ class UsersCoursManagerTest extends TestCase
         $cours->method('getUsersCours')->willReturn(new ArrayCollection([$usersCours]));
 
         if ($expectRemoval) {
-            $cours->expects($this->once())
-                ->method('removeUsersCours')
-                ->with($usersCours);
+            $usersCours->expects($this->once())
+                ->method('setUnsubscribedAt')
+                ->with($this->isInstanceOf(\DateTimeImmutable::class));
         } else {
-            $cours->expects($this->never())->method('removeUsersCours');
+            $usersCours->expects($this->never())->method('setUnsubscribedAt');
         }
 
         if ($expectIncrement) {

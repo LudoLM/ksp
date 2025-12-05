@@ -181,7 +181,8 @@ const routes = computed(() =>
                 "EditProfile",
                 "CreateWeekType",
                 "ControlUser",
-                "AdminEditProfile"
+                "AdminEditProfile",
+                "UsersActivities",
             ].includes(r.name)
     )
 );

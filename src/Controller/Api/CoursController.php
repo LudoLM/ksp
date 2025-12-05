@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -103,7 +104,7 @@ class CoursController extends AbstractController
     }
 
     #[Route('api/add-user', name: 'cours_add_user', methods: ['POST'])]
-    public function addUserToCours(Request $request): JsonResponse
+    public function addUserToCours(Request $request, HubInterface $hub): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $user = null === $data['userId'] ? $this->getUser() : $this->userRepository->find($data['userId']);

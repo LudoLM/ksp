@@ -4,10 +4,10 @@ import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import App from '../App.vue';
+import {createPinia, storeToRefs} from "pinia";
 import { useUserStore } from '../store/user';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
-import {createPinia, storeToRefs} from "pinia";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 const router = createRouter({
@@ -61,15 +61,27 @@ const router = createRouter({
             { path: 'createWeekType', name: 'CreateWeekType', label: 'Gérer semaine type', component: () => import('../views/admin/CreateWeekType.vue'), meta: { requiresAdmin: true, title: "Gestion de semaines types" }},
             { path: 'controlUser', name: 'ControlUser', label: 'Gérer utilisateurs', component: () => import('../views/admin/ControlUser.vue'), meta: { requiresAdmin: true, title: "Gestion des utilisateurs" }},
             { path: 'profile/:id?', name: 'AdminProfile', label: 'Profil utilisateur' ,component: () => import('../views/Profile.vue'), meta: { requiresAdmin: true, title: "Profil utilisateur" }},
-
+            { path: 'usersActivities', name: 'UsersActivities', label: 'Dernières actions utilisateurs' ,component: () => import('../views/admin/UsersActivities.vue'), meta: { requiresAdmin: true, title: "Dernières actions utilisateurs" }}
           ],
         },
       ],
     },
   ],
-  scrollBehavior() {
-    document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
-  },
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    }
+
+    if (to.hash) {
+      const el = document.querySelector(to.hash)
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 80
+        return { top: y, behavior: 'smooth' }
+      }
+    }
+
+    return { top: 0, behavior: 'smooth' }
+  }
 });
 
 // Vuetify configuration

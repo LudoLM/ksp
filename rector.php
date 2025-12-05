@@ -7,6 +7,7 @@ use Rector\Config\RectorConfig;
 use Rector\Doctrine\Set\DoctrineSetList;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
+use Rector\Symfony\CodeQuality\Rector\Class_\ControllerMethodInjectionToConstructorRector;
 use Rector\Symfony\Set\SymfonySetList;
 use Rector\Symfony\Symfony34\Rector\Closure\ContainerGetNameToTypeInTestsRector;
 
@@ -42,7 +43,11 @@ return static function (RectorConfig $rectorConfig): void {
 
     // register a single rule
     $rectorConfig->rule(InlineConstructorDefaultToPropertyRector::class);
-    $rectorConfig->skip([ContainerGetNameToTypeInTestsRector::class]);
+    $rectorConfig->skip([
+        ContainerGetNameToTypeInTestsRector::class,
+        __DIR__.'/migrations',
+        ControllerMethodInjectionToConstructorRector::class,
+    ]);
 
     // define sets of rules
     //    $rectorConfig->sets([

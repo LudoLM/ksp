@@ -27,8 +27,14 @@ jobs:
         run: |
           echo "APP_ENV=$APP_ENV_DEV" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
+          echo "MERCURE_JWT_SECRET=${{ secrets.CADDY_MERCURE_JWT_SECRET }}" >> .env
+          echo "MERCURE_URL=${{ secrets.MERCURE_URL }}" >> .env
+          echo "MERCURE_PUBLIC_URL=${{ secrets.MERCURE_PUBLIC_URL }}" >> .env
+          echo "CADDY_MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
 
-      - uses: php-actions/composer@v6 
+      - uses: php-actions/composer@v6
+        env:
+          APP_SECRET: ${{ secrets.APP_SECRET }}
       - uses: php-actions/phpunit@master
         with:
           version: 11.5
@@ -52,12 +58,18 @@ jobs:
         run: |
           echo "APP_ENV=$APP_ENV_DEV" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
+          echo "MERCURE_JWT_SECRET=${{ secrets.CADDY_MERCURE_JWT_SECRET }}" >> .env
+          echo "MERCURE_URL=${{ secrets.MERCURE_URL }}" >> .env
+          echo "MERCURE_PUBLIC_URL=${{ secrets.MERCURE_PUBLIC_URL }}" >> .env
+          echo "CADDY_MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
   
-
       - uses: php-actions/composer@v6 # or alternative dependency management
+        env:
+          APP_SECRET: ${{ secrets.APP_SECRET }}
       - uses: php-actions/phpstan@v3
         with:
           path: src/
+          
           
   php-cs-fixer:
     name: PHP-CS-Fixer
@@ -79,14 +91,18 @@ jobs:
         run: |
           echo "APP_ENV=$APP_ENV_DEV" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
+          echo "MERCURE_JWT_SECRET=${{ secrets.CADDY_MERCURE_JWT_SECRET }}" >> .env
+          echo "MERCURE_URL=${{ secrets.MERCURE_URL }}" >> .env
+          echo "MERCURE_PUBLIC_URL=${{ secrets.MERCURE_PUBLIC_URL }}" >> .env
+          echo "CADDY_MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           coverage: none
       - run: composer install --no-progress --ansi
+        env:
+          APP_SECRET: ${{ secrets.APP_SECRET }}
       - run: vendor/bin/rector process --dry-run --config rector.php
-
-  
   
   lint:
     name: Docker Lint
