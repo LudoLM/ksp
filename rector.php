@@ -7,30 +7,28 @@ use Rector\Config\RectorConfig;
 use Rector\Doctrine\Set\DoctrineSetList;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
-use Rector\Symfony\Set\SymfonySetList;
-use Rector\Symfony\Symfony34\Rector\Closure\ContainerGetNameToTypeInTestsRector;
 
 return static function (RectorConfig $rectorConfig): void {
     RectorConfig::configure()
         ->withImportNames(removeUnusedImports: true)
         ->withAttributesSets(symfony: true, doctrine: true)
-        ->withSymfonyContainerXml(__DIR__.'/var/cache/dev/App_KernelDevDebugContainer.xml');
+        ->withSymfonyContainerXml(__DIR__.'/var/cache/dev/App_KernelDevDebugContainer.xml')
+        ->withComposerBased(
+            doctrine: true,
+            phpunit: true,
+            symfony: true,
+        );
 
     $rectorConfig->sets([
         LevelSetList::UP_TO_PHP_83,
         LevelSetList::UP_TO_PHP_84,
-        SymfonySetList::SYMFONY_72,
-        SymfonySetList::SYMFONY_CODE_QUALITY,
-        SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION,
         SetList::DEAD_CODE,
         SetList::CODE_QUALITY,
-        SetList::STRICT_BOOLEANS,
-        //        SetList::NAMING,
         SetList::PRIVATIZATION,
         SetList::TYPE_DECLARATION,
         SetList::EARLY_RETURN,
         SetList::INSTANCEOF,
-        SetList::PHP_83,
+        SetList::PHP_84,
         DoctrineSetList::DOCTRINE_CODE_QUALITY,
         DoctrineSetList::TYPED_COLLECTIONS,
     ]);
@@ -42,7 +40,6 @@ return static function (RectorConfig $rectorConfig): void {
 
     // register a single rule
     $rectorConfig->rule(InlineConstructorDefaultToPropertyRector::class);
-    $rectorConfig->skip([ContainerGetNameToTypeInTestsRector::class]);
 
     // define sets of rules
     //    $rectorConfig->sets([

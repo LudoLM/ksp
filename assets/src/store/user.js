@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { useCalendarStore } from "./calendar";
-import router from '../router';
 
 
 export const useUserStore = defineStore('userStore', {
@@ -54,6 +53,8 @@ export const useUserStore = defineStore('userStore', {
           console.log("Déconnexion réussie.");
           this.clearUser();
           useCalendarStore().$reset();
+          // Lazy import du router pour éviter la dépendance circulaire
+          const { default: router } = await import('../router');
           await router.push({name: 'Accueil', query: {alert: 'logout'}});
 
         } else {
