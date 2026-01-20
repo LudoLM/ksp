@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import CoursCardCalendar from '../CoursCardCalendar.vue'
-
-interface CalendarGridProps {
-  days: string[]
-  weekInfos: any[][]
-  daySelected: number
-  infos: any
-  nextDateInNextWeek: string | undefined
-}
+import type { CalendarGridProps } from '../../types'
 
 defineProps<CalendarGridProps>()
 
@@ -45,11 +38,11 @@ const formatDay = (day: string): string => {
         />
       </div>
       <div v-if="weekInfos.every((info) => info.length === 0)" class="col-span-6 mx-auto text-center p-4 m-20">
-        <a v-if="infos.type === 'info_next_cours'" @click="$emit('go-to-next-course', new Date(infos.nextCoursDate.date))">
+        <a v-if="(infos as any)?.type === 'info_next_cours'" @click="$emit('go-to-next-course', new Date((infos as any).nextCoursDate?.date ?? ''))">
           {{ nextDateInNextWeek }}
         </a>
         <p v-else>
-          {{ infos.message }}
+          {{ (infos as any)?.message }}
         </p>
       </div>
       <div v-for="(weekInfo, index) in weekInfos" :key="index">

@@ -41,23 +41,23 @@ export const updateUrl = (
   selectedStatusCours: number
 ): void => {
   const newParams = new URLSearchParams(window.location.search)
-  
+
   if (newParams.has('isOpenRequired') && !keepIsOpenRequired) {
     newParams.delete('isOpenRequired')
   }
-  
+
   if (selectedTypeCours !== 0) {
     newParams.set('typeCoursId', selectedTypeCours.toString())
   } else {
     newParams.delete('typeCoursId')
   }
-  
+
   if (selectedStatusCours !== 0) {
     newParams.set('statusCoursId', selectedStatusCours.toString())
   } else {
     newParams.delete('statusCoursId')
   }
-  
+
   window.history.replaceState({}, '', `${window.location.pathname}?${newParams}`)
 }
 

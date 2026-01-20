@@ -1,17 +1,6 @@
 <script setup lang="ts">
 import CoursCardCalendar from '../CoursCardCalendar.vue'
-
-interface CalendarMobileProps {
-  daySelected: number
-  weekInfos: any[][]
-  date: Date
-  dateToday: Date
-  infos: any
-  nextDateInNextWeek: string | undefined
-  nextDateInTheWeek: string | undefined
-  nextDateIndex: number | null
-  firstNextCoursInNextWeeks: any
-}
+import type { CalendarMobileProps } from '../../types'
 
 defineProps<CalendarMobileProps>()
 
@@ -43,8 +32,8 @@ defineEmits<CalendarMobileEmits>()
         </div>
         <div v-else class="flex justify-center items-center h-70 text-center nextDateDisplayed">
           <a
-            v-if="infos.type === 'info_next_cours'"
-            @click="$emit('go-to-next-course', new Date(infos.nextCoursDate.date), new Date(infos.nextCoursDate.date).getDay() - 1)"
+            v-if="(infos as any)?.type === 'info_next_cours'"
+            @click="$emit('go-to-next-course', new Date((infos as any).nextCoursDate?.date ?? ''), new Date((infos as any).nextCoursDate?.date ?? '').getDay() - 1)"
           >
             {{ nextDateInNextWeek }}
           </a>
@@ -53,15 +42,15 @@ defineEmits<CalendarMobileEmits>()
             @click="
               $emit(
                 'go-to-next-course',
-                !nextDateIndex ? firstNextCoursInNextWeeks.nextCoursDate.date : date,
-                nextDateIndex ? nextDateIndex : new Date(firstNextCoursInNextWeeks.nextCoursDate.date).getDay() - 1
+                !nextDateIndex ? (firstNextCoursInNextWeeks as any)?.nextCoursDate?.date ?? date : date,
+                nextDateIndex ? nextDateIndex : new Date((firstNextCoursInNextWeeks as any)?.nextCoursDate?.date ?? '').getDay() - 1
               )
             "
           >
             {{ nextDateInTheWeek }}
           </a>
           <p v-else>
-            {{ firstNextCoursInNextWeeks && firstNextCoursInNextWeeks.message ? firstNextCoursInNextWeeks.message : infos.message }}
+            {{ (firstNextCoursInNextWeeks as any)?.message ?? (infos as any)?.message }}
           </p>
         </div>
       </div>

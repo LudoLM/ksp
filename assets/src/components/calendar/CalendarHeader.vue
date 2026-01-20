@@ -6,17 +6,7 @@ import TypeCoursFilter from '../filtersCours/TypeCoursFilter.vue'
 import StatusCoursFilter from '../filtersCours/StatusCoursFilter.vue'
 import bannerImage from '../../../images/banners/imageBanner9.jpg'
 import Banner from '../Banner.vue'
-
-interface CalendarHeaderProps {
-  weekString: string
-  uniqueTypeCoursList: any[]
-  uniqueStatusCoursList: any[]
-  selectedTypeCours: number
-  selectedStatusCours: number
-  shouldPreviousWeekDisabled: boolean
-  isAdmin: boolean
-  canLaunchWeek: boolean
-}
+import type { CalendarHeaderProps } from '../../types'
 
 defineProps<CalendarHeaderProps>()
 

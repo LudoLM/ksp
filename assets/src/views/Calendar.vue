@@ -72,8 +72,8 @@ const nextDateInTheWeek = computed(() => {
     nextDateIndex.value = null
     return displayDateNextCoursString(
       calendarStore.firstNextCoursInNextWeeks.nextCoursDate.date,
-      calendarStore.firstNextCoursInNextWeeks.typeCours,
-      calendarStore.firstNextCoursInNextWeeks.statusCours,
+      calendarStore.firstNextCoursInNextWeeks.typeCours ?? '',
+      calendarStore.firstNextCoursInNextWeeks.statusCours ?? '',
       selectedTypeCours.value,
       selectedStatusCours.value
     )
@@ -84,9 +84,9 @@ const nextDateInNextWeek = computed(() => {
   const infosValue = infos.value as any
   if (infosValue?.type === 'info_next_cours') {
     return displayDateNextCoursString(
-      infosValue.nextCoursDate.date,
-      infosValue.typeCours,
-      infosValue.statusCours,
+      infosValue.nextCoursDate?.date ?? '',
+      infosValue.typeCours ?? '',
+      infosValue.statusCours ?? '',
       selectedTypeCours.value,
       selectedStatusCours.value
     )
