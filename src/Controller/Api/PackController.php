@@ -9,6 +9,7 @@ use App\Repository\HistoriquePaiementRepository;
 use App\Repository\PackRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
 use Stripe\StripeClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +18,11 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'Pack')]
 class PackController extends AbstractController
 {
+    public function __construct(
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
     #[Route('api/packs', name: 'packs_list', methods: ['GET'])]
     public function index(PackRepository $packRepository): JsonResponse
     {
@@ -46,7 +52,41 @@ class PackController extends AbstractController
         // on retrive la session pour vérifier si le paiement a été effectué
         $nbCours = $stripe->checkout->sessions->allLineItems($id, ['expand' => ['data.price.product']]);
         // on retrive les LI pour avoir le nombre de cours
-        $nbCours = json_decode((string) $nbCours->toJSON(), true);
+
+        // Sécurisation: Décoder avec gestion d'erreur (KSP-12)
+        try {
+            $nbCours = json_decode(
+                (string) $nbCours->toJSON(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+        } catch (\JsonException $e) {
+            // Log l'erreur pour debug paiements (CRITICAL - argent)
+            $this->logger->error('Stripe JSON decode error', [
+                'error' => $e->getMessage(),
+                'checkout_id' => $id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->json([
+                'type' => 'error',
+                'message' => 'Erreur lors du traitement du paiement',
+            ], 500);
+        }
+
+        // Validation: Vérifier la structure des données Stripe (KSP-12)
+        if (!isset($nbCours['data'][0]['price']['product']['metadata']['nombreCours'])) {
+            $this->logger->error('Stripe response structure invalid', [
+                'checkout_id' => $id,
+                'data' => $nbCours,
+            ]);
+
+            return $this->json([
+                'type' => 'error',
+                'message' => 'Données de paiement incomplètes',
+            ], 500);
+        }
 
         $credits = $nbCours['data'][0]['price']['product']['metadata']['nombreCours'];
         if ('paid' === $session->payment_status) {

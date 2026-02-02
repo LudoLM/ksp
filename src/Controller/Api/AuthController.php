@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\DTO\CreateUserDTO;
 use App\DTO\EditUserDTO;
+use App\DTO\ForgotPasswordDTO;
 use App\DTO\ResetPasswordDTO;
 use App\Entity\User;
 use App\Event\PasswordChangedEvent;
@@ -107,6 +108,8 @@ class AuthController extends AbstractController
     #[Route(path: 'api/forgot-password', name: 'api_app_forget_password', methods: ['POST'])]
     public function forgotPassword(
         Request $request,
+        #[MapRequestPayload]
+        ForgotPasswordDTO $forgotPasswordDTO,
     ): JsonResponse {
         // Rate limiting basé sur l'IP du client
         $limiter = $this->forgotPasswordLimiter->create($request->getClientIp());
@@ -117,19 +120,7 @@ class AuthController extends AbstractController
             ], Response::HTTP_TOO_MANY_REQUESTS);
         }
 
-        $data = json_decode($request->getContent(), true);
-
-        // Vérifier que 'email' existe dans les données décodées
-        if (!isset($data['email'])) {
-            return new JsonResponse([
-                'type' => 'error',
-                'message' => "L'email est requis",
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $emailReceived = $data['email'];
-
-        return $this->forgotPasswordService->handleForgotPassword($emailReceived);
+        return $this->forgotPasswordService->handleForgotPassword($forgotPasswordDTO->email);
     }
 
     #[Route(path: 'api/reset-password', name: 'api_app_reset_password', methods: ['POST'])]

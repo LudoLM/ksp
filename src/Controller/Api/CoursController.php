@@ -2,7 +2,9 @@
 
 namespace App\Controller\Api;
 
+use App\DTO\AddUserToCoursDTO;
 use App\DTO\CreateCoursDTO;
+use App\DTO\RemoveUserFromCoursDTO;
 use App\DTO\UserIdsToRemoveDTO;
 use App\Entity\Cours;
 use App\Entity\User;
@@ -103,44 +105,75 @@ class CoursController extends AbstractController
     }
 
     #[Route('api/add-user', name: 'cours_add_user', methods: ['POST'])]
-    public function addUserToCours(Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $user = null === $data['userId'] ? $this->getUser() : $this->userRepository->find($data['userId']);
-        // Vérifiez que $user est une instance de la classe user
+    public function addUserToCours(
+        #[MapRequestPayload]
+        AddUserToCoursDTO $dto,
+    ): JsonResponse {
+        // Récupérer l'utilisateur (connecté ou spécifié)
+        $user = null === $dto->userId
+            ? $this->getUser()
+            : $this->userRepository->find($dto->userId);
+
+        // Vérifier que $user est valide
         if (!$user instanceof User) {
-            throw new \InvalidArgumentException('Type de l\'utilisateur invalide');
+            return new JsonResponse([
+                'type' => 'error',
+                'message' => 'Utilisateur non trouvé',
+            ], Response::HTTP_NOT_FOUND);
         }
 
-        $cours = $this->coursRepository->find($data['coursId']);
-        $isOnWaitingList = $data['isOnWaitingList'];
+        // Récupérer le cours
+        $cours = $this->coursRepository->find($dto->coursId);
+        if (null === $cours) {
+            return new JsonResponse([
+                'type' => 'error',
+                'message' => 'Cours non trouvé',
+            ], Response::HTTP_NOT_FOUND);
+        }
 
-        return $this->createUsersCoursService->createUsersCours($cours, $user, $isOnWaitingList);
+        return $this->createUsersCoursService->createUsersCours($cours, $user, $dto->isOnWaitingList);
     }
 
     #[Route('api/remove-user', name: 'cours_remove_user', methods: ['PUT'])]
     public function removeUserFromCours(
-        Request $request,
+        #[MapRequestPayload]
+        RemoveUserFromCoursDTO $dto,
     ): JsonResponse {
-        $data = json_decode($request->getContent(), true);
-        $cours = $this->coursRepository->find($data['coursId']);
-        $isOnWaitingList = (bool) $data['isOnWaitingList'];
-        $user = $this->getUser();
-
-        // Vérifiez que $user est une instance de la classe utilisateur
-        if (!$user instanceof User) {
-            throw new \InvalidArgumentException('Type de l\'utilisateur invalide');
+        // Récupérer le cours
+        $cours = $this->coursRepository->find($dto->coursId);
+        if (null === $cours) {
+            return new JsonResponse([
+                'type' => 'error',
+                'message' => 'Cours non trouvé',
+            ], Response::HTTP_NOT_FOUND);
         }
+
+        // Récupérer l'utilisateur connecté
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return new JsonResponse([
+                'type' => 'error',
+                'message' => 'Utilisateur non authentifié',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
         // Retire le participant du cours, recredite si besoin et met à jour le statut
-        $this->usersCoursManager->processRemovalFromCours($cours, [$user->getId()], $isOnWaitingList);
+        $this->usersCoursManager->processRemovalFromCours($cours, [$user->getId()], $dto->isOnWaitingList);
 
         $this->em->flush();
 
         // Retourne une réponse JSON pour indiquer que l'utilisateur a été supprimé avec succès
         return new JsonResponse([
             'success' => true,
-            'message' => $isOnWaitingList ? 'Vous n\'êtes plus sur la liste d\'attente' : 'Vous avez bien été supprimé du cours',
-            'statusChange' => $this->serializer->serialize($cours->getStatusCours(), 'json', ['groups' => 'cours:detail']), 'usersCount' => $cours->getActiveSubscribedCount(),
+            'message' => $dto->isOnWaitingList
+                ? 'Vous n\'êtes plus sur la liste d\'attente'
+                : 'Vous avez bien été supprimé du cours',
+            'statusChange' => $this->serializer->serialize(
+                $cours->getStatusCours(),
+                'json',
+                ['groups' => 'cours:detail']
+            ),
+            'usersCount' => $cours->getActiveSubscribedCount(),
             'userCoursQuantity' => $user->getNombreCours(),
         ], Response::HTTP_OK);
     }
