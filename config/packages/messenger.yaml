@@ -16,6 +16,8 @@ framework:
              App\Message\SendCancelEmailMessage: async
              App\Message\UpdateStatusCoursMessage: async 
              App\Message\RemoveResetTokenMessage: async
+             App\Message\SendPasswordChangedNotificationMessage: async
+             
 
 # when@test:
 #    framework:

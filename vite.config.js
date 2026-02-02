@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import symfonyPlugin from "vite-plugin-symfony";
 import vue from '@vitejs/plugin-vue';
+import path from 'path';
 
 export default defineConfig({
     plugins: [
@@ -10,7 +11,11 @@ export default defineConfig({
         ),
     ],
     base: "/build/",
-
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './assets/src')
+        }
+    },
     server: {
         host: 'localhost',
         port: 5173,

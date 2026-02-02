@@ -35,6 +35,8 @@ grumphp:
             metadata:
                 priority: 0
             config: 'rector.php'
+            ignore_patterns: 
+                - migrations/
         phpunit:
             metadata:
                 priority: 0

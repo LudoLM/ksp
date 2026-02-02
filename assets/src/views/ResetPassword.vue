@@ -6,6 +6,7 @@
     import SideBannerAuth from "../components/SideBannerAuth.vue";
     import {useUserStore} from "../store/user";
     import {alertStore} from "../store/alert";
+    import {useActionsUser} from "../utils/composables/useActionsUser.ts";
 
     const password = ref('');
     const confirmPassword = ref('');
@@ -13,6 +14,7 @@
     const success = ref('');
     const route = useRoute();
     const router = useRouter();
+    const { getUser } = useActionsUser();
 
     const token = route.params.token;
     const userId = route.params.id;
@@ -35,7 +37,6 @@
                     token: token,
                 }),
             });
-
             if (!response.ok) {
                 const responseError = await response.json();
                 if (responseError.violations) {
@@ -47,10 +48,10 @@
                     return;
                 }
             }
-
             const data = await response.json();
             success.value = data.message;
             alertStore.setAlert(success.value, 'success');
+            await getUser();
             await router.push("/");
         } catch (err) {
             error.value = err.message;

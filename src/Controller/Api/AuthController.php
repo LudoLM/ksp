@@ -6,6 +6,7 @@ use App\DTO\CreateUserDTO;
 use App\DTO\EditUserDTO;
 use App\DTO\ResetPasswordDTO;
 use App\Entity\User;
+use App\Event\PasswordChangedEvent;
 use App\Serializer\ResetPasswordDTOToUserDenormalizer;
 use App\Service\SendingEmail\ForgotPasswordService;
 use App\Service\UserControllerService\CreateOrEditUserService;
@@ -21,7 +22,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[OA\Tag(name: 'Authentication')]
 class AuthController extends AbstractController
@@ -34,6 +37,9 @@ class AuthController extends AbstractController
         private readonly RefreshTokenGeneratorInterface $refreshTokenGenerator,
         private readonly RefreshTokenManagerInterface $refreshTokenManager,
         private readonly FetchUserService $fetchUserService,
+        private readonly RateLimiterFactory $forgotPasswordLimiter,
+        private readonly RateLimiterFactory $resetPasswordLimiter,
+        private readonly EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -49,9 +55,9 @@ class AuthController extends AbstractController
             [$jwtCookie, $refreshCookie] = $this->createTokens($user);
 
             // Crée la réponse avec un message JSON
-            $response = new JsonResponse(json_encode([
+            $response = new JsonResponse([
                 'message' => 'Utilisateur créé',
-            ]), Response::HTTP_CREATED);
+            ], Response::HTTP_CREATED);
 
             $response->headers->setCookie($jwtCookie);
             $response->headers->setCookie($refreshCookie);
@@ -59,12 +65,11 @@ class AuthController extends AbstractController
             return $response;
         } catch (\Exception $exception) {
             $message = $exception->getMessage();
-
             // Tente de décoder le message (au cas où c’est du JSON)
             $decoded = json_decode($message, true);
 
             // Si le message est un JSON valide avec une clé 'errors', renvoie-le directement
-            if (array_key_exists('errors', $decoded)) {
+            if (is_array($decoded) && array_key_exists('errors', $decoded)) {
                 return new JsonResponse($decoded, Response::HTTP_BAD_REQUEST);
             }
 
@@ -103,6 +108,15 @@ class AuthController extends AbstractController
     public function forgotPassword(
         Request $request,
     ): JsonResponse {
+        // Rate limiting basé sur l'IP du client
+        $limiter = $this->forgotPasswordLimiter->create($request->getClientIp());
+        if (!$limiter->consume(1)->isAccepted()) {
+            return new JsonResponse([
+                'type' => 'error',
+                'message' => 'Trop de tentatives. Veuillez réessayer dans 15 minutes.',
+            ], Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         // Vérifier que 'email' existe dans les données décodées
@@ -118,12 +132,20 @@ class AuthController extends AbstractController
         return $this->forgotPasswordService->handleForgotPassword($emailReceived);
     }
 
-    #[Route(path: 'api/reset-password', name: 'api_app_reset_password', methods: ['PUT'])]
+    #[Route(path: 'api/reset-password', name: 'api_app_reset_password', methods: ['POST'])]
     public function resetPassword(
+        Request $request,
         #[MapRequestPayload]
         ResetPasswordDTO $resetPasswordDTO,
         ResetPasswordDTOToUserDenormalizer $resetPasswordDTOToUserDenormalizer,
     ): JsonResponse {
+        $limiter = $this->resetPasswordLimiter->create($request->getClientIp());
+        if (!$limiter->consume(1)->isAccepted()) {
+            return new JsonResponse([
+                'type' => 'error',
+                'message' => 'Trop de tentatives. Veuillez réessayer dans 15 minutes.',
+            ], Response::HTTP_TOO_MANY_REQUESTS);
+        }
         // Utilisez le denormalizer pour convertir le DTO en entité User;
         $user = $resetPasswordDTOToUserDenormalizer->denormalize($resetPasswordDTO, User::class);
 
@@ -132,10 +154,13 @@ class AuthController extends AbstractController
 
         [$jwtCookie, $refreshCookie] = $this->createTokens($user);
 
+        // Lance un password changed event -> envoi de notifation
+        $this->eventDispatcher->dispatch(new PasswordChangedEvent($user));
+
         // Crée la réponse avec un message JSON
-        $response = new JsonResponse(json_encode([
+        $response = new JsonResponse([
             'message' => 'Mot de passe modifié',
-        ]), Response::HTTP_CREATED);
+        ], Response::HTTP_CREATED);
 
         $response->headers->setCookie($jwtCookie);
         $response->headers->setCookie($refreshCookie);

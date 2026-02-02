@@ -44,6 +44,11 @@ services:
         arguments:
             $cronExpression: '%app.refresh_tokens_cleanup_cron%' # Injecter le paramètre app.refresh_tokens_cleanup_cron
 
+    App\Controller\Api\AuthController:
+        arguments:
+            $forgotPasswordLimiter: '@limiter.forgot_password_limiter'
+            $resetPasswordLimiter: '@limiter.reset_password_limiter'
+
     Stripe\StripeClient:
         arguments:
             - { api_key: '%env(STRIPE_PRIVATE_KEY)%' }

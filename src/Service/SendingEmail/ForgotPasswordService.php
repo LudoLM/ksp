@@ -25,19 +25,28 @@ readonly class ForgotPasswordService
     {
         // Vérifie si l'email existe dans la base de données
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => $emailReceived]);
-        // Si l'utilisateur n'existe pas, on renvoie une erreur
+
+        // Si l'utilisateur n'existe pas, on retourne quand même un message de succès
         if (null === $user) {
             return new JsonResponse([
-                'type' => 'error',
-                'message' => "Il n'y a pas d'utilisateur avec cet email",
-            ], Response::HTTP_NOT_FOUND);
+                'type' => 'success',
+                'message' => 'Si cet email est enregistré, un lien de réinitialisation a été envoyé',
+            ], Response::HTTP_OK);
         }
 
         // Si l'utilisateur existe, on lui envoie un email de réinitialisation de mot de passe
         try {
             // Recupere un token de réinitialisation
             $token = $this->tokenGenerator->generateToken();
-            $user->setResetPasswordToken($token);
+
+            // Hash le token avant stockage (KSP-11 security fix)
+            $tokenHash = hash('sha256', $token);
+            $user->setResetPasswordToken($tokenHash);
+
+            // Définit la date d'expiration à 10 minutes (KSP-11 security fix)
+            $expiresAt = new \DateTime('+10 minutes');
+            $user->setResetPasswordTokenExpiresAt($expiresAt);
+
             $this->em->persist($user);
             $this->em->flush();
 
@@ -52,7 +61,7 @@ readonly class ForgotPasswordService
 
             return new JsonResponse([
                 'type' => 'success',
-                'message' => 'Un email de réinitialisation de mot de passe a été envoyé',
+                'message' => 'Si cet email est enregistré, un lien de réinitialisation a été envoyé',
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return new JsonResponse([

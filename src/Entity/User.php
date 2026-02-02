@@ -40,6 +40,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $resetPasswordToken = null;
 
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTime $resetPasswordTokenExpiresAt = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
     private ?string $nom = null;
@@ -174,6 +177,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     public function setResetPasswordToken(string $resetPasswordToken): self
     {
         $this->resetPasswordToken = $resetPasswordToken;
+
+        return $this;
+    }
+
+    public function getResetPasswordTokenExpiresAt(): ?\DateTime
+    {
+        return $this->resetPasswordTokenExpiresAt;
+    }
+
+    public function setResetPasswordTokenExpiresAt(?\DateTime $resetPasswordTokenExpiresAt): self
+    {
+        $this->resetPasswordTokenExpiresAt = $resetPasswordTokenExpiresAt;
 
         return $this;
     }
