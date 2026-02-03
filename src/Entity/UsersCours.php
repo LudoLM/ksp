@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UsersCoursRepository::class)]
+#[ORM\Index(columns: ['cours_id', 'is_on_waiting_list'], name: 'idx_users_cours_cours_waiting')]
 class UsersCours
 {
     #[ORM\Id]

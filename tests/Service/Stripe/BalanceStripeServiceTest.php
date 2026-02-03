@@ -10,11 +10,13 @@ use Stripe\BalanceTransaction;
 use Stripe\Collection;
 use Stripe\Service\BalanceTransactionService;
 use Stripe\StripeClient;
+use Symfony\Contracts\Cache\CacheInterface;
 
 class BalanceStripeServiceTest extends TestCase
 {
     private BalanceStripeService $balanceStripeService;
     private MockObject $stripeClientMock;
+    private MockObject $cacheMock;
     private int $testMonth = 11;
     private int $testYear = 2025;
 
@@ -24,7 +26,16 @@ class BalanceStripeServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->stripeClientMock = $this->createMock(StripeClient::class);
-        $this->balanceStripeService = new BalanceStripeService($this->stripeClientMock);
+        $this->cacheMock = $this->createMock(CacheInterface::class);
+
+        $this->cacheMock->method('get')
+            ->willReturnCallback(fn ($key, $callback) => $callback());
+
+        $this->balanceStripeService = new BalanceStripeService(
+            $this->stripeClientMock,
+            $this->cacheMock
+        );
+
         $this->expectedStartTimestamp = new \DateTimeImmutable('2025-11-01 00:00:00')->getTimestamp();
         $this->expectedEndTimestamp = new \DateTimeImmutable('2025-12-01 00:00:00')->getTimestamp();
     }
@@ -116,5 +127,116 @@ class BalanceStripeServiceTest extends TestCase
         $this->assertEquals($expectedResults['tva'], $result['tva'], 'TVA calculation error.');
         $this->assertEquals($expectedResults['netStripe'], $result['netStripe'], 'NetStripe calculation error.');
         $this->assertIsString($result['gross']);
+    }
+
+    public function testGetBalanceBypassesCacheForCurrentMonth(): void
+    {
+        $currentMonth = (int) date('m');
+        $currentYear = (int) date('Y');
+
+        $expectedStart = new \DateTimeImmutable("{$currentYear}-{$currentMonth}-01 00:00:00");
+        $expectedEnd = $expectedStart->modify('first day of next month');
+
+        $stripeClientMock = $this->createMock(StripeClient::class);
+        $cacheMock = $this->createMock(CacheInterface::class);
+
+        $mockTransaction = $this->createMock(BalanceTransaction::class);
+        $mockTransaction->method('__get')
+            ->willReturnCallback(fn ($property): ?int => match ($property) {
+                'amount' => 10000,
+                'fee' => 500,
+                'net' => 9500,
+                default => null,
+            });
+
+        $collectionMock = $this->createMock(Collection::class);
+        $collectionMock->method('autoPagingIterator')
+            ->willReturn(new \ArrayIterator([$mockTransaction]));
+
+        $balanceTransactionServiceMock = $this->createMock(BalanceTransactionService::class);
+        $balanceTransactionServiceMock->expects($this->once())
+            ->method('all')
+            ->with([
+                'created' => [
+                    'gte' => $expectedStart->getTimestamp(),
+                    'lt' => $expectedEnd->getTimestamp(),
+                ],
+                'type' => 'charge',
+                'limit' => 100,
+            ])
+            ->willReturn($collectionMock);
+
+        $stripeClientMock->method('__get')
+            ->with('balanceTransactions')
+            ->willReturn($balanceTransactionServiceMock);
+
+        // Assert: cache->get() should NEVER be called for current month
+        $cacheMock->expects($this->never())
+            ->method('get');
+
+        $service = new BalanceStripeService($stripeClientMock, $cacheMock);
+
+        $result = $service->getBalance($currentMonth, $currentYear);
+
+        $this->assertIsArray($result);
+        $this->assertEquals('100.00', $result['gross']);
+    }
+
+    public function testGetBalanceUsesCacheForPastMonth(): void
+    {
+        $pastMonth = 1;
+        $pastYear = 2025;
+
+        $expectedStart = new \DateTimeImmutable('2025-01-01 00:00:00');
+        $expectedEnd = $expectedStart->modify('first day of next month');
+
+        $stripeClientMock = $this->createMock(StripeClient::class);
+        $cacheMock = $this->createMock(CacheInterface::class);
+
+        $mockTransaction = $this->createMock(BalanceTransaction::class);
+        $mockTransaction->method('__get')
+            ->willReturnCallback(fn ($property): ?int => match ($property) {
+                'amount' => 20000,
+                'fee' => 1000,
+                'net' => 19000,
+                default => null,
+            });
+
+        $collectionMock = $this->createMock(Collection::class);
+        $collectionMock->method('autoPagingIterator')
+            ->willReturn(new \ArrayIterator([$mockTransaction]));
+
+        $balanceTransactionServiceMock = $this->createMock(BalanceTransactionService::class);
+        $balanceTransactionServiceMock->expects($this->once())
+            ->method('all')
+            ->with([
+                'created' => [
+                    'gte' => $expectedStart->getTimestamp(),
+                    'lt' => $expectedEnd->getTimestamp(),
+                ],
+                'type' => 'charge',
+                'limit' => 100,
+            ])
+            ->willReturn($collectionMock);
+
+        $stripeClientMock->method('__get')
+            ->with('balanceTransactions')
+            ->willReturn($balanceTransactionServiceMock);
+
+        // Assert: cache->get() SHOULD be called for past month
+        $cacheMock->expects($this->once())
+            ->method('get')
+            ->with(
+                $this->equalTo('stripe_balance_2025-01'),
+                $this->anything()
+            )
+            ->willReturnCallback(fn ($key, $callback) => $callback());
+
+        $service = new BalanceStripeService($stripeClientMock, $cacheMock);
+
+        $result = $service->getBalance($pastMonth, $pastYear);
+
+        $this->assertIsArray($result);
+        $this->assertEquals('200.00', $result['gross']);
     }
 }

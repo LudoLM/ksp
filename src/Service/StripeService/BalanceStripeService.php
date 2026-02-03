@@ -3,15 +3,32 @@
 namespace App\Service\StripeService;
 
 use Stripe\StripeClient;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Contracts\Cache\CacheInterface;
 
-readonly class BalanceStripeService
+class BalanceStripeService
 {
     public function __construct(
-        private StripeClient $stripeClient,
+        private readonly StripeClient $stripeClient,
+        #[Autowire(service: 'cache.stripe_reports')]
+        private readonly CacheInterface $cache,
     ) {
     }
 
     public function getBalance(int $month, int $year): array
+    {
+        $yearMonth = sprintf('%04d-%02d', $year, $month);
+        $cacheKey = 'stripe_balance_'.$yearMonth;
+
+        $currentYearMonth = date('Y-m');
+        if ($yearMonth === $currentYearMonth) {
+            return $this->fetchBalanceFromStripe($month, $year);
+        }
+
+        return $this->cache->get($cacheKey, fn (): array => $this->fetchBalanceFromStripe($month, $year));
+    }
+
+    private function fetchBalanceFromStripe(int $month, int $year): array
     {
         $start = new \DateTimeImmutable("{$year}-{$month}-01 00:00:00");
         $end = $start->modify('first day of next month');

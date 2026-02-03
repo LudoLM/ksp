@@ -189,6 +189,7 @@ class CoursRepository extends ServiceEntityRepository
             ->where('c.statusCours = 1 OR c.statusCours = 2')
             ->andWhere('c.dateCours > :currentDate')
             ->andWhere('c.dateCours < :dateLimit')
+            ->andWhere('u.isOnWaitingList = false OR u.isOnWaitingList IS NULL')
             ->setParameter('currentDate', new \DateTime())
             ->setParameter('dateLimit', new \DateTime()->modify('+90days'))
             ->groupBy('c.id')

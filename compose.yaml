@@ -58,6 +58,18 @@ services:
           MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       volumes:
           - db-data:/var/lib/mysql
+          
+  redis:
+      networks:
+          - proxy
+      container_name: redis
+      image: redis:alpine3.22
+      restart: unless-stopped
+      ports:
+          - "6379:6379"
+      volumes:
+          - redis-data:/data
+      command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
 
 
 ###> doctrine/doctrine-bundle ###
@@ -83,6 +95,7 @@ volumes:
 ###> doctrine/doctrine-bundle ###
   db-data:  
 ###< doctrine/doctrine-bundle ###
+  redis-data:
   
 networks:
     proxy:

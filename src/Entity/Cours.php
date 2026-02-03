@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
+#[ORM\Index(columns: ['status_cours_id', 'date_cours'], name: 'idx_cours_status_date')]
 class Cours extends Coursbase
 {
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
