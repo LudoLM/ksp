@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
+#[ORM\Cache(usage: 'READ_ONLY', region: 'type_cours_region')]
 #[ORM\Entity(repositoryClass: TypeCoursRepository::class)]
 class TypeCours
 {

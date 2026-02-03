@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
+#[ORM\Cache(usage: 'READ_ONLY', region: 'status_cours_region')]
 #[ORM\Entity(repositoryClass: StatusCoursRepository::class)]
 class StatusCours
 {
