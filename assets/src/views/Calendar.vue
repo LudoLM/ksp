@@ -195,6 +195,7 @@ const handleGoToNextCourse = (dateValue: Date, dayIndex?: number): void => {
   />
 
   <CalendarMobile
+    :days="days"
     :daySelected="daySelected"
     :weekInfos="weekInfos"
     :date="date"
@@ -207,6 +208,7 @@ const handleGoToNextCourse = (dateValue: Date, dayIndex?: number): void => {
     @navigate-day="handleNavigateDay"
     @navigate-week="handleNavigateWeek"
     @go-to-next-course="handleGoToNextCourse"
+    @select-day="calendarStore.setDaySelected"
   />
 </template>
 

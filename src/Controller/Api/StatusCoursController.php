@@ -20,7 +20,7 @@ class StatusCoursController extends AbstractController
     ) {
     }
 
-    #[Route('/api/get-status-cours', name: 'status_cours_index', methods: ['GET'])]
+    #[Route('/api/public/get-status-cours', name: 'status_cours_index', methods: ['GET'])]
     public function statusCoursIndex(): JsonResponse
     {
         $statusCours = $this->statusCoursRepository->findAll();

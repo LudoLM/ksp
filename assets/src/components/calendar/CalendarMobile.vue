@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CoursCardCalendar from '../CoursCardCalendar.vue'
-import type { CalendarMobileProps } from '../../types'
+import type { CalendarMobileProps } from '@/types'
 
 defineProps<CalendarMobileProps>()
 
@@ -8,13 +8,41 @@ interface CalendarMobileEmits {
   'navigate-day': [direction: 'prev' | 'next']
   'navigate-week': [direction: 'prev' | 'next']
   'go-to-next-course': [date: Date, dayIndex?: number]
+  'select-day': [index: number]
 }
 
 defineEmits<CalendarMobileEmits>()
+
+/**
+ * Formats a date string into HTML with day name and number (same as CalendarGrid)
+ */
+const formatDay = (day: string): string => {
+  const date = new Date(day)
+  const daysOfWeek = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+  const dayOfWeek = daysOfWeek[date.getDay()]
+  const dayPart = day.split('-')[2]
+  return `<p>${dayOfWeek.substring(0, 3)} </p><p> ${dayPart}</p>`
+}
 </script>
 
 <template>
   <div class="p-10 bg-white mobile-container">
+    <!-- Mobile day selector -->
+    <div class="mobile-days-selector">
+      <div
+        v-for="(day, index) in days"
+        :key="day"
+        class="mobile-day"
+        :class="[
+          daySelected === index ? 'mobile-day-active' : '',
+          weekInfos[index]?.length > 0 ? 'has-cours' : ''
+        ]"
+        @click="$emit('select-day', index)"
+        v-html="formatDay(day)"
+      />
+    </div>
+
+    <!-- Mobile carousel -->
     <div class="mobile">
       <div
         :class="daySelected !== 0 || new Date(date) > new Date(dateToday) ? 'dayBefore' : 'dayBefore invisible'"
@@ -67,9 +95,6 @@ defineEmits<CalendarMobileEmits>()
 </template>
 
 <style scoped>
-.mobile-container {
-  padding: 0;
-}
 
 a {
   color: #472371;
@@ -81,11 +106,42 @@ a {
   display: none;
 }
 
+.mobile-days-selector {
+  display: none;
+}
+
 .nextDateDisplayed {
   font-size: clamp(0.9rem, 1.4vw, 1.4rem);
 }
 
 @media (max-width: 980px) {
+  .mobile-days-selector {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+  }
+
+  .mobile-day {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding-bottom: 20px;
+    width: 100%;
+    opacity: 0.4;
+  }
+
+  .mobile-day.has-cours {
+    color: #5e2ca5;
+    font-weight: bold;
+  }
+
+  .mobile-day-active {
+    opacity: 1;
+    border-bottom: 1px solid #5e2ca5;
+  }
+
   .mobile {
     display: flex;
     justify-content: space-around;
@@ -105,7 +161,7 @@ a {
   .dayAfter {
     width: clamp(40px, 9vw, 150px);
     height: clamp(40px, 9vw, 150px);
-    background: url('../../../assets/icons/arrow.svg') no-repeat center;
+    background: url('../../../../assets/icons/arrow.svg') no-repeat center;
     background-size: 50%;
     margin-top: 100px;
     cursor: pointer;

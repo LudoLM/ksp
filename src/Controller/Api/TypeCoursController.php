@@ -24,7 +24,7 @@ class TypeCoursController extends AbstractController
     ) {
     }
 
-    #[Route('/api/get-types-cours', name: 'type_cours_index', methods: ['GET'])]
+    #[Route('/api/public/get-types-cours', name: 'type_cours_index', methods: ['GET'])]
     public function typeCoursIndex(): JsonResponse
     {
         $typeCours = $this->typeCoursRepository->findAll();
@@ -33,7 +33,7 @@ class TypeCoursController extends AbstractController
         return new JsonResponse($jsonTypeCours, \Symfony\Component\HttpFoundation\Response::HTTP_OK, [], true);
     }
 
-    #[Route('/api/get-types-cours/{id}', name: 'type_cours_detail', methods: ['GET'])]
+    #[Route('/api/public/get-types-cours/{id}', name: 'type_cours_detail', methods: ['GET'])]
     public function typeCoursFiltered(int $id): JsonResponse
     {
         $typeCours = $this->typeCoursRepository->find($id);

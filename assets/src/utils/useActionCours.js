@@ -3,14 +3,17 @@ import {isRef} from "vue";
 import {useCalendarStore} from "../store/calendar";
 import {useUserStore} from "../store/user";
 import {alertStore} from "../store/alert.js";
+import {storeToRefs} from "pinia";
 
 
 export async function useGetCours(route, infos, selectedTypeCours, selectedDate, selectedStatusCours, isOpenRequired = false) {
     try {
+      const { userId } = storeToRefs(useUserStore());
       const typeCoursValue = isRef(selectedTypeCours) ? selectedTypeCours.value : selectedTypeCours;
       const dateCoursValue = isRef(selectedDate) ? selectedDate.value : selectedDate;
       const statusCoursValue = isRef(selectedStatusCours) ? selectedStatusCours.value : selectedStatusCours;
       const isOpenRequiredValue = isRef(isOpenRequired) ? isOpenRequired.value : isOpenRequired;
+      const url = userId.value === null ? "public/" + route.value : route.value;
 
 
       let params = new URLSearchParams({
@@ -20,9 +23,8 @@ export async function useGetCours(route, infos, selectedTypeCours, selectedDate,
         isOpenRequired: isOpenRequiredValue,
 
       });
-      const response = await fetch(`/api/${route.value}?${params.toString()}`, {
+      const response = await apiFetch(`/api/${url}?${params.toString()}`, {
         method: "GET",
-        headers : makeRequestHeaders()
       });
       if (response.ok) {
         infos.value = await response.json();
@@ -38,9 +40,11 @@ export async function useGetCours(route, infos, selectedTypeCours, selectedDate,
 
 export async function useGetOnlyNextCours(selectedTypeCours, selectedDate, selectedStatusId) {
   try{
+    const { userId } = storeToRefs(useUserStore());
     const typeCoursValue = isRef(selectedTypeCours) ? selectedTypeCours.value : selectedTypeCours;
     const dateCoursValue = isRef(selectedDate) ? selectedDate.value : selectedDate;
     const statusCoursValue = isRef(selectedStatusId) ? selectedStatusId.value : selectedStatusId;
+    const url = userId.value === null ? 'public/get-only-next-cours' : 'get-only-next-cours';
 
     let params = new URLSearchParams({
       typeCoursId: typeCoursValue === null ? "0" : typeCoursValue,
@@ -49,9 +53,8 @@ export async function useGetOnlyNextCours(selectedTypeCours, selectedDate, selec
       isOpenRequired: true,
     });
 
-    const response = await fetch(`/api/get-only-next-cours?${params.toString()}`, {
+    const response = await apiFetch(`/api/${url}?${params.toString()}`, {
       method: "GET",
-      headers : makeRequestHeaders()
     });
     return await response.json();
   } catch (error) {
@@ -62,7 +65,7 @@ export async function useGetOnlyNextCours(selectedTypeCours, selectedDate, selec
 
 export async function useGetCoursById(coursId) {
         try {
-            const response = await fetch(`/api/get-cours/${coursId}`);
+            const response = await fetch(`/api/public/get-cours/${coursId}`);
             return await response.json();
         } catch (error) {
             console.error('Error fetching cours details:', error);
@@ -72,7 +75,7 @@ export async function useGetCoursById(coursId) {
 
 export async function useGetTypesCours() {
     try {
-        const response = await fetch('/api/get-types-cours', {
+        const response = await fetch('/api/public/get-types-cours', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -91,7 +94,7 @@ export async function useGetTypesCours() {
 export async function useGetStatusCours() {
 
     try {
-        const response = await fetch('/api/get-status-cours', {
+        const response = await fetch('/api/public/get-status-cours', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -176,15 +179,4 @@ export async function handleLaunchAllCours(days) {
 
   calendarStore.setSelectedStatusCours(0);
   await calendarStore.fetchCoursPerWeek();
-}
-
-function makeRequestHeaders() {
-    const token = useUserStore().accessToken;
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
 }

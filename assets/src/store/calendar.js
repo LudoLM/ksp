@@ -64,6 +64,7 @@ export const useCalendarStore = defineStore('calendar', {
     async fetchCoursPerWeek(isOpenRequired = false) {
       try {
         const dateFormatted = ref(this.date.toISOString().split('T')[0]);
+        this.weekInfos = [[], [], [], [], [], [], []];
         const tempInfos = ref([]);
         const route = ref("get-cours-calendar");
         await useGetCours(route, tempInfos, this.selectedTypeCours, dateFormatted, this.selectedStatusCours, isOpenRequired,);
@@ -77,7 +78,6 @@ export const useCalendarStore = defineStore('calendar', {
         // On trie les cours par date et on les répartit dans les jours de la semaine
         if (Array.isArray(this.infos)) {
           this.infos.sort((a, b) => new Date(a.dateCours) - new Date(b.dateCours));
-          this.weekInfos = [[], [], [], [], [], [], []];
           this.infos.forEach(info => {
             const rawDay = new Date(info.dateCours).getDay();
             const day = (rawDay + 6) % 7;

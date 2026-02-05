@@ -63,7 +63,7 @@ readonly class FilteringCoursService
         }
 
         $dateLimit = null;
-        if ('cours_next_cours' === $route) {
+        if (str_ends_with($route, 'cours_next_cours')) {
             if ($isOpenRequired) {
                 $getFirstCours = $this->coursRepository->findNextCours($typeCours, $dateCours, $isPrioritized, $statusCours, $isAdmin);
                 if (!$getFirstCours instanceof Cours) {
@@ -91,7 +91,7 @@ readonly class FilteringCoursService
 
             return $this->coursRepository->findAllSortByDateForUsers($typeCours, $dateCours, $dateLimit, $isPrioritized, $isAdmin, $statusCours);
         }
-        if ('cours_calendar' === $route) {
+        if (str_ends_with($route, 'cours_calendar')) {
             if ($isOpenRequired) {
                 $getFirstCours = $this->coursRepository->findNextCours($typeCours, $dateCours, $isPrioritized, $statusCours, $isAdmin);
                 if (!$getFirstCours instanceof Cours) {
@@ -105,6 +105,8 @@ readonly class FilteringCoursService
 
             return $this->coursRepository->findAllSortByDateForUsers($typeCours, $dateCours, $dateLimit, $isPrioritized, $isAdmin, $statusCours);
         }
+
+        // Route api/get-cours
         [$dateCours, $dateLimit] = DateHelper::adjustDatesForIndexRoute($dateCours);
 
         return $this->coursRepository->findAllSortByDate($typeCours, $dateCours, $dateLimit, $statusCours);

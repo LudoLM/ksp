@@ -48,9 +48,11 @@ class CoursController extends AbstractController
     ) {
     }
 
+    #[Route('api/public/get-cours-calendar', name: 'public_cours_calendar', methods: ['GET'])]
+    #[Route('api/public/get-only-next-cours', name: 'public_cours_next_cours', methods: ['GET'])]
     #[Route('api/get-cours-calendar', name: 'cours_calendar', methods: ['GET'])]
-    #[Route('api/get-cours', name: 'cours_index', methods: ['GET'])]
     #[Route('api/get-only-next-cours', name: 'cours_next_cours', methods: ['GET'])]
+    #[Route('api/get-cours', name: 'cours_index', methods: ['GET'])]
     public function coursIndex(
         Request $request,
         #[MapQueryParameter] int $typeCoursId,
@@ -64,14 +66,14 @@ class CoursController extends AbstractController
         $isAdmin = false;
         if ($user instanceof User) {
             $isPrioritized = $user->isPrioritized();
-            $isAdmin = 'ROLE_ADMIN' === $user->getRoles()[0];
+            $isAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
         }
         try {
             $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized, $isAdmin);
 
             // S'il n'y a pas de cours cette semaine, on renvoie un message d'erreur
             if ([] === $responseData) {
-                throw new \Exception('Aucun cours cette semaine', 500);
+                throw new \Exception('Aucun cours cette semaine', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
             if (array_key_exists('type', $responseData) && 'info_next_cours' === $responseData['type']) {
                 return new JsonResponse($responseData, Response::HTTP_OK);

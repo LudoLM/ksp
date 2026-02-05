@@ -49,6 +49,7 @@ export interface CalendarGridProps {
 }
 
 export interface CalendarMobileProps {
+  days: string[]
   daySelected: number
   weekInfos: CalendarCours[][]
   date: Date
