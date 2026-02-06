@@ -32,10 +32,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import {ref, computed, onMounted, watch} from 'vue';
 import CustomButton from '../forms/CustomButton.vue';
 import { useSubscription } from "../../utils/useSubscribing";
 import {useUserStore} from "../../store/user";
+import {apiFetch} from "@/utils/useFetchInterceptor.ts";
 
 // Définition des props
 const props = defineProps({
@@ -63,6 +64,7 @@ const localIsOpen = ref(props.isOpen);
 const selectedUser = ref(null);
 const users = ref([]);
 const usersAdded = ref([]);
+const hasLoaded = ref(false);
 
 // Utilisation de computed pour filtrer users en fonction de usersAdded
 const userOptions = computed(() =>
@@ -75,8 +77,21 @@ const userOptions = computed(() =>
 );
 
 
+// ✅ Synchronise localIsOpen avec la prop isOpen
+watch(() => props.isOpen, (newValue) => {
+    localIsOpen.value = newValue;
+});
+
+// ✅ Charge les users à l'ouverture de la modale
+watch(localIsOpen, async (isOpen) => {
+    if (isOpen && !hasLoaded.value) {
+        await getUsers();
+        hasLoaded.value = true;
+    }
+});
+
 const getUsers = async () => {
-  const response = await fetch(`/api/admin/users-not-in-cours/${props.cours}`, {
+  const response = await apiFetch(`/api/admin/users-not-in-cours/${props.cours}`, {
     method: 'GET',
   });
 
@@ -88,9 +103,6 @@ const getUsers = async () => {
   }
 };
 
-onMounted(async () => {
-  await getUsers();
-});
 
 const closeDialog = () => {
   localIsOpen.value = false;

@@ -71,7 +71,7 @@ export async function useGetOnlyNextCours(
 
 export async function useGetCoursById(coursId: number): Promise<any> {
   try {
-    const response = await fetch(`/api/get-cours/${coursId}`)
+    const response = await fetch(`/api/public/get-cours/${coursId}`)
     return await response.json()
   } catch (error) {
     const err = error as Error
@@ -81,7 +81,7 @@ export async function useGetCoursById(coursId: number): Promise<any> {
 
 export async function useGetTypesCours(): Promise<any> {
   try {
-    const response = await fetch('/api/get-types-cours', {
+    const response = await fetch('/api/public/get-types-cours', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export async function useGetTypesCours(): Promise<any> {
 
 export async function useGetStatusCours(): Promise<any> {
   try {
-    const response = await fetch('/api/get-status-cours', {
+    const response = await fetch('/api/public/get-status-cours', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

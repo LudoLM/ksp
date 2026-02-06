@@ -57,12 +57,6 @@
     </div>
 </template>
 
-<style scoped>
-    div{
-        font-size: clamp(0.8rem, 1.5vw, 1rem);
-    }
-</style>
-
 <script setup>
 import {ref, onMounted, watch} from 'vue';
 import { useRoute } from "vue-router";
@@ -70,7 +64,7 @@ import {
     useGetCours,
     useGetStatusCours,
     useGetTypesCours,
-} from "../../utils/useActionCours";
+} from "@/utils/useActionCours.ts";
 import Banner from "../../components/Banner.vue";
 import bannerImage from "../../../images/banners/imageBanner5.jpg";
 import CustomButton from "../../components/forms/CustomButton.vue";
@@ -167,6 +161,10 @@ const resetInfos = async () => {
 
 
 <style scoped lang="scss">
+
+    div{
+        font-size: clamp(0.8rem, 1.5vw, 1rem);
+    }
 
     .thead {
         display: grid;

@@ -97,7 +97,7 @@ class CoursController extends AbstractController
         return new JsonResponse($jsonYearsRange);
     }
 
-    #[Route('api/get-cours/{id}', name: 'cours_detail', methods: ['GET'])]
+    #[Route('api/public/get-cours/{id}', name: 'cours_detail', methods: ['GET'])]
     public function coursFiltered(int $id): JsonResponse
     {
         $cours = $this->coursRepository->find($id);
