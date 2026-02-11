@@ -102,12 +102,12 @@ abstract class Coursbase
         $this->hasLimitOfOneCoursPerWeek = $hasLimitOfOneCoursPerWeek;
     }
 
-    public function getSpecialNote(): string
+    public function getSpecialNote(): ?string
     {
         return $this->specialNote;
     }
 
-    public function setSpecialNote(string $specialNote): void
+    public function setSpecialNote(?string $specialNote): void
     {
         $this->specialNote = $specialNote;
     }

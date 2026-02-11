@@ -3,6 +3,7 @@ import { isRef, type Ref } from 'vue'
 import { useCalendarStore } from '../store/calendar'
 import { useUserStore } from '../store/user'
 import { alertStore } from '../store/alert'
+import type { CoursAdminDetailDTO, CoursPublicDetailDTO } from '../types/coursDetails'
 
 export async function useGetCours(
   route: Ref<string>,
@@ -13,10 +14,12 @@ export async function useGetCours(
   isOpenRequired: Ref<boolean> | boolean = false
 ): Promise<void> {
   try {
+    const userStore = useUserStore()
     const typeCoursValue = isRef(selectedTypeCours) ? selectedTypeCours.value : selectedTypeCours
     const dateCoursValue = isRef(selectedDate) ? selectedDate.value : selectedDate
     const statusCoursValue = isRef(selectedStatusCours) ? selectedStatusCours.value : selectedStatusCours
     const isOpenRequiredValue = isRef(isOpenRequired) ? isOpenRequired.value : isOpenRequired
+    const url = userStore.userId === null ? `public/${route.value}` : route.value
 
     const params = new URLSearchParams({
       typeCoursId: typeCoursValue === null ? '0' : String(typeCoursValue),
@@ -25,9 +28,8 @@ export async function useGetCours(
       isOpenRequired: String(isOpenRequiredValue),
     })
 
-    const response = await fetch(`/api/${route.value}?${params.toString()}`, {
+    const response = await apiFetch(`/api/${url}?${params.toString()}`, {
       method: 'GET',
-      headers: makeRequestHeaders(),
     })
 
     if (response.ok) {
@@ -47,9 +49,11 @@ export async function useGetOnlyNextCours(
   selectedStatusId: Ref<number | null> | number | null
 ): Promise<any> {
   try {
+    const userStore = useUserStore()
     const typeCoursValue = isRef(selectedTypeCours) ? selectedTypeCours.value : selectedTypeCours
     const dateCoursValue = isRef(selectedDate) ? selectedDate.value : selectedDate
     const statusCoursValue = isRef(selectedStatusId) ? selectedStatusId.value : selectedStatusId
+    const url = userStore.userId === null ? 'public/get-only-next-cours' : 'get-only-next-cours'
 
     const params = new URLSearchParams({
       typeCoursId: typeCoursValue === null ? '0' : String(typeCoursValue),
@@ -58,9 +62,8 @@ export async function useGetOnlyNextCours(
       isOpenRequired: 'true',
     })
 
-    const response = await fetch(`/api/get-only-next-cours?${params.toString()}`, {
+    const response = await apiFetch(`/api/${url}?${params.toString()}`, {
       method: 'GET',
-      headers: makeRequestHeaders(),
     })
     return await response.json()
   } catch (error) {
@@ -69,14 +72,32 @@ export async function useGetOnlyNextCours(
   }
 }
 
-export async function useGetCoursById(coursId: number): Promise<any> {
+export async function getPublicCoursById(coursId: number): Promise<CoursPublicDetailDTO | undefined> {
   try {
     const response = await fetch(`/api/public/get-cours/${coursId}`)
     return await response.json()
   } catch (error) {
     const err = error as Error
-    console.error('Error fetching cours details:', err.message)
+    console.error('Error fetching public cours details:', err.message)
   }
+}
+
+export async function getAdminCoursById(coursId: number): Promise<CoursAdminDetailDTO | undefined> {
+  try {
+    const response = await apiFetch(`/api/admin/get-cours/${coursId}`, { method: 'GET' })
+    return await response.json()
+  } catch (error) {
+    const err = error as Error
+    console.error('Error fetching admin cours details:', err.message)
+  }
+}
+
+// @deprecated Use getPublicCoursById or getAdminCoursById instead
+export async function useGetCoursById(
+  coursId: number,
+  isAdmin: boolean = false
+): Promise<CoursPublicDetailDTO | CoursAdminDetailDTO | undefined> {
+  return isAdmin ? getAdminCoursById(coursId) : getPublicCoursById(coursId)
 }
 
 export async function useGetTypesCours(): Promise<any> {
@@ -178,15 +199,3 @@ export async function handleLaunchAllCours(days: Ref<any>): Promise<void> {
   calendarStore.setSelectedStatusCours(0)
   await calendarStore.fetchCoursPerWeek()
 }
-
-function makeRequestHeaders(): Record<string, string> {
-  const token = (useUserStore() as any).accessToken as string | undefined
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
-  return headers
-}
-
