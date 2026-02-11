@@ -4,6 +4,7 @@ namespace App\Service\SendingEmail;
 
 use App\Entity\User;
 use App\Message\RemoveResetTokenMessage;
+use App\Message\SendResetPasswordEmailMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,7 +16,6 @@ readonly class ForgotPasswordService
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private SendResetPasswordEmailService $sendResetPasswordEmailService,
         private MessageBusInterface $messageBus,
         private TokenGeneratorInterface $tokenGenerator,
     ) {
@@ -50,14 +50,14 @@ readonly class ForgotPasswordService
             $this->em->persist($user);
             $this->em->flush();
 
-            // Envoie un message pour supprimer le token après 10 minutes
+            // Envoie un message pour supprimer le token après 10 minutes et mail de réinitialisation
             $this->messageBus->dispatch(
-                new RemoveResetTokenMessage(
-                    $user->getId()),
-                [new DelayStamp(10 * 60 * 1000)],
+                new SendResetPasswordEmailMessage($user->getId(), $token)
             );
-            // Envoie un email de réinitialisation de mot de passe
-            $this->sendResetPasswordEmailService->send($user, $token);
+            $this->messageBus->dispatch(
+                new RemoveResetTokenMessage($user->getId()),
+                [new DelayStamp(10 * 60 * 1000)]
+            );
 
             return new JsonResponse([
                 'type' => 'success',

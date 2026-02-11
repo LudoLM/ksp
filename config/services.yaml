@@ -40,6 +40,10 @@ services:
         arguments:
             $baseUrl: '%app_url%'  # Injecter le paramètre app_url
             
+    App\Service\SendingEmail\SendDesistementEmailService:
+        arguments:
+            $baseUrl: '%app_url%'
+            
     App\Scheduler\RemoveRefreshTokensProvider:
         arguments:
             $cronExpression: '%app.refresh_tokens_cleanup_cron%' # Injecter le paramètre app.refresh_tokens_cleanup_cron
@@ -52,3 +56,12 @@ services:
     Stripe\StripeClient:
         arguments:
             - { api_key: '%env(STRIPE_PRIVATE_KEY)%' }
+    
+    _instanceof:
+        App\Service\Interface\Notification\NotificationSenderInterface:
+            tags: [ 'app.notification_sender' ]
+            
+    App\Service\Notification\EmailSender:
+        arguments:
+            $fromEmail: '%env(MAILER_SENDER)%'  
+            

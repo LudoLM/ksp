@@ -20,9 +20,10 @@ parameters:
     ignoreErrors:
         - '#Strict comparison using !== between array\{\} and array\{\} will always evaluate to false#'
         - '#Use explicit methods over array access on object#'
-
-
-
+        - identifier: typePerfect.narrowPublicClassMethodParamType
+          path: src/Service/Notification/NotificationManager.php
+        - identifier: typePerfect.narrowPublicClassMethodParamType
+          path: src/Entity/User.php
 
 
 

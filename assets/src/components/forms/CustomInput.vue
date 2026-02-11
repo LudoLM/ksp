@@ -25,7 +25,7 @@ interface CustomInputProps {
   item: string
   type: string
   id: string
-  placeholder: string
+  placeholder?: string
   modelValue: string | number | Date
   isHorizontal?: boolean
   error?: string | null

@@ -8,15 +8,13 @@ use App\Enum\StatusCoursEnum;
 use App\Repository\StatusCoursRepository;
 use App\Service\CoursControllerService\CountUsersInCoursService;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class CountUsersInCoursServiceTest extends TestCase
 {
+    public \PHPUnit\Framework\MockObject\MockObject $statusCoursRepositoryMock;
     public $countUsersInCoursService;
-    /* private MockObject&EventDispatcherInterface $dispatcherMock; */
-    public MockObject $statusCoursRepositoryMock;
 
     public function setUp(): void
     {
@@ -24,6 +22,7 @@ class CountUsersInCoursServiceTest extends TestCase
         $this->countUsersInCoursService = new CountUsersInCoursService(
             /* $this->dispatcherMock, */
             $this->statusCoursRepositoryMock,
+            $this->createMock(EventDispatcherInterface::class)
         );
     }
 

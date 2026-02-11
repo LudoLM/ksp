@@ -2,35 +2,33 @@
 
 namespace App\Service\SendingEmail;
 
-use App\Entity\User;
 use App\Entity\UsersCours;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\Mailer\MailerInterface;
+use App\Service\Notification\EmailNotification;
+use App\Service\Notification\NotificationManager;
 
 readonly class SendUpdateCoursEmailService
 {
     public function __construct(
-        private MailerInterface $mailer,
+        private NotificationManager $notificationManager,
         private string $baseUrl,
     ) {
     }
 
-    public function send(UsersCours $usersCours, User $currentUser, \DateTimeInterface $initialDate, int $initialDuration): void
+    public function send(UsersCours $usersCours, \DateTimeInterface $initialDate, int $initialDuration): void
     {
-        $email = new TemplatedEmail()
-            ->from('ludolemelinaire@gmail.com')
-            ->to($usersCours->getUser()->getEmail())
-            ->subject('Modification de cours')
-            ->htmlTemplate('emails/updateCours.html.twig')
-            ->locale('fr')
-            ->context([
+        $notification = new EmailNotification(
+            subject: 'Modification de cours',
+            content: 'Cours Modifié',
+            template: 'emails/updateCours.html.twig',
+            parameters: [
                 'cours' => $usersCours->getCours(),
                 'participant' => $usersCours->getUser(),
-                'user' => $currentUser->getPrenom().' '.$currentUser->getNom(),
                 'url' => $this->baseUrl,
                 'initialDate' => $initialDate,
                 'initialDuration' => $initialDuration,
-            ]);
-        $this->mailer->send($email);
+            ]
+        );
+
+        $this->notificationManager->send($notification, $usersCours->getUser());
     }
 }

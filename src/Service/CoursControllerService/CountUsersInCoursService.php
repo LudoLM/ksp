@@ -5,12 +5,15 @@ namespace App\Service\CoursControllerService;
 use App\Entity\Cours;
 use App\Entity\UsersCours;
 use App\Enum\StatusCoursEnum;
+use App\Event\DesistementEvent;
 use App\Repository\StatusCoursRepository;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class CountUsersInCoursService
+readonly class CountUsersInCoursService
 {
     public function __construct(
-        private readonly StatusCoursRepository $statusCoursRepository,
+        private StatusCoursRepository $statusCoursRepository,
+        private EventDispatcherInterface $dispatcher,
     ) {
     }
 
@@ -27,8 +30,8 @@ class CountUsersInCoursService
         if ($cours->hasCapacityAvailable() && $cours->getStatusCours()->getLibelle() === StatusCoursEnum::COMPLET->value) {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::OUVERT->value]));
             // Envoi d'un mail aux personnes en attente
-            /*$eventCours = new DesistementEvent($cours);
-            $this->dispatcher->dispatch($eventCours);*/
+            $eventCours = new DesistementEvent($cours);
+            $this->dispatcher->dispatch($eventCours);
         }
     }
 }

@@ -11,16 +11,16 @@
             <p class="text-center">Bonjour {{ participant.prenom }}!</p>
             <p class="block">
 {#              Le cours de {{ cours.typeCours.libelle}}  du {{ cours.date|date('d/m/Y') }} à {{ cours.heureDebut|date('H:i') }} a été annulé.#}
-              Une place pour le cours de {{ cours.typeCours.libelle}} est disponible.
+              Une place pour le cours de {{ cours.typeCours.libelle}}  du  {{ cours.dateCours|date('d/m/Y') }} à  {{ cours.dateCours|date('H:i') }} est disponible.
             </p>
             <p>
-                RDV sur votre espace personnel pour vous inscrire.
+            <p class="text-center">
+                <a href={{ url }}>Voir le cours</a>
             </p>
             <p>
-                Cordialement,
-                <br>
-                <br>
-                 {{ user.prenom }}
+                Cordialement,<br><br>
+                L'équipe Kiné Sport Santé
+            </p>
         </div>
     </div>
 </div>

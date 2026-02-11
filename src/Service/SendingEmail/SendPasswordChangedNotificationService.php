@@ -3,29 +3,26 @@
 namespace App\Service\SendingEmail;
 
 use App\Entity\User;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\Mailer\MailerInterface;
+use App\Service\Notification\EmailNotification;
+use App\Service\Notification\NotificationManager;
 
 readonly class SendPasswordChangedNotificationService
 {
     public function __construct(
-        private MailerInterface $mailer,
+        private NotificationManager $notificationManager,
     ) {
     }
 
     public function send(User $user): void
-    // TODO Change email
     {
-        $email = new TemplatedEmail()
-            ->from('ludolemelinaire@gmail.com')
-            ->to($user->getEmail())
-            ->subject('Votre mot de passe a été modifié')
-            ->htmlTemplate('emails/passwordChanged.html.twig')
-            ->locale('fr')
-            ->context([
+        $notification = new EmailNotification(
+            subject: 'Votre mot de passe a été modifié',
+            content: 'Votre mot de passe a été modifié',
+            template: 'emails/passwordChanged.html.twig',
+            parameters: [
                 'user' => $user,
                 'changedAt' => new \DateTimeImmutable(),
             ]);
-        $this->mailer->send($email);
+        $this->notificationManager->send($notification, $user);
     }
 }

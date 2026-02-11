@@ -3,8 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Service\Interface\Notification\RecipientInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -15,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User implements UserInterface, PasswordAuthenticatedUserInterface, \Stringable
+class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUserInterface, \Stringable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -40,8 +42,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $resetPasswordToken = null;
 
-    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTime $resetPasswordTokenExpiresAt = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $resetPasswordTokenExpiresAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:detail', 'cours:detail', 'cours:index'])]
@@ -181,12 +183,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
         return $this;
     }
 
-    public function getResetPasswordTokenExpiresAt(): ?\DateTime
+    public function getResetPasswordTokenExpiresAt(): ?\DateTimeInterface
     {
         return $this->resetPasswordTokenExpiresAt;
     }
 
-    public function setResetPasswordTokenExpiresAt(?\DateTime $resetPasswordTokenExpiresAt): self
+    public function setResetPasswordTokenExpiresAt(?\DateTimeInterface $resetPasswordTokenExpiresAt): self
     {
         $this->resetPasswordTokenExpiresAt = $resetPasswordTokenExpiresAt;
 

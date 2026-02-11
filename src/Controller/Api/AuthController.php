@@ -172,10 +172,14 @@ class AuthController extends AbstractController
         // Crée les cookies httpOnly pour les tokens et les ajoute à la réponse
         $jwtCookie = Cookie::create('BEARER', $token)
             ->withHttpOnly()
+            ->withSecure(true)
+            ->withSameSite('strict')
             ->withExpires(time() + 3600); // 1 heure d'expiration
 
         $refreshCookie = Cookie::create('refresh_token', $refreshToken->getRefreshToken())
             ->withHttpOnly()
+            ->withSecure(true)
+            ->withSameSite('strict')
             ->withExpires(time() + 604800); // 7 jours d'expiration
 
         return [$jwtCookie, $refreshCookie];

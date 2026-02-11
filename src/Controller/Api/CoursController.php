@@ -10,6 +10,7 @@ use App\Entity\Cours;
 use App\Entity\User;
 use App\Enum\StatusCoursEnum;
 use App\Manager\UsersCoursManager;
+use App\Message\SendCancelEmailMessage;
 use App\Repository\CoursRepository;
 use App\Repository\StatusCoursRepository;
 use App\Repository\UserRepository;
@@ -26,6 +27,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -233,14 +235,13 @@ class CoursController extends AbstractController
 
     #[Route('api/admin/cours/cancel/{id}', name: 'cours_cancel', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent annuler les cours.')]
-    public function cancelCours(Cours $cours): JsonResponse
+    public function cancelCours(Cours $cours, MessageBusInterface $messageBus): JsonResponse
     {
         try {
             $cours->setStatusCours($this->statusCoursRepository->findOneBy(['libelle' => StatusCoursEnum::ANNULE->value]));
-            /*foreach ($cours->getUsersCours() as $usersCours){
-
-                $messageBus->dispatch(new SendCancelEmailMessage($usersCours->getId(), $this->getUser()->getId() ));
-            }*/
+            foreach ($cours->getUsersCours() as $usersCours) {
+                $messageBus->dispatch(new SendCancelEmailMessage($usersCours->getId()));
+            }
             $this->em->flush();
 
             return new JsonResponse([
