@@ -19,6 +19,7 @@ use App\Service\CoursControllerService\ActionsModifyOpenedCoursService;
 use App\Service\CoursControllerService\CreateUsersCoursService;
 use App\Service\CoursControllerService\FilteringCoursService;
 use App\Service\CoursControllerService\UpdateStatusCoursService;
+use App\Service\CoursDetailsMapperService;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -47,6 +48,7 @@ class CoursController extends AbstractController
         private readonly UpdateStatusCoursService $updateStatusCoursService,
         private readonly UsersCoursManager $usersCoursManager,
         private readonly CreateCoursDTOToCoursDenormalizer $createCoursDTOToCoursDenormalizer,
+        private readonly CoursDetailsMapperService $coursDetailsMapperService,
     ) {
     }
 
@@ -103,9 +105,29 @@ class CoursController extends AbstractController
     public function coursFiltered(int $id): JsonResponse
     {
         $cours = $this->coursRepository->find($id);
-        $jsonCours = $this->serializer->serialize($cours, 'json', ['groups' => 'cours:detail']);
+        if (null === $cours) {
+            return new JsonResponse(['message' => 'Cours non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+        $currentUser = $this->getUser();
+        $dto = $this->coursDetailsMapperService->getCoursPublicDetailDTO($cours, $currentUser instanceof User ? $currentUser : null);
+        $jsonCours = $this->serializer->serialize($dto, 'json');
 
-        return new JsonResponse($jsonCours);
+        return new JsonResponse($jsonCours, Response::HTTP_OK, [], true);
+    }
+
+    #[Route('api/admin/get-cours/{id}', name: 'admin_cours_detail', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent accéder aux détails complets.')]
+    public function coursFilteredAdmin(int $id): JsonResponse
+    {
+        $cours = $this->coursRepository->find($id);
+        if (null === $cours) {
+            return new JsonResponse(['message' => 'Cours non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+        $currentUser = $this->getUser();
+        $dto = $this->coursDetailsMapperService->getCoursAdminDetailDTO($cours, $currentUser instanceof User ? $currentUser : null);
+        $jsonCours = $this->serializer->serialize($dto, 'json');
+
+        return new JsonResponse($jsonCours, Response::HTTP_OK, [], true);
     }
 
     #[Route('api/add-user', name: 'cours_add_user', methods: ['POST'])]

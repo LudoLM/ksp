@@ -110,7 +110,7 @@ const formData = ref({
 
   const getCoursData = async () => {
     try {
-      const response = await apiFetch("/api/public/get-cours/" + origin.id, {
+      const response = await apiFetch("/api/admin/get-cours/" + origin.id, {
         method: "GET"
       });
 
