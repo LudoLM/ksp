@@ -21,10 +21,26 @@ Côté administration, l'application vise à faciliter la gestion des cours et d
 
 ## Technologies utilisées
 
-- **Frontend** : Vue 3, Tailwind CSS
-- **Backend** : PHP 8.3, Symfony 6.4, API REST
-- **Base de données** : MySQL
-- **Paiement en ligne** : Stripe
-- **Authentification** : JWT (JSON Web Tokens)
+**Backend**
+- PHP 8.4
+- Symfony 7.3
+- Doctrine ORM
+- API REST
+- JWT Authentication
+
+**Frontend**
+- Vue 3 (Composition API)
+- TypeScript
+- Tailwind CSS
+
+**Infrastructure**
+- MySQL
+- Docker
+- GitHub Actions (CI/CD)
+- PHPStan (analyse statique)
+
+**Services tiers**
+- Stripe (paiements)
+- SMTP (notifications email)
 
 
