@@ -28,7 +28,9 @@ jobs:
           echo "APP_ENV=$APP_ENV_DEV" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
 
-      - uses: php-actions/composer@v6 
+      - uses: php-actions/composer@v6
+        with:
+          php_version: '8.4'
       - uses: php-actions/phpunit@master
         with:
           version: 11.5
@@ -55,6 +57,8 @@ jobs:
   
 
       - uses: php-actions/composer@v6 # or alternative dependency management
+        with:
+          php_version: '8.4'
       - uses: php-actions/phpstan@v3
         with:
           path: src/
