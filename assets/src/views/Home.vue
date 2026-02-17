@@ -1,255 +1,285 @@
 <template>
-    <Banner
-        title="Kiné Sport Santé"
-        :image="bannerImage"
-        :backgroundColor="'rgba(71,35,113,.3)'"
-        alt="Salle de sport moderne avec des tapis d'exercice au sol et une grande baie vitrée offrant une vue lumineuse"
-    />
-    <div>
-        <div class="centerPart">
-            <div class="centerWrapper flex justify-center items-center">
-                <div class="image">
-                    <img
-                        src="../../images/banners/banner2.jpg"
-                        alt="Ballon de gym dans une salle au décor minimaliste, avec lumière tamisée et ambiance zen"
-                    >
-                </div>
-                <div class="text">
-                    <div class="flex flex-col justify-center items-end mr-2 mb-6">
-                        <h3>Le centre</h3>
-                        <span class="flex gap-2">
-                            <h6>{{ store.address }} {{ store.fullAddress }}</h6>
-                            <a href="https://maps.app.goo.gl/ApZ1E35srhDT2ynK7">
-                                <div class="pinWrapper">
-                                    <img src="../../icons/pin.svg" alt=""/>
-                                </div>
-                            </a>
-                        </span>
+    <div class="home">
+        <HomeHero />
 
-                    </div>
-
-                    <p>Aujourd’hui, douleurs et fatigue physique font malheureusement partie de notre quotidien : mal de dos, raideur articulaire, tensions musculaires... Comme pour beaucoup de problème de santé, notre mode de vie (sédentarisme, alimentation, mauvais sommeil, stress,…) est en lien direct avec ces souffrances quotidiennes.</p>
-                    <p>Nous vous proposons donc des METHODES SIMPLES ET EFFICACES pour vous aider à changer les habitudes : le SPORT SANTE ! Ces cours vous permettront de comprendre et de soulager vos douleurs.</p>
-                    <p>Vous y apprendrez les règles de bon fonctionnement de l’organisme : schéma corporel, posture quotidienne, mobilité articulaire, renforcement musculaire, respiration, coordination, équilibre, étirements, gestes et posture et détente… Ces séances de gymnastique ont également un but préventif et vous permettront d’empêcher les récidives.</p>
-                </div>
+        <div
+            ref="scrollIndicator"
+            class="scroll-indicator"
+            @click="scrollToContent"
+            :class="{ 'scroll-hidden': hasScrolled }"
+        >
+            <span class="scroll-text">Scroll</span>
+            <div class="scroll-wave">
+                <div class="wave-line wave-line-1"></div>
+                <div class="wave-line wave-line-2"></div>
+                <div class="wave-line wave-line-3"></div>
             </div>
         </div>
-        <div class="coachPart">
-            <div class="coachWrapper flex justify-between items-center w-full">
-                <div class="text">
-                    <div class="flex flex-col justify-center items-start mb-6">
-                        <h3>La coach</h3>
-                        <h6 class="font-bold">{{ store.fullName }} - Masseur-Kinésithérapeute DE</h6>
-                    </div>
-                    <div class="image image_mobile">
-                        <div class="w-1/2 flex justify-center items-center">
-                            <img
-                                class="rounded-full" src="../../../public/images/servane.jpg"
-                                alt="Portrait de la professeure souriante" />
-                        </div>
-                    </div>
-                    <p>"En choisissant le métier de masseur kinésithérapeute, je voulais aider et soigner les gens, tout en gardant comme objectif de pouvoir me rapprocher du milieu sportif. Avec mes spécialisations en rééducation du dos, des abdominaux et du périnée, et plus récemment mes formations en sport santé, je vous propose des cours de gym adaptés à vos besoins."</p>
-                </div>
-                <div class="image image_desktop">
-                    <div class="w-1/2">
-                        <img class="rounded-full" src="../../../public/images/servane.jpg" alt="">
+
+        <HomeCenter />
+        <HomeCoach />
+        <HomeAtouts />
+
+        <section class="section section-cta">
+            <div class="container">
+                <div v-reveal="{ delay: 0.1 }" class="cta-content">
+                    <h2 class="cta-title">Prêt(e) à vous lancer ?</h2>
+                    <p class="cta-text">
+                        Rejoignez-nous dès maintenant et découvrez les bienfaits
+                        du Sport Santé. Votre premier cours est offert !
+                    </p>
+                    <div class="cta-actions">
+                        <router-link
+                            to="/calendar"
+                            class="cta-btn"
+                            >Découvrir les cours</router-link
+                        >
+                        <router-link to="/packs" class="cta-btn"
+                            >Découvrir les packs</router-link
+                        >
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="assetsPart">
-            <div class="w-full">
-                <div class="text">
-                    <div class="flex flex-col justify-center items-start h-full">
-                        <div class="flex flex-col justify-center items-start mb-6">
-                            <h3>Les atouts</h3>
-                        </div>
-                        <ul class="flex flex-col justify-lg-space-around gap-8 w-full mt-10">
-                            <li class="flex items-center">Encadrement par un professionnel de santé</li>
-                            <li class="flex items-center">Cours en petits groupes (10 personnes max)</li>
-                            <li class="flex items-center"><div class="w-3/4">Bilan sport santé possible</div><button><a target="_blank" href="https://www.doctolib.fr/masseur-kinesitherapeute/mordelles/servane-cosqueric-mordelles/booking/availabilities?specialityId=9&telehealth=false&placeId=practice-567335&motiveCategoryIds%5B%5D=338126&motiveIds%5B%5D=11667176&bookingFunnelSource=profile">Prendre RDV sur Doctolib</a></button></li>
-                            <li class="flex items-center"><div class="w-3/4">Séance de coaching individuel proposé</div><button><a target="_blank" href="https://www.doctolib.fr/masseur-kinesitherapeute/mordelles/servane-cosqueric-mordelles/booking/availabilities?specialityId=9&telehealth=false&placeId=practice-567335&motiveCategoryIds%5B%5D=338126&motiveIds%5B%5D=11667177&bookingFunnelSource=profile">Prendre RDV sur Doctolib</a></button></li>
-                            <li class="flex items-center">Exercices et conseils personnalisés</li>
-                        </ul>
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
-
-
+        </section>
     </div>
 </template>
 
 <script setup>
-import { infos } from "../store/index";
-import bannerImage from "../../images/banners/banner4.jpg";
-import Banner from "../components/Banner.vue";
-import {useRoute} from "vue-router";
-import { alertStore } from '../store/alert';
-const store = infos();
-const route = useRoute();
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRoute } from "vue-router";
+import { alertStore } from "../store/alert";
+import HomeHero from "../components/home/HomeHero.vue";
+import HomeCenter from "../components/home/HomeCenter.vue";
+import HomeCoach from "../components/home/HomeCoach.vue";
+import HomeAtouts from "../components/home/HomeAtouts.vue";
 
-if (route.query.alert === 'logout') {
+const route = useRoute();
+const hasScrolled = ref(false);
+const scrollIndicator = ref(null);
+let scrollIndicatorTimeout = null;
+
+if (route.query.alert === "logout") {
     alertStore.setAlert("Vous êtes déconnecté(e).", "info");
 }
 
+const scrollToContent = () => {
+    document
+        .getElementById("home-center")
+        ?.scrollIntoView({ behavior: "smooth" });
+};
+
+const checkScrollPosition = () => {
+    if (window.scrollY > 100) {
+        hasScrolled.value = true;
+    }
+};
+
+onMounted(() => {
+    scrollIndicatorTimeout = setTimeout(() => {
+        scrollIndicator.value?.classList.add("animate-in");
+    }, 800);
+
+    window.addEventListener('scroll', checkScrollPosition);
+    checkScrollPosition();
+});
+
+onUnmounted(() => {
+    if (scrollIndicatorTimeout) {
+        clearTimeout(scrollIndicatorTimeout);
+    }
+    window.removeEventListener('scroll', checkScrollPosition);
+});
 </script>
 
-
 <style scoped lang="scss">
+.container {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
 
-.text{
-    width: 50%;
-    height: 100%;
-    padding: 20px;
+.scroll-indicator {
+    position: fixed;
+    bottom: 3rem;
+    left: 50%;
+    z-index: 1000;
     display: flex;
     flex-direction: column;
-    justify-content: start;
-    gap: 2vh;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0;
+    cursor: pointer;
+    transform: translateX(-50%) translateY(100px);
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-
-
-    h3{
-        font-size: clamp(1.5rem, 3.5vw, 2.5rem);
-        color:#fff;
-        text-align: right;
+    &.animate-in {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
     }
 
-    h6{
-        font-size: clamp(0.6rem, 1.2vw, .8rem);
-        color: #e2a945;
-        text-align: right;
-    }
-
-    .pinWrapper{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: #e2a945;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-    }
-
-    p{
-        font-size: clamp(0.8rem, 1.5vw, 1rem);
-        color: #aba9a9;
+    &.scroll-hidden {
+        opacity: 0;
+        visibility: hidden;
     }
 }
 
-
-.centerPart, .coachPart, .assetsPart {
-    width: 100%;
-    background: #27272A;
-    padding: 6vw;
-    display: flex;
+.scroll-text {
+    color: #fff;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    opacity: 0.7;
 }
 
-.image{
-    width: 50%;
-    height: 100%;
-    padding: 20px;
+.scroll-wave {
+    position: relative;
     display: flex;
     justify-content: center;
-    align-items: center;
+    width: 24px;
+    height: 40px;
+    overflow: hidden;
+}
 
-    img{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+.wave-line {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    border-radius: 1px;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(128, 128, 128, 0.2) 20%,
+        rgba(128, 128, 128, 0.8) 50%,
+        rgba(128, 128, 128, 0.2) 80%,
+        transparent 100%
+    );
+
+    &-1 {
+        animation: wave 2.5s ease-in-out infinite;
+    }
+
+    &-2 {
+        opacity: 0.5;
+        animation: wave 2.5s ease-in-out infinite 0.3s;
+    }
+
+    &-3 {
+        opacity: 0.3;
+        animation: wave 2.5s ease-in-out infinite 0.6s;
     }
 }
 
+.section {
+    &-cta {
+        position: relative;
+        overflow: hidden;
+        padding: 8rem 0;
+        background: #27272a;
+    }
+}
 
-.coachPart{
+.cta-content {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    text-align: center;
+}
+
+.cta-title {
+    margin-bottom: 1.5rem;
+    color: #fff;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300;
+}
+
+.cta-text {
+    margin-bottom: 2.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.cta-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+:deep(.cta-btn) {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+    border: 2px solid #fff;
     background: transparent;
+    color: #fff;
 
-    h3{
-        color: #472371;
-    }
-    p{
-        color: #27272A;
-    }
-
-    .image{
-        max-width: 600px;
-        width: 70%;
-        height: 50%;
-    }
-
-    .image_mobile{
-        display: none;
+    &:hover {
+        background: #fff;
+        color: theme('colors.templateMainColor');
+        transform: translateY(-2px);
     }
 }
 
-.assetsPart{
-    background: #fff;
-    color: #2e2e2e;
-
-    h3{
-        color: #27272A;
+@keyframes wave {
+    0%,
+    100% {
+        opacity: 0;
+        transform: translateY(-100%) scaleY(0.8);
     }
 
-    li{
-        padding-left: 20px;
-        border-left: 2px solid #e2a945;
-        height: 40px;
-        color: #7e7e7e;
-        font-size: clamp(0.8rem, 1.5vw, 1rem);
+    20%,
+    80% {
+        opacity: 1;
     }
-    button{
-        background: #107aca;
-        font-size: clamp(0.6rem, 1vw, .8rem);
-        padding: 10px;
-        border-radius: 5px;
-        color: #F3F4F6;
-        margin-left: 2vw;
 
-        &:hover{
-            background: #43aaec;
-        }
+    50% {
+        transform: translateY(0) scaleY(1.2);
+    }
+
+    100% {
+        transform: translateY(100%) scaleY(0.8);
     }
 }
 
-@media (max-width: 760px) {
-
-    .text{
-        width: 100%;
-        padding: 20px;
+@media (max-width: 768px) {
+    .section-cta {
+        padding: 4rem 0;
     }
 
-    .centerWrapper{
-        display: flex;
-
-        .image {
-            display: none;
-        }
+    .cta-content {
+        padding: 0 1.25rem;
     }
 
-    .coachWrapper {
-        display: block;
+    .cta-title {
+        margin-bottom: 1rem;
+        font-size: clamp(1.45rem, 6vw, 1.85rem);
+    }
+
+    .cta-text {
+        margin-bottom: 1.25rem;
+        font-size: 0.95rem;
+        line-height: 1.55;
+    }
+
+    .cta-actions {
         flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
 
-        .image_desktop {
-            display: none;
-        }
-
-        .image_mobile {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            img {
-                width: 100%;
-                height: 50%;
-                object-fit: cover;
-            }
-        }
+    .section-cta .cta-btn {
+        width: 100%;
+        max-width: 260px;
+        padding: 0.75rem 1.1rem;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
     }
 }
 </style>
-
-

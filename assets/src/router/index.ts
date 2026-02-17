@@ -10,6 +10,7 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import { createPinia, storeToRefs } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import adminRoutes from './admin/admin.routes'
+import { vReveal } from '../directives/reveal'
 
 const router: Router = createRouter({
   history: createWebHistory(),
@@ -155,6 +156,7 @@ const app = createApp(App)
   .use(appPinia)
   .use(router)
   .use(vuetify)
+  .directive('reveal', vReveal)
   .component('VueDatePicker', VueDatePicker)
 
 watch(
