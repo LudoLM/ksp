@@ -1,46 +1,96 @@
-# Application de Paiement et de Réservation en Ligne
+# KSS – Plateforme de Réservation de Cours de Bien-être
 
-Bienvenue sur la plateforme de réservation et de paiement en ligne du centre KSS, spécialement conçue pour les cours de Pilates, stretching, gym douce, et bien plus encore. Cette application vise à simplifier l'accès aux activités de bien-être en offrant une expérience utilisateur fluide et intuitive.
+Application web complète de réservation et de paiement en ligne pour un centre proposant des cours de Pilates, stretching et gym douce. Projet en production, développé en solo de l'architecture à la mise en ligne.
 
-## Fonctionnalités principales
+---
 
-- **Profil utilisateur** : Permet de créer et de gérer un profil utilisateur pour personnaliser l'expérience et accéder rapidement aux informations.
-- **Profil administrateur** : Un espace dédié aux administrateurs pour gérer les cours, les inscriptions, les utilisateurs, les types de cours et les statistiques.
-- **Consultation des cours** : Permet de parcourir une liste détaillée des cours disponibles, incluant des descriptions, les horaires et les notes spéciales.
-- **Inscriptions en ligne** : Permet de s'inscrire/désinscrire aux cours de son choix directement depuis l'application.
-- **Paiement sécurisé** : Permet d'effectuer des paiements en ligne de manière sécurisée grâce à l'intégration de **Stripe**.
-- **Gestion de liste d'attente** : Permet de s'inscrire sur une liste d'attente pour les cours et de recevoir des emails lorsque des places se libèrent.
-- **Historique des paiements** : Permet de suivre les transactions et de consulter et télécharger l'historique de paiement pour une meilleure gestion des dépenses.
-- **Authentification sécurisée** : Utilise **JWT (JSON Web Tokens)** pour une authentification sécurisée et fiable.
+## Aperçu
 
+| Espace utilisateur | Espace admin |
+|---|---|
+| Inscription / désinscription aux cours | Gestion des cours et des horaires |
+| Paiement sécurisé via Stripe | Gestion des utilisateurs et des inscriptions |
+| Liste d'attente avec notification email | Tableau de bord et statistiques |
+| Historique des paiements (PDF) | Gestion des types de cours |
 
-## Objectifs
+---
 
-L'objectif principal de cette application est de rendre l'accès aux cours de bien-être plus accessible et pratique. En centralisant la réservation et le paiement en ligne, nous espérons encourager plus de personnes à intégrer ces activités dans leur quotidien, tout en leur offrant une solution simple et efficace.
-Côté administration, l'application vise à faciliter la gestion des cours et des utilisateurs, permettant ainsi aux administrateurs de se concentrer sur l'amélioration de l'expérience utilisateur.
+## Screenshots
 
-## Technologies utilisées
+![Home](screenshots/Home.png)
+![Calendrier de réservation](screenshots/calendrier.png)
+![Inscription Liste d'attente](screenshots/EnAttente.png)
+![Offres de paiement Stripe](screenshots/OffresPaiementsStripe.png)
+![Création d'une semaine type](screenshots/CréationSemaineType.png)
+![Liste des cours Admin](screenshots/ListeCoursAdmin.png)
+
+---
+
+## Stack Technique
 
 **Backend**
-- PHP 8.4
-- Symfony 7.3
+- PHP 8.4 / Symfony 7.3
 - Doctrine ORM
-- API REST
 - JWT Authentication
+- Symfony Messenger (traitement asynchrone des emails)
+- Redis
+- PHPStan + PHP-CS-Fixer (qualité de code)
 
 **Frontend**
-- Vue 3 (Composition API)
-- TypeScript
-- Tailwind CSS
+- Vue 3 (Composition API) + Vuetify 3
+- TypeScript (migration en cours)
+- Pinia (state management)
+- Tailwind CSS / ApexCharts
 
 **Infrastructure**
-- MySQL
-- Docker
-- GitHub Actions (CI/CD)
-- PHPStan (analyse statique)
+- MySQL / Docker
+- GitHub Actions — CI/CD complet (tests, analyse statique, lint)
 
 **Services tiers**
-- Stripe (paiements)
-- SMTP (notifications email)
+- Stripe (paiements en ligne)
+- Mailjet (notifications email transactionnelles)
+- Sentry (monitoring d'erreurs)
 
+---
 
+## Architecture
+
+Le projet suit une architecture orientée services avec séparation claire des responsabilités :
+
+```
+src/
+├── Controller/       # 13 controllers REST fins, délèguent aux services
+├── Service/          # 33 services métier (réservation, paiement, liste d'attente...)
+├── Entity/           # 11 entités Doctrine
+├── DTO/              # Objets de transfert de données
+├── MessageHandler/   # Handlers Messenger pour le traitement async
+└── EventSubscriber/  # Abonnés aux événements Symfony
+```
+
+---
+
+## Fonctionnalités clés
+
+- **Réservation en temps réel** avec gestion des places disponibles
+- **Liste d'attente automatique** — notification email dès qu'une place se libère (traitement async via Messenger + Redis)
+- **Paiement Stripe** avec historique téléchargeable
+- **Authentification JWT** avec rôles utilisateur / administrateur
+- **CI/CD GitHub Actions** — pipeline complet à chaque push
+
+---
+
+## Tests & Qualité
+
+```bash
+make test      # Tests PHPUnit
+make phpstan   # Analyse statique PHPStan
+make cs        # Formatage PHP-CS-Fixer
+make rector    # Refactoring automatique Rector
+make analyse   # Lance cs + rector + phpstan + test en une commande
+```
+
+---
+
+## Auteur
+
+Développé en solo — architecture, développement, intégration des services tiers et mise en production.
