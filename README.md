@@ -17,12 +17,18 @@ Application web complète de réservation et de paiement en ligne pour un centre
 
 ## Screenshots
 
-![Home](screenshots/Home.png)
-![Calendrier de réservation](screenshots/calendrier.png)
-![Inscription Liste d'attente](screenshots/EnAttente.png)
-![Offres de paiement Stripe](screenshots/OffresPaiementsStripe.png)
-![Création d'une semaine type](screenshots/CréationSemaineType.png)
-![Liste des cours Admin](screenshots/ListeCoursAdmin.png)
+<p>
+  <img src="screenshots/Home.png" width="450" alt="Home"/>
+  <img src="screenshots/Calendrier.png" width="450" alt="Calendrier de réservation"/>
+</p>
+<p>
+  <img src="screenshots/EnAttente.png" width="450" alt="Inscription liste d'attente"/>
+  <img src="screenshots/OffresPaiementsStripe.png" width="450" alt="Offres de paiement Stripe"/>
+</p>
+<p>
+  <img src="screenshots/CreationSemaineType.png" width="450" alt="Création d'une semaine type"/>
+  <img src="screenshots/ListeCoursAdmin.png" width="450" alt="Liste des cours Admin"/>
+</p>
 
 ---
 
