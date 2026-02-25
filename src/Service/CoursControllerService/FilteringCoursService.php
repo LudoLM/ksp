@@ -23,7 +23,6 @@ readonly class FilteringCoursService
         string $dateCoursStr,
         int $statusCoursId,
         string $route,
-        bool $isOpenRequired,
         bool $isPrioritized,
         bool $isAdmin,
     ): array {
@@ -64,43 +63,28 @@ readonly class FilteringCoursService
 
         $dateLimit = null;
         if (str_ends_with($route, 'cours_next_cours')) {
-            if ($isOpenRequired) {
-                $getFirstCours = $this->coursRepository->findNextCours($typeCours, $dateCours, $isPrioritized, $statusCours, $isAdmin);
-                if (!$getFirstCours instanceof Cours) {
-                    if (null === $typeCours && null === $statusCours) {
-                        throw new FilteringCoursException('Aucun cours prévu à partir de cette date', 404);
-                    }
-                    if (null === $typeCours && null !== $statusCours) {
-                        throw new FilteringCoursException('Aucun cours '.$statusCours->getLibelle().' prévu à partir de cette date', 404);
-                    }
-                    if (null !== $typeCours && null === $statusCours) {
-                        throw new FilteringCoursException('Aucun cours de '.$typeCours->getLibelle().' prévu à partir de cette date', 404);
-                    }
-                    throw new FilteringCoursException('Aucun cours de '.$typeCours->getLibelle().' '.$statusCours->getLibelle().' prévu à partir de cette date', 404);
+            $getFirstCours = $this->coursRepository->findNextCours($typeCours, $dateCours, $isPrioritized, $statusCours, $isAdmin);
+            if (!$getFirstCours instanceof Cours) {
+                if (null === $typeCours && null === $statusCours) {
+                    throw new FilteringCoursException('Aucun cours prévu à partir de cette date', 404);
                 }
-
-                return [
-                    'type' => 'info_next_cours',
-                    'typeCours' => $getFirstCours->getTypeCours()->getLibelle(),
-                    'statusCours' => $getFirstCours->getStatusCours()->getLibelle(),
-                    'nextCoursDate' => $getFirstCours->getDateCours(),
-                ];
+                if (null === $typeCours && null !== $statusCours) {
+                    throw new FilteringCoursException('Aucun cours '.$statusCours->getLibelle().' prévu à partir de cette date', 404);
+                }
+                if (null !== $typeCours && null === $statusCours) {
+                    throw new FilteringCoursException('Aucun cours de '.$typeCours->getLibelle().' prévu à partir de cette date', 404);
+                }
+                throw new FilteringCoursException('Aucun cours de '.$typeCours->getLibelle().' '.$statusCours->getLibelle().' prévu à partir de cette date', 404);
             }
 
-            [$dateCours, $dateLimit] = DateHelper::adjustDatesForCalendarRoute($dateCours);
-
-            return $this->coursRepository->findAllSortByDateForUsers($typeCours, $dateCours, $dateLimit, $isPrioritized, $isAdmin, $statusCours);
+            return [
+                'type' => 'info_next_cours',
+                'typeCours' => $getFirstCours->getTypeCours()->getLibelle(),
+                'statusCours' => $getFirstCours->getStatusCours()->getLibelle(),
+                'nextCoursDate' => $getFirstCours->getDateCours(),
+            ];
         }
         if (str_ends_with($route, 'cours_calendar')) {
-            if ($isOpenRequired) {
-                $getFirstCours = $this->coursRepository->findNextCours($typeCours, $dateCours, $isPrioritized, $statusCours, $isAdmin);
-                if (!$getFirstCours instanceof Cours) {
-                    throw new FilteringCoursException('Aucun cours de '.$typeCours->getLibelle().' '.$statusCours->getLibelle().' prévu à partir de cette date', 404);
-                }
-
-                return [$getFirstCours];
-            }
-
             [$dateCours, $dateLimit] = DateHelper::adjustDatesForCalendarRoute($dateCours);
 
             return $this->coursRepository->findAllSortByDateForUsers($typeCours, $dateCours, $dateLimit, $isPrioritized, $isAdmin, $statusCours);

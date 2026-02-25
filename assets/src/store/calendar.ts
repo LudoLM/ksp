@@ -98,23 +98,14 @@ export const useCalendarStore = defineStore('calendar', {
   },
 
   actions: {
-    /**
-     * Récupère les cours pour la semaine affichée
-     * @param isOpenRequired - Si vrai, récupère uniquement les cours ouverts
-     */
-    async fetchCoursPerWeek(isOpenRequired: boolean = false): Promise<void> {
+    async fetchCoursPerWeek(): Promise<void> {
       try {
         const dateFormatted = ref(this.date.toISOString().split('T')[0])
         const tempInfos = ref<any[]>([])
         const route = ref('get-cours-calendar')
 
-        await useGetCours(route, tempInfos, this.selectedTypeCours, dateFormatted, this.selectedStatusCours, isOpenRequired)
+        await useGetCours(route, tempInfos, this.selectedTypeCours, dateFormatted, this.selectedStatusCours)
         this.infos = tempInfos.value
-
-        if (isOpenRequired && this.infos && this.infos.length > 0) {
-          this.date = new Date(this.infos[0].dateCours)
-          this.setDaySelected(this.date.getDay() - 1)
-        }
 
         if (Array.isArray(this.infos)) {
           this.infos.sort((a, b) => new Date(a.dateCours).getTime() - new Date(b.dateCours).getTime())

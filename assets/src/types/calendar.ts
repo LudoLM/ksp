@@ -66,5 +66,4 @@ export interface CalendarLogicParams {
   selectedTypeCours: any // Ref or ComputedRef
   selectedStatusCours: any // Ref or ComputedRef
   days: any // ComputedRef
-  isOpenRequiredFromUrl: any // Ref
 }

@@ -6,7 +6,7 @@ import TypeCoursFilter from '../filtersCours/TypeCoursFilter.vue'
 import StatusCoursFilter from '../filtersCours/StatusCoursFilter.vue'
 import bannerImage from '../../../images/banners/imageBanner9.jpg'
 import Banner from '../Banner.vue'
-import type { CalendarHeaderProps } from '../../types'
+import type { CalendarHeaderProps } from '@/types'
 
 defineProps<CalendarHeaderProps>()
 
@@ -53,7 +53,7 @@ defineEmits<CalendarHeaderEmits>()
         />
         <StatusCoursFilter
           :uniqueStatusCoursList="uniqueStatusCoursList"
-          :selectedStatusId="selectedStatusCours"
+          :statusCoursId="selectedStatusCours"
           @update:selectedStatusId="$emit('update:selectedStatusCours', $event)"
         />
         <Tooltip title="Réinitialiser les filtres et revenir à la semaine actuelle" tooltip-pos="right">

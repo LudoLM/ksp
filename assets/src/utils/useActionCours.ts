@@ -11,21 +11,18 @@ export async function useGetCours(
   selectedTypeCours: Ref<number | null> | number | null,
   selectedDate: Ref<string> | string,
   selectedStatusCours: Ref<number | null> | number | null,
-  isOpenRequired: Ref<boolean> | boolean = false
 ): Promise<void> {
   try {
     const userStore = useUserStore()
     const typeCoursValue = isRef(selectedTypeCours) ? selectedTypeCours.value : selectedTypeCours
     const dateCoursValue = isRef(selectedDate) ? selectedDate.value : selectedDate
     const statusCoursValue = isRef(selectedStatusCours) ? selectedStatusCours.value : selectedStatusCours
-    const isOpenRequiredValue = isRef(isOpenRequired) ? isOpenRequired.value : isOpenRequired
     const url = userStore.userId === null ? `public/${route.value}` : route.value
 
     const params = new URLSearchParams({
       typeCoursId: typeCoursValue === null ? '0' : String(typeCoursValue),
       dateCoursStr: String(dateCoursValue),
       statusCoursId: statusCoursValue === null ? '0' : String(statusCoursValue),
-      isOpenRequired: String(isOpenRequiredValue),
     })
 
     const response = await apiFetch(`/api/${url}?${params.toString()}`, {
@@ -59,9 +56,7 @@ export async function useGetOnlyNextCours(
       typeCoursId: typeCoursValue === null ? '0' : String(typeCoursValue),
       dateCoursStr: String(dateCoursValue),
       statusCoursId: statusCoursValue === null ? '0' : String(statusCoursValue),
-      isOpenRequired: 'true',
     })
-
     const response = await apiFetch(`/api/${url}?${params.toString()}`, {
       method: 'GET',
     })

@@ -50,7 +50,7 @@ onMounted(async () => {
 
 const handleRedirection = (cours) => {
     calendarStore.$reset();
-    router.push({ name: 'Calendrier', query: { typeCoursId: cours.id, isOpenRequired: true } });
+    router.push({ name: 'Calendrier', query: { typeCoursId: cours.id, statusCoursId: 1 } });
 }
 
 </script>

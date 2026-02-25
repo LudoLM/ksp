@@ -13,7 +13,6 @@ interface UseCalendarLogicParams {
   selectedTypeCours: Ref<number> | ComputedRef<number>
   selectedStatusCours: Ref<number> | ComputedRef<number>
   days: ComputedRef<string[]>
-  isOpenRequiredFromUrl: Ref<boolean>
 }
 
 /**
@@ -31,20 +30,15 @@ export const formatDay = (day: string): string => {
 
 /**
  * Updates the browser URL with current filter parameters
- * @param keepIsOpenRequired - Whether to preserve the isOpenRequired parameter
  * @param selectedTypeCours - Currently selected course type
  * @param selectedStatusCours - Currently selected course status
  */
 export const updateUrl = (
-  keepIsOpenRequired: boolean,
   selectedTypeCours: number,
   selectedStatusCours: number
 ): void => {
   const newParams = new URLSearchParams(window.location.search)
 
-  if (newParams.has('isOpenRequired') && !keepIsOpenRequired) {
-    newParams.delete('isOpenRequired')
-  }
 
   if (selectedTypeCours !== 0) {
     newParams.set('typeCoursId', selectedTypeCours.toString())
@@ -89,16 +83,13 @@ export const displayDateNextCoursString = (
  * Main composable function combining all calendar logic operations
  */
 export const useCalendarLogic = (params: UseCalendarLogicParams) => {
-  const { calendarStore, selectedTypeCours, selectedStatusCours, days, isOpenRequiredFromUrl } = params
+  const { calendarStore, selectedTypeCours, selectedStatusCours, days } = params
 
   /**
    * Handles week navigation (prev, next, or jump to next course)
    */
   const handleGetCoursPerWeek = async (direction: 'prev' | 'next' | 'nextCours'): Promise<void> => {
-    if (isOpenRequiredFromUrl.value) {
-      isOpenRequiredFromUrl.value = false
-      updateUrl(false, selectedTypeCours.value, selectedStatusCours.value)
-    }
+    updateUrl(selectedTypeCours.value, selectedStatusCours.value)
 
     if (direction === 'next') {
       calendarStore.nextWeek()

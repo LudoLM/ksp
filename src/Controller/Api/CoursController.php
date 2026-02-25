@@ -62,7 +62,6 @@ class CoursController extends AbstractController
         #[MapQueryParameter] int $typeCoursId,
         #[MapQueryParameter] string $dateCoursStr,
         #[MapQueryParameter] int $statusCoursId,
-        #[MapQueryParameter] bool $isOpenRequired = false,
     ): JsonResponse {
         $route = $request->attributes->get('_route');
         $user = $this->getUser();
@@ -73,7 +72,7 @@ class CoursController extends AbstractController
             $isAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
         }
         try {
-            $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isOpenRequired, $isPrioritized, $isAdmin);
+            $responseData = $this->filteringCoursService->filterCours($typeCoursId, $dateCoursStr, $statusCoursId, $route, $isPrioritized, $isAdmin);
 
             // S'il n'y a pas de cours cette semaine, on renvoie un message d'erreur
             if ([] === $responseData) {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useCalendarStore } from '../store/calendar'
 import { useUserStore } from '../store/user'
 import CalendarHeader from '../components/calendar/CalendarHeader.vue'
@@ -12,19 +12,18 @@ import { useCalendarLogic, updateUrl, displayDateNextCoursString } from '../util
 // ===== STORE & ROUTER SETUP =====
 const calendarStore = useCalendarStore()
 const userStore = useUserStore()
-const router = useRouter()
+const route = useRoute()
 
 // ===== REFS & COMPUTED =====
 const dateToday = ref(new Date())
-const isOpenRequiredFromUrl = ref(!!new URLSearchParams(window.location.search).get('isOpenRequired'))
-const typeCoursIdFromUrl = parseInt(new URLSearchParams(window.location.search).get('typeCoursId') ?? '0')
-const previousRoutePath = ref(router.options.history.state?.back ?? '')
+
+const typeCoursIdFromUrl = Number(route.query.typeCoursId ?? 0)
+const statusCoursIdFromUrl = Number(route.query.statusCoursId ?? 0)
+const isInitializing = ref(true)
 const nextDateIndex = ref<number | null>(null)
 
 // Computed values from store
-const date = computed(() =>
-  previousRoutePath.value === '/coursDescriptions' ? new Date() : calendarStore.date
-)
+const date = computed(() => calendarStore.date)
 const daySelected = computed(() => calendarStore.daySelected)
 const weekString = computed(() => calendarStore.weekString)
 const days = computed(() => calendarStore.days)
@@ -45,7 +44,6 @@ const { handleGetCoursPerWeek, handleLaunchAllCours } = useCalendarLogic({
   selectedTypeCours,
   selectedStatusCours,
   days,
-  isOpenRequiredFromUrl,
 })
 
 // ===== COMPUTED: NEXT COURSE DATES =====
@@ -96,16 +94,19 @@ const nextDateInNextWeek = computed(() => {
 // ===== LIFECYCLE HOOKS =====
 onBeforeMount(async () => {
   // Initialize selectedTypeCours from URL if exists
-  if (!isNaN(typeCoursIdFromUrl) && typeCoursIdFromUrl !== 0) {
+    if ((!isNaN(typeCoursIdFromUrl) && typeCoursIdFromUrl !== 0) || (!isNaN(statusCoursIdFromUrl) && statusCoursIdFromUrl)) {
     calendarStore.setSelectedTypeCours(typeCoursIdFromUrl)
-    await calendarStore.fetchCoursPerWeek(isOpenRequiredFromUrl.value)
+    calendarStore.setSelectedStatusCours(statusCoursIdFromUrl)
+    await calendarStore.fetchCoursPerWeek()
   } else {
     await calendarStore.fetchCoursPerWeek()
   }
 
-  // Fetch course types and statuses
+  // Fetch
+    // ourse types and statuses
   await calendarStore.fetchTypesCours()
   await calendarStore.fetchStatusCours()
+  isInitializing.value = false
 })
 
 // ===== WATCHERS =====
@@ -113,11 +114,14 @@ onBeforeMount(async () => {
 watch([selectedTypeCours, selectedStatusCours], () => {
   calendarStore.setSelectedTypeCours(selectedTypeCours.value)
   calendarStore.setSelectedStatusCours(selectedStatusCours.value)
-  updateUrl(false, selectedTypeCours.value, selectedStatusCours.value)
+  updateUrl(selectedTypeCours.value, selectedStatusCours.value)
 })
 
 // Fetch data when date or filters change
 watch([date, selectedTypeCours, selectedStatusCours], async () => {
+  if (isInitializing.value) {
+    return
+  }
   calendarStore.firstNextCoursInNextWeeks = null
   await calendarStore.fetchCoursPerWeek()
 })
@@ -129,7 +133,7 @@ const handleNavigate = async (direction: 'prev' | 'next'): Promise<void> => {
 
 const handleReset = (): void => {
   calendarStore.resetCalendar()
-  updateUrl(false, 0, 0)
+  updateUrl(0, 0)
 }
 
 const handleLaunchWeek = async (): Promise<void> => {
@@ -215,6 +219,5 @@ const handleGoToNextCourse = (dateValue: Date, dayIndex?: number): void => {
 <style scoped>
 /* Styles are now in child components */
 </style>
-
 
 
