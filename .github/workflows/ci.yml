@@ -27,10 +27,10 @@ jobs:
         run: |
           echo "APP_ENV=$APP_ENV_DEV" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
-          echo "MERCURE_JWT_SECRET=${{ secrets.CADDY_MERCURE_JWT_SECRET }}" >> .env
+          echo "MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
           echo "MERCURE_URL=${{ secrets.MERCURE_URL }}" >> .env
           echo "MERCURE_PUBLIC_URL=${{ secrets.MERCURE_PUBLIC_URL }}" >> .env
-          echo "CADDY_MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
+          echo "CADDY_MERCURE_JWT_SECRET=${{ secrets.CADDY_MERCURE_JWT_SECRET }}" >> .env
 
       - uses: php-actions/composer@v6
         with:
@@ -61,6 +61,10 @@ jobs:
         run: |
           echo "APP_ENV=$APP_ENV_DEV" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
+          echo "MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
+          echo "MERCURE_URL=${{ secrets.MERCURE_URL }}" >> .env
+          echo "MERCURE_PUBLIC_URL=${{ secrets.MERCURE_PUBLIC_URL }}" >> .env
+          echo "CADDY_MERCURE_JWT_SECRET=${{ secrets.CADDY_MERCURE_JWT_SECRET }}" >> .env
   
 
       - uses: php-actions/composer@v6 # or alternative dependency management
@@ -92,10 +96,10 @@ jobs:
         run: |
           echo "APP_ENV=$APP_ENV_DEV" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL}}" >> .env
-          echo "MERCURE_JWT_SECRET=${{ secrets.CADDY_MERCURE_JWT_SECRET }}" >> .env
+          echo "MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
           echo "MERCURE_URL=${{ secrets.MERCURE_URL }}" >> .env
           echo "MERCURE_PUBLIC_URL=${{ secrets.MERCURE_PUBLIC_URL }}" >> .env
-          echo "CADDY_MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
+          echo "CADDY_MERCURE_JWT_SECRET=${{ secrets.CADDY_MERCURE_JWT_SECRET }}" >> .env
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'

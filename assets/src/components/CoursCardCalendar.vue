@@ -19,7 +19,14 @@ const formattedHour = computed(() => {
 });
 const userStore = useUserStore();
 const userId = userStore.userId;
-const isUserOnWaitingList = ref(props.info.usersCours.some(userCours => userCours.user.id === userId && userCours.isOnWaitingList === true));
+const isUserOnWaitingList = ref(
+    props.info.usersCours.some(
+        (userCours) =>
+            userCours.user.id === userId &&
+            userCours.isOnWaitingList === true &&
+            userCours.unsubscribedAt === null
+    )
+);
 
 const isSubscribed = computed(() => {
     if (!props.info?.usersCours) return false;

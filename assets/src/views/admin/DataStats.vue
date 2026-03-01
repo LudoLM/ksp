@@ -12,7 +12,7 @@
     import UsersActionsReporting from "../../components/admin/UsersActionsReporting.vue";
     import {useIntersectionObserver} from "@vueuse/core";
     import {storeToRefs} from "pinia";
-    import {useLastActivitiesStore} from "../../store/lastActivities.js";
+    import {useLastActivitiesStore} from "../../store/lastActivities";
     const title = 'Rapport d\'activité';
 
     const paiements = ref([]);

@@ -27,6 +27,7 @@ readonly class CoursParticipationService
             $usersCours->setIsOnWaitingList(false);
             $usersCours->setCreatedAt(new \DateTimeImmutable());
             $usersCours->setUnsubscribedAt(null);
+
             $this->notificationsUsersActionsService->sendNotifications($usersCours);
         } //      Si l'utilisateur n'est pas inscrit, je l'ajoute à la liste des participants
         else {

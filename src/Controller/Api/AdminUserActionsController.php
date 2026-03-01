@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class AdminUserActionsController extends AbstractController
 {
@@ -23,6 +24,7 @@ class AdminUserActionsController extends AbstractController
     ) {
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/api/getLastUsersActions', name: 'admin_user_actions_index')]
     public function getLastActivities(): JsonResponse
     {
@@ -40,6 +42,7 @@ class AdminUserActionsController extends AbstractController
         return $this->json($activities);
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/api/getUsersActionsPerMonth', name: 'admin_user_actions_per_month')]
     public function getActivitiesPerMonth(
         #[MapQueryParameter] int $month,

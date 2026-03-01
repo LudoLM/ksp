@@ -8,14 +8,14 @@ use App\Entity\UsersCours;
 
 class handleCheckSubscriptionsInAWeek
 {
-    public function checkIfUserAlreadyHasTwoSubscriptionsInTheSameWeek(User $user, Cours $cours): void
+    public function checkIfUserAlreadyHasSubscriptionsInTheSameWeek(User $user, Cours $cours): void
     {
-        // Logique pour vérifier si l'utilisateur a déjà deux abonnements dans la même semaine
+        // Logique pour vérifier si l'utilisateur a déjà une inscription dans la même semaine
         // Si oui, lancer une exception ou gérer le cas selon les besoins
         // Exemple :
         $subscriptionsCount = $this->countUserSubscriptionsInWeek($user, $cours);
-        if ($subscriptionsCount >= 2) {
-            throw new \InvalidArgumentException('Vous avez déjà deux reservations de cours pour cette semaine.', 403);
+        if ($subscriptionsCount >= 1) {
+            throw new \InvalidArgumentException('Vous avez déjà une reservation de cours pour cette semaine.', 403);
         }
     }
 

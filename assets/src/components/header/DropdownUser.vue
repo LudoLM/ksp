@@ -1,23 +1,23 @@
 <script setup>
 import { onClickOutside } from '@vueuse/core'
 import {computed, onMounted, onUnmounted, ref} from 'vue'
-import {useUserStore} from "../../store/user";
+import {useUserStore} from "@/store/user.ts";
 import {useRoute, useRouter} from 'vue-router';
 import TypeMode from "../../../icons/adminActions/TypeMode.vue";
 import LogoutIcon from "../../../icons/userActions/LogoutIcon.vue";
 import UserIcon from "../../../icons/userActions/UserIcon.vue";
 import {storeToRefs} from "pinia";
-import {useLastActivitiesStore} from "../../store/lastActivities.js";
+import {useLastActivitiesStore} from "@/store/lastActivities";
+import ChevronIcon from "../../../icons/ChevronIcon.vue";
+import Dropdown from "@/components/header/Dropdown.vue";
 
 const target = ref(null)
 const dropdownOpen = ref(false)
 const userStore = useUserStore();
 const lastActivitiesStore = useLastActivitiesStore();
 const {countActivities} = storeToRefs(lastActivitiesStore);
-
 const { userId, userPrenom, userNom, userEmail, userNombreCours, isAdmin } = storeToRefs(userStore)
-const lastActivitiesStore = useLastActivitiesStore();
-const {countActivities} = storeToRefs(lastActivitiesStore);
+
 
 const route = useRoute();
 const router = useRouter();
@@ -35,8 +35,6 @@ const modeLabel = computed(() => {
 })
 
 const logout = async () => {
-    await userStore.logout()
-}
     await userStore.logout();
 };
 
@@ -85,17 +83,14 @@ onUnmounted(() => {
                         <span
                             v-if="isAdmin && countActivities > 0"
                             class="newsActions">
-                            <img src="../../../icons/bell.svg"/>
+                        <img src="../../../icons/bell.svg" alt=""/>
                         </span>
-                        <span
-                    v-if="isAdmin && countActivities > 0"
-                            class="newsActions">
-                            <img src="../../../icons/bell.svg"/>
-                        </span><span
+                    </span>
+                    <span
                         v-if="userPrenom"
                         class="hidden text-right lg:block">
-                    <span
-                        class="block text-sm font-medium text-black dark:text-white">{{ userPrenom }}
+                        <span
+                            class="block text-sm font-medium text-black dark:text-white">{{ userPrenom }}
                     </span>
                     </span>
 

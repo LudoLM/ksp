@@ -47,6 +47,16 @@ readonly class CreateUsersCoursService
             }
             // Si l'utilisateur n'a pas assez de crédits, on ne peut pas s'inscrire -> renvoie une exception
             $this->userCreditCheckerService->checkAccountCredits($user, false);
+            // Si l'utilisateur n'est pas prioritized, on throw une exception
+            if ($cours->hasPriority() && !$user->isPrioritized()) {
+                throw new \Exception('Vous n\'êtes pas prioritaire pour ce cours');
+            }
+
+            if ($cours->hasLimitOfOneCoursPerWeek()) {
+                // Vérifier la règle avant d'ajouter la nouvelle inscription
+                $this->handleCheckSubscriptionsInAWeekService->checkIfUserAlreadyHasSubscriptionsInTheSameWeek($user, $cours);
+            }
+
             // Si le cours est désormais complet, on ne peut plus s'inscrire -> renvoie une exception
             $this->checkIfCoursIsFullService->checkIfCoursIsFull($cours, $usersCount, $isOnWaitingList);
             // Si le cours est complet, j'ajoute l'utilisateur à la liste d'attente sinon je l'ajoute au cours
@@ -55,16 +65,6 @@ readonly class CreateUsersCoursService
             $this->checkIfCoursIsFullService->changeStatusIfCoursIsfull($cours);
             // Si l'utilisateur n'est pas en attente alors on décrémente le nombre de cours de l'utilisateur
             $this->handleUserCreditService->decrement($isOnWaitingList);
-
-            // Si l'utilisateur n'est pas prioritized, on throw une exception
-            if ($cours->hasPriority() && !$user->isPrioritized()) {
-                throw new \Exception('Vous n\'êtes pas prioritaire pour ce cours');
-            }
-
-            if ($cours->hasLimitOfOneCoursPerWeek()) {
-                // si l'utilisateur n'a pas déjà 2 reservations pour la meme semaine
-                $this->handleCheckSubscriptionsInAWeekService->checkIfUserAlreadyHasTwoSubscriptionsInTheSameWeek($user, $cours);
-            }
 
             // Sauvegarde des modifications en base de données
             $this->em->persist($cours);

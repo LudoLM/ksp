@@ -1,7 +1,7 @@
 <script setup>
 import CustomButton from "../forms/CustomButton.vue";
 import {useRouter} from "vue-router";
-import {useLastActivitiesStore} from "../../store/lastActivities.js";
+import {useLastActivitiesStore} from "../../store/lastActivities";
 import {storeToRefs} from "pinia";
 import {onUnmounted} from "vue";
 import {apiFetch} from "../../utils/useFetchInterceptor.js";

@@ -26,6 +26,10 @@ class CoursDetailsMapperService
         $isUserOnWaitingList = false;
         if ($currentUser instanceof User) {
             foreach ($usersCours as $userCours) {
+                if (null !== $userCours->getUnsubscribedAt()) {
+                    continue;
+                }
+
                 if ($userCours->getUser()->getId() === $currentUser->getId()) {
                     $isUserOnWaitingList = $userCours->isOnWaitingList() ?? false;
                     $isSubscribed = !$isUserOnWaitingList;
@@ -67,6 +71,10 @@ class CoursDetailsMapperService
         $usersSubscribed = [];
         $usersOnStandby = [];
         foreach ($cours->getUsersCours() as $userCours) {
+            if (null !== $userCours->getUnsubscribedAt()) {
+                continue;
+            }
+
             $user = $userCours->getUser();
             $userDto = new LightUserDTO(
                 id: $user->getId() ?? 0,

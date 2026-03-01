@@ -24,6 +24,8 @@ parameters:
           path: src/Service/Notification/NotificationManager.php
         - identifier: typePerfect.narrowPublicClassMethodParamType
           path: src/Entity/User.php
+        - identifier: typePerfect.narrowPublicClassMethodParamType
+          path: src/Entity/UsersCours.php
 
 
 

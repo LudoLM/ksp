@@ -18,6 +18,10 @@ const userRoutes: RouteRecordRaw[] = [
         component: () => import('../../views/Profile.vue'),
         meta: { requiresAdmin: true, title: 'Profil utilisateur' },
       },
+      { path: 'usersActivities',
+        name: 'UsersActivities',
+        component: () => import('../../views/admin/UsersActivities.vue'),
+        meta: { requiresAdmin: true, title: "Dernières actions utilisateurs" }}
     ],
   },
 ]

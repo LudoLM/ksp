@@ -33,7 +33,7 @@ class HandleCheckSubscriptionsInAWeekTest extends TestCase
             'isOnWaitingList2' => false,
             'date2Unsubscription' => null,
             'expectedStatus' => 403,
-            'expectedMessage' => 'Vous avez déjà deux reservations de cours pour cette semaine.',
+            'expectedMessage' => 'Vous avez déjà une reservation de cours pour cette semaine.',
         ];
 
         yield 'user_with_no_usersCours_in_same_week' => [
@@ -55,7 +55,7 @@ class HandleCheckSubscriptionsInAWeekTest extends TestCase
             'date' => new \DateTime('2023-10-30T00:00:00.000000+0000'),
             'hasLimit' => true,
             'date1' => new \DateTime('2023-10-31T00:00:00.000000+0000'),
-            'hasLimit1' => true,
+            'hasLimit1' => false,
             'isOnWaitingList1' => false,
             'date1Unsubscription' => null,
             'date2' => new \DateTime('2023-11-01T00:00:00.000000+0000'),
@@ -70,7 +70,7 @@ class HandleCheckSubscriptionsInAWeekTest extends TestCase
             'date' => new \DateTime('2023-10-30T00:00:00.000000+0000'),
             'hasLimit' => true,
             'date1' => new \DateTime('2023-10-31T00:00:00.000000+0000'),
-            'hasLimit1' => true,
+            'hasLimit1' => false,
             'isOnWaitingList1' => false,
             'date1Unsubscription' => null,
             'date2' => new \DateTime('2023-11-01T00:00:00.000000+0000'),
@@ -81,11 +81,11 @@ class HandleCheckSubscriptionsInAWeekTest extends TestCase
             'expectedMessage' => null,
         ];
 
-        yield 'user_with_three_usersCours_in_same_weekButOneIsUnsubscription' => [
+        yield 'user_with_two_usersCours_in_same_weekButOneIsUnsubscription' => [
             'date' => new \DateTime('2023-10-30T00:00:00.000000+0000'),
             'hasLimit' => true,
             'date1' => new \DateTime('2023-10-31T00:00:00.000000+0000'),
-            'hasLimit1' => true,
+            'hasLimit1' => false,
             'isOnWaitingList1' => false,
             'date1Unsubscription' => null,
             'date2' => new \DateTime('2023-11-01T00:00:00.000000+0000'),
@@ -98,7 +98,7 @@ class HandleCheckSubscriptionsInAWeekTest extends TestCase
     }
 
     #[DataProvider('userProvider')]
-    public function testCheckIfUserAlreadyHasTwoSubscriptionsInTheSameWeek(
+    public function testCheckIfUserAlreadyHasSubscriptionsInTheSameWeek(
         \DateTimeInterface $date,
         bool $hasLimit,
         \DateTimeInterface $date1,
@@ -138,9 +138,9 @@ class HandleCheckSubscriptionsInAWeekTest extends TestCase
         if (null !== $expectedStatus) {
             $this->expectException(\InvalidArgumentException::class);
             $this->expectExceptionMessage($expectedMessage);
-            $this->handleCheckSubscriptionsInAWeek->checkIfUserAlreadyHasTwoSubscriptionsInTheSameWeek($user, $cours);
+            $this->handleCheckSubscriptionsInAWeek->checkIfUserAlreadyHasSubscriptionsInTheSameWeek($user, $cours);
         } else {
-            $this->handleCheckSubscriptionsInAWeek->checkIfUserAlreadyHasTwoSubscriptionsInTheSameWeek($user, $cours);
+            $this->handleCheckSubscriptionsInAWeek->checkIfUserAlreadyHasSubscriptionsInTheSameWeek($user, $cours);
             $this->assertTrue(true, 'L\'exception ne devrait pas être lancée.');
         }
     }

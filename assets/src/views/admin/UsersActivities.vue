@@ -57,7 +57,7 @@ const handleReset = () => {
                     placeholder="Bob ou Dylan"
                     v-model="userName"
                     class="w-1/2 sm:w-1/4 sm:mt-4"
-                />
+                    item=""/>
                 <button
                     class="hover:text deleteIcon border p-3 rounded-lg sm:mt-2"
                     @click="handleReset"

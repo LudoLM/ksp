@@ -8,9 +8,9 @@ use Doctrine\ORM\Mapping\Index;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UsersCoursRepository::class)]
-#[ORM\Index(columns: ['createdAt', 'user'], name: 'idx_created_user')]
-#[ORM\Index(columns: ['unsubscribedAt', 'user'], name: 'idx_unsubscribed_user')]
-#[ORM\Index(columns: ['cours_id', 'is_on_waiting_list'], name: 'idx_users_cours_cours_waiting')]
+#[Index(columns: ['createdAt', 'user'], name: 'idx_created_user')]
+#[Index(columns: ['unsubscribedAt', 'user'], name: 'idx_unsubscribed_user')]
+#[Index(columns: ['cours_id', 'is_on_waiting_list'], name: 'idx_users_cours_cours_waiting')]
 class UsersCours
 {
     #[ORM\Id]
