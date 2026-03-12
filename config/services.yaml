@@ -6,7 +6,7 @@
 parameters:
     timezone: 'Europe/Paris'
     app_url: '%env(APP_URL)%'
-    app.refresh_tokens_cleanup_cron: '0 2 * * *' # Every day at 2:00 AM
+    app.cleanup_cron: '0 2 * * *' # Every day at 2:00 AM
 
 services:
     # default configuration for services in *this* file
@@ -32,6 +32,10 @@ services:
         tags:
             - { name: 'kernel.event_listener', event: 'lexik_jwt_authentication.on_jwt_created', method: 'onJWTCreated' }
 
+    App\EventListener\UserActivityListener:
+        tags:
+            - { name: 'kernel.event_subscriber' }
+
     App\Service\SendingEmail\SendResetPasswordEmailService:
         arguments:
             $baseUrl: '%app_url%'  # Injecter le paramètre app_url
@@ -44,9 +48,9 @@ services:
         arguments:
             $baseUrl: '%app_url%'
             
-    App\Scheduler\RemoveRefreshTokensProvider:
+    App\Scheduler\ScheduleProvider:
         arguments:
-            $cronExpression: '%app.refresh_tokens_cleanup_cron%' # Injecter le paramètre app.refresh_tokens_cleanup_cron
+            $cronExpression: '%app.cleanup_cron%' # Injecter le paramètre app.cleanup_cron
 
     App\Controller\Api\AuthController:
         arguments:

@@ -24,6 +24,7 @@ final readonly class RemoveExpiredRefreshTokensHandler
             $this->logger->info('Suppression des tokens expirés terminée. Nombre de tokens supprimés :'.count($deleted));
         } catch (\Exception $exception) {
             $this->logger->error('Erreur lors de la suppression des tokens expirés : '.$exception->getMessage());
+            throw $exception;
         }
     }
 }

@@ -9,10 +9,15 @@
 /public/bundles/
 /var/
 /vendor/
+/.phpunit.cache
+/Audits
 
 /bolt.db
 ###< symfony/framework-bundle ###
 
+###> Docker compose overrides (dev local config) ###
+/compose.override.yaml
+###< Docker compose overrides (dev local config) ###
 
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem

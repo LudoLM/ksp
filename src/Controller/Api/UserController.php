@@ -7,6 +7,8 @@ use App\Entity\Cours;
 use App\Entity\User;
 use App\Repository\CoursRepository;
 use App\Repository\UserRepository;
+use App\Service\ArchivageService;
+use App\Service\UserAnonymisationService;
 use App\Service\UserControllerService\FetchUserService;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
@@ -34,6 +36,9 @@ class UserController extends AbstractController
         private readonly CoursRepository $coursRepository,
         private readonly UserRepository $userRepository,
         private readonly FetchUserService $fetchUserService,
+        private readonly ArchivageService $archivageService,
+        private readonly UserAnonymisationService $anonymisationService,
+        private readonly EntityManagerInterface $em,
     ) {
     }
 
@@ -42,8 +47,14 @@ class UserController extends AbstractController
     public function getAllUsers(
         #[MapQueryParameter(name: 'page')] int $page,
         #[MapQueryParameter(name: 'searchUser')] string $searchUser = '',
+        #[MapQueryParameter(name: 'archived')] bool $archived = false,
     ): JsonResponse {
-        $paginator = $this->userRepository->paginateUsers($page, self::LIMIT_USERS_PER_PAGE, $searchUser);
+        $paginator = $this->userRepository->paginateUsers(
+            $page,
+            self::LIMIT_USERS_PER_PAGE,
+            $searchUser,
+            !$archived  // Passer false pour paginateUsers quand archived=true
+        );
         $totalItems = $paginator->count();
 
         $usersArray = $this->normalizer->normalize(iterator_to_array($paginator->getIterator()), 'json', ['groups' => 'user:detail']);
@@ -83,9 +94,31 @@ class UserController extends AbstractController
     {
         try {
             $user = $this->fetchUserService->fetchUser($id);
-            $this->userRepository->remove($user, true);
 
-            return new JsonResponse(['message' => 'Utilisateur supprimé'], Response::HTTP_OK);
+            // Transaction wrapper
+            try {
+                $this->em->beginTransaction();
+
+                // Soft delete RGPD
+                $user->setIsDeleted(true);
+                $user->setDeletedAt(new \DateTime());
+
+                // Supprimer les tokens de réinitialisation de mot de passe (PII)
+                $user->setResetPasswordToken(null);
+                $user->setResetPasswordTokenExpiresAt(null);
+
+                // Anonymiser immédiatement
+                $this->anonymisationService->anonymiseUser($user, 'rgpd_request');
+
+                $this->userRepository->save($user, true);
+
+                $this->em->commit();
+            } catch (\Exception $transactionException) {
+                $this->em->rollback();
+                throw $transactionException;
+            }
+
+            return new JsonResponse(['message' => 'Compte utilisateur supprimé et anonymisé'], Response::HTTP_OK);
         } catch (NotFoundHttpException|AccessDeniedException $e) {
             return new JsonResponse(
                 ['message' => $e->getMessage()],
@@ -162,9 +195,19 @@ class UserController extends AbstractController
             // Appeler la méthode de mise à jour en masse
             $this->userRepository->resetAllUsersCounterCours();
 
-            // Retourner le nombre d'utilisateurs affectés
+            // ARCHIVER les utilisateurs inactifs après le reset
+            $adminUser = $this->getUser();
+            if (!$adminUser instanceof User) {
+                throw $this->createAccessDeniedException('Utilisateur non authentifié');
+            }
+
+            $result = $this->archivageService->archiveInactiveUsers();
+
+            // Retourner le résultat avec le nombre d'utilisateurs archivés
             return new JsonResponse([
                 'message' => 'Le compteur de cours a été réinitialisé pour tous les utilisateurs.',
+                'archived' => $result['archived'],
+                'errors' => $result['errors'],
             ], Response::HTTP_OK);
         } catch (\Exception $exception) {
             return new JsonResponse($exception->getMessage(), Response::HTTP_BAD_REQUEST);

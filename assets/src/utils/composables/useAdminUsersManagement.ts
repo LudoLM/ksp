@@ -1,5 +1,5 @@
 import { apiFetch } from '../useFetchInterceptor'
-import { alertStore } from '../../store/alert'
+import { alertStore } from '@/store/alert.ts'
 import { ref } from 'vue'
 
 interface User {
@@ -18,12 +18,13 @@ export function useAdminUsersManagement() {
   const metadata = ref<Metadata>({ total_pages: 1 })
   const currentPage = ref(1)
   const searchUser = ref('')
+  const showArchived = ref(false)
 
   const getUsers = async (page?: number): Promise<void> => {
     const targetPage = page !== undefined ? page : currentPage.value
     try {
       const res = await apiFetch(
-        `/api/admin/users?page=${targetPage}&searchUser=${searchUser.value}`
+        `/api/admin/users?page=${targetPage}&searchUser=${searchUser.value}&archived=${showArchived.value}`
       ).then((res) => res.json())
 
       users.value = res.data
@@ -59,6 +60,7 @@ export function useAdminUsersManagement() {
     metadata,
     currentPage,
     searchUser,
+    showArchived,
     getUsers,
     resetAllUserCounterCours,
   }

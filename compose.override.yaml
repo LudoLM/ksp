@@ -41,6 +41,21 @@ services:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 ###< symfony/mailer ###
+
+###> messenger & scheduler workers ###
+  messenger-worker:
+    volumes:
+      - ./:/app
+    environment:
+      APP_ENV: dev
+
+  scheduler-worker:
+    volumes:
+      - ./:/app
+    environment:
+      APP_ENV: dev
+###< messenger & scheduler workers ###
+
 networks:
   proxy:
-    external: true  
+    external: true

@@ -2,13 +2,14 @@
 
 namespace App\Scheduler;
 
+use Symfony\Component\Console\Messenger\RunCommandMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
 
 #[AsSchedule]
-final class RemoveRefreshTokensProvider implements ScheduleProviderInterface
+final class ScheduleProvider implements ScheduleProviderInterface
 {
     private ?Schedule $schedule = null;
 
@@ -20,7 +21,8 @@ final class RemoveRefreshTokensProvider implements ScheduleProviderInterface
     public function getSchedule(): Schedule
     {
         return $this->schedule ??= new Schedule()
-            ->with(RecurringMessage::cron($this->cronExpression, new RemoveExpiredRefreshTokens())
-            );
+            ->add(RecurringMessage::cron($this->cronExpression, new RemoveExpiredRefreshTokens()))
+            ->add(RecurringMessage::cron('30 2 * * *', new RunCommandMessage('app:archive-inactive-users')))
+            ->add(RecurringMessage::cron('0 3 * * *', new RunCommandMessage('app:anonymise-old-archived-users')));
     }
 }

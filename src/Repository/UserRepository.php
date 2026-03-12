@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Constant\ArchivageConstants;
 use App\Entity\Cours;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -69,6 +70,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->createQueryBuilder('u')
             ->select('NEW App\DTO\LightUserDTO(u.id, u.prenom, u.nom)')
             ->andWhere('u.id NOT IN (:usersCours)')
+            ->andWhere('u.anonymisedAt IS NULL')
             ->setParameter('usersCours', $usersCours)
             ->orderBy('u.nom', 'ASC')
             ->getQuery()
@@ -79,18 +81,21 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         int $page = 1,
         int $limit = 10,
         string $searchUser = '',
+        bool $excludeArchived = true,
     ): Paginator {
         $query = $this->createQueryBuilder('u')
-            ->where('u.nom LIKE :searchUser')
-            ->orWhere('u.prenom LIKE :searchUser')
-            ->orWhere('u.email LIKE :searchUser')
-            ->setParameter('searchUser', '%'.$searchUser.'%')
-            ->setFirstResult(($page - 1) * $limit)
-            ->setMaxResults($limit)
-            ->orderBy('u.nom', 'ASC')
-            ->getQuery();
+            ->where('(u.nom LIKE :searchUser OR u.prenom LIKE :searchUser OR u.email LIKE :searchUser)')
+            ->setParameter('searchUser', '%'.$searchUser.'%');
 
-        return new Paginator($query);
+        if ($excludeArchived) {
+            $query->andWhere('u.isArchived = false');
+        }
+        $query->andWhere('u.anonymisedAt IS NULL');
+        $query->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->orderBy('u.nom', 'ASC');
+
+        return new Paginator($query->getQuery());
     }
 
     public function resetAllUsersCounterCours()
@@ -103,6 +108,55 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setParameter('adminRole', '%"ROLE_ADMIN"%');
 
         return $qb->getQuery()->execute();
+    }
+
+    /**
+     * Trouve les utilisateurs inactifs et archivables
+     * Critères: nombreCours <= 0 AND last_visit < X mois AND isArchived = false.
+     *
+     * @param int $monthsInactive Nombre de mois d'inactivité avant archivage
+     *
+     * @return User[]
+     */
+    public function findInactiveUsers(int $monthsInactive = ArchivageConstants::MONTHS_INACTIVE_THRESHOLD): array
+    {
+        $date = new \DateTime("-{$monthsInactive} months");
+
+        return $this->createQueryBuilder('u')
+            ->where('u.nombreCours <= :zeroCours')
+            ->andWhere('(u.last_visit IS NULL OR u.last_visit < :date)')
+            ->andWhere('u.isArchived = false')
+            ->andWhere('u.isDeleted = false')
+            ->andWhere('u.anonymisedAt IS NULL')
+            ->setParameter('zeroCours', 0)
+            ->setParameter('date', $date)
+            ->orderBy('u.last_visit', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Trouve les utilisateurs archivés depuis plus de ANONYMISATION_DELAY_MONTHS mois à anonymiser.
+     * Optimized: All filtering done in SQL instead of PHP memory.
+     *
+     * @return User[]
+     *
+     * @throws \DateMalformedStringException
+     */
+    public function findOldArchivedUsers(): array
+    {
+        $anonymisationThreshold = new \DateTime('-'.ArchivageConstants::ANONYMISATION_DELAY_MONTHS.' months');
+
+        return $this->createQueryBuilder('u')
+            ->where('u.isArchived = true')
+            ->andWhere('u.isDeleted = false')
+            ->andWhere('u.archivedAt IS NOT NULL')
+            ->andWhere('u.archivedAt < :threshold')
+            ->andWhere('u.anonymisedAt IS NULL')
+            ->setParameter('threshold', $anonymisationThreshold)
+            ->orderBy('u.archivedAt', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**

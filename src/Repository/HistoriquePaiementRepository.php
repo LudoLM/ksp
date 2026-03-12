@@ -66,7 +66,12 @@ class HistoriquePaiementRepository extends ServiceEntityRepository
     public function getPaymentSinceLastVisit(User $user): array
     {
         $qb = $this->createQueryBuilder('hp')
+            ->leftJoin('hp.user', 'u')
+            ->addSelect('u')
+            ->leftJoin('hp.pack', 'p')
+            ->addSelect('p')
             ->where('hp.date BETWEEN :lastVisit AND :now')
+            ->andWhere('u.anonymisedAt IS NULL')
             ->setParameter('lastVisit', $user->getLastVisit())
             ->setParameter('now', new \DateTime())
             ->orderBy('hp.date', 'DESC');
@@ -78,8 +83,12 @@ class HistoriquePaiementRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('hp')
             ->join('hp.user', 'u')
+            ->addSelect('u')
+            ->leftJoin('hp.pack', 'p')
+            ->addSelect('p')
             ->where('hp.date BETWEEN :start AND :end')
             ->andWhere('u.nom LIKE :userName OR u.prenom LIKE :userName')
+            ->andWhere('u.anonymisedAt IS NULL')
             ->setParameter('start', $startDate)
             ->setParameter('end', $endDate)
             ->setParameter('userName', '%'.$userName.'%')

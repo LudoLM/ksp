@@ -17,6 +17,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Index(columns: ['is_archived'], name: 'idx_user_is_archived')]
+#[ORM\Index(columns: ['anonymised_at'], name: 'idx_user_anonymised_at')]
+#[ORM\Index(columns: ['is_deleted'], name: 'idx_user_is_deleted')]
+#[ORM\Index(columns: ['archived_at'], name: 'idx_user_archived_at')]
 class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUserInterface, \Stringable
 {
     #[ORM\Id]
@@ -65,13 +69,13 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
     private ?string $commune = null;
 
     #[Groups(['user:detail'])]
-    #[ORM\Column(length: 10)]
+    #[ORM\Column(length: 10, nullable: true)]
     #[Assert\NotBlank(message: 'Le numéro de téléphone ne doit pas être vide.')]
     #[Assert\Regex(
         pattern: '/^\d{10}$/',
         message: 'Le numéro de téléphone doit contenir exactement 10 chiffres.'
     )]
-    private string $telephone;
+    private ?string $telephone = null;
 
     #[Groups(['user:detail'])]
     #[ORM\Column]
@@ -97,6 +101,21 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $last_visit = null;
+
+    #[ORM\Column]
+    private bool $isArchived = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $archivedAt = null;
+
+    #[ORM\Column]
+    private bool $isDeleted = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $anonymisedAt = null;
 
     public function __construct()
     {
@@ -179,7 +198,7 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
         return $this->resetPasswordToken;
     }
 
-    public function setResetPasswordToken(string $resetPasswordToken): self
+    public function setResetPasswordToken(?string $resetPasswordToken): self
     {
         $this->resetPasswordToken = $resetPasswordToken;
 
@@ -236,7 +255,7 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
         return $this->adresse;
     }
 
-    public function setAdresse(string $adresse): self
+    public function setAdresse(?string $adresse): self
     {
         $this->adresse = $adresse;
 
@@ -248,7 +267,7 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
         return $this->codePostal;
     }
 
-    public function setCodePostal(string $codePostal): self
+    public function setCodePostal(?string $codePostal): self
     {
         $this->codePostal = $codePostal;
 
@@ -260,7 +279,7 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
         return $this->commune;
     }
 
-    public function setCommune(string $commune): self
+    public function setCommune(?string $commune): self
     {
         $this->commune = $commune;
 
@@ -272,7 +291,7 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
         return $this->telephone;
     }
 
-    public function setTelephone(string $telephone): self
+    public function setTelephone(?string $telephone): self
     {
         $this->telephone = $telephone;
 
@@ -375,6 +394,66 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
         if ($this->usersCours->removeElement($usersCours) && $usersCours->getUser() === $this) {
             $usersCours->setUser(null);
         }
+
+        return $this;
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->isArchived;
+    }
+
+    public function setIsArchived(bool $isArchived): static
+    {
+        $this->isArchived = $isArchived;
+
+        return $this;
+    }
+
+    public function getArchivedAt(): ?\DateTimeInterface
+    {
+        return $this->archivedAt;
+    }
+
+    public function setArchivedAt(?\DateTimeInterface $archivedAt): static
+    {
+        $this->archivedAt = $archivedAt;
+
+        return $this;
+    }
+
+    public function isDeleted(): bool
+    {
+        return $this->isDeleted;
+    }
+
+    public function setIsDeleted(bool $isDeleted): static
+    {
+        $this->isDeleted = $isDeleted;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    public function getAnonymisedAt(): ?\DateTimeInterface
+    {
+        return $this->anonymisedAt;
+    }
+
+    public function setAnonymisedAt(?\DateTimeInterface $anonymisedAt): static
+    {
+        $this->anonymisedAt = $anonymisedAt;
 
         return $this;
     }

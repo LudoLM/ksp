@@ -27,7 +27,7 @@ up: ## Start the docker hub in detached mode (no logs)
 down: ## Stop the docker hub
 	@$(DOCKER_COMP) down --remove-orphans
 
-start: build up messengerConsume
+start: build up ## Build and start the containers
 
 restart: down start ## Restart the docker hub
 
@@ -53,8 +53,17 @@ cs: ## Run PHP CS Fixer
 rector: ## Run Rector
 	@$(DOCKER_COMP) exec php vendor/bin/rector process
 
-messengerConsume: ## Start the messenger consumer
-	@$(DOCKER_COMP) exec php bin/console messenger:consume async
+messengerConsume: ## Show live logs from messenger-worker
+	@$(DOCKER_COMP) logs -f messenger-worker
+
+schedulerConsume: ## Show live logs from scheduler-worker
+	@$(DOCKER_COMP) logs -f scheduler-worker
+
+logs-scheduler: ## Show live logs from scheduler-worker
+	@$(DOCKER_COMP) logs -f scheduler-worker
+
+scheduler-debug: ## Display scheduled tasks debug info
+	@$(PHP) bin/console debug:scheduler
 
 analyse: cs rector phpstan test ## Run PHPStan, PHP CS Fixer and Rector
 

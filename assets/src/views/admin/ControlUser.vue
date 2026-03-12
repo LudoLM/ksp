@@ -9,15 +9,15 @@ import CustomButton from "../../components/forms/CustomButton.vue";
 import ModalConfirm from "../../components/modals/ModalConfirm.vue";
 import InfosItem from "../../../icons/adminActions/InfosItem.vue";
 import DeleteItem from "../../../icons/adminActions/DeleteItem.vue";
-import {useActionsUser} from "../../utils/composables/useActionsUser";
-import {useAdminUsersManagement} from "../../utils/composables/useAdminUsersManagement";
+import {useActionsUser} from "@/utils/composables/useActionsUser.ts";
+import {useAdminUsersManagement} from "@/utils/composables/useAdminUsersManagement.ts";
 
 const title = 'Gestion des utilisateurs';
 const route = useRoute();
 const router = useRouter();
 const confirmDialog = ref(false);
 const { deleteUser } = useActionsUser();
-const { users, currentPage, metadata, searchUser, getUsers, resetAllUserCounterCours } = useAdminUsersManagement();
+const { users, currentPage, metadata, searchUser, showArchived, getUsers, resetAllUserCounterCours } = useAdminUsersManagement();
 
 
 //Gère le clic sur les boutons de pagination.
@@ -68,7 +68,7 @@ watch(() => route.query.page, async (newPageFromUrl) => {
 
 </script>
 
-<template>
+    <template>
     <Banner
         :title="title"
         :hasButton=false
@@ -83,6 +83,18 @@ watch(() => route.query.page, async (newPageFromUrl) => {
                 @input="getUsers(1)"
                 placeholder="Rechercher un utilisateur"
             />
+        </div>
+        <!-- Toggle pour afficher les archivés -->
+        <div class="flex items-center gap-4 my-4">
+            <label class="flex items-center cursor-pointer">
+                <input
+                    type="checkbox"
+                    v-model="showArchived"
+                    @change="getUsers(1)"
+                    class="mr-2"
+                />
+                <span class="text-sm">Afficher les utilisateurs archivés</span>
+            </label>
         </div>
         <div class="flex justify-center align-items-center">
             <ModalConfirm
@@ -123,7 +135,12 @@ watch(() => route.query.page, async (newPageFromUrl) => {
                             class="relative flex min-h-15 gap-5"
                         >
                             <div class="grid grid-cols-[2fr_2fr_1fr_2fr] gap-2 items-center text-xs md:text-sm w-full">
-                                <div class="ml-4">{{ user.nom }} {{ user.prenom }}</div>
+                                <div class="ml-4 flex items-center gap-2">
+                                    <span>{{ user.nom }} {{ user.prenom }}</span>
+                                    <span v-if="user.isArchived" class="inline-block px-2 py-1 text-xs bg-gray-400 text-white rounded">
+                                        Archivé
+                                    </span>
+                                </div>
                                 <div class="ml-4 max-w-xs truncate">{{ user.email }}</div>
                                 <div class="text-center">{{ user.nombreCours }}</div>
                                 <div class="flex justify-center items-center mr-4">

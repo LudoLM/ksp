@@ -52,8 +52,15 @@ class UsersCoursRepository extends ServiceEntityRepository
         ]);
 
         return $qb
+            ->leftJoin('uc.user', 'u')
+            ->addSelect('u')
+            ->leftJoin('uc.cours', 'c')
+            ->addSelect('c')
+            ->leftJoin('c.typeCours', 'tc')
+            ->addSelect('tc')
             ->andWhere($dateWindow)
             ->andWhere('uc.isOnWaitingList = :isOnWaitingList')
+            ->andWhere('u.anonymisedAt IS NULL')
             ->setParameter('lastVisit', $user->getLastVisit())
             ->setParameter('now', new \DateTime())
             ->setParameter('isOnWaitingList', false)
@@ -72,9 +79,15 @@ class UsersCoursRepository extends ServiceEntityRepository
 
         return $qb
             ->join('uc.user', 'u')
+            ->addSelect('u')
+            ->leftJoin('uc.cours', 'c')
+            ->addSelect('c')
+            ->leftJoin('c.typeCours', 'tc')
+            ->addSelect('tc')
             ->andWhere($dateWindow)
             ->andWhere('u.nom LIKE :userName OR u.prenom LIKE :userName')
             ->andWhere('uc.isOnWaitingList = :isOnWaitingList')
+            ->andWhere('u.anonymisedAt IS NULL')
             ->setParameter('start', $startDate)
             ->setParameter('end', $endDate)
             ->setParameter('userName', '%'.$userName.'%')
