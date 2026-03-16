@@ -90,8 +90,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         if ($excludeArchived) {
             $query->andWhere('u.isArchived = false');
         }
-        $query->andWhere('u.anonymisedAt IS NULL');
-        $query->setFirstResult(($page - 1) * $limit)
+        $query->andWhere('u.anonymisedAt IS NULL')
+            ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit)
             ->orderBy('u.nom', 'ASC');
 

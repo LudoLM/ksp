@@ -18,7 +18,24 @@ const props = defineProps(
 )
 const emit = defineEmits(['cancelCours', 'deleteCreation', 'updateCreation', 'openCreation', 'handleAddExtraResponse']);
 const statusCours = ref(props.item.statusCours);
-const usersCount = ref(props.item.usersCours.filter(cours => cours.isOnWaitingList === false).length);
+
+const isActiveSubscription = (usersCours) => {
+    if (usersCours.isOnWaitingList) {
+        return false;
+    }
+    if (!usersCours.unsubscribedAt) {
+        return true;
+    }
+    const unsubscribedAt = new Date(usersCours.unsubscribedAt);
+    const createdAt = new Date(usersCours.createdAt);
+    return unsubscribedAt <= createdAt;
+};
+
+const calculateUsersCount = (item) => {
+    return item.usersCours.filter(isActiveSubscription).length;
+};
+
+const usersCount = ref(calculateUsersCount(props.item));
 
 const deleteCreation = async () => {
     const response = await useDeleteCours(props.item.id);
@@ -59,7 +76,7 @@ const openCreation = async () => {
 const handleAddExtraResponse = ({ type, message, statusChange }) => {
     if (type === 'success') {
         statusCours.value = JSON.parse(statusChange);
-        usersCount.value++;
+        usersCount.value = calculateUsersCount(props.item) + 1;
     }
     alertStore.setAlert(message, type);
 };

@@ -7,10 +7,10 @@ import CustomButton from "../components/forms/CustomButton.vue";
 import ButtonsCardUser from "../components/user/ButtonsCardUser.vue";
 import StatusCoursTag from "../components/StatusCoursTag.vue";
 import ModalConnect from "../components/modals/ModalConnect.vue";
-import ModalUnsubscribeUsers from "../components/modals/ModalUnsubscribeUsers.vue";
 import {useUserStore} from "../store/user";
 import {getImageUrl} from "../utils/useAssetHelper.js";
 import type { CoursPublicDetailDTO, UsersCoursDTO } from "../types/coursDetails";
+import ParticipationLists from "@/components/admin/ParticipationLists.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -28,7 +28,6 @@ const usersOnStandby = ref<UsersCoursDTO[]>([]);
 
 // UI state
 const loginDialog = ref(false);
-const UnsubscribeUsersDialog = ref(false);
 const usersCount = ref(0);
 const dateLimit = ref<string | null>(null);
 const isSubscribed = ref(false);
@@ -145,7 +144,7 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                         </div>
                         <div>
                             <div class="constraintsInfos text-gray-400">{{ cours.hasPriority && dateLimit ? "Priorité jusqu'au " + dateLimit : "" }}</div>
-                            <div class="constraintsInfos text-gray-400">{{ !cours.hasLimitOfOneCoursPerWeek ? "Ce cours n'est pas limité à 2 par semaine" : "" }}</div>
+                            <div class="constraintsInfos text-gray-400">{{ !cours.hasLimitOfOneCoursPerWeek ? "Ce cours n'est pas limité à 1 par semaine" : "" }}</div>
                         </div>
                         <div>
                             <h2 class="text-white mb-4">{{ cours.typeCours.libelle }}</h2>
@@ -160,7 +159,7 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
 
                         <div class="specialNote mt-5" v-if="cours.specialNote !== ''">Note: {{ cours.specialNote }}</div>
 
-                        <div class="w-full ml-auto mr-auto mt-2">
+                        <div class="w-full ml-auto mr-auto mt-8">
                             <div class="w-2/3 h-0.5 bg-gray-200 mx-auto mb-3"></div>
                             <div class="button flex justify-center gap-5">
                                 <ButtonsCardUser
@@ -172,15 +171,6 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                                      :isUserOnWaitingList="isUserOnWaitingList"
                                      @updateCoursStatus="handleUpdateStatusCours"
                                 />
-                                <div v-if="isAdminPath && (cours.statusCours.id === 1 || cours.statusCours.id === 2)">
-                                    <ModalUnsubscribeUsers
-                                        :cours="cours"
-                                        :usersSubscribed="usersSubscribed"
-                                        :isModalUnsubscribedUsersOpen="UnsubscribeUsersDialog"
-                                        :usersOnStandby="usersOnStandby"
-                                        @updateUnsubscribeUsersValue="handleUpdateUnsubscribeUsersValue"
-                                    />
-                                </div>
                                 <ModalConnect
                                     v-if="!isAuthenticated && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
                                     v-model:isOpen="loginDialog"
@@ -202,6 +192,13 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                 <div class="details_skeleton"></div>
             </template>
         </div>
+        <ParticipationLists
+            v-if="isAdminPath"
+            :coursId="coursId"
+            :usersSubscribed="usersSubscribed"
+            :usersOnStandby="usersOnStandby"
+            @updateUnsubscribeUsersValue="handleUpdateUnsubscribeUsersValue"
+        />
     </div>
 
 </template>
@@ -225,7 +222,8 @@ p{
 
     img {
         width: 100%;
-        min-height: 60vh;
+        min-height: 500px;
+        max-height: 80vh;
         object-fit: cover;
     }
 }

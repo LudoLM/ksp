@@ -1,9 +1,9 @@
 <script setup>
 import CoursLine from "../CoursLine.vue";
-import { getMondayOfSpecificDate, getSundayOfSpecificDate } from "../../store/calendar";
+import { getMondayOfSpecificDate, getSundayOfSpecificDate } from "@/store/calendar.ts";
 import CustomButton from "../forms/CustomButton.vue";
 import { computed } from "vue";
-import { useWeekActions } from "../../utils/useWeekActions";
+import { useWeekActions } from "@/utils/useWeekActions.ts";
 
 const props = defineProps({
     coursData: Array,
