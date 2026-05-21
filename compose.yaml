@@ -17,6 +17,7 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+      - ${CADDY_CONF_DIR:-/home/debian/projets/caddy}:/etc/caddy/conf.d
     ports:
       # HTTP
       - target: 80
