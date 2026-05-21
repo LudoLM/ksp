@@ -21,6 +21,7 @@ final class Version20251129163819 extends AbstractMigration
     {
         $this->addSql('CREATE INDEX IDX_710402ECAA9E377A ON historique_paiement (date)');
         $this->addSql('CREATE INDEX idx_date_user ON historique_paiement (date, user_id)');
+        $this->addSql('ALTER TABLE user ADD last_visit DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
         $this->addSql('ALTER TABLE users_cours ADD unsubscribed_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE INDEX idx_created_user ON users_cours (created_at, user_id)');
         $this->addSql('CREATE INDEX idx_unsubscribed_user ON users_cours (unsubscribed_at, user_id)');
@@ -32,6 +33,7 @@ final class Version20251129163819 extends AbstractMigration
         $this->addSql('DROP INDEX idx_date_user ON historique_paiement');
         $this->addSql('DROP INDEX idx_created_user ON users_cours');
         $this->addSql('DROP INDEX idx_unsubscribed_user ON users_cours');
+        $this->addSql('ALTER TABLE user DROP last_visit');
         $this->addSql('ALTER TABLE users_cours DROP unsubscribed_at');
     }
 }
