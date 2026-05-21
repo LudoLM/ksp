@@ -7,6 +7,7 @@
 }
 
 {$CADDY_EXTRA_CONFIG}
+import /etc/caddy/conf.d/*.caddy
 
 {$SERVER_NAME:localhost} {
 	log {
