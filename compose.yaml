@@ -35,8 +35,12 @@ services:
     container_name: database
     image: mysql:latest
     command: --max_allowed_packet=32505856
-    ports:
-      - "3306:3306"
+    # Pas de publication hôte : la base n'est jointe qu'au réseau Docker `proxy`
+    # et n'est consommée que par php/workers via le nom d'hôte `database:3306`.
+    # (sécurité : évite l'exposition 0.0.0.0:3306 sur Internet, que ufw ne bloque
+    #  pas car Docker court-circuite la chaîne INPUT)
+    expose:
+      - "3306"
     restart: always
     environment:
       MYSQL_DATABASE: 'db'
@@ -52,8 +56,10 @@ services:
     container_name: redis
     image: redis:alpine3.22
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    # Pas de publication hôte : Redis (sans mot de passe) ne doit jamais être
+    # joignable depuis Internet. Accès interne uniquement via `redis:6379`.
+    expose:
+      - "6379"
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
