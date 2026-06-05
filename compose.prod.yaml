@@ -8,6 +8,10 @@ services:
       APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - ${CADDY_CONF_DIR:-/home/debian/projets/caddy}:/etc/caddy/conf.d
 
   messenger-worker:
     build:
