@@ -5,7 +5,10 @@ services:
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     environment:
-      SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
+      # Derrière le reverse proxy autonome : FrankenPHP sert en HTTP simple sur
+      # le port 80 pour tous les hôtes (`:80`). C'est le proxy qui termine le TLS.
+      # (Avant : `${SERVER_NAME}, php:80` car FrankenPHP gérait lui-même le TLS.)
+      SERVER_NAME: ":80"
       APP_ENV: ${APP_ENV}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
@@ -19,12 +22,13 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - /home/debian/projets/ksp/frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
-      - /home/debian/projets/caddy:/etc/caddy/conf.d:ro 
-    ports:
-        - "80:80"
-        - "443:443"
-        - "443:443/udp"
-    
+      # Plus de montage de /home/debian/projets/caddy (conf.d) : le routage des
+      # domaines vit désormais dans le projet reverse-proxy autonome.
+    # Plus aucune publication de port hôte : php n'est joignable que par le
+    # reverse proxy via l'alias `php:80` sur le réseau `proxy`.
+    expose:
+      - "80"
+
     # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
   ###> symfony/mercure-bundle ###
   ###< symfony/mercure-bundle ###
