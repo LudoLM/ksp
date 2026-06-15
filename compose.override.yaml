@@ -25,8 +25,10 @@ services:
 
 ###> doctrine/doctrine-bundle ###
   database:
+    # Accès dev à la base restreint à la loopback (jamais 0.0.0.0).
+    # Depuis le poste local : ssh -L 3306:127.0.0.1:3306 -p 49603 user@host
     ports:
-      - "3306"
+      - "127.0.0.1:3306:3306"
 ###< doctrine/doctrine-bundle ###
 
 ###> symfony/mailer ###
@@ -34,9 +36,12 @@ services:
     image: axllent/mailpit
     networks:
       - proxy
+    # Restreint à la loopback : l'UI Mailpit (8025) et le SMTP (1025) ne doivent
+    # pas être exposés publiquement. Accès via tunnel SSH :
+    #   ssh -L 8025:127.0.0.1:8025 -p 49603 user@host
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
