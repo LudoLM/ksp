@@ -115,15 +115,15 @@ const formData = ref({
       });
 
       const data = await response.json();
-      const coursData = JSON.parse(data);
+      const cours = data.cours;
 
-      formData.value.typeCours = coursData.typeCours.id;
-      formData.value.dateCours = coursData.dateCours ? coursData.dateCours.slice(0, 16) : formData.value.dateCours;
-      formData.value.dureeCours = coursData.duree;
-      formData.value.nbInscriptionMax = coursData.nbInscriptionMax;
-      formData.value.specialNote = coursData.specialNote;
-      formData.value.hasPriority = coursData.hasPriority;
-      formData.value.hasLimitOfOneCoursPerWeek = coursData.hasLimitOfOneCoursPerWeek
+      formData.value.typeCours = cours.typeCours.id;
+      formData.value.dateCours = cours.dateCours ? cours.dateCours.slice(0, 16) : formData.value.dateCours;
+      formData.value.dureeCours = cours.duree;
+      formData.value.nbInscriptionMax = cours.nbInscriptionMax;
+      formData.value.specialNote = cours.specialNote;
+      formData.value.hasPriority = cours.hasPriority;
+      formData.value.hasLimitOfOneCoursPerWeek = cours.hasLimitOfOneCoursPerWeek
 
 
     } catch (error) {
@@ -174,7 +174,7 @@ const formData = ref({
                         v-model="formData.hasLimitOfOneCoursPerWeek"
                         id="hasLimitOfOneCoursPerWeek"
                     >
-                        Limite 2 cours/semaine
+                        Limite 1 cours/semaine
                     </CustomCheckboxPriority>
                 </div>
                 <div class="mt-4 flex justify-center">

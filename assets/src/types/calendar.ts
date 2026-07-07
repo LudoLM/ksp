@@ -38,6 +38,7 @@ export interface CalendarHeaderProps {
   shouldPreviousWeekDisabled: boolean
   isAdmin: boolean
   canLaunchWeek: boolean
+  showBanner?: boolean
 }
 
 export interface CalendarGridProps {
@@ -46,6 +47,7 @@ export interface CalendarGridProps {
   daySelected: number
   infos: CalendarNextCoursInfo
   nextDateInNextWeek: string | undefined
+  isAdminRoute: boolean
 }
 
 export interface CalendarMobileProps {
@@ -59,6 +61,7 @@ export interface CalendarMobileProps {
   nextDateInTheWeek: string | undefined
   nextDateIndex: number | null
   firstNextCoursInNextWeeks: CalendarNextCoursInfo | null
+  isAdminRoute: boolean
 }
 
 export interface CalendarLogicParams {

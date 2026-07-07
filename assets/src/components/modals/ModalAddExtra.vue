@@ -115,13 +115,16 @@ const handleAddExtraClick = async () => {
     emit('subscriptionResponse', {
       type: 'success',
       message: result.message,
-      statusChange: result.statusChange
+      statusChange: result.statusChange,
+      usersCount: result.usersCount,
+
     });
   } else {
     emit('subscriptionResponse', {
       type: 'error',
       message: result.message,
-      statusChange: result.statusChange
+      statusChange: result.statusChange,
+      usersCount: result.usersCount,
     });
 
   }

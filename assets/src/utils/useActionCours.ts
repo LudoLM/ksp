@@ -4,6 +4,7 @@ import { useCalendarStore } from '../store/calendar'
 import { useUserStore } from '../store/user'
 import { alertStore } from '../store/alert'
 import type { CoursAdminDetailDTO, CoursPublicDetailDTO } from '../types/coursDetails'
+import router from "@/router";
 
 export async function useGetCours(
   route: Ref<string>,
@@ -194,3 +195,7 @@ export async function handleLaunchAllCours(days: Ref<any>): Promise<void> {
   calendarStore.setSelectedStatusCours(0)
   await calendarStore.fetchCoursPerWeek()
 }
+
+export const updateCours = (coursId: number): void => {
+  void router.push({ name: 'EditCours', params: { id: coursId } });
+};

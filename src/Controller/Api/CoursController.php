@@ -267,6 +267,7 @@ class CoursController extends AbstractController
 
             return new JsonResponse([
                 'success' => true,
+                'type' => 'success',
                 'message' => 'Le cours a été annulé',
                 'statusChange' => $this->serializer->serialize($cours->getStatusCours(), 'json', ['groups' => 'cours:detail']), Response::HTTP_OK,
             ]);

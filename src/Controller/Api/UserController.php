@@ -179,9 +179,12 @@ class UserController extends AbstractController
 
     #[Route('/api/admin/users-not-in-cours/{cours}', name: 'api_users', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN', message: 'Seuls les administrateurs peuvent avoir accès à tous les utilisateurs.')]
-    public function getUsersData(UserRepository $userRepository, Cours $cours): JsonResponse
-    {
-        $users = $userRepository->getLightUsersAll($cours);
+    public function getUsersData(
+        UserRepository $userRepository,
+        Cours $cours,
+        #[MapQueryParameter(name: 'search')] string $search = '',
+    ): JsonResponse {
+        $users = $userRepository->getAvailableUsers($cours, $search);
         $jsonUsers = $this->serializer->serialize($users, 'json');
 
         return new JsonResponse($jsonUsers, Response::HTTP_OK, [], true);

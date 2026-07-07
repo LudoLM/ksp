@@ -2,6 +2,7 @@
  * User-related TypeScript types and interfaces
  * Synchronized with Symfony backend entities
  */
+import {Cours} from "@/types/cours.ts";
 
 export interface User {
   id: number
@@ -46,31 +47,10 @@ export interface UpdateUserDTO {
 export interface UsersCours {
   id: number
   user: User
-  cours: any // Forward reference to Cours
-  dateInscription: string
-  dateDesistement?: string
+  cours: Cours
+  createdAt: string
+  unsubscribedAt: string
   isArchived: boolean
-  status: UserCoursStatusEnum
   isOnWaitingList?: boolean
 }
 
-export enum UserCoursStatusEnum {
-  ACTIVE = 'active',
-  DESISTED = 'desisted',
-  COMPLETED = 'completed',
-  ARCHIVED = 'archived',
-}
-
-export enum UserRoleEnum {
-  ADMIN = 'ROLE_ADMIN',
-  USER = 'ROLE_USER',
-  TEACHER = 'ROLE_TEACHER',
-}
-
-export interface UserFilterParams {
-  search?: string
-  role?: UserRoleEnum
-  isPrioritized?: boolean
-  page?: number
-  limit?: number
-}

@@ -107,12 +107,16 @@ const router: Router = createRouter({
     },
     adminRoutes as RouteRecordRaw,
   ],
-  scrollBehavior() {
+  scrollBehavior(_to, _from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    }
     const appElement = document.getElementById('app')
     if (appElement) {
       appElement.scrollIntoView({ behavior: 'smooth' })
     }
   },
+
 })
 
 // Vuetify configuration

@@ -41,7 +41,7 @@ class CoursDetailsMapperService
         return new CoursPublicDetailDTO(
             id: $cours->getId() ?? 0,
             dateCours: $cours->getDateCours()->format(\DateTimeInterface::ATOM),
-            launchedAt: $cours->getLaunchedAt()->format(\DateTimeInterface::ATOM),
+            launchedAt: $cours->getLaunchedAt()?->format(\DateTimeInterface::ATOM),
             statusCours: new StatusCoursDTO(
                 id: $statusCours->getId() ?? 0,
                 libelle: $statusCours->getLibelle() ?? '',

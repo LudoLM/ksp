@@ -40,7 +40,7 @@ const logout = async () => {
 
 const redirectToDashboard = () => {
     router.push({
-        name: 'Statistiques',
+        name: 'AdminDashboard',
         hash: '#usersActionsReporting'
     });
 

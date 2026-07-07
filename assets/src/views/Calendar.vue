@@ -194,8 +194,10 @@ const handleGoToNextCourse = (dateValue: Date, dayIndex?: number): void => {
     :daySelected="daySelected"
     :infos="infos"
     :nextDateInNextWeek="nextDateInNextWeek"
+    :isAdminRoute="false"
     @select-day="calendarStore.setDaySelected"
     @go-to-next-course="handleGoToNextCourse"
+
   />
 
   <CalendarMobile
@@ -209,6 +211,7 @@ const handleGoToNextCourse = (dateValue: Date, dayIndex?: number): void => {
     :nextDateInTheWeek="nextDateInTheWeek"
     :nextDateIndex="nextDateIndex"
     :firstNextCoursInNextWeeks="calendarStore.firstNextCoursInNextWeeks"
+    :isAdminRoute="false"
     @navigate-day="handleNavigateDay"
     @navigate-week="handleNavigateWeek"
     @go-to-next-course="handleGoToNextCourse"

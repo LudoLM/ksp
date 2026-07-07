@@ -8,7 +8,9 @@ import bannerImage from '../../../images/banners/imageBanner9.jpg'
 import Banner from '../Banner.vue'
 import type { CalendarHeaderProps } from '@/types'
 
-defineProps<CalendarHeaderProps>()
+const props = withDefaults(defineProps<CalendarHeaderProps>(), {
+    showBanner: true
+})
 
 interface CalendarHeaderEmits {
   navigate: [direction: 'prev' | 'next']
@@ -23,6 +25,7 @@ defineEmits<CalendarHeaderEmits>()
 
 <template>
   <Banner
+    v-if="showBanner"
     title="Planning des cours"
     :backgroundColor="'rgba(30, 27, 75, .9)'"
     :image="bannerImage"

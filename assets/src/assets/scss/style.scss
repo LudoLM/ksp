@@ -133,6 +133,18 @@ a{
 }
 
 
+.buttonIcon{
+    padding: 10px;
+    border: 1px solid #E5E7EB;
+    border-radius: 50%;
+    transition: border 0.3s ease-in-out;
+    font-size: clamp(0.8rem, 1.5vw, 1rem);
+
+    &>p{
+        font-size: clamp(0.8rem, 1.5vw, 1rem);
+    }
+}
+
 /* ---------Grille Card---------------*/
 
 .gridCards ul{

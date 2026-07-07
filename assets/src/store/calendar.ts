@@ -6,7 +6,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useDateFormat } from '@vueuse/core'
-import { useGetCours, useGetOnlyNextCours, useGetTypesCours, useGetStatusCours } from '@/utils/useActionCours'
+import { useGetCours, useGetOnlyNextCours, useGetTypesCours, useGetStatusCours, useCancelCours, useDeleteCours, useOpenCours } from '@/utils/useActionCours'
+import {Cours} from "@/types";
 
 interface CalendarState {
   date: Date
@@ -15,11 +16,12 @@ interface CalendarState {
   selectedStatusCours: number
   infos: any[]
   weekInfos: any[][]
-  firstNextCoursInNextWeeks: any | null
+  firstNextCoursInNextWeeks: Cours | null
   uniqueTypeCoursList: any[]
   uniqueStatusCoursList: any[]
   weekString: string
   days: string[]
+  activeTab: number
 }
 
 /**
@@ -61,6 +63,7 @@ export const useCalendarStore = defineStore('calendar', {
     uniqueStatusCoursList: [],
     weekString: '',
     days: [],
+    activeTab: 0,
   }),
 
   getters: {
@@ -230,5 +233,70 @@ export const useCalendarStore = defineStore('calendar', {
       this.setSelectedTypeCours(0)
       this.setSelectedStatusCours(0)
     },
+
+    /**
+     * Annule un cours et met à jour son statut dans le state
+     */
+    async cancelCours(id: number) {
+      const response = await useCancelCours(id)
+      if (response.success && response.statusChange) {
+        this.updateCoursStatus(id, response.statusChange)
+      }
+      return response
+    },
+
+    /**
+     * Ouvre un cours et met à jour son statut dans le state
+     */
+    async openCreation(id: number) {
+      const response= await useOpenCours(id)
+      if (response.success && response.statusChange) {
+        this.updateCoursStatus(id, response.statusChange)
+      }
+      return response
+    },
+
+    /**
+     * Supprime un cours et le retire du state
+     */
+    async deleteCreation(id: number) {
+      const response = await useDeleteCours(id)
+      if (response.success) {
+        this.removeCours(id)
+      }
+      return response
+    },
+
+    /**
+     * Traite une réponse d'ajout d'extra (inscription supplémentaire, etc.)
+     */
+    handleAddExtraResponse(id: number, { type, statusChange }: { type: string; statusChange?: string }): void {
+      if (type === 'success' && statusChange) {
+        this.updateCoursStatus(id, statusChange)
+        const cours = this.infos.find((c) => c.id === id)
+        if (cours) {
+          cours.usersCount = (cours.usersCount ?? 0) + 1
+        }
+      }
+    },
+
+    /**
+     * Met à jour le statut d'un cours dans infos (et donc weekInfos par référence)
+     */
+    updateCoursStatus(id: number, statusChange: string): void {
+      const cours = this.infos.find((c) => c.id === id)
+      if (cours) {
+        cours.statusCours = JSON.parse(statusChange)
+      }
+    },
+
+    /**
+     * Retire un cours de infos et weekInfos
+     */
+    removeCours(id: number): void {
+      this.infos = this.infos.filter((c) => c.id !== id)
+      this.weekInfos = this.weekInfos.map((day) => day.filter((c) => c.id !== id))
+    },
   },
 })
+

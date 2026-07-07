@@ -10,7 +10,7 @@ const props = defineProps({
     currentPage: Number
 });
 
-const emit = defineEmits(["deleteCreation", "weekOpened"]);
+const emit = defineEmits([ "weekOpened"]);
 
 
 const { handleLaunchAllCours: _handleLaunchAllCours } = useWeekActions();
@@ -22,10 +22,6 @@ const launchWeekAction = async (mondayDateObject, sundayDateObject) => {
     }
 };
 
-
-const onDeleteCreation = (payload) => {
-    emit("deleteCreation", payload);
-};
 
 
 // Grouper les cours par semaine (lundi)
@@ -73,7 +69,6 @@ const groups = computed(() => {
         <div v-for="(item, index) in group" :key="item.id + currentPage" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
             <CoursLine
                 :item="item"
-                @deleteCreation="onDeleteCreation"
             />
         </div>
         <div class="groupActions">

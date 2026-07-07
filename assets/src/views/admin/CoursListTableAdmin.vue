@@ -1,10 +1,4 @@
 <template>
-    <Banner
-        :title="title"
-        :hasButton=false
-        :backgroundColor="'rgba(30, 27, 75, .9)'"
-        :image="bannerImage"
-    />
     <div
         class="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1"
     >
@@ -45,7 +39,6 @@
                     <CoursWeekList
                         :coursData = coursData
                         :currentPage="currentPage"
-                        @deleteCreation="handleUpdateDeleteCreation"
                         @weekOpened="handleWeekOpened"
                     />
                 </div>
@@ -58,21 +51,16 @@
 </template>
 
 <script setup>
-import {ref, onMounted, watch} from 'vue';
-import { useRoute } from "vue-router";
-import {
-    useGetCours,
-    useGetStatusCours,
-    useGetTypesCours,
-} from "@/utils/useActionCours.ts";
-import Banner from "../../components/Banner.vue";
-import bannerImage from "../../../images/banners/imageBanner5.jpg";
+import {onMounted, provide, ref, watch} from 'vue';
+import {useRoute} from "vue-router";
+import {useDeleteCours, useGetCours, useGetStatusCours, useGetTypesCours,} from "@/utils/useActionCours.ts";
 import CustomButton from "../../components/forms/CustomButton.vue";
 import TypeCoursFilter from "../../components/filtersCours/TypeCoursFilter.vue";
 import StatusCoursFilter from "../../components/filtersCours/StatusCoursFilter.vue";
 import MonthsFilter from "../../components/filtersCours/MonthsFilter.vue";
 import YearsFilter from "../../components/filtersCours/YearsFilter.vue";
 import CoursWeekList from "../../components/admin/CoursWeekList.vue";
+import {alertStore} from "@/store/alert.ts";
 
 const selectedCoursId = ref(null);
 const coursData = ref([]);
@@ -85,8 +73,20 @@ const currentPage = ref(1);
 const uniqueTypeCoursList = ref([]);
 const uniqueStatusCoursList = ref([]);
 const route = useRoute();
-const title = 'Liste des cours';
 const routeGetCours = ref("get-cours");
+
+
+const handleDeleteCreation = async (coursId) => {
+    const response = await useDeleteCours(coursId);
+    console.log('deleteCreation response:', response);
+    alertStore.setAlert(response.message, response.type);
+    await useGetCours(routeGetCours, coursData, selectedTypeCoursId, selectedDate, selectedStatusId);
+};
+
+
+provide('coursActions', {
+    deleteCreation: handleDeleteCreation,
+})
 
 
 // Appel de fetchData lors du montage
@@ -112,27 +112,17 @@ watch(selectedStatusId, async (newValue, oldValue) => {
     currentPage.value = 1;
     await useGetCours(routeGetCours, coursData, selectedTypeCoursId, selectedDate, selectedStatusId);
 });
-const handleUpdateDeleteCreation = ({ id }) => {
-    // Supprimer le cours de la liste
-    coursData.value = coursData.value.filter(info => info.id !== id);
-};
+
 
 const handleWeekOpened = (updatedCours) => {
     // Créer une copie du tableau existant
-    const updatedData = [...coursData.value];
-
-    // Mettre à jour les cours modifiés dans le tableau
-    updatedCours.forEach(newCours => {
-        const index = updatedData.findIndex(oldCours => oldCours.id === newCours.id);
-        if (index !== -1) {
-            updatedData[index] = newCours;
-        }
+    coursData.value = coursData.value.map(oldCours => {
+        const newCours = updatedCours.find(c => c.id === oldCours.id);
+        return newCours ||  oldCours;
     });
-
-    // Remplacer l'ancienne référence par la nouvelle pour déclencher la réactivité
-    coursData.value = updatedData;
 };
 // Mise à jour des filtres lorsqu'un événement est reçu
+
 
 const updateSelectedMonthList = async (month) => {
     selectedMonth.value = month;

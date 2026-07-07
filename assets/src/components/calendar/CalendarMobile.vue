@@ -2,7 +2,8 @@
 import CoursCardCalendar from '../CoursCardCalendar.vue'
 import type { CalendarMobileProps } from '@/types'
 
-defineProps<CalendarMobileProps>()
+const props = defineProps<CalendarMobileProps>()
+
 
 interface CalendarMobileEmits {
   'navigate-day': [direction: 'prev' | 'next']
@@ -23,6 +24,8 @@ const formatDay = (day: string): string => {
   const dayPart = day.split('-')[2]
   return `<p>${dayOfWeek.substring(0, 3)} </p><p> ${dayPart}</p>`
 }
+
+
 </script>
 
 <template>
@@ -55,7 +58,10 @@ const formatDay = (day: string): string => {
       <div class="active">
         <div v-if="weekInfos[daySelected]?.length > 0">
           <div v-for="info in weekInfos[daySelected]" :key="info.id" class="flex flex-col items-center">
-            <CoursCardCalendar :info="info" />
+            <CoursCardCalendar
+                :info="info"
+                :isAdminRoute="isAdminRoute"
+            />
           </div>
         </div>
         <div v-else class="flex justify-center items-center h-70 text-center nextDateDisplayed">

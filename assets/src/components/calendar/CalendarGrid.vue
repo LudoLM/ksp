@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CoursCardCalendar from '../CoursCardCalendar.vue'
-import type { CalendarGridProps } from '../../types'
+import type { CalendarGridProps } from '@/types'
 
 defineProps<CalendarGridProps>()
 
@@ -21,6 +21,7 @@ const formatDay = (day: string): string => {
   const dayPart = day.split('-')[2]
   return `<p>${dayOfWeek.substring(0, 3)} </p><p> ${dayPart}</p>`
 }
+
 </script>
 
 <template>
@@ -47,7 +48,10 @@ const formatDay = (day: string): string => {
       </div>
       <div v-for="(weekInfo, index) in weekInfos" :key="index">
         <div v-for="info in weekInfo" :key="info.id" class="flex flex-col items-center">
-          <CoursCardCalendar :info="info" />
+          <CoursCardCalendar
+              :info="info"
+              :isAdminRoute="isAdminRoute"
+          />
         </div>
       </div>
     </div>

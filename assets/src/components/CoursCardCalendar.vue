@@ -3,12 +3,18 @@ import {computed, ref} from "vue";
 import {useUserStore} from "../store/user";
 import StatusCoursTag from "./StatusCoursTag.vue";
 import {getImageUrl} from "../utils/useAssetHelper.js";
+import ParticipantsBadge from "@/components/admin/ParticipantsBadge.vue";
+import {useCounterSubscribed} from "@/utils/useCounterSubscribed.ts";
 
 const props = defineProps({
     info: {
         type: Object,
         required: true,
     },
+    isAdminRoute: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const formattedHour = computed(() => {
@@ -38,42 +44,50 @@ const isSubscribed = computed(() => {
     );
 });
 
+const countSubscribed = computed(() => useCounterSubscribed(props.info.usersCours));
 
 </script>
 
 <template>
     <router-link
         class="coursCardCalendar"
-        :to="{ name: 'CoursDetails', params: { id: info.id }}"
+        :to="{ name: isAdminRoute ? 'AdminCoursDetails' : 'CoursDetails', params: { id: info.id }}"
     >
         <StatusCoursTag
             class="statusCoursTag"
             :statusCours="info.statusCours"
         />
+
+        <ParticipantsBadge
+            v-if="isAdminRoute"
+            :countSubscribed="countSubscribed"
+            :nbInscriptionMax="info.nbInscriptionMax"
+        />
+
         <div class="card-image">
             <img :src="getImageUrl(info.typeCours.thumbnail)" alt="">
         </div>
-        <div class="card-infos ">
-            <svg
-                class="fill-body dark:hover:fill-primary"
-                viewBox="0 0 20 20"
-                fill="#000000"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M9.16666 3.33332C5.945 3.33332 3.33332 5.945 3.33332 9.16666C3.33332 12.3883 5.945 15 9.16666 15C12.3883 15 15 12.3883 15 9.16666C15 5.945 12.3883 3.33332 9.16666 3.33332ZM1.66666 9.16666C1.66666 5.02452 5.02452 1.66666 9.16666 1.66666C13.3088 1.66666 16.6667 5.02452 16.6667 9.16666C16.6667 13.3088 13.3088 16.6667 9.16666 16.6667C5.02452 16.6667 1.66666 13.3088 1.66666 9.16666Z"
-                />
-                <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
-                />
-            </svg>
-            <div :class="isSubscribed ? 'isSubscribed' : 'invisible'">Je participe</div>
-            <div :class="isUserOnWaitingList ? 'isUserOnWaitingList' : 'invisible'">
-                En attente
+        <div class="card-infos">
+            <div>
+                <svg
+                    class="fill-body dark:hover:fill-primary"
+                    viewBox="0 0 20 20"
+                    fill="#000000"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M9.16666 3.33332C5.945 3.33332 3.33332 5.945 3.33332 9.16666C3.33332 12.3883 5.945 15 9.16666 15C12.3883 15 15 12.3883 15 9.16666C15 5.945 12.3883 3.33332 9.16666 3.33332ZM1.66666 9.16666C1.66666 5.02452 5.02452 1.66666 9.16666 1.66666C13.3088 1.66666 16.6667 5.02452 16.6667 9.16666C16.6667 13.3088 13.3088 16.6667 9.16666 16.6667C5.02452 16.6667 1.66666 13.3088 1.66666 9.16666Z"
+                    />
+                    <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
+                    />
+                </svg>
+                <div v-if="!isAdminRoute" :class="isSubscribed ? 'isSubscribed' : 'invisible'">Je participe</div>
+                <div v-if="!isAdminRoute" :class="isUserOnWaitingList ? 'isUserOnWaitingList' : 'invisible'">En attente</div>
             </div>
             <div class="card_title">
                 <h3>{{ info.typeCours.libelle }}</h3>

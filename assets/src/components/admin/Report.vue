@@ -62,7 +62,6 @@ onMounted(() => {
                     v-model="selectedYear"
                     class="w-1/2 sm:w-1/4"
                 />
-                <input type="month"/>
                 <div class="flex flex-col min-h-[160px]">
                     <div v-if="isLoading" class="flex justify-center">
                         <Spinner />

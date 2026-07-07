@@ -9,7 +9,7 @@ const coursRoutes: RouteRecordRaw[] = [
       {
         path: 'coursList',
         name: 'CoursAdmin',
-        component: () => import('../../views/admin/CoursListTableAdmin.vue'),
+        component: () => import('../../views/admin/AdminPlanning.vue'),
         meta: { navLabel: 'Liste des cours', navGroup: 'cours', requiresAdmin: true, displayInNav: true, order: 1 },
       },
       {

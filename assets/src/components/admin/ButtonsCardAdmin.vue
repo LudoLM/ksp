@@ -1,140 +1,116 @@
 <script setup>
-
-import ModalAddExtra from "../modals/ModalAddExtra.vue";
-import {ref} from "vue";
+import {inject, ref} from "vue";
 import DeleteItem from "../../../icons/adminActions/DeleteItem.vue";
 import CancelCours from "../../../icons/adminActions/CancelCours.vue";
 import LaunchCours from "../../../icons/adminActions/LaunchCours.vue";
-import InfosItem from "../../../icons/adminActions/InfosItem.vue";
-import AddExtraUser from "../../../icons/adminActions/AddExtraUser.vue";
 import EditCoursIcon from "../../../icons/adminActions/EditCoursIcon.vue";
 import Tooltip from "../Tooltip.vue";
 import ModalConfirm from "../modals/ModalConfirm.vue";
+import {updateCours, useCancelCours, useOpenCours} from "@/utils/useActionCours.ts";
+import {alertStore} from "@/store/alert.ts";
 
-defineProps({
-  statusCours:{
-    type: Object,
-    required: true
-  },
+const props = defineProps({
   coursId:{
     type: Number,
     required: true
   },
-
 })
 
-const addExtraDialog = ref(false);
+const statusCours = defineModel('statusCours', {
+    type: Object,
+    required: true
+})
+
 const confirmDialog = ref(false);
-const emit = defineEmits([
-  'openCreation',
-  'updateCreation',
-  'updateCours',
-  'deleteCreation',
-  'cancelCours',
-  'handleAddExtraResponse'
-])
+
+
+const { deleteCreation } = inject('coursActions')
+
+
+const onDeleteClick = async () => {
+    await deleteCreation(props.coursId);
+}
+const cancelCours = async () => {
+    const response = await useCancelCours(props.coursId);
+    if (response.success) {
+        statusCours.value = JSON.parse(response.statusChange);
+    }
+    alertStore.setAlert(response.message, response.type);
+};
+
+
+// A revoir
+const openCreation = async () => {
+    const response = await useOpenCours(props.coursId);
+    if (response.success) {
+        statusCours.value = JSON.parse(response.statusChange);
+    }
+    alertStore.setAlert(response.message, response.type);
+};
 
 </script>
 <template>
-
-    <Tooltip
-        :title="'Voir les détails du cours.'"
-    >
-        <button class="hover:text">
-            <router-link :to="{ name: 'AdminCoursDetails', params: { id: coursId }}">
-                <InfosItem
-                    data-text="Why did you hovered?"
-                    size="18"/>
-            </router-link>
-        </button>
-    </Tooltip>
+<!--    DeleteCours-->
     <ModalConfirm
         v-model:isOpen="confirmDialog"
         title="Confirmation requise"
         message="Etes-vous sûr de vouloir supprimer ce cours ?"
-        @confirmActions="emit('deleteCreation')"
+        @confirmActions="onDeleteClick"
         v-if="statusCours.libelle === 'En création'"
     >
         <Tooltip
             :title="'Supprimer le cours.'"
         >
-            <button class="hover:text">
+            <button class="hover:text buttonIcon">
                 <DeleteItem size="18"/>
             </button>
         </Tooltip>
     </ModalConfirm>
+<!--    EditCours-->
     <Tooltip
         title="Modifier le cours."
         v-if="statusCours.libelle === 'En création' || statusCours.libelle === 'Ouvert'"
-        @click="emit(statusCours.libelle === 'En création' ? 'updateCreation' : 'updateCours')"
+        @click="updateCours(coursId)"
     >
         <button
+            class="buttonIcon"
             @click="confirmDialog"
         >
             <EditCoursIcon size="18"/>
         </button>
     </Tooltip>
+<!--    CancelCours-->
     <ModalConfirm
         v-model:isOpen="confirmDialog"
         title="Confirmation requise"
         message="Etes-vous sûr de vouloir annuler à ce cours ?"
-        @confirmActions="emit('cancelCours')"
+        @confirmActions="cancelCours"
         v-if="(statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet')"
     >
         <Tooltip
             :title="'Annuler le cours.'"
         >
-            <button>
+            <button class="buttonIcon">
                 <CancelCours size="18"/>
             </button>
 
         </Tooltip>
     </ModalConfirm>
+<!--    OpenCours-->
     <ModalConfirm
         v-model:isOpen="confirmDialog"
         title="Confirmation requise"
         message="Etes-vous sûr de vouloir vous ouvrir ce cours ?"
-        @confirmActions="emit('openCreation')"
+        @confirmActions="openCreation"
         v-if="statusCours.libelle === 'En création'"
     >
         <Tooltip
             :title="'Ouvrir le cours.'"
         >
-            <button>
-                <LaunchCours size="18"/>
-            </button>
+                <button class="buttonIcon">
+                    <LaunchCours size="18"/>
+                </button>
         </Tooltip>
     </ModalConfirm>
-  <ModalAddExtra
-      v-if="statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet'"
-      v-model:isOpen="addExtraDialog"
-      title="Ajouter un extra"
-      message="Sélectionner l'extra à ajouter."
-      :cours="coursId"
-      @subscriptionResponse="(data) => emit('handleAddExtraResponse', data)"
-  >
-      <Tooltip
-            :title="'Ajouter un extra.'"
-      >
-          <button class="flex items-center justify-center">
-              <AddExtraUser size="18"/>
-          </button>
-      </Tooltip>
-  </ModalAddExtra>
 </template>
 
-
-<style scoped>
-
-    button{
-        padding: 10px;
-        border: 1px solid #E5E7EB;
-        border-radius: 50%;
-        transition: border 0.3s ease-in-out;
-        font-size: clamp(0.8rem, 1.5vw, 1rem);
-
-        &>p{
-            font-size: clamp(0.8rem, 1.5vw, 1rem);
-        }
-    }
-</style>

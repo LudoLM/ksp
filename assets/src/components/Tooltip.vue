@@ -45,6 +45,7 @@ const props = defineProps({
 
     .tooltip:after {
         background-color: #f5f5f5;
+        color: #000;
         box-shadow: 0 0 3px #ddd;
         content: attr(data-tooltip);
         padding: 10px;

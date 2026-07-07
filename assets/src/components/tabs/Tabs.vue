@@ -3,14 +3,18 @@ import { ref, computed, useSlots } from 'vue'
 
 const emit = defineEmits(['changeTab'])
 
-const active = ref(0)
+const activeTab = defineModel('activeTab', {
+    type: Number,
+    default: 0
+})
+
 const slots = useSlots().default?.()
 const transform = computed(() =>
-    `translate3d(-${active.value * 100}%, 0px, 0px)`
+    `translate3d(-${activeTab.value * 100}%, 0px, 0px)`
 )
 
 function selectTab(index) {
-    active.value = index
+    activeTab.value = index
     emit('changeTab', index)
 }
 </script>
@@ -22,7 +26,7 @@ function selectTab(index) {
                 v-for="(slot, index) in slots" :key="slot.props?.title"
                 @click="selectTab(index)"
                 class="w-full flex items-center justify-center cursor-pointer mx-10 pb-2 border-b-2"
-                :class="active === index  ? 'border-templateMainColor' : 'border-transparent'"
+                :class="activeTab === index  ? 'border-templateMainColor' : 'border-transparent'"
             >
               {{ slot.props?.title }}
             </span>

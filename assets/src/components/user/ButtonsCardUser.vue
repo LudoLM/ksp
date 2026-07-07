@@ -1,9 +1,9 @@
 <script setup>
 import {ref, watch} from "vue";
 import CustomButton from "../forms/CustomButton.vue";
-import { useSubscription, useUnSubscription } from "../../utils/useSubscribing";
-import {useUserStore} from "../../store/user";
-import {alertStore} from "../../store/alert";
+import { useSubscription, useUnSubscription } from "@/utils/useSubscribing.ts";
+import {useUserStore} from "@/store/user.ts";
+import {alertStore} from "@/store/alert";
 
 const userStore = useUserStore();
 
@@ -57,7 +57,6 @@ const handleSubscription = async (isUserOnWaitingList) => {
                 isSubscribed: !isUserOnWaitingList
             };
 
-            // Informer le parent
             emit("updateCoursStatus", {
                 statusCoursValue: localData.value.statusCours,
                 usersCountValue: result.usersCount,
@@ -65,12 +64,11 @@ const handleSubscription = async (isUserOnWaitingList) => {
                 isUserOnWaitingListValue: localData.value.isUserOnWaitingList,
 
             });
-
             userStore.userNombreCours = result.userCoursQuantity;
             alertStore.setAlert(result.message, "success");
 
         } else {
-            alertStore.setAlert(result.message, "error");
+            alertStore.error(result.message);
         }
     } catch (error) {
         alertStore.setAlert("Une erreur inattendue s'est produite.", "error");

@@ -28,3 +28,5 @@ export const useCoursStore = defineStore('cours', {
     timerBeforeBeginning: 6 * 60 * 60 * 1000,
   }),
 })
+
+

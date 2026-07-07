@@ -1,7 +1,7 @@
 /**
  * Frontend TypeScript Types & Interfaces
  * Central export point for all types - synchronized with backend entities (Symfony)
- * 
+ *
  * Organization:
  * - user.ts: User, UserProfile, UsersCours, etc.
  * - cours.ts: Cours, TypeCours, StatusCours, CoursWeekType, etc.
@@ -18,9 +18,7 @@ export type {
   CreateUserDTO,
   UpdateUserDTO,
   UsersCours,
-  UserFilterParams,
 } from './user'
-export { UserCoursStatusEnum, UserRoleEnum } from './user'
 
 // Cours types
 export type {
@@ -35,7 +33,6 @@ export type {
   UpdateCoursDTO,
   CoursFilterParams,
 } from './cours'
-export { StatusCoursEnum } from './cours'
 
 // Calendar types
 export type {

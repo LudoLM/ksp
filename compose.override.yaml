@@ -11,6 +11,8 @@ services:
       # If you develop on Mac or Windows you can remove the vendor/ directory
       #  from the bind-mount for better performance by enabling the next line:
       #- /app/vendor
+    ports:
+      - "127.0.0.1:80:80"
     environment:
       MERCURE_EXTRA_DIRECTIVES: demo
       # See https://xdebug.org/docs/all_settings#mode

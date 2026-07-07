@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import {computed, onMounted, ref} from 'vue';
+import {computed, onMounted, provide, ref} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import {useDateFormat} from '@vueuse/core';
-import {getPublicCoursById, getAdminCoursById} from "../utils/useActionCours";
+import {
+    getPublicCoursById,
+    getAdminCoursById,
+    useDeleteCours,
+} from "../utils/useActionCours";
 import CustomButton from "../components/forms/CustomButton.vue";
 import ButtonsCardUser from "../components/user/ButtonsCardUser.vue";
 import StatusCoursTag from "../components/StatusCoursTag.vue";
@@ -11,6 +15,11 @@ import {useUserStore} from "../store/user";
 import {getImageUrl} from "../utils/useAssetHelper.js";
 import type { CoursPublicDetailDTO, UsersCoursDTO } from "../types/coursDetails";
 import ParticipationLists from "@/components/admin/ParticipationLists.vue";
+import ButtonsCardAdmin from "@/components/admin/ButtonsCardAdmin.vue";
+import {alertStore} from "../store/alert";
+import UserSearchAutocomplete from "@/components/admin/UserSearchAutocomplete.vue";
+import { useSubscription } from "@/utils/useSubscribing";
+import type { User } from "@/types/user";
 
 const route = useRoute();
 const router = useRouter();
@@ -50,6 +59,16 @@ const redirectToLogin = () => {
 const stepBack = () => {
     router.back();
 };
+
+const handleDeleteCreation = async () => {
+    const response = await useDeleteCours(coursId);
+    stepBack();
+    alertStore.setAlert(response.message, response.type);
+};
+
+provide('coursActions', {
+    deleteCreation: handleDeleteCreation,
+})
 
 const coursDetails = async () => {
   if (isAdminPath) {
@@ -115,12 +134,28 @@ interface StatusCoursUpdate {
 }
 
 const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscribedValue, isUserOnWaitingListValue }: StatusCoursUpdate): void => {
-    if (cours.value) {
-        cours.value.statusCours = statusCoursValue;
+     if (cours.value) {
+         cours.value.statusCours = statusCoursValue;
+     }
+     usersCount.value = usersCountValue;
+     isSubscribed.value = isSubscribedValue;
+     isUserOnWaitingList.value = isUserOnWaitingListValue;
+};
+
+
+const handleAddParticipant = async (user: User): Promise<void> => {
+    try {
+        const result = await useSubscription(coursId, false, user.id);
+        if (result.success) {
+            // Mettre à jour les listes des utilisateurs
+            await coursDetails();
+            alertStore.setAlert(`${user.prenom} ${user.nom} a été ajouté avec succès`, 'success');
+        } else {
+            alertStore.setAlert(result.message || 'Erreur lors de l\'ajout du participant', 'error');
+        }
+    } catch (error) {
+        alertStore.setAlert('Erreur lors de l\'ajout du participant', 'error');
     }
-    usersCount.value = usersCountValue;
-    isSubscribed.value = isSubscribedValue;
-    isUserOnWaitingList.value = isUserOnWaitingListValue;
 };
 </script>
 
@@ -143,13 +178,13 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                             </div>
                         </div>
                         <div>
-                            <div class="constraintsInfos text-gray-400">{{ cours.hasPriority && dateLimit ? "Priorité jusqu'au " + dateLimit : "" }}</div>
-                            <div class="constraintsInfos text-gray-400">{{ !cours.hasLimitOfOneCoursPerWeek ? "Ce cours n'est pas limité à 1 par semaine" : "" }}</div>
+                            <div class="constraintsInfos text-gray-400 text-xs">{{ cours.hasPriority && dateLimit ? "Priorité jusqu'au " + dateLimit : "" }}</div>
+                            <div class="constraintsInfos text-gray-400 text-xs">{{ !cours.hasLimitOfOneCoursPerWeek ? "Ce cours n'est pas limité à 1 par semaine" : "" }}</div>
                         </div>
                         <div>
                             <h2 class="text-white mb-4">{{ cours.typeCours.libelle }}</h2>
                             <div class="flex justify-between mb-4">
-                                <div class="duree text-gray-400">Durée: {{ cours.duree }} min</div>
+                                <div class="duree text-gray-400 text-xs">Durée: {{ cours.duree }} min</div>
                                 <div :style="{ visibility: cours.nbInscriptionMax - usersCount <= 3 ? 'visible' : 'hidden' }" class="dispo quantity">
                                     Dispo:&nbsp;<span class="infoRestante">{{ cours.nbInscriptionMax - usersCount >= 0 ? cours.nbInscriptionMax - usersCount : 0}}</span>
                                 </div>
@@ -160,7 +195,7 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                         <div class="specialNote mt-5" v-if="cours.specialNote !== ''">Note: {{ cours.specialNote }}</div>
 
                         <div class="w-full ml-auto mr-auto mt-8">
-                            <div class="w-2/3 h-0.5 bg-gray-200 mx-auto mb-3"></div>
+                            <div class="w-2/3 h-0.5 bg-gray-200 mx-auto mb-6"></div>
                             <div class="button flex justify-center gap-5">
                                 <ButtonsCardUser
                                      v-if="!isAdminPath"
@@ -180,6 +215,11 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                                 >
                                     {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
                                 </ModalConnect>
+                                <ButtonsCardAdmin
+                                    v-if="cours && isAdminPath"
+                                    v-model:statusCours="cours.statusCours"
+                                    :coursId="cours.id"
+                                />
                                 <div>
                                     <CustomButton @click="stepBack">Retour</CustomButton>
                                 </div>
@@ -192,13 +232,20 @@ const handleUpdateStatusCours = ({ statusCoursValue, usersCountValue, isSubscrib
                 <div class="details_skeleton"></div>
             </template>
         </div>
-        <ParticipationLists
-            v-if="isAdminPath"
-            :coursId="coursId"
-            :usersSubscribed="usersSubscribed"
-            :usersOnStandby="usersOnStandby"
-            @updateUnsubscribeUsersValue="handleUpdateUnsubscribeUsersValue"
-        />
+        <div
+            v-if="isAdminPath && cours?.statusCours.id === 1"
+        >
+            <ParticipationLists
+                :coursId="coursId"
+                :usersSubscribed="usersSubscribed"
+                :usersOnStandby="usersOnStandby"
+                @updateUnsubscribeUsersValue="handleUpdateUnsubscribeUsersValue"
+            />
+            <UserSearchAutocomplete
+                :coursId="coursId"
+                @user-selected="handleAddParticipant"
+            />
+        </div>
     </div>
 
 </template>
@@ -233,9 +280,6 @@ p{
   min-height: 60vh;
   background: #111;
 }
-.hero-img {
-  height: 60vh;
-}
 
 .infos_wrapper {
     position: absolute;
@@ -263,10 +307,9 @@ p{
     }
 }
 
-.isSubscribedTag, .isUserOnWaitingListTag, .specialNote, .descriptif, .duree, .dispo, .isSubscribed, .onStandby, .constraintsInfos {
+.isSubscribedTag, .isUserOnWaitingListTag, .specialNote, .descriptif, .dispo, .isSubscribed, .onStandby {
     font-size: clamp(0.8rem, 1vw, 1rem);
 }
-
 
 @media (max-width: 980px) {
   .infos_wrapper {

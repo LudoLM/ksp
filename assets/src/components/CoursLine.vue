@@ -4,9 +4,14 @@ import {useDateFormat} from "@vueuse/core";
 import StatusCoursTag from "./StatusCoursTag.vue";
 import ButtonsCardAdmin from "./admin/ButtonsCardAdmin.vue";
 import {useCancelCours, useDeleteCours, useOpenCours} from "../utils/useActionCours";
-import {computed, ref} from "vue";
+import {computed, inject, ref} from "vue";
 import {useRouter} from "vue-router";
 import {alertStore} from "../store/alert";
+import {useCounterSubscribed} from "@/utils/useCounterSubscribed.ts";
+import InfosItem from "../../icons/adminActions/InfosItem.vue";
+import Tooltip from "@/components/Tooltip.vue";
+import AddExtraUser from "../../icons/adminActions/AddExtraUser.vue";
+import ModalAddExtra from "@/components/modals/ModalAddExtra.vue";
 
 const router = useRouter();
 
@@ -16,72 +21,20 @@ const props = defineProps(
         item: Object
     }
 )
+
 const emit = defineEmits(['cancelCours', 'deleteCreation', 'updateCreation', 'openCreation', 'handleAddExtraResponse']);
-const statusCours = ref(props.item.statusCours);
+const statusCours = computed(() => props.item.statusCours);
+const addExtraDialog = ref(false);
 
-const isActiveSubscription = (usersCours) => {
-    if (usersCours.isOnWaitingList) {
-        return false;
-    }
-    if (!usersCours.unsubscribedAt) {
-        return true;
-    }
-    const unsubscribedAt = new Date(usersCours.unsubscribedAt);
-    const createdAt = new Date(usersCours.createdAt);
-    return unsubscribedAt <= createdAt;
-};
+const usersQuantity = ref(useCounterSubscribed(props.item.usersCours));
 
-const calculateUsersCount = (item) => {
-    return item.usersCours.filter(isActiveSubscription).length;
-};
-
-const usersCount = ref(calculateUsersCount(props.item));
-
-const deleteCreation = async () => {
-    const response = await useDeleteCours(props.item.id);
-    alertStore.setAlert(response.message, response.type);
-    if (response.success){
-        emit('deleteCreation', {
-            id: props.item.id
-        });
-    }
-};
-
-const updateCreation = () => {
-    router.push({ name: 'EditCours', params: { id: props.item.id } });
-};
-
-const updateCours = () => {
-    router.push({ name: 'EditCours', params: { id: props.item.id } });
-};
-
-const cancelCours = async () => {
-    const response = await useCancelCours(props.item.id);
-    if (response.success) {
-        statusCours.value = JSON.parse(response.statusChange);
-    }
-    alertStore.setAlert(response.message, response.type);
-};
-
-
-// A revoir
-const openCreation = async () => {
-    const response = await useOpenCours(props.item.id);
-    if (response.success) {
-        statusCours.value = JSON.parse(response.statusChange);
-    }
-    alertStore.setAlert(response.message, response.type);
-};
-
-const handleAddExtraResponse = ({ type, message, statusChange }) => {
+const handleAddExtraResponse = ({ type, message, statusChange, usersCount }) => {
     if (type === 'success') {
         statusCours.value = JSON.parse(statusChange);
-        usersCount.value = calculateUsersCount(props.item) + 1;
+        usersQuantity.value = usersCount;
     }
     alertStore.setAlert(message, type);
 };
-
-
 
 </script>
 
@@ -99,7 +52,7 @@ const handleAddExtraResponse = ({ type, message, statusChange }) => {
 
         <!-- Inscrits -->
         <div class="users">
-            {{ usersCount }} / {{ item.nbInscriptionMax }}
+            {{ usersQuantity }} / {{ item.nbInscriptionMax }}
         </div>
 
         <!-- Statut -->
@@ -110,16 +63,36 @@ const handleAddExtraResponse = ({ type, message, statusChange }) => {
         <!-- Actions -->
         <div class="actions">
             <div class="flex justify-start items-center gap-8">
+                <Tooltip
+                    :title="'Voir les détails du cours.'"
+                >
+                    <button class="hover:text buttonIcon">
+                        <router-link :to="{ name: 'AdminCoursDetails', params: { id: item.id }}">
+                            <InfosItem
+                                size="18"/>
+                        </router-link>
+                    </button>
+                </Tooltip>
                 <ButtonsCardAdmin
-                    :statusCours="statusCours"
+                    v-model:statusCours="statusCours"
                     :coursId="item.id"
-                    @cancelCours="cancelCours"
-                    @deleteCreation="deleteCreation"
-                    @updateCreation="updateCreation"
-                    @updateCours="updateCours"
-                    @openCreation="openCreation"
-                    @handleAddExtraResponse="handleAddExtraResponse"
                 />
+                <ModalAddExtra
+                    v-if="statusCours.libelle === 'Ouvert' || statusCours.libelle === 'Complet'"
+                    v-model:isOpen="addExtraDialog"
+                    title="Ajouter un extra"
+                    message="Sélectionner l'extra à ajouter."
+                    :cours="item.id"
+                    @subscriptionResponse="(data) =>handleAddExtraResponse(data)"
+                >
+                    <Tooltip
+                        :title="'Ajouter un extra.'"
+                    >
+                        <button class="flex items-center justify-center buttonIcon">
+                            <AddExtraUser size="18"/>
+                        </button>
+                    </Tooltip>
+                </ModalAddExtra>
             </div>
         </div>
     </div>

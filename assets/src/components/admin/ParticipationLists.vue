@@ -45,12 +45,6 @@ const handleMultiUnSubscription = async () => {
     }
 };
 
-const redirectToUserProfile = (selectedUserId: string) => {
-    if (selectedUserId) {
-        router.push({ name: 'AdminProfile', params: { id: selectedUserId} });
-    }
-};
-
 </script>
 
 <template>
@@ -69,11 +63,12 @@ const redirectToUserProfile = (selectedUserId: string) => {
                         <div>{{ index +1 }}</div>
                         <div
                             class="flex items-center gap-2 cursor-pointer"
-                            @click="redirectToUserProfile(user.user.id)"
+                            @click="router.push({ name: 'AdminProfile', params: { id: user.user.id }})"
                         >
                             <div class="w-1/5">{{ user.user.id }}</div>
                             <div><span>{{ user.user.prenom }}</span> <span>{{ user.user.nom }}</span></div>
                         </div>
+
 
                         <div class="flex justify-end"><input
                             type="checkbox"
@@ -82,6 +77,9 @@ const redirectToUserProfile = (selectedUserId: string) => {
                         /></div>
                     </div>
                 </transition-group>
+                <div v-else>
+                    <p class="text-sm italic mt-4">Pas de participants.</p>
+                </div>
                 <div class="unsubscribe-row">
                     <transition name="fade-slide">
                         <div
@@ -107,10 +105,12 @@ const redirectToUserProfile = (selectedUserId: string) => {
                         <span>{{ user.user.prenom }} {{ user.user.nom }}</span>
                     </div>
                 </div>
+                <div v-else>
+                    <p class="text-sm italic mt-6">Personne en attente.</p>
+                </div>
             </div>
         </div>
     </div>
-
 </template>
 
 <style scoped lang="scss">

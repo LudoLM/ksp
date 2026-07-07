@@ -77,6 +77,25 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
+    public function getAvailableUsers(Cours $cours, string $search): array
+    {
+        return $this->createQueryBuilder('u')
+            ->select('NEW App\DTO\LightUserDTO(u.id, u.prenom, u.nom)')
+            ->leftJoin('u.usersCours', 'uc', 'WITH', 'uc.cours = :cours')
+            ->andWhere(
+                // Soit pas d'inscription du tout
+                // Soit désinscrit (unsubscribedAt non null) ET la désinscription est après la dernière inscription
+                'uc.id IS NULL OR (uc.unsubscribedAt IS NOT NULL AND uc.unsubscribedAt > uc.createdAt)'
+            )
+            ->andWhere('u.anonymisedAt IS NULL')
+            ->andWhere('u.nom LIKE :search OR u.prenom LIKE :search')
+            ->setParameter('cours', $cours)
+            ->setParameter('search', '%'.$search.'%')
+            ->orderBy('u.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function paginateUsers(
         int $page = 1,
         int $limit = 10,

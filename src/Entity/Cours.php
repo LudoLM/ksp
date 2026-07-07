@@ -69,7 +69,7 @@ class Cours extends Coursbase
         $this->createdAt = $createdAt;
     }
 
-    public function getLaunchedAt(): \DateTimeInterface
+    public function getLaunchedAt(): ?\DateTimeInterface
     {
         return $this->launchedAt;
     }
@@ -79,7 +79,7 @@ class Cours extends Coursbase
         $this->launchedAt = $launchedAt;
     }
 
-    public function getUpdatedAt(): \DateTimeInterface
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
     }

@@ -118,7 +118,7 @@ const closeDialog = () => {
                                     id="hasLimitOfOneCoursPerWeek"
                                     class="text-xs sm:text-sm"
                                 >
-                                    Limite 2 cours/semaine
+                                    Limite 1 cours/semaine
                                 </CustomCheckboxPriority>
                             </div>
                         </div>
