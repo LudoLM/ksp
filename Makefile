@@ -44,6 +44,10 @@ test: ## Start tests with phpunit, pass the parameter "c=" to add options to php
 	@$(eval c ?=)
 	@$(DOCKER_COMP) exec -e APP_ENV=test php bin/phpunit $(c)
 
+coverage : ## Start tests with phpunit and generate a code coverage report, pass the parameter "c=" to add options to phpunit, example: make coverage c="--group e2e --stop-on-failure"
+	@$(eval c ?=)
+	@$(DOCKER_COMP) exec -e XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-text $(c)
+
 phpstan: ## Run PHPStan
 	@$(DOCKER_COMP) exec php vendor/bin/phpstan analyse
 

@@ -20,6 +20,7 @@ framework:
              App\Message\SendPasswordChangedNotificationMessage: async
              App\Message\SendUpdateCoursEmailMessage: async
              App\Message\SendDesistementEmailMessage: async
+             App\Message\SendToUsersCoursAvailabilityMessage: async
               
 
 # when@test:
