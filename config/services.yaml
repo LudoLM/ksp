@@ -48,6 +48,10 @@ services:
         arguments:
             $baseUrl: '%app_url%'
             
+    App\Service\SendingEmail\SendToUsersCoursAvailabilityService:
+        arguments:
+            $baseUrl: '%app_url%'
+            
     App\Scheduler\ScheduleProvider:
         arguments:
             $cronExpression: '%app.cleanup_cron%' # Injecter le paramètre app.cleanup_cron

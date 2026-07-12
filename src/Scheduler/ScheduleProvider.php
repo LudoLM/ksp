@@ -23,6 +23,8 @@ final class ScheduleProvider implements ScheduleProviderInterface
         return $this->schedule ??= new Schedule()
             ->add(RecurringMessage::cron($this->cronExpression, new RemoveExpiredRefreshTokens()))
             ->add(RecurringMessage::cron('30 2 * * *', new RunCommandMessage('app:archive-inactive-users')))
-            ->add(RecurringMessage::cron('0 3 * * *', new RunCommandMessage('app:anonymise-old-archived-users')));
+            ->add(RecurringMessage::cron('0 3 * * *', new RunCommandMessage('app:anonymise-old-archived-users')))
+            // ->add(RecurringMessage::cron('0 18 * * 7', new RunCommandMessage('app:send-to-users-cours-availability')))
+        ;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Constant\ArchivageConstants;
+use App\DTO\UserContactDTO;
 use App\Entity\Cours;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -176,6 +177,35 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->orderBy('u.archivedAt', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function findIdsActiveUsers(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->select('u.id')
+            ->where('u.isArchived = false')
+            ->andWhere('u.isDeleted = false')
+            ->andWhere('u.anonymisedAt IS NULL')
+            ->andWhere('u.nombreCours > 0')
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
+    public function findUserContact(int $id): ?UserContactDTO
+    {
+        return $this->createQueryBuilder('u')
+            ->select('NEW App\DTO\UserContactDTO(
+                u.id,
+                u.prenom,
+                u.nom,
+                u.email,
+                u.telephone
+            )')
+            ->where('u.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
     }
 
     //    /**

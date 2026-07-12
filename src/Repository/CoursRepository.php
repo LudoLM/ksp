@@ -6,7 +6,9 @@ use App\Entity\Cours;
 use App\Entity\StatusCours;
 use App\Entity\TypeCours;
 use App\Entity\User;
+use App\Enum\StatusCoursEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -241,5 +243,39 @@ class CoursRepository extends ServiceEntityRepository
             ->setMaxResults($limit); // Limit
 
         return new Paginator($query);
+    }
+
+    public function findIdsOpenCoursForNextWeek(): array
+    {
+        $now = new \DateTimeImmutable();
+        $nextWeek = $now->modify('+7 days');
+
+        return $this->createQueryBuilder('c')
+           ->select('c.id')
+           ->join('c.statusCours', 'statusCours')
+           ->andWhere('statusCours.libelle = :status')
+           ->andWhere('c.dateCours > :now')
+           ->andWhere('c.dateCours < :nextWeek')
+           ->setParameter('status', StatusCoursEnum::OUVERT->value)
+           ->setParameter('now', $now, Types::DATETIME_IMMUTABLE)
+           ->setParameter('nextWeek', $nextWeek, Types::DATETIME_IMMUTABLE)
+           ->getQuery()
+           ->getSingleColumnResult();
+    }
+
+    public function findCoursAvailabilitiesByIds(array $ids): array
+    {
+        return $this->createQueryBuilder('c')
+            ->select('NEW App\DTO\CoursAvailabilityDTO(
+                c.id,
+                typeCours.libelle,
+                c.dateCours,
+                c.duree
+            )')
+            ->join('c.typeCours', 'typeCours')
+            ->andWhere('c.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
     }
 }
