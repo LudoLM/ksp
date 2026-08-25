@@ -3,7 +3,7 @@
  * Gère le profil, historique, paiements
  */
 
-import { useUserStore } from '@/store/user'
+import { useUserStore, UserCertificatMedical } from '@/store/user'
 import { apiFetch } from '@/utils/useFetchInterceptor'
 import { computed, ref } from 'vue'
 import { alertStore } from '@/store/alert'
@@ -20,6 +20,7 @@ interface UserProfileData {
   codePostal: string | null
   adresse: string | null
   commune: string | null
+  certificatMedical: UserCertificatMedical | null
 }
 
 interface DeleteUserResponse {
@@ -49,6 +50,7 @@ export function useActionsUser() {
     codePostal: null,
     adresse: null,
     commune: null,
+    certificatMedical: null,
   })
 
   /**
@@ -142,7 +144,7 @@ export function useActionsUser() {
         currentUserNewCount.value = currentUser.value.nombreCours
       } else {
         // Utilisateur consulte son propre profil
-        const { getUserId: userId, getUserPrenom: userPrenom, getUserNom: userNom, getUserEmail: userEmail, getUserNombreCours: userNombreCours, getUserTelephone: userTelephone, getUserCodePostal: userCodePostal, getUserAdresse: userAdresse, getUserVille: userVille } = storeToRefs(userStore)
+        const { getUserId: userId, getUserPrenom: userPrenom, getUserNom: userNom, getUserEmail: userEmail, getUserNombreCours: userNombreCours, getUserTelephone: userTelephone, getUserCodePostal: userCodePostal, getUserAdresse: userAdresse, getUserVille: userVille, getUserCertificatMedical : userCertificatMedical } = storeToRefs(userStore)
 
         currentUser.value = {
           userId: userId.value,
@@ -154,9 +156,11 @@ export function useActionsUser() {
           codePostal: userCodePostal.value,
           adresse: userAdresse.value,
           commune: userVille.value,
+          certificatMedical: userCertificatMedical.value,
         }
       }
     } catch (error) {
+      console.log('Erreur lors du chargement du profil:', error)
       alertStore.setAlert('Erreur lors du chargement du profil', 'error')
     }
   }

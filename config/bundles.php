@@ -20,4 +20,5 @@ return [
     Pentatrion\ViteBundle\PentatrionViteBundle::class => ['all' => true],
     Symfony\Bundle\MercureBundle\MercureBundle::class => ['all' => true],
     Nelmio\ApiDocBundle\NelmioApiDocBundle::class => ['dev' => true],
+    League\FlysystemBundle\FlysystemBundle::class => ['all' => true],
 ];

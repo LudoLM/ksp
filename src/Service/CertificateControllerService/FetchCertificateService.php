@@ -1,0 +1,63 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Service\CertificateControllerService;
+
+use App\Entity\CertificatMedical;
+use App\Repository\CertificatMedicalRepository;
+use League\Flysystem\FilesystemOperator;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+
+readonly class FetchCertificateService
+{
+    public function __construct(
+        #[Target('default.storage')] private FilesystemOperator $filesystem,
+        private CertificatMedicalRepository $repository,
+    ) {
+    }
+
+    public function getPendingCertificates(int $page, int $limit): array
+    {
+        $paginator = $this->repository->paginatePending($page, $limit);
+        $totalItems = $paginator->count();
+
+        $data = [];
+        foreach ($paginator as $certificate) {
+            $user = $certificate->getUser();
+            $data[] = [
+                'id' => $certificate->getId(),
+                'status' => $certificate->getStatus(),
+                'uploadedAt' => $certificate->getUploadedAt()->format('Y-m-d H:i:s'),
+                'validUntil' => $certificate->getValidUntil()?->format('Y-m-d'),
+                'certificateFilename' => $certificate->getCertificateFilename(),
+                'user' => [
+                    'id' => $user?->getId(),
+                    'nom' => $user?->getNom(),
+                    'prenom' => $user?->getPrenom(),
+                    'email' => $user?->getEmail(),
+                ],
+            ];
+        }
+
+        return [
+            'metadata' => [
+                'total_items' => $totalItems,
+                'current_page' => $page,
+                'total_pages' => (int) ceil($totalItems / $limit),
+            ],
+            'data' => $data,
+        ];
+    }
+
+    public function readCertificateContent(CertificatMedical $certificate): string
+    {
+        $filename = $certificate->getCertificateFilename();
+
+        if (!$this->filesystem->fileExists($filename)) {
+            throw new \RuntimeException('Fichier introuvable.');
+        }
+
+        return $this->filesystem->read($filename);
+    }
+}

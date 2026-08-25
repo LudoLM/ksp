@@ -112,6 +112,13 @@
                     </div>
                 </div>
 
+                <!-- Certificat médical -->
+                <CertificateStatus
+                    v-if="!isViewingOtherUser"
+                    :certificatMedical="currentUser.certificatMedical"
+                    @uploaded="handleCertificateUploaded"
+                />
+
                 <!-- Cours disponibles -->
                 <div class="p-5 mb-6 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
                     <div class="coursDispo flex gap-6  items-center">
@@ -212,11 +219,13 @@ import DeleteItem from "../../icons/adminActions/DeleteItem.vue";
 import ModalConfirm from "../components/modals/ModalConfirm.vue";
 import {useActionsUser } from "../utils/composables/useActionsUser";
 import {useUserStore} from "../store/user";
+import CertificateStatus from "@/components/CertificateStatus.vue";
+
 
 const router = useRouter();
 const route = useRoute();
 const isModifyingCounterCours = ref(false);
-const {userPaymentsHistory, currentUserNewCount, userCoursHistory, currentUser, deleteUser, loadProfileData, loadUserCoursHistory, loadUserPaymentsHistory, isViewingOtherUser, handleUpdateCounterCours } = useActionsUser();
+const {userPaymentsHistory, currentUserNewCount, userCoursHistory, currentUser, deleteUser, loadProfileData, loadUserCoursHistory, loadUserPaymentsHistory, isViewingOtherUser, handleUpdateCounterCours, getUser } = useActionsUser();
 const confirmDialog = ref(false);
 const confirmMessage = computed(() => {
     const cours = currentUser.value?.nombreCours ?? 0;
@@ -241,6 +250,13 @@ const handleDeleteUser = async (userId) => {
         }
     }
 };
+
+const handleCertificateUploaded = async () => {
+    if (!isViewingOtherUser.value) {
+        await getUser();
+    }
+    await loadProfileData(route.params.id);
+}
 
 
 const handlePageChanged = async (newPage) => {
@@ -270,6 +286,7 @@ const redirectToEditProfile = () => {
         router.push({ name: "EditProfile" });
     }
 };
+
 </script>
 
 <style lang="scss" scoped>

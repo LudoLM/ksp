@@ -117,6 +117,10 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $anonymisedAt = null;
 
+    #[Groups(['user:detail'])]
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: CertificatMedical::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private ?CertificatMedical $certificatMedical = null;
+
     public function __construct()
     {
         $this->historiquePaiements = new ArrayCollection();
@@ -454,6 +458,21 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
     public function setAnonymisedAt(?\DateTimeInterface $anonymisedAt): static
     {
         $this->anonymisedAt = $anonymisedAt;
+
+        return $this;
+    }
+
+    public function getCertificatMedical(): ?CertificatMedical
+    {
+        return $this->certificatMedical;
+    }
+
+    public function setCertificatMedical(?CertificatMedical $certificatMedical): static
+    {
+        if (!$certificatMedical instanceof CertificatMedical && $this->certificatMedical instanceof CertificatMedical) {
+            $this->certificatMedical->setUser(null);
+        }
+        $this->certificatMedical = $certificatMedical;
 
         return $this;
     }

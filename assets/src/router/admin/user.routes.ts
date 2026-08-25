@@ -13,6 +13,12 @@ const userRoutes: RouteRecordRaw[] = [
         meta: { navLabel: 'Gestion utilisateurs', navGroup: 'users', displayInNav: true },
       },
       {
+        path: 'controlCertificate',
+        name: 'controlCertificate',
+        component: () => import('../../views/admin/ControlCertificate.vue'),
+        meta: { navLabel: 'Gestion certificats', navGroup: 'users', displayInNav: true },
+      },
+      {
         path: 'profile/:id?',
         name: 'AdminProfile',
         component: () => import('../../views/Profile.vue'),

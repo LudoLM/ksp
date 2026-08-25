@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, computed } from 'vue'
+import {reactive, computed, toRef} from 'vue'
 import { useCalendarStore } from './calendar'
 
 // Interface pour typer l'utilisateur
@@ -14,6 +14,16 @@ interface User {
   codePostal: string
   nombreCours: number
   roles: string[]
+  certificatMedical: UserCertificatMedical | null
+}
+
+
+export interface UserCertificatMedical {
+  status: string | null
+  uploadedAt: Date | null
+  validUntil: Date | null
+  rejectionReason: string | null
+
 }
 
 interface UserState {
@@ -62,7 +72,6 @@ export const useUserStore = defineStore(
         state.user.nombreCours = newCount
       }
     }
-
     // Getters - computed simplifié
     const userId = computed((): number | null => state.user?.id ?? null)
     const userEmail = computed((): string | null => state.user?.email ?? null)
@@ -74,6 +83,7 @@ export const useUserStore = defineStore(
     const userCodePostal = computed((): string | null => state.user?.codePostal ?? null)
     const userNombreCours = computed((): number => state.user?.nombreCours ?? 0)
     const userRoles = computed((): string[] => state.user?.roles ?? [])
+    const userCertificatMedical = computed((): UserCertificatMedical | null => state.user?.certificatMedical ?? null)
 
     // Getters avec ancien nommage (pour compatibilité)
     const getUserId = computed((): number | null => userId.value)
@@ -85,6 +95,7 @@ export const useUserStore = defineStore(
     const getUserAdresse = computed((): string | null => userAdresse.value)
     const getUserCodePostal = computed((): string | null => userCodePostal.value)
     const getUserNombreCours = computed((): number => userNombreCours.value)
+    const getUserCertificatMedical = computed((): UserCertificatMedical | null => userCertificatMedical.value)
 
     // Computed pour les états dérivés
     const isAuthenticated = computed((): boolean => !!state.user?.id)
@@ -92,7 +103,7 @@ export const useUserStore = defineStore(
 
     return {
       // State - accès direct à l'objet user
-      user: state.user,
+      user: toRef(state, 'user'),
       // Actions
       setUser,
       clearUser,
@@ -109,6 +120,7 @@ export const useUserStore = defineStore(
       userCodePostal,
       userNombreCours,
       userRoles,
+      userCertificatMedical,
       // Getters (ancien nommage - compatibilité)
       getUserId,
       getUserEmail,
@@ -119,6 +131,7 @@ export const useUserStore = defineStore(
       getUserAdresse,
       getUserCodePostal,
       getUserNombreCours,
+      getUserCertificatMedical,
       // États dérivés
       isAuthenticated,
       isAdmin,

@@ -26,6 +26,10 @@ parameters:
           path: src/Entity/User.php
         - identifier: typePerfect.narrowPublicClassMethodParamType
           path: src/Entity/UsersCours.php
+        - identifier: typePerfect.narrowPublicClassMethodParamType
+          path: src/Entity/CertificatMedical.php
+        - identifier: doctrine.associationType
+          path: src/Entity/CertificatMedical.php
 
 
 

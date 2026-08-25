@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificat médical validé</title>
+</head>
+<body>
+<div class="body">
+    <div class="container">
+        <div class="header text-center">
+        </div>
+        <div class="content">
+            <p class="text-center">Bonjour {{ user.prenom }}!</p>
+            <p class="block">
+                Bonne nouvelle : votre certificat médical a été validé.
+            </p>
+            {% if validUntil %}
+                <p class="block">
+                    Il est valide jusqu'au <strong>{{ validUntil|date('d/m/Y') }}</strong>.
+                </p>
+            {% endif %}
+            <p>
+                Cordialement,<br><br>
+                L'équipe Kiné Sport Santé
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

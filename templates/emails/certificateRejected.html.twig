@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificat médical refusé</title>
+</head>
+<body>
+<div class="body">
+    <div class="container">
+        <div class="header text-center">
+        </div>
+        <div class="content">
+            <p class="text-center">Bonjour {{ user.prenom }}!</p>
+            <p class="block">
+                Votre certificat médical n'a pas pu être validé.
+            </p>
+            {% if reason %}
+                <p class="block">
+                    Motif : {{ reason }}
+                </p>
+            {% endif %}
+            <p class="block">
+                Merci de transmettre un nouveau certificat depuis votre profil.
+            </p>
+            <p>
+                Cordialement,<br><br>
+                L'équipe Kiné Sport Santé
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
