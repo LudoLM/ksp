@@ -6,6 +6,7 @@ import { useRoute, useRouter } from "vue-router";
 import SmartPagination from "../../components/admin/SmartPagination.vue";
 import { apiFetch } from "@/utils/useFetchInterceptor.ts";
 import { alertStore } from "@/store/alert.ts";
+import { viewCertificatePdf } from "@/utils/viewCertificatePdf.ts";
 
 interface CertificateUser {
     id: number;
@@ -45,6 +46,22 @@ const processingId = ref<number | null>(null);
 const confirmingRejectId = ref<number | null>(null);
 // Motif du rejet, saisi par l'admin avant de confirmer.
 const rejectReason = ref("");
+// Id du certificat pour lequel on demande la date de validité avant approbation.
+const confirmingApproveId = ref<number | null>(null);
+// Date de validité (YYYY-MM-DD), pré-remplie à +1 an mais modifiable par l'admin.
+const approveValidUntil = ref("");
+
+const defaultValidUntil = (): string => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + 1);
+    return date.toISOString().slice(0, 10);
+};
+
+// Le backend exige une date strictement future : on l'interdit aussi côté input.
+// Constante (pas un ref) : ne dépend d'aucune interaction, pas besoin d'être réinitialisée.
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const approveMinValidUntil = tomorrow.toISOString().slice(0, 10);
 
 const fetchCertificates = async (page: number = 1) => {
     loading.value = true;
@@ -69,10 +86,12 @@ const handlePageChange = async (newPage: number) => {
 };
 
 const viewCertificate = (certificate: Certificate) => {
-    window.open(`/api/admin/certificate/${certificate.id}`, "_blank");
+    viewCertificatePdf(certificate.id);
 };
 
 const askRejectConfirmation = (certificate: Certificate) => {
+    confirmingApproveId.value = null;
+    approveValidUntil.value = "";
     confirmingRejectId.value = certificate.id;
     rejectReason.value = "";
 };
@@ -80,10 +99,25 @@ const askRejectConfirmation = (certificate: Certificate) => {
 const cancelRejectConfirmation = () => {
     confirmingRejectId.value = null;
     rejectReason.value = "";
+    confirmingRejectId.value = null;
+    rejectReason.value = "";
+};
+
+const askApproveConfirmation = (certificate: Certificate) => {
+    confirmingApproveId.value = certificate.id;
+    approveValidUntil.value = defaultValidUntil();
+};
+
+const cancelApproveConfirmation = () => {
+    confirmingApproveId.value = null;
+    approveValidUntil.value = "";
 };
 
 const validateCertificate = async (certificate: Certificate, action: "approve" | "reject") => {
     if (action === "reject" && !rejectReason.value.trim()) {
+        return;
+    }
+    if (action === "approve" && !approveValidUntil.value) {
         return;
     }
 
@@ -93,6 +127,8 @@ const validateCertificate = async (certificate: Certificate, action: "approve" |
         formData.append("action", action);
         if (action === "reject") {
             formData.append("reason", rejectReason.value.trim());
+        } else {
+            formData.append("validUntil", approveValidUntil.value);
         }
         const res = await apiFetch(`/admin/certificate/${certificate.id}/validate`, {
             method: "POST",
@@ -109,7 +145,8 @@ const validateCertificate = async (certificate: Certificate, action: "approve" |
                 await handlePageChange(currentPage.value - 1);
             }
         } else {
-            alertStore.setAlert("Erreur lors de la validation du certificat", "error");
+            const data = await res.json().catch(() => null);
+            alertStore.setAlert(data?.error ?? "Erreur lors de la validation du certificat", "error");
         }
     } catch (error) {
         alertStore.setAlert("Erreur lors de la validation du certificat", "error");
@@ -117,6 +154,8 @@ const validateCertificate = async (certificate: Certificate, action: "approve" |
         processingId.value = null;
         confirmingRejectId.value = null;
         rejectReason.value = "";
+        confirmingApproveId.value = null;
+        approveValidUntil.value = "";
     }
 };
 
@@ -203,8 +242,9 @@ watch(() => route.query.page, async (newPageFromUrl) => {
                     <div class="cert-actions" role="cell">
                         <template v-if="confirmingRejectId === cert.id">
                             <div class="cert-actions__reject">
-                                <span class="cert-actions__confirm-label">Motif du refus (transmis à l'utilisateur)</span>
+                                <label :for="`reject-reason-${cert.id}`" class="cert-actions__confirm-label">Motif du refus (transmis à l'utilisateur)</label>
                                 <textarea
+                                    :id="`reject-reason-${cert.id}`"
                                     v-model="rejectReason"
                                     class="cert-actions__reason-input"
                                     rows="2"
@@ -230,6 +270,36 @@ watch(() => route.query.page, async (newPageFromUrl) => {
                                 </div>
                             </div>
                         </template>
+                        <template v-else-if="confirmingApproveId === cert.id">
+                            <div class="cert-actions__reject">
+                                <label :for="`approve-valid-until-${cert.id}`" class="cert-actions__confirm-label">Date de validité</label>
+                                <input
+                                    :id="`approve-valid-until-${cert.id}`"
+                                    v-model="approveValidUntil"
+                                    type="date"
+                                    :min="approveMinValidUntil"
+                                    class="cert-actions__reason-input"
+                                />
+                                <div class="cert-actions__reject-buttons">
+                                    <button
+                                        type="button"
+                                        class="cert-btn cert-btn--success"
+                                        :disabled="processingId === cert.id || !approveValidUntil"
+                                        @click="validateCertificate(cert, 'approve')"
+                                    >
+                                        {{ processingId === cert.id ? "Approbation…" : "Confirmer l'approbation" }}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="cert-btn cert-btn--ghost"
+                                        :disabled="processingId === cert.id"
+                                        @click="cancelApproveConfirmation"
+                                    >
+                                        Annuler
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
                         <template v-else>
                             <button
                                 type="button"
@@ -243,9 +313,9 @@ watch(() => route.query.page, async (newPageFromUrl) => {
                                 type="button"
                                 class="cert-btn cert-btn--success"
                                 :disabled="processingId === cert.id"
-                                @click="validateCertificate(cert, 'approve')"
+                                @click="askApproveConfirmation(cert)"
                             >
-                                {{ processingId === cert.id ? "Approbation…" : "Approuver" }}
+                                Approuver
                             </button>
                             <button
                                 type="button"

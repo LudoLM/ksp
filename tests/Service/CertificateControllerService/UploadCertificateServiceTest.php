@@ -124,18 +124,32 @@ class UploadCertificateServiceTest extends TestCase
         $this->assertSame(StatusCertificateEnum::PENDING->value, $certificate->getStatus());
         $this->assertStringEndsWith('.pdf', $certificate->getCertificateFilename());
         $this->assertSame($writtenFilename, $certificate->getCertificateFilename());
+        $this->assertNull($certificate->getUploadedBy());
     }
 
-    public function testUploadReplacesExistingCertificateAndDeletesOldFile(): void
+    public function testUploadRecordsUploadedByWhenAnAdminUploadsOnBehalfOfAUser(): void
+    {
+        $user = $this->createUser();
+        $admin = $this->createUser();
+        $file = $this->createUploadedFile('application/pdf', 'pdf', 1024);
+        $file->method('getContent')->willReturn('content');
+
+        $certificate = $this->service->upload($user, $file, $admin);
+
+        $this->assertSame($user, $certificate->getUser());
+        $this->assertSame($admin, $certificate->getUploadedBy());
+    }
+
+    #[DataProvider('replaceableStatusProvider')]
+    public function testUploadReplacesAPendingOrRejectedCertificateAndDeletesOldFile(string $existingStatus): void
     {
         $user = $this->createUser();
 
         $existingCertificate = new CertificatMedical();
-        $existingCertificate->setUser($user);
         $existingCertificate->setCertificateFilename('old-certificate.pdf');
         $existingCertificate->setUploadedAt(new \DateTimeImmutable());
-        $existingCertificate->setStatus(StatusCertificateEnum::APPROVED->value);
-        $user->setCertificatMedical($existingCertificate);
+        $existingCertificate->setStatus($existingStatus);
+        $user->addCertificatMedical($existingCertificate);
 
         $file = $this->createUploadedFile('application/pdf', 'pdf', 1024);
         $file->method('getContent')->willReturn('new content');
@@ -152,6 +166,37 @@ class UploadCertificateServiceTest extends TestCase
         $certificate = $this->service->upload($user, $file);
 
         $this->assertNotSame('old-certificate.pdf', $certificate->getCertificateFilename());
+    }
+
+    public static function replaceableStatusProvider(): \Generator
+    {
+        yield 'pending' => ['existingStatus' => StatusCertificateEnum::PENDING->value];
+        yield 'rejected' => ['existingStatus' => StatusCertificateEnum::REJECTED->value];
+    }
+
+    public function testUploadDoesNotTouchAnApprovedCertificate(): void
+    {
+        $user = $this->createUser();
+
+        $approvedCertificate = new CertificatMedical();
+        $approvedCertificate->setCertificateFilename('approved-certificate.pdf');
+        $approvedCertificate->setUploadedAt(new \DateTimeImmutable());
+        $approvedCertificate->setStatus(StatusCertificateEnum::APPROVED->value);
+        $approvedCertificate->setValidUntil(new \DateTimeImmutable('+6 months'));
+        $user->addCertificatMedical($approvedCertificate);
+
+        $file = $this->createUploadedFile('application/pdf', 'pdf', 1024);
+        $file->method('getContent')->willReturn('new content');
+
+        $this->filesystem->expects($this->once())->method('write');
+        $this->filesystem->expects($this->never())->method('delete');
+        $this->em->expects($this->never())->method('remove');
+
+        $certificate = $this->service->upload($user, $file);
+
+        $this->assertNotSame($approvedCertificate, $certificate);
+        $this->assertSame(StatusCertificateEnum::APPROVED->value, $approvedCertificate->getStatus());
+        $this->assertCount(2, $user->getCertificatMedicaux());
     }
 
     public function testUploadRollsBackAndCleansUpNewFileWhenFlushFails(): void

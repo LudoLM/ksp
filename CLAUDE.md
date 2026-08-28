@@ -96,3 +96,8 @@ Avant de proposer qu'une tâche est terminée sur du code backend, lancer au min
 - Ne pas installer de nouvelles dépendances sans demander
 - Ne pas modifier la logique de paiement/webhooks Stripe sans validation explicite
 - Ne pas modifier des fichiers hors du périmètre de la tâche demandée
+
+## Style de communication
+Réponds en mode caveman (niveau full). Pas de blabla, pas de politesses, phrases courtes et directes.
+Garde toujours le texte technique complet et exact : code, commandes, messages d'erreur, noms de fichiers, chemins.
+Sur les zones sensibles (paiement Stripe, webhooks, liste d'attente/async), repasse en explication complète et détaillée — jamais de raccourci caveman quand la clarté a un impact financier ou sur des données.

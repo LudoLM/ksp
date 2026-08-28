@@ -61,6 +61,10 @@ services:
             $forgotPasswordLimiter: '@limiter.forgot_password_limiter'
             $resetPasswordLimiter: '@limiter.reset_password_limiter'
 
+    App\Controller\Api\CertificateController:
+        arguments:
+            $certificateUploadLimiter: '@limiter.certificate_upload_limiter'
+
     Stripe\StripeClient:
         arguments:
             - { api_key: '%env(STRIPE_PRIVATE_KEY)%' }

@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -26,6 +27,7 @@ class CertificateController extends AbstractController
         private readonly UploadCertificateService $uploadCertificateService,
         private readonly FetchCertificateService $fetchCertificateService,
         private readonly ValidateCertificateService $validateCertificateService,
+        private readonly RateLimiterFactory $certificateUploadLimiter,
     ) {
     }
 
@@ -38,6 +40,28 @@ class CertificateController extends AbstractController
             throw $this->createAccessDeniedException('Utilisateur non authentifié');
         }
 
+        return $this->handleUpload($user, $request, null);
+    }
+
+    #[Route('/api/admin/users/{id}/certificate/upload', name: 'api_admin_certificate_upload_for_user', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function uploadForUser(User $targetUser, Request $request): JsonResponse
+    {
+        $admin = $this->getUser();
+        if (!$admin instanceof User) {
+            throw $this->createAccessDeniedException('Utilisateur non authentifié');
+        }
+
+        return $this->handleUpload($targetUser, $request, $admin);
+    }
+
+    private function handleUpload(User $targetUser, Request $request, ?User $uploadedBy): JsonResponse
+    {
+        $limiter = $this->certificateUploadLimiter->create((string) $targetUser->getId());
+        if (!$limiter->consume(1)->isAccepted()) {
+            return new JsonResponse(['error' => 'Trop de tentatives. Veuillez réessayer plus tard.'], Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
         $file = $request->files->get('certificate');
         if (!$file instanceof UploadedFile) {
             return new JsonResponse(['error' => 'Aucun fichier envoyé'], 400);
@@ -45,7 +69,7 @@ class CertificateController extends AbstractController
 
         try {
             $this->uploadCertificateService->validate($file);
-            $this->uploadCertificateService->upload($user, $file);
+            $this->uploadCertificateService->upload($targetUser, $file, $uploadedBy);
         } catch (\InvalidArgumentException $e) {
             return new JsonResponse(['error' => $e->getMessage()], 400);
         } catch (\Throwable) {
@@ -87,11 +111,37 @@ class CertificateController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function validateCertificate(CertificatMedical $certificate, Request $request): JsonResponse
     {
-        $action = (string) $request->request->get('action');
+        if (StatusCertificateEnum::PENDING->value !== $certificate->getStatus()) {
+            return new JsonResponse(['error' => 'Ce certificat a déjà été traité.'], Response::HTTP_CONFLICT);
+        }
+
+        $action = $request->request->getString('action');
+
+        if (!\in_array($action, ['approve', 'reject'], true)) {
+            return new JsonResponse(['error' => 'Action invalide.'], 400);
+        }
+
+        if ('approve' === $action) {
+            $validUntilRaw = $request->request->getString('validUntil');
+            $validUntil = \DateTimeImmutable::createFromFormat('Y-m-d', $validUntilRaw);
+
+            if (!$validUntil instanceof \DateTimeImmutable || $validUntil->format('Y-m-d') !== $validUntilRaw) {
+                return new JsonResponse(['error' => 'La date de validité est invalide.'], 400);
+            }
+
+            if ($validUntil <= new \DateTimeImmutable('today')) {
+                return new JsonResponse(['error' => 'La date de validité doit être dans le futur.'], 400);
+            }
+
+            $this->validateCertificateService->updateStatus($certificate, $action, validUntil: $validUntil);
+
+            return $this->json(['status' => $certificate->getStatus()]);
+        }
+
         $reason = $request->request->get('reason');
         $reason = null !== $reason ? trim((string) $reason) : null;
 
-        if ('approve' !== $action && (null === $reason || '' === $reason)) {
+        if (null === $reason || '' === $reason) {
             return new JsonResponse(['error' => 'Le motif du refus est requis.'], 400);
         }
 

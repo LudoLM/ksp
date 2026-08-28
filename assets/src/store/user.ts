@@ -19,6 +19,7 @@ interface User {
 
 
 export interface UserCertificatMedical {
+  id: number
   status: string | null
   uploadedAt: Date | null
   validUntil: Date | null

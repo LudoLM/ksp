@@ -25,6 +25,10 @@ framework:
             policy: 'sliding_window'
             limit: 5
             interval: '15 minutes'
+        certificate_upload_limiter:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '1 hour'
 
 when@test:
     framework:

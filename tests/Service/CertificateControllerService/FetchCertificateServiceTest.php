@@ -140,4 +140,53 @@ class FetchCertificateServiceTest extends TestCase
 
         $this->service->readCertificateContent($certificate);
     }
+
+    private function certificateWithStatus(string $status): CertificatMedical
+    {
+        $certificate = new CertificatMedical();
+        $certificate->setCertificateFilename('certificate.pdf');
+        $certificate->setUploadedAt(new \DateTimeImmutable());
+        $certificate->setStatus($status);
+
+        return $certificate;
+    }
+
+    public function testSelectCurrentCertificateReturnsNullForAnEmptyCollection(): void
+    {
+        $this->assertNull(FetchCertificateService::selectCurrentCertificate([]));
+    }
+
+    #[DataProvider('selectCurrentCertificateProvider')]
+    public function testSelectCurrentCertificatePrioritizesPendingThenApprovedThenRejected(array $statuses, string $expectedStatus): void
+    {
+        $certificates = array_map($this->certificateWithStatus(...), $statuses);
+
+        $selected = FetchCertificateService::selectCurrentCertificate($certificates);
+
+        $this->assertNotNull($selected);
+        $this->assertSame($expectedStatus, $selected->getStatus());
+    }
+
+    public static function selectCurrentCertificateProvider(): \Generator
+    {
+        yield 'pending_wins_over_approved' => [
+            'statuses' => [StatusCertificateEnum::APPROVED->value, StatusCertificateEnum::PENDING->value],
+            'expectedStatus' => StatusCertificateEnum::PENDING->value,
+        ];
+
+        yield 'pending_wins_over_rejected' => [
+            'statuses' => [StatusCertificateEnum::REJECTED->value, StatusCertificateEnum::PENDING->value],
+            'expectedStatus' => StatusCertificateEnum::PENDING->value,
+        ];
+
+        yield 'approved_wins_over_rejected_when_no_pending' => [
+            'statuses' => [StatusCertificateEnum::REJECTED->value, StatusCertificateEnum::APPROVED->value],
+            'expectedStatus' => StatusCertificateEnum::APPROVED->value,
+        ];
+
+        yield 'rejected_alone' => [
+            'statuses' => [StatusCertificateEnum::REJECTED->value],
+            'expectedStatus' => StatusCertificateEnum::REJECTED->value,
+        ];
+    }
 }

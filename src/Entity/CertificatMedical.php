@@ -13,9 +13,10 @@ class CertificatMedical
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:detail'])]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'certificatMedical', targetEntity: User::class)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'certificatMedicaux')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
@@ -34,6 +35,10 @@ class CertificatMedical
     #[Groups(['user:detail'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $rejectionReason = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $uploadedBy = null;
 
     public function getId(): ?int
     {
@@ -108,6 +113,18 @@ class CertificatMedical
     public function setRejectionReason(?string $rejectionReason): static
     {
         $this->rejectionReason = $rejectionReason;
+
+        return $this;
+    }
+
+    public function getUploadedBy(): ?User
+    {
+        return $this->uploadedBy;
+    }
+
+    public function setUploadedBy(?User $uploadedBy): static
+    {
+        $this->uploadedBy = $uploadedBy;
 
         return $this;
     }

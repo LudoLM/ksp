@@ -114,10 +114,11 @@
 
                 <!-- Certificat médical -->
                 <CertificateStatus
-                    v-if="!isViewingOtherUser"
                     :certificatMedical="currentUser.certificatMedical"
+                    :userId="isViewingOtherUser ? currentUser.id : null"
                     @uploaded="handleCertificateUploaded"
                 />
+
 
                 <!-- Cours disponibles -->
                 <div class="p-5 mb-6 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\CertificatMedical;
+use App\Enum\StatusCertificateEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
@@ -31,5 +32,19 @@ class CertificatMedicalRepository extends ServiceEntityRepository
             ->getQuery();
 
         return new Paginator($query);
+    }
+
+    /**
+     * @return CertificatMedical[]
+     */
+    public function findExpirable(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.status = :status')
+            ->andWhere('c.validUntil < :now')
+            ->setParameter('status', StatusCertificateEnum::APPROVED->value)
+            ->setParameter('now', new \DateTimeImmutable())
+            ->getQuery()
+            ->getResult();
     }
 }

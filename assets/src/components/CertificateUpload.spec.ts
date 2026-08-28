@@ -86,6 +86,20 @@ describe('CertificateUpload.vue', () => {
         expect(wrapper.find('p.text-red-600').exists()).toBe(false);
     });
 
+    it('targets the admin endpoint when a userId is provided', async () => {
+        vi.mocked(apiFetch).mockResolvedValue({ ok: true, json: async () => ({}) } as Response);
+
+        const wrapper = mount(CertificateUpload, { props: { userId: 42 } });
+
+        await selectFile(wrapper, pdfFile());
+        await flushPromises();
+
+        expect(apiFetch).toHaveBeenCalledWith('/admin/users/42/certificate/upload', expect.objectContaining({
+            method: 'POST',
+            body: expect.any(FormData),
+        }));
+    });
+
     it('shows a disabled loading state while the upload is in progress', async () => {
         let resolveFetch: (value: Response) => void = () => {};
         vi.mocked(apiFetch).mockReturnValue(new Promise((resolve) => {

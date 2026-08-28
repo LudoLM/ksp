@@ -36,10 +36,10 @@ readonly class UploadCertificateService
         }
     }
 
-    public function upload(User $user, UploadedFile $file): CertificatMedical
+    public function upload(User $user, UploadedFile $file, ?User $uploadedBy = null): CertificatMedical
     {
         $newFilename = Uuid::v4().'.pdf';
-        $existingCertificate = $user->getCertificatMedical();
+        $existingCertificate = $this->findReplaceableCertificate($user);
 
         $this->em->beginTransaction();
         try {
@@ -48,16 +48,16 @@ readonly class UploadCertificateService
             $oldFilePath = null;
             if ($existingCertificate instanceof CertificatMedical) {
                 $oldFilePath = $existingCertificate->getCertificateFilename();
-                $user->setCertificatMedical(null);
                 $this->em->remove($existingCertificate);
                 $this->em->flush();
             }
 
             $certificate = new CertificatMedical();
-            $certificate->setUser($user);
+            $user->addCertificatMedical($certificate);
             $certificate->setCertificateFilename($newFilename);
             $certificate->setUploadedAt(new \DateTimeImmutable());
             $certificate->setStatus(StatusCertificateEnum::PENDING->value);
+            $certificate->setUploadedBy($uploadedBy);
 
             $this->em->persist($certificate);
             $this->em->flush();
@@ -79,5 +79,21 @@ readonly class UploadCertificateService
         }
 
         return $certificate;
+    }
+
+    /**
+     * Un certificat approuvé reste actif tant qu'un remplaçant n'a pas lui-même
+     * été approuvé (voir ValidateCertificateService) : seul un certificat en
+     * attente ou refusé peut être remplacé par un nouvel upload.
+     */
+    private function findReplaceableCertificate(User $user): ?CertificatMedical
+    {
+        foreach ($user->getCertificatMedicaux() as $certificate) {
+            if (StatusCertificateEnum::APPROVED->value !== $certificate->getStatus()) {
+                return $certificate;
+            }
+        }
+
+        return null;
     }
 }

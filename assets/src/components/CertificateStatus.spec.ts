@@ -1,7 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { mount, flushPromises } from '@vue/test-utils';
 import CertificateStatus from './CertificateStatus.vue';
 import CertificateUpload from './CertificateUpload.vue';
+import { apiFetch } from '@/utils/useFetchInterceptor.ts';
+import { alertStore } from '@/store/alert.ts';
 import type { UserCertificatMedical } from '@/store/user';
 
 vi.mock('@/utils/useFetchInterceptor.ts', () => ({
@@ -14,7 +16,20 @@ vi.mock('@/store/alert.ts', () => ({
     },
 }));
 
+let fakeTab: { location: { href: string }; close: ReturnType<typeof vi.fn> };
+
+beforeEach(() => {
+    vi.mocked(apiFetch).mockReset();
+    vi.mocked(alertStore.setAlert).mockReset();
+
+    fakeTab = { location: { href: '' }, close: vi.fn() };
+    vi.spyOn(window, 'open').mockReset().mockReturnValue(fakeTab as unknown as Window);
+    URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+    URL.revokeObjectURL = vi.fn();
+});
+
 const certificate = (overrides: Partial<UserCertificatMedical> = {}): UserCertificatMedical => ({
+    id: 1,
     status: null,
     uploadedAt: null,
     validUntil: null,
@@ -129,5 +144,50 @@ describe('CertificateStatus.vue', () => {
         await wrapper.findComponent(CertificateUpload).vm.$emit('uploaded');
 
         expect(wrapper.emitted('uploaded')).toHaveLength(1);
+    });
+
+    it('forwards the userId prop to the upload component', () => {
+        const wrapper = mount(CertificateStatus, {
+            props: { certificatMedical: null, userId: 42 },
+        });
+
+        expect(wrapper.findComponent(CertificateUpload).props('userId')).toBe(42);
+    });
+
+    it('hides the "view PDF" button for the user\'s own profile (no userId)', () => {
+        const wrapper = mount(CertificateStatus, {
+            props: { certificatMedical: certificate({ status: 'Approved' }) },
+        });
+
+        expect(wrapper.find('.cert-view-pdf').exists()).toBe(false);
+    });
+
+    it('hides the "view PDF" button when there is no certificate, even for an admin', () => {
+        const wrapper = mount(CertificateStatus, {
+            props: { certificatMedical: null, userId: 42 },
+        });
+
+        expect(wrapper.find('.cert-view-pdf').exists()).toBe(false);
+    });
+
+    it('opens the PDF in a new tab via apiFetch when the admin clicks "Voir le PDF"', async () => {
+        const pdfBlob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+        vi.mocked(apiFetch).mockResolvedValue({ ok: true, blob: async () => pdfBlob } as unknown as Response);
+
+        const wrapper = mount(CertificateStatus, {
+            props: { certificatMedical: certificate({ id: 99, status: 'Approved' }), userId: 42 },
+        });
+
+        const button = wrapper.find('.cert-view-pdf');
+        expect(button.exists()).toBe(true);
+        expect(button.text()).toBe('Voir le PDF');
+
+        await button.trigger('click');
+        expect(window.open).toHaveBeenCalledWith('', '_blank');
+
+        await flushPromises();
+
+        expect(apiFetch).toHaveBeenCalledWith('/admin/certificate/99');
+        expect(fakeTab.location.href).toBe('blob:mock-url');
     });
 });

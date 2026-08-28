@@ -34,10 +34,12 @@ import {alertStore} from "@/store/alert.ts";
 
 interface Props {
     buttonLabel?: string;
+    userId?: number | null;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     buttonLabel: 'Transmettre mon certificat',
+    userId: null,
 });
 
 const emit = defineEmits<{
@@ -79,8 +81,11 @@ const uploadFile = async (file: File) => {
 
     const formData = new FormData();
     formData.append('certificate', file);
+    const url = props.userId
+        ? `/admin/users/${props.userId}/certificate/upload`
+        : '/certificate/upload';
     try {
-        const response = await apiFetch('/certificate/upload', {
+        const response = await apiFetch(url, {
             method: 'POST',
             body: formData,
         });

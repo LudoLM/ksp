@@ -51,10 +51,16 @@ const mountControlCertificate = async (): Promise<{ wrapper: ReturnType<typeof m
 };
 
 describe('ControlCertificate.vue', () => {
+    let fakeTab: { location: { href: string }; close: ReturnType<typeof vi.fn> };
+
     beforeEach(() => {
         vi.mocked(apiFetch).mockReset();
         vi.mocked(alertStore.setAlert).mockReset();
-        vi.spyOn(window, 'open').mockImplementation(() => null);
+
+        fakeTab = { location: { href: '' }, close: vi.fn() };
+        vi.spyOn(window, 'open').mockReset().mockReturnValue(fakeTab as unknown as Window);
+        URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+        URL.revokeObjectURL = vi.fn();
     });
 
     it('loads and displays pending certificates on mount', async () => {
@@ -92,16 +98,43 @@ describe('ControlCertificate.vue', () => {
         expect(wrapper.text()).toContain('Aucun certificat en attente');
     });
 
-    it('opens the PDF in a new tab', async () => {
-        vi.mocked(apiFetch).mockResolvedValue(jsonResponse({
-            data: [sampleCertificate({ id: 7 })],
-            metadata: { total_items: 1, current_page: 1, total_pages: 1 },
-        }) as unknown as Response);
+    it('opens the PDF in a new tab via apiFetch, using a blob to survive a token refresh', async () => {
+        const pdfBlob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+
+        vi.mocked(apiFetch)
+            .mockResolvedValueOnce(jsonResponse({
+                data: [sampleCertificate({ id: 7 })],
+                metadata: { total_items: 1, current_page: 1, total_pages: 1 },
+            }) as unknown as Response)
+            .mockResolvedValueOnce({ ok: true, blob: async () => pdfBlob } as unknown as Response);
+
+        const { wrapper } = await mountControlCertificate();
+
+        // Le nouvel onglet doit être ouvert de façon synchrone au clic, avant l'appel réseau.
+        await wrapper.find('.cert-btn--ghost').trigger('click');
+        expect(window.open).toHaveBeenCalledWith('', '_blank');
+
+        await flushPromises();
+
+        expect(apiFetch).toHaveBeenLastCalledWith('/admin/certificate/7');
+        expect(fakeTab.location.href).toBe('blob:mock-url');
+        expect(fakeTab.close).not.toHaveBeenCalled();
+    });
+
+    it('closes the empty tab and shows an alert if fetching the PDF fails', async () => {
+        vi.mocked(apiFetch)
+            .mockResolvedValueOnce(jsonResponse({
+                data: [sampleCertificate({ id: 7 })],
+                metadata: { total_items: 1, current_page: 1, total_pages: 1 },
+            }) as unknown as Response)
+            .mockResolvedValueOnce({ ok: false } as unknown as Response);
 
         const { wrapper } = await mountControlCertificate();
         await wrapper.find('.cert-btn--ghost').trigger('click');
+        await flushPromises();
 
-        expect(window.open).toHaveBeenCalledWith('/api/admin/certificate/7', '_blank');
+        expect(fakeTab.close).toHaveBeenCalled();
+        expect(alertStore.setAlert).toHaveBeenCalledWith('Impossible de récupérer le certificat.', 'error');
     });
 
     it('approves a certificate and removes it from the list', async () => {
@@ -114,6 +147,12 @@ describe('ControlCertificate.vue', () => {
 
         const { wrapper } = await mountControlCertificate();
 
+        // Premier clic : ouvre la confirmation avec la date de validité pré-remplie.
+        await wrapper.find('.cert-btn--success').trigger('click');
+        expect(wrapper.find('.cert-actions__reason-input').exists()).toBe(true);
+        expect((wrapper.find('.cert-actions__reason-input').element as HTMLInputElement).value).not.toBe('');
+
+        // Second clic : confirme avec la date proposée.
         await wrapper.find('.cert-btn--success').trigger('click');
         await flushPromises();
 
@@ -125,9 +164,27 @@ describe('ControlCertificate.vue', () => {
         const body = vi.mocked(apiFetch).mock.calls[1][1]?.body as FormData;
         expect(body.get('action')).toBe('approve');
         expect(body.has('reason')).toBe(false);
+        expect(body.get('validUntil')).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
         expect(alertStore.setAlert).toHaveBeenCalledWith('Certificat de Jean Dupont approuvé avec succès', 'success');
         expect(wrapper.text()).toContain('Aucun certificat en attente');
+    });
+
+    it('cancels the approval confirmation and restores the default actions', async () => {
+        vi.mocked(apiFetch).mockResolvedValue(jsonResponse({
+            data: [sampleCertificate({ id: 6 })],
+            metadata: { total_items: 1, current_page: 1, total_pages: 1 },
+        }) as unknown as Response);
+
+        const { wrapper } = await mountControlCertificate();
+
+        await wrapper.find('.cert-btn--success').trigger('click');
+        expect(wrapper.find('.cert-actions__reason-input').exists()).toBe(true);
+
+        await wrapper.find('.cert-btn--ghost').trigger('click');
+
+        expect(wrapper.find('.cert-actions__reason-input').exists()).toBe(false);
+        expect(apiFetch).not.toHaveBeenCalledWith(expect.stringContaining('/validate'), expect.anything());
     });
 
     it('disables the confirm button until a rejection reason is entered', async () => {

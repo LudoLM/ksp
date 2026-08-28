@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Service\CertificateControllerService\FetchCertificateService;
 use App\Service\Interface\Notification\RecipientInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,6 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
@@ -117,14 +119,17 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $anonymisedAt = null;
 
-    #[Groups(['user:detail'])]
-    #[ORM\OneToOne(mappedBy: 'user', targetEntity: CertificatMedical::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private ?CertificatMedical $certificatMedical = null;
+    /**
+     * @var Collection<int, CertificatMedical>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CertificatMedical::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $certificatMedicaux;
 
     public function __construct()
     {
         $this->historiquePaiements = new ArrayCollection();
         $this->usersCours = new ArrayCollection();
+        $this->certificatMedicaux = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -462,18 +467,34 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function getCertificatMedical(): ?CertificatMedical
+    /**
+     * @return Collection<int, CertificatMedical>
+     */
+    public function getCertificatMedicaux(): Collection
     {
-        return $this->certificatMedical;
+        return $this->certificatMedicaux;
     }
 
-    public function setCertificatMedical(?CertificatMedical $certificatMedical): static
+    public function addCertificatMedical(CertificatMedical $certificatMedical): static
     {
-        if (!$certificatMedical instanceof CertificatMedical && $this->certificatMedical instanceof CertificatMedical) {
-            $this->certificatMedical->setUser(null);
+        if (!$this->certificatMedicaux->contains($certificatMedical)) {
+            $this->certificatMedicaux->add($certificatMedical);
+            $certificatMedical->setUser($this);
         }
-        $this->certificatMedical = $certificatMedical;
 
         return $this;
+    }
+
+    /**
+     * Certificat à afficher à l'utilisateur. Logique de sélection déléguée à
+     * FetchCertificateService (voir sa docblock) : une entité ne peut pas
+     * recevoir d'injection de dépendances, cette méthode ne fait donc que
+     * relayer la collection au service qui porte la vraie règle métier.
+     */
+    #[Groups(['user:detail'])]
+    #[SerializedName('certificatMedical')]
+    public function getCurrentCertificatMedical(): ?CertificatMedical
+    {
+        return FetchCertificateService::selectCurrentCertificate($this->certificatMedicaux);
     }
 }
