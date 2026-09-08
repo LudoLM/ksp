@@ -48,6 +48,12 @@ const coursRoutes: RouteRecordRaw[] = [
         component: () => import('../../views/admin/CreateWeekType.vue'),
         meta: { navLabel: 'Gérer une semaine type', navGroup: 'cours', displayInNav: true },
       },
+      {
+        path: 'seasonPlanning',
+        name: 'AdminSeasonPlanning',
+        component: () => import('../../views/admin/SeasonPlanning.vue'),
+        meta: { navLabel: 'Planning de la saison', navGroup: 'cours', displayInNav: true },
+      },
     ],
   },
 ]
