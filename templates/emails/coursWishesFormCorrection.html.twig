@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dossier d'inscription à corriger</title>
+</head>
+<body>
+<div class="body">
+    <div class="container">
+        <div class="header text-center">
+        </div>
+        <div class="content">
+            <p class="text-center">Bonjour {{ form.contactPrenom }}!</p>
+            <p class="block">
+                Votre dossier d'inscription nécessite une correction avant de pouvoir être validé.
+            </p>
+            {% if reason %}
+                <p class="block">
+                    Motif : <strong>{{ reason }}</strong>
+                </p>
+            {% endif %}
+            <p class="block">
+                Merci de mettre à jour votre dossier :
+            </p>
+            <p class="text-center">
+                <a href="{{ formUrl }}">Corriger mon dossier</a>
+            </p>
+            <p>
+                Cordialement,<br><br>
+                L'équipe Kiné Sport Santé
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

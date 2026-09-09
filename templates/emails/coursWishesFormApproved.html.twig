@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dossier d'inscription validé</title>
+</head>
+<body>
+<div class="body">
+    <div class="container">
+        <div class="header text-center">
+        </div>
+        <div class="content">
+            <p class="text-center">Bonjour {{ form.contactPrenom }}!</p>
+            <p class="block">
+                Bonne nouvelle : votre dossier d'inscription a été validé.
+            </p>
+            {% if registerUrl %}
+                <p class="block">
+                    Il ne vous reste plus qu'à créer votre compte pour finaliser votre inscription :
+                </p>
+                <p class="text-center">
+                    <a href="{{ registerUrl }}">Créer mon compte</a>
+                </p>
+            {% else %}
+                <p class="block">
+                    Votre inscription pour la saison est confirmée.
+                </p>
+            {% endif %}
+            <p>
+                Cordialement,<br><br>
+                L'équipe Kiné Sport Santé
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\DTO\AddSeasonPlanningSlotDTO;
+use App\Entity\SeasonPlanningSlot;
+use App\Entity\TypeCours;
 use App\Repository\TypeCoursRepository;
 use App\Service\SeasonPlanningService\AddSlotService;
 use App\Service\SeasonPlanningService\FetchCurrentSeasonPlanningSlotsService;
+use App\Service\SeasonPlanningService\PlanningStatsService;
+use App\Service\SeasonPlanningService\RemoveSlotService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +25,8 @@ class SeasonPlanningController extends AbstractController
         private readonly TypeCoursRepository $typeCoursRepository,
         private readonly AddSlotService $addSlotService,
         private readonly FetchCurrentSeasonPlanningSlotsService $fetchCurrentSeasonPlanningSlotsService,
+        private readonly RemoveSlotService $removeSlotService,
+        private readonly PlanningStatsService $planningStatsService,
     ) {
     }
 
@@ -59,5 +65,21 @@ class SeasonPlanningController extends AbstractController
         $slot = $this->addSlotService->addSlot($dto->daySelected, $timeSelected, $typeCours);
 
         return $this->json($slot, Response::HTTP_CREATED, [], ['groups' => 'season_planning:index']);
+    }
+
+    #[Route('api/admin/season-planning/slots/{slot}/type-cours/{typeCours}', name: 'api_admin_season_planning_remove_slot', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function removeSlot(SeasonPlanningSlot $slot, TypeCours $typeCours): JsonResponse
+    {
+        $this->removeSlotService->removeTypeCoursFromSlot($slot, $typeCours);
+
+        return $this->json(['success' => true], Response::HTTP_OK);
+    }
+
+    #[Route('api/admin/season-planning/stats', name: 'api_admin_season_planning_stats', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function stats(): JsonResponse
+    {
+        return $this->json($this->planningStatsService->getStatsForCurrentSaison());
     }
 }

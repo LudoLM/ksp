@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import bannerImage from "../../../images/banners/imageBanner5.jpg";
 import Banner from "../../components/Banner.vue";
 import { apiFetch } from "@/utils/useFetchInterceptor.ts";
@@ -19,11 +19,19 @@ interface Slot {
     typeCoursOptions: TypeCours[];
 }
 
+interface SlotStats {
+    slotId: number;
+    primaryCount: number;
+    secondaryCount: number;
+}
+
 const title = "Planning de la saison";
 const slots = ref<Slot[]>([]);
+const stats = ref<Map<number, SlotStats>>(new Map());
 const typeCoursChoices = ref<TypeCours[]>([]);
 const loading = ref(false);
 const submitting = ref(false);
+const deletingKey = ref<string | null>(null);
 
 const newDaySelected = ref<string>("1");
 const newTimeSelected = ref<string>("");
@@ -31,16 +39,32 @@ const newTypeCoursId = ref<string>("");
 
 const dayName = (daySelected: number) => SEASON_PLANNING_DAYS.find((d) => d.id === daySelected)?.name ?? "?";
 
+const statsFor = (slotId: number): SlotStats => stats.value.get(slotId) ?? { slotId, primaryCount: 0, secondaryCount: 0 };
+
+const maxCount = computed(() => {
+    let max = 1;
+    for (const s of stats.value.values()) {
+        max = Math.max(max, s.primaryCount, s.secondaryCount);
+    }
+    return max;
+});
+
+const barWidth = (count: number) => `${Math.round((count / maxCount.value) * 100)}%`;
+
 const load = async () => {
     loading.value = true;
     try {
-        const [slotsRes, typeCoursRes] = await Promise.all([
+        const [slotsRes, statsRes, typeCoursRes] = await Promise.all([
             apiFetch("/admin/season-planning"),
+            apiFetch("/admin/season-planning/stats"),
             useGetTypesCours(),
         ]);
 
         if (!slotsRes.ok) {
             throw new Error("Erreur lors du chargement des créneaux");
+        }
+        if (!statsRes.ok) {
+            throw new Error("Erreur lors du chargement des statistiques");
         }
         // useGetTypesCours() avale ses propres erreurs et résout à `false`
         // plutôt que de rejeter : il faut vérifier la forme du résultat.
@@ -49,6 +73,7 @@ const load = async () => {
         }
 
         slots.value = await slotsRes.json();
+        stats.value = new Map((await statsRes.json() as SlotStats[]).map((s) => [s.slotId, s]));
         typeCoursChoices.value = typeCoursRes;
     } catch (error) {
         alertStore.setAlert("Erreur lors du chargement du planning", "error");
@@ -84,6 +109,24 @@ const addSlot = async () => {
         alertStore.setAlert("Erreur lors de l'ajout du cours", "error");
     } finally {
         submitting.value = false;
+    }
+};
+
+const removeOption = async (slot: Slot, typeCours: TypeCours) => {
+    const key = `${slot.id}-${typeCours.id}`;
+    deletingKey.value = key;
+    try {
+        const res = await apiFetch(`/admin/season-planning/slots/${slot.id}/type-cours/${typeCours.id}`, { method: "DELETE" });
+        if (res.ok) {
+            alertStore.setAlert("Cours retiré du créneau", "success");
+            await load();
+        } else {
+            alertStore.setAlert("Erreur lors de la suppression", "error");
+        }
+    } catch (error) {
+        alertStore.setAlert("Erreur lors de la suppression", "error");
+    } finally {
+        deletingKey.value = null;
     }
 };
 
@@ -150,8 +193,33 @@ onMounted(load);
                     </span>
                 </div>
 
+                <div class="sp-option__demand">
+                    <div class="sp-demand-row">
+                        <span class="sp-demand-row__label">Prioritaire</span>
+                        <div class="sp-demand-row__track">
+                            <div class="sp-demand-row__bar sp-demand-row__bar--primary" :style="{ width: barWidth(statsFor(slot.id).primaryCount) }"></div>
+                        </div>
+                        <span class="sp-demand-row__count">{{ statsFor(slot.id).primaryCount }}</span>
+                    </div>
+                    <div class="sp-demand-row">
+                        <span class="sp-demand-row__label">Secondaire</span>
+                        <div class="sp-demand-row__track">
+                            <div class="sp-demand-row__bar sp-demand-row__bar--secondary" :style="{ width: barWidth(statsFor(slot.id).secondaryCount) }"></div>
+                        </div>
+                        <span class="sp-demand-row__count">{{ statsFor(slot.id).secondaryCount }}</span>
+                    </div>
+                </div>
+
                 <div v-for="typeCours in slot.typeCoursOptions" :key="typeCours.id" class="sp-option">
                     <div class="sp-option__label">{{ typeCours.libelle }}</div>
+                    <button
+                        type="button"
+                        class="sp-btn sp-btn--danger-outline"
+                        :disabled="deletingKey === `${slot.id}-${typeCours.id}`"
+                        @click="removeOption(slot, typeCours)"
+                    >
+                        {{ deletingKey === `${slot.id}-${typeCours.id}` ? "Suppression…" : "Retirer" }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -165,6 +233,8 @@ $color-gold: #e2a945;
 $color-border: #e5e7eb;
 $color-text: #111827;
 $color-text-muted: #6b7280;
+$color-danger: #b91c1c;
+$color-danger-bg: #fee2e2;
 $radius: 10px;
 
 .sp-panel {
@@ -273,6 +343,19 @@ $radius: 10px;
     }
 }
 
+.sp-btn--danger-outline {
+    height: 32px;
+    padding: 0 12px;
+    background: #fff;
+    border-color: $color-danger-bg;
+    color: $color-danger;
+    font-size: 12px;
+
+    &:hover:not(:disabled) {
+        background: $color-danger-bg;
+    }
+}
+
 .sp-state {
     display: flex;
     flex-direction: column;
@@ -372,5 +455,53 @@ $radius: 10px;
     font-size: 13.5px;
     font-weight: 600;
     color: $color-text;
+}
+
+.sp-option__demand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 360px;
+    margin-bottom: 12px;
+}
+
+.sp-demand-row {
+    display: grid;
+    grid-template-columns: 62px 1fr 20px;
+    align-items: center;
+    gap: 8px;
+}
+
+.sp-demand-row__label {
+    font-size: 11px;
+    color: $color-text-muted;
+}
+
+.sp-demand-row__track {
+    height: 6px;
+    background: $color-border;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.sp-demand-row__bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.2s ease;
+}
+
+.sp-demand-row__bar--primary {
+    background: $color-primary;
+}
+
+.sp-demand-row__bar--secondary {
+    background: $color-gold;
+}
+
+.sp-demand-row__count {
+    font-size: 11px;
+    font-weight: 600;
+    color: $color-text-muted;
+    text-align: right;
 }
 </style>

@@ -14,13 +14,14 @@ class Pack
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['pack:index'])]
     private ?int $id = null;
 
-    #[Groups(['user:payments', 'historique_paiements:index'])]
+    #[Groups(['user:payments', 'historique_paiements:index', 'pack:index'])]
     #[ORM\Column(length: 255)]
     private string $nom;
 
-    #[Groups(['user:payments', 'historique_paiements:index'])]
+    #[Groups(['user:payments', 'historique_paiements:index', 'pack:index'])]
     #[ORM\Column]
     private float $tarif;
 

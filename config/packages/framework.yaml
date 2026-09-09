@@ -29,6 +29,10 @@ framework:
             policy: 'sliding_window'
             limit: 5
             interval: '1 hour'
+        cours_wishes_form_submit_limiter:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '1 hour'
 
 when@test:
     framework:

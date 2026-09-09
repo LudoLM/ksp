@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\CoursWishesFormRepository;
+use App\Service\Interface\Notification\RecipientInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CoursWishesFormRepository::class)]
 #[ORM\UniqueConstraint(name: 'uniq_wishes_form_email_saison', columns: ['email', 'saison'])]
-class CoursWishesForm
+class CoursWishesForm implements RecipientInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -23,7 +24,16 @@ class CoursWishesForm
     #[Groups(['wishes_form:read'])]
     private string $email;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $nom = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $prenom = null;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $telephone = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'coursWishesForms')]
     #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
@@ -31,15 +41,15 @@ class CoursWishesForm
     #[Groups(['wishes_form:read', 'user:detail'])]
     private string $saison;
 
-    #[ORM\ManyToOne(targetEntity: CoursWeekType::class)]
+    #[ORM\ManyToOne(targetEntity: SeasonPlanningSlot::class)]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['wishes_form:read'])]
-    private ?CoursWeekType $creneauPrimaire = null;
+    private ?SeasonPlanningSlot $creneauPrimaire = null;
 
-    #[ORM\ManyToOne(targetEntity: CoursWeekType::class)]
+    #[ORM\ManyToOne(targetEntity: SeasonPlanningSlot::class)]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['wishes_form:read'])]
-    private ?CoursWeekType $creneauSecondaire = null;
+    private ?SeasonPlanningSlot $creneauSecondaire = null;
 
     #[ORM\ManyToOne(targetEntity: Pack::class)]
     #[ORM\JoinColumn(nullable: false)]
@@ -90,6 +100,66 @@ class CoursWishesForm
         return $this;
     }
 
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(?string $nom): static
+    {
+        $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function getPrenom(): ?string
+    {
+        return $this->prenom;
+    }
+
+    public function setPrenom(?string $prenom): static
+    {
+        $this->prenom = $prenom;
+
+        return $this;
+    }
+
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+
+    public function setTelephone(?string $telephone): static
+    {
+        $this->telephone = $telephone;
+
+        return $this;
+    }
+
+    /**
+     * Nom à afficher pour contacter le demandeur : celui du compte lié s'il existe
+     * (donnée à jour), sinon celui saisi anonymement à la soumission du dossier.
+     * Seul point d'accès à utiliser pour afficher l'identité d'un dossier — ne
+     * jamais lire $this->nom/$this->prenom/$this->telephone directement ailleurs.
+     */
+    #[Groups(['wishes_form:read'])]
+    public function getContactNom(): ?string
+    {
+        return $this->user?->getNom() ?? $this->nom;
+    }
+
+    #[Groups(['wishes_form:read'])]
+    public function getContactPrenom(): ?string
+    {
+        return $this->user?->getPrenom() ?? $this->prenom;
+    }
+
+    #[Groups(['wishes_form:read'])]
+    public function getContactTelephone(): ?string
+    {
+        return $this->user?->getTelephone() ?? $this->telephone;
+    }
+
     public function getUser(): ?User
     {
         return $this->user;
@@ -114,24 +184,24 @@ class CoursWishesForm
         return $this;
     }
 
-    public function getCreneauPrimaire(): ?CoursWeekType
+    public function getCreneauPrimaire(): ?SeasonPlanningSlot
     {
         return $this->creneauPrimaire;
     }
 
-    public function setCreneauPrimaire(?CoursWeekType $creneauPrimaire): static
+    public function setCreneauPrimaire(?SeasonPlanningSlot $creneauPrimaire): static
     {
         $this->creneauPrimaire = $creneauPrimaire;
 
         return $this;
     }
 
-    public function getCreneauSecondaire(): ?CoursWeekType
+    public function getCreneauSecondaire(): ?SeasonPlanningSlot
     {
         return $this->creneauSecondaire;
     }
 
-    public function setCreneauSecondaire(?CoursWeekType $creneauSecondaire): static
+    public function setCreneauSecondaire(?SeasonPlanningSlot $creneauSecondaire): static
     {
         $this->creneauSecondaire = $creneauSecondaire;
 

@@ -54,6 +54,12 @@ const coursRoutes: RouteRecordRaw[] = [
         component: () => import('../../views/admin/SeasonPlanning.vue'),
         meta: { navLabel: 'Planning de la saison', navGroup: 'cours', displayInNav: true },
       },
+      {
+        path: 'cours-wishes-form',
+        name: 'AdminCoursWishesForm',
+        component: () => import('../../views/admin/ControlCoursWishesForm.vue'),
+        meta: { navLabel: "Dossiers d'inscription", navGroup: 'cours', displayInNav: true },
+      },
     ],
   },
 ]

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service\CoursWishesFormService;
 
-use App\Entity\CoursWeekType;
 use App\Entity\CoursWishesForm;
 use App\Entity\Pack;
+use App\Entity\SeasonPlanningSlot;
 use App\Entity\User;
 use App\Enum\StatusCoursWishesFormEnum;
 use App\Helper\SaisonHelper;
@@ -24,14 +24,25 @@ readonly class SubmitCoursWishesFormService
     public function submit(
         string $email,
         ?User $user,
-        ?CoursWeekType $creneauPrimaire,
-        ?CoursWeekType $creneauSecondaire,
+        ?string $nom,
+        ?string $prenom,
+        ?string $telephone,
+        ?SeasonPlanningSlot $creneauPrimaire,
+        ?SeasonPlanningSlot $creneauSecondaire,
         Pack $packSouhaite,
         string $modeReglement,
         bool $filledByAdmin = false,
     ): CoursWishesForm {
         $saison = SaisonHelper::current();
         $form = $user instanceof User ? $this->repository->findCurrentForUser($user, $saison) : null;
+
+        // Reprend un dossier anonyme existant (jamais lié à un compte) pour le
+        // même email : couvre à la fois la resoumission d'un prospect sans
+        // compte, et le cas où un admin remplit le dossier d'un user dont
+        // l'email avait déjà un dossier anonyme en attente.
+        if (!$form instanceof CoursWishesForm) {
+            $form = $this->repository->findCurrentForEmail($email, $saison);
+        }
 
         if (!$form instanceof CoursWishesForm) {
             $form = new CoursWishesForm();
@@ -42,6 +53,9 @@ readonly class SubmitCoursWishesFormService
 
         $form->setEmail($email);
         $form->setUser($user);
+        $form->setNom($user instanceof User ? null : $nom);
+        $form->setPrenom($user instanceof User ? null : $prenom);
+        $form->setTelephone($user instanceof User ? null : $telephone);
         $form->setCreneauPrimaire($creneauPrimaire);
         $form->setCreneauSecondaire($creneauSecondaire);
         $form->setPackSouhaite($packSouhaite);

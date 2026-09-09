@@ -67,6 +67,12 @@ const router: Router = createRouter({
           component: () => import('../views/Profile.vue'),
           meta: { title: 'Mon profil', requiresAuth: true, displayInNav: false },
         },
+        {
+          path: '/demandeInscription',
+          name: 'CoursWishesForm',
+          component: () => import('../views/CoursWishesForm.vue'),
+          meta: { title: "Demande d'inscription", displayInNav: false },
+        },
       ],
     },
     {

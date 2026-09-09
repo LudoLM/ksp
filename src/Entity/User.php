@@ -2,8 +2,10 @@
 
 namespace App\Entity;
 
+use App\Helper\SaisonHelper;
 use App\Repository\UserRepository;
 use App\Service\CertificateControllerService\FetchCertificateService;
+use App\Service\CoursWishesFormService\FetchCoursWishesFormService;
 use App\Service\Interface\Notification\RecipientInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -125,11 +127,18 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: CertificatMedical::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $certificatMedicaux;
 
+    /**
+     * @var Collection<int, CoursWishesForm>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CoursWishesForm::class)]
+    private Collection $coursWishesForms;
+
     public function __construct()
     {
         $this->historiquePaiements = new ArrayCollection();
         $this->usersCours = new ArrayCollection();
         $this->certificatMedicaux = new ArrayCollection();
+        $this->coursWishesForms = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -496,5 +505,30 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
     public function getCurrentCertificatMedical(): ?CertificatMedical
     {
         return FetchCertificateService::selectCurrentCertificate($this->certificatMedicaux);
+    }
+
+    /**
+     * @return Collection<int, CoursWishesForm>
+     */
+    public function getCoursWishesForms(): Collection
+    {
+        return $this->coursWishesForms;
+    }
+
+    public function addCoursWishesForm(CoursWishesForm $coursWishesForm): static
+    {
+        if (!$this->coursWishesForms->contains($coursWishesForm)) {
+            $this->coursWishesForms->add($coursWishesForm);
+            $coursWishesForm->setUser($this);
+        }
+
+        return $this;
+    }
+
+    #[Groups(['user:detail'])]
+    #[SerializedName('coursWishesForm')]
+    public function getCurrentCoursWishesForm(): ?CoursWishesForm
+    {
+        return FetchCoursWishesFormService::selectCurrentForm($this->coursWishesForms, SaisonHelper::current());
     }
 }

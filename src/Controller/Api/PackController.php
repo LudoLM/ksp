@@ -23,12 +23,12 @@ class PackController extends AbstractController
     ) {
     }
 
-    #[Route('api/packs', name: 'packs_list', methods: ['GET'])]
+    #[Route('api/public/packs', name: 'packs_list', methods: ['GET'])]
     public function index(PackRepository $packRepository): JsonResponse
     {
         $packs = $packRepository->findAll();
 
-        return $this->json($packs);
+        return $this->json($packs, context: ['groups' => 'pack:index']);
     }
 
     public function show(Pack $pack): JsonResponse

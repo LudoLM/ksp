@@ -51,7 +51,11 @@ services:
     App\Service\SendingEmail\SendToUsersCoursAvailabilityService:
         arguments:
             $baseUrl: '%app_url%'
-            
+
+    App\Service\SendingEmail\SendCoursWishesFormStatusEmailService:
+        arguments:
+            $baseUrl: '%app_url%'
+
     App\Scheduler\ScheduleProvider:
         arguments:
             $cronExpression: '%app.cleanup_cron%' # Injecter le paramètre app.cleanup_cron
@@ -64,6 +68,10 @@ services:
     App\Controller\Api\CertificateController:
         arguments:
             $certificateUploadLimiter: '@limiter.certificate_upload_limiter'
+
+    App\Controller\Api\CoursWishesFormController:
+        arguments:
+            $coursWishesFormSubmitLimiter: '@limiter.cours_wishes_form_submit_limiter'
 
     Stripe\StripeClient:
         arguments:
