@@ -26,7 +26,7 @@ const router = useRouter();
 const coursId = Number(route.params.id);
 const isAdminPath = route.path.startsWith('/admin');
 const userStore = useUserStore();
-const { isAuthenticated, userId } = userStore;
+const { isAuthenticated, userId, hasValidWishesForm } = userStore;
 
 // Course data
 const cours = ref<CoursPublicDetailDTO | null>(null);
@@ -198,7 +198,7 @@ const handleAddParticipant = async (user: User): Promise<void> => {
                             <div class="w-2/3 h-0.5 bg-gray-200 mx-auto mb-6"></div>
                             <div class="button flex justify-center gap-5">
                                 <ButtonsCardUser
-                                     v-if="!isAdminPath"
+                                     v-if="!isAdminPath && (isAuthenticated ? hasValidWishesForm : true)"
                                      :userId="userId"
                                      :coursId="cours.id"
                                      :statusCours="cours.statusCours"
@@ -212,6 +212,15 @@ const handleAddParticipant = async (user: User): Promise<void> => {
                                     title="Connexion requise"
                                     message="Veuillez vous authentifier pour vous inscrire à ce cours."
                                     @login="redirectToLogin"
+                                >
+                                    {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
+                                </ModalConnect>
+                                <ModalConnect
+                                    v-if="isAuthenticated && !hasValidWishesForm && !isAdminPath && (cours.statusCours.libelle === 'Ouvert' || cours.statusCours.libelle === 'Complet')"
+                                    v-model:isOpen="loginDialog"
+                                    title="Dossier non validé"
+                                    message="Votre dossier d'inscription annuel n'est pas encore validé. Contactez l'administration pour pouvoir réserver."
+                                    :show-login-button="false"
                                 >
                                     {{ cours.statusCours.libelle === "Complet" ? 'Liste d\'attente' : 'S\'inscrire' }}
                                 </ModalConnect>

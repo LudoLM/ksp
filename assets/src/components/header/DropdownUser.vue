@@ -176,8 +176,8 @@ onUnmounted(() => {
 
         <!-- Utilisateur non connecté -->
         <div v-else class="loginButtons">
-            <router-link :to="{ name: 'Register' }" class="createCount">
-                Créer un compte
+            <router-link to="/demandeInscription" class="createCount">
+                Demande d'inscription
             </router-link>
             <router-link :to="{ name: 'Login' }" class="identifier">
                 <span class="identifier_text">Se connecter</span>
@@ -255,8 +255,9 @@ onUnmounted(() => {
     color: #472371;
     border: 2px solid #472371;
     border-radius: 5px;
-    width: 130px;
+    width: 155px;
     height: 40px;
+    white-space: nowrap;
     font-weight: 400;
     font-size: clamp(.7rem, 1.2vw, .6rem);
 }
@@ -266,11 +267,12 @@ onUnmounted(() => {
     justify-content: center;
     align-items: center;
     gap: 5px;
-    width: 130px;
+    width: 155px;
     height: 40px;
     background: #472371;
     border-radius: 5px;
     color: #dfdfdf;
+    white-space: nowrap;
     font-weight: 400;
     font-size: clamp(.7rem, 1.2vw, .6rem);
 }

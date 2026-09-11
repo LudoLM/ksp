@@ -9,7 +9,7 @@ import {useRouter} from "vue-router";
 import {storeToRefs} from "pinia";
 
 
-const { userId } = storeToRefs(useUserStore());
+const { userId, hasValidWishesForm } = storeToRefs(useUserStore());
 const loginDialog = ref(false);
 const router = useRouter();
 const redirectToLogin = () => {
@@ -81,6 +81,16 @@ const redirectToLogin = () => {
             >
                 Acheter
             </ModalConnect>
+            <ModalConnect
+                v-else-if="!hasValidWishesForm"
+                isPricingSizeButton
+                v-model:isOpen="loginDialog"
+                title="Dossier non validé"
+                message="Votre dossier d'inscription annuel n'est pas encore validé. Veuillez patienter avant d'acheter un pack."
+                :show-login-button="false"
+            >
+                Acheter
+            </ModalConnect>
             <stripe-buy-button
                 v-else
                 buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
@@ -101,6 +111,16 @@ const redirectToLogin = () => {
                 title="Connexion requise"
                 message="Veuillez vous authentifier pour vous inscrire à ce cours."
                 @login="redirectToLogin"
+            >
+                Acheter
+            </ModalConnect>
+            <ModalConnect
+                v-else-if="!hasValidWishesForm"
+                isPricingSizeButton
+                v-model:isOpen="loginDialog"
+                title="Dossier non validé"
+                message="Votre dossier d'inscription annuel n'est pas encore validé. Veuillez patienter avant d'acheter un pack."
+                :show-login-button="false"
             >
                 Acheter
             </ModalConnect>
@@ -127,6 +147,16 @@ const redirectToLogin = () => {
             >
                 Acheter
             </ModalConnect>
+            <ModalConnect
+                v-else-if="!hasValidWishesForm"
+                isPricingSizeButton
+                v-model:isOpen="loginDialog"
+                title="Dossier non validé"
+                message="Votre dossier d'inscription annuel n'est pas encore validé. Contactez l'administration pour finaliser votre inscription avant d'acheter un pack."
+                :show-login-button="false"
+            >
+                Acheter
+            </ModalConnect>
            <stripe-buy-button
               v-else
               buy-button-id="buy_btn_1Q4Mu7C6kEhASj1e5j6L1Tkm"
@@ -150,6 +180,16 @@ const redirectToLogin = () => {
           >
               Acheter
           </ModalConnect>
+          <ModalConnect
+              v-else-if="!hasValidWishesForm"
+              isPricingSizeButton
+              v-model:isOpen="loginDialog"
+              title="Dossier non validé"
+              message="Votre dossier d'inscription annuel n'est pas encore validé. Contactez l'administration pour finaliser votre inscription avant d'acheter un pack."
+              :show-login-button="false"
+          >
+              Acheter
+          </ModalConnect>
           <stripe-buy-button
               v-else
               buy-button-id="buy_btn_1RfkFTC6kEhASj1enOcDtmph"
@@ -170,6 +210,16 @@ const redirectToLogin = () => {
               title="Connexion requise"
               message="Veuillez vous authentifier pour vous inscrire à ce cours."
               @login="redirectToLogin"
+          >
+              Acheter
+          </ModalConnect>
+          <ModalConnect
+              v-else-if="!hasValidWishesForm"
+              isPricingSizeButton
+              v-model:isOpen="loginDialog"
+              title="Dossier non validé"
+              message="Votre dossier d'inscription annuel n'est pas encore validé. Contactez l'administration pour finaliser votre inscription avant d'acheter un pack."
+              :show-login-button="false"
           >
               Acheter
           </ModalConnect>

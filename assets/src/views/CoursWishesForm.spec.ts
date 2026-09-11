@@ -135,6 +135,7 @@ describe('CoursWishesForm.vue', () => {
       nombreCours: 0,
       roles: ['ROLE_USER'],
       certificatMedical: null,
+      coursWishesForm: null,
     })
 
     const wrapper = mount(CoursWishesForm)

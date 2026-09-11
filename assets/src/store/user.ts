@@ -15,6 +15,7 @@ interface User {
   nombreCours: number
   roles: string[]
   certificatMedical: UserCertificatMedical | null
+  coursWishesForm: UserCoursWishesForm | null
 }
 
 
@@ -25,6 +26,12 @@ export interface UserCertificatMedical {
   validUntil: Date | null
   rejectionReason: string | null
 
+}
+
+export interface UserCoursWishesForm {
+  id: number
+  status: string
+  saison: string
 }
 
 interface UserState {
@@ -101,6 +108,7 @@ export const useUserStore = defineStore(
     // Computed pour les états dérivés
     const isAuthenticated = computed((): boolean => !!state.user?.id)
     const isAdmin = computed((): boolean => state.user?.roles.includes('ROLE_ADMIN') ?? false)
+    const hasValidWishesForm = computed((): boolean => state.user?.coursWishesForm?.status === 'Valide')
 
     return {
       // State - accès direct à l'objet user
@@ -136,6 +144,7 @@ export const useUserStore = defineStore(
       // États dérivés
       isAuthenticated,
       isAdmin,
+      hasValidWishesForm,
     }
   },
   {

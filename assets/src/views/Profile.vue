@@ -119,6 +119,9 @@
                     @uploaded="handleCertificateUploaded"
                 />
 
+                <!-- Dossier d'inscription annuel -->
+                <CoursWishesFormStatus :coursWishesForm="currentUser.coursWishesForm" />
+
 
                 <!-- Cours disponibles -->
                 <div class="p-5 mb-6 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -221,6 +224,7 @@ import ModalConfirm from "../components/modals/ModalConfirm.vue";
 import {useActionsUser } from "../utils/composables/useActionsUser";
 import {useUserStore} from "../store/user";
 import CertificateStatus from "@/components/CertificateStatus.vue";
+import CoursWishesFormStatus from "@/components/CoursWishesFormStatus.vue";
 
 
 const router = useRouter();
@@ -268,6 +272,9 @@ const handlePageChanged = async (newPage) => {
 watch(
     () => route.params.id,
     async (newId) => {
+        if (!isViewingOtherUser.value) {
+            await getUser();
+        }
         await loadProfileData(newId);
         await loadUserCoursHistory(newId);
         await loadUserPaymentsHistory(newId);

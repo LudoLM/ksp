@@ -6,7 +6,6 @@ namespace App\Security\Voter;
 
 use App\Entity\User;
 use App\Repository\CoursWishesFormRepository;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
@@ -15,7 +14,6 @@ class CoursWishesFormVoter extends Voter
     public const string VALIDE = 'COURS_WISHES_FORM_VALIDE';
 
     public function __construct(
-        private readonly Security $security,
         private readonly CoursWishesFormRepository $repository,
     ) {
     }
@@ -32,7 +30,7 @@ class CoursWishesFormVoter extends Voter
             return false;
         }
 
-        if ($this->security->isGranted('ROLE_ADMIN')) {
+        if (\in_array('ROLE_ADMIN', $token->getRoleNames(), true)) {
             return true;
         }
 

@@ -147,6 +147,8 @@ class CoursController extends AbstractController
             ], Response::HTTP_NOT_FOUND);
         }
 
+        $this->denyAccessUnlessGranted('COURS_WISHES_FORM_VALIDE', message: "Votre dossier d'inscription n'est pas encore validé.");
+
         // Récupérer le cours
         $cours = $this->coursRepository->find($dto->coursId);
         if (null === $cours) {

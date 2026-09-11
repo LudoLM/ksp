@@ -15,18 +15,18 @@
         <div class="loginLinks">
             <template v-if="!userId">
                 <router-link
+                    to="/demandeInscription"
+                    @click="$emit('close')"
+                    class="auth-link"
+                >
+                    Demande d'inscription
+                </router-link>
+                <router-link
                     :to="{ name: 'Login' }"
                     @click="$emit('close')"
                     class="auth-link"
                 >
                     Se connecter
-                </router-link>
-                <router-link
-                    :to="{ name: 'Register' }"
-                    @click="$emit('close')"
-                    class="auth-link"
-                >
-                    Créer un compte
                 </router-link>
             </template>
 

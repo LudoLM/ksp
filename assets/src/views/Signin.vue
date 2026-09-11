@@ -85,8 +85,8 @@
                                 <p class="text-sm font-normal text-gray-700 dark:text-gray-400 text-start">
                                     Vous n'avez pas de compte?
                                     <router-link
-                                        to="/register"
-                                    >Créez-en un </router-link
+                                        to="/demandeInscription"
+                                    >Faites une demande d'inscription </router-link
                                     >
                                 </p>
                             </div>

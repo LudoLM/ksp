@@ -3,7 +3,7 @@
  * Gère le profil, historique, paiements
  */
 
-import { useUserStore, UserCertificatMedical } from '@/store/user'
+import { useUserStore, UserCertificatMedical, UserCoursWishesForm } from '@/store/user'
 import { apiFetch } from '@/utils/useFetchInterceptor'
 import { computed, ref } from 'vue'
 import { alertStore } from '@/store/alert'
@@ -21,6 +21,7 @@ interface UserProfileData {
   adresse: string | null
   commune: string | null
   certificatMedical: UserCertificatMedical | null
+  coursWishesForm: UserCoursWishesForm | null
 }
 
 interface DeleteUserResponse {
@@ -51,6 +52,7 @@ export function useActionsUser() {
     adresse: null,
     commune: null,
     certificatMedical: null,
+    coursWishesForm: null,
   })
 
   /**
@@ -157,6 +159,7 @@ export function useActionsUser() {
           adresse: userAdresse.value,
           commune: userVille.value,
           certificatMedical: userCertificatMedical.value,
+          coursWishesForm: userStore.user?.coursWishesForm ?? null,
         }
       }
     } catch (error) {
