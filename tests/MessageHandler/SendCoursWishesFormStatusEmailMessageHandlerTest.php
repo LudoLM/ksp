@@ -59,9 +59,9 @@ class SendCoursWishesFormStatusEmailMessageHandlerTest extends TestCase
 
         $this->sendingService->expects($this->once())
             ->method('send')
-            ->with($form, 'raw-token');
+            ->with($form, 'raw-token', 'raw-correction-token');
 
-        $this->handler->__invoke(new SendCoursWishesFormStatusEmailMessage(42, 'raw-token'));
+        $this->handler->__invoke(new SendCoursWishesFormStatusEmailMessage(42, 'raw-token', 'raw-correction-token'));
     }
 
     public static function statusProvider(): \Generator

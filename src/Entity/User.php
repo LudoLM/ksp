@@ -34,7 +34,7 @@ class User implements UserInterface, RecipientInterface, PasswordAuthenticatedUs
     private ?int $id = null;
 
     #[Groups(['user:detail'])]
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(length: 180, unique: true)]
     public string $email;
 
     #[ORM\Column]

@@ -7,6 +7,7 @@ final readonly class SendCoursWishesFormStatusEmailMessage
     public function __construct(
         private int $formId,
         private ?string $registrationToken = null,
+        private ?string $correctionToken = null,
     ) {
     }
 
@@ -18,5 +19,10 @@ final readonly class SendCoursWishesFormStatusEmailMessage
     public function getRegistrationToken(): ?string
     {
         return $this->registrationToken;
+    }
+
+    public function getCorrectionToken(): ?string
+    {
+        return $this->correctionToken;
     }
 }

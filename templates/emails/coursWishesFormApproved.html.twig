@@ -21,6 +21,11 @@
                 <p class="text-center">
                     <a href="{{ registerUrl }}">Créer mon compte</a>
                 </p>
+                {% if registrationExpiresAt %}
+                    <p class="block">
+                        Ce lien est valable jusqu'au <strong>{{ registrationExpiresAt|date('d/m/Y') }}</strong>. Passé ce délai, il vous suffira de <a href="{{ formUrl }}">refaire une demande d'inscription</a> avec la même adresse email pour recevoir un nouveau lien.
+                    </p>
+                {% endif %}
             {% else %}
                 <p class="block">
                     Votre inscription pour la saison est confirmée.

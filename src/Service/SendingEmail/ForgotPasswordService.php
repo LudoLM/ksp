@@ -5,19 +5,19 @@ namespace App\Service\SendingEmail;
 use App\Entity\User;
 use App\Message\RemoveResetTokenMessage;
 use App\Message\SendResetPasswordEmailMessage;
+use App\Service\Security\SecureTokenService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
-use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 
 readonly class ForgotPasswordService
 {
     public function __construct(
         private EntityManagerInterface $em,
         private MessageBusInterface $messageBus,
-        private TokenGeneratorInterface $tokenGenerator,
+        private SecureTokenService $secureTokenService,
     ) {
     }
 
@@ -37,11 +37,10 @@ readonly class ForgotPasswordService
         // Si l'utilisateur existe, on lui envoie un email de réinitialisation de mot de passe
         try {
             // Recupere un token de réinitialisation
-            $token = $this->tokenGenerator->generateToken();
+            $token = $this->secureTokenService->generate();
 
             // Hash le token avant stockage (KSP-11 security fix)
-            $tokenHash = hash('sha256', $token);
-            $user->setResetPasswordToken($tokenHash);
+            $user->setResetPasswordToken($this->secureTokenService->hash($token));
 
             // Définit la date d'expiration à 10 minutes (KSP-11 security fix)
             $expiresAt = new \DateTime('+10 minutes');

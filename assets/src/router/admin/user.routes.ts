@@ -19,6 +19,12 @@ const userRoutes: RouteRecordRaw[] = [
         meta: { navLabel: 'Gestion certificats', navGroup: 'users', displayInNav: true },
       },
       {
+        path: 'coursWishesForm',
+        name: 'AdminCoursWishesForm',
+        component: () => import('../../views/admin/ControlCoursWishesForm.vue'),
+        meta: { navLabel: "Dossiers d'inscription", navGroup: 'users', displayInNav: true },
+      },
+      {
         path: 'profile/:id?',
         name: 'AdminProfile',
         component: () => import('../../views/Profile.vue'),

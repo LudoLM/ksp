@@ -45,9 +45,9 @@
                         </p>
                     </div>
                     <div>
-                        <form @submit.prevent="handleSubmit">
+                        <form v-if="isEditProfileRoute || prefilled" @submit.prevent="handleSubmit">
                             <div class="space-y-5">
-                                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                                <div v-if="isEditProfileRoute || prefilled" class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                     <!-- Prénom -->
                                     <CustomInput
                                         item="Prénom"
@@ -56,6 +56,7 @@
                                         placeholder="Robert"
                                         v-model="firstName"
                                         :error="errors.prenom"
+                                        :disabled="prefilled"
                                         isRequired
                                     />
                                     <!-- Nom -->
@@ -66,6 +67,7 @@
                                         placeholder="Zimmerman"
                                         v-model="lastName"
                                         :error="errors.nom"
+                                        :disabled="prefilled"
                                         isRequired
                                     />
                                 </div>
@@ -80,6 +82,7 @@
                                         placeholder="bobDylan@gmail.com"
                                         v-model="email"
                                         :error="errors.email"
+                                        :disabled="prefilled"
                                         isRequired
                                     />
                                     <!-- Mot de passe -->
@@ -121,12 +124,14 @@
                                     />
                                     <!-- Téléphone -->
                                     <CustomInput
+                                        v-if="isEditProfileRoute || prefilled"
                                         item="Téléphone"
                                         type="text"
                                         id="phone"
                                         placeholder="06XXXXXXXX"
                                         v-model="phone"
                                         :error="errors.telephone"
+                                        :disabled="prefilled"
                                         isRequired
                                     />
                                 </div>
@@ -138,6 +143,18 @@
                                 </CustomValidationButton>
                             </div>
                         </form>
+                        <p v-else-if="!prefillChecked" class="text-sm text-gray-500 dark:text-gray-400">
+                            Vérification de votre lien d'inscription…
+                        </p>
+                        <div v-else class="space-y-3">
+                            <p class="text-sm text-gray-700 dark:text-gray-400">
+                                La création d'un compte n'est possible qu'après validation d'un dossier d'inscription.
+                            </p>
+                            <router-link
+                                to="/demandeInscription"
+                                class="inline-block text-sm font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                            >Faire une demande d'inscription</router-link>
+                        </div>
                         <div class="mt-5" v-if="!isEditProfileRoute">
                             <p
                                 class="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start"
@@ -160,8 +177,8 @@
     </div>
 </template>
 
-<script setup>
-import {onMounted, ref} from 'vue'
+<script setup lang="ts">
+import {onMounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import CustomInput from "../components/forms/CustomInput.vue";
 import CustomPassword from "../components/forms/CustomPassword.vue";
@@ -180,21 +197,24 @@ const adress = ref('');
 const cp = ref('');
 const city = ref('');
 const phone = ref('');
-const errors = ref({
-    firstName: null,
-    lastName: null,
-    email: null,
-    password: null,
-    adress: null,
-    cp: null,
-    city: null,
-    phone: null,
+const prefilled = ref(false)
+const registrationToken = ref('')
+const prefillChecked = ref(false)
+const errors = ref<Record<string, string>>({
+    prenom: '',
+    nom: '',
+    email: '',
+    password: '',
+    adresse: '',
+    cp: '',
+    ville: '',
+    telephone: '',
 });
 const router = useRouter();
 const route = useRoute();
-const isEditProfileRoute =  ref(route.name === 'EditProfile' || route.name === 'AdminEditProfile');
+const isEditProfileRoute = ref(route.name === 'EditProfile' || route.name === 'AdminEditProfile');
 
-const getUser = async (userId) => {
+const getUser = async (userId?: string | string[]): Promise<any> => {
     const url = userId ? `/api/user/${userId}` : `/api/user`;
     const response = await apiFetch(url, {
         method: "GET",
@@ -204,13 +224,45 @@ const getUser = async (userId) => {
 };
 
 
-const handleRedirection = () => {
+const handleRedirection = (): void => {
     router.go(-1);
 }
 
-const handleSubmit = async () => {
+// Réinitialise l'état de préremplissage
+const resetPrefill = (): void => {
+    prefilled.value = false
+    registrationToken.value = ''
+    email.value = ''
+    firstName.value = ''
+    lastName.value = ''
+    phone.value = ''
+}
+
+const fetchPrefill = async (token: string): Promise<void> => {
+    try {
+        const response = await fetch(`/api/register/prefill?token=${encodeURIComponent(token)}`)
+        if (!response.ok) {
+            resetPrefill()
+            return
+        }
+        const data = await response.json()
+        email.value = data.email || ''
+        firstName.value = data.prenom || ''
+        lastName.value = data.nom || ''
+        phone.value = data.telephone || ''
+        registrationToken.value = token
+        prefilled.value = true
+    } catch (err) {
+        console.error(err)
+        resetPrefill()
+    } finally {
+        prefillChecked.value = true
+    }
+}
+
+const handleSubmit = async (): Promise<void> => {
     const url = ref('');
-    const data = ref({});
+    const data = ref<Record<string, unknown>>({});
     if (isEditProfileRoute.value) {
         url.value = route.params.id ? `/api/edit-user/${route.params.id}` : `/api/edit-user`;
         data.value = {
@@ -221,18 +273,20 @@ const handleSubmit = async () => {
             commune: city.value,
             telephone: phone.value,
         }
-    } else {
+    } else if (prefilled.value) {
         url.value = `/api/register`;
         data.value = {
-            prenom: firstName.value,
-            nom: lastName.value,
-            email: email.value,
+            token: registrationToken.value,
             password: password.value,
             adresse: adress.value,
             cp: cp.value,
             commune: city.value,
-            telephone: phone.value,
         }
+    } else {
+        // Aucune inscription possible sans token valide (dossier d'inscription
+        // approuvé) : le bouton n'est plus affiché dans ce cas côté template,
+        // ce chemin ne devrait donc jamais être atteint.
+        return;
     }
 
     try {
@@ -279,6 +333,19 @@ onMounted(async () => {
         cp.value = userData.codePostal || "";
         city.value = userData.commune || "";
         phone.value = userData.telephone || "";
+    } else if (route.query.token) {
+        await fetchPrefill(String(route.query.token));
+    } else {
+        prefillChecked.value = true;
+    }
+});
+
+// Cas d'une navigation in-app entre deux liens /register?token=... différents
+// (pas de remount) : l'onMounted ci-dessus ne se redéclenche pas, il faut
+// re-résoudre le prefill quand le token de la query change.
+watch(() => route.query.token, async (newToken) => {
+    if (!isEditProfileRoute.value && newToken) {
+        await fetchPrefill(String(newToken));
     }
 });
 

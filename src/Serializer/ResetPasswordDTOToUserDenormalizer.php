@@ -5,6 +5,7 @@ namespace App\Serializer;
 use App\DTO\ResetPasswordDTO;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\Security\SecureTokenService;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
@@ -13,6 +14,7 @@ class ResetPasswordDTOToUserDenormalizer implements DenormalizerInterface
     public function __construct(
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly UserRepository $userRepository,
+        private readonly SecureTokenService $secureTokenService,
     ) {
     }
 
@@ -36,8 +38,7 @@ class ResetPasswordDTOToUserDenormalizer implements DenormalizerInterface
         }
 
         // 2. Vérifier le token avec comparaison constant-time (protection timing attack)
-        $tokenHash = hash('sha256', $data->token);
-        if (!hash_equals($user->getResetPasswordToken() ?? '', $tokenHash)) {
+        if (!$this->secureTokenService->matches($data->token, $user->getResetPasswordToken())) {
             throw new \Exception('Le lien de réinitialisation est invalide ou a expiré');
         }
 

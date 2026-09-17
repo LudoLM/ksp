@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Enum\StatusCoursWishesFormEnum;
 use App\Message\SendCoursWishesFormStatusEmailMessage;
 use App\Service\CoursWishesFormService\ValidateCoursWishesFormService;
+use App\Service\Security\SecureTokenService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -23,13 +24,17 @@ class ValidateCoursWishesFormServiceTest extends TestCase
 {
     private EntityManagerInterface&MockObject $em;
     private MessageBusInterface&MockObject $messageBus;
+    private SecureTokenService&MockObject $secureTokenService;
     private ValidateCoursWishesFormService $service;
 
     protected function setUp(): void
     {
         $this->em = $this->createMock(EntityManagerInterface::class);
         $this->messageBus = $this->createMock(MessageBusInterface::class);
-        $this->service = new ValidateCoursWishesFormService($this->em, $this->messageBus);
+        $this->secureTokenService = $this->createMock(SecureTokenService::class);
+        $this->secureTokenService->method('generate')->willReturn('raw-token');
+        $this->secureTokenService->method('hash')->willReturn('hashed-token');
+        $this->service = new ValidateCoursWishesFormService($this->em, $this->messageBus, $this->secureTokenService);
 
         $this->messageBus->method('dispatch')->willReturn(new Envelope(new \stdClass()));
     }
@@ -74,8 +79,8 @@ class ValidateCoursWishesFormServiceTest extends TestCase
 
         $this->assertSame($expectedStatus, $form->getStatus());
         $this->assertSame($expectedReason, $form->getCorrectionReason());
-        $this->assertSame($admin, $form->getValidatedBy());
-        $this->assertInstanceOf(\DateTimeImmutable::class, $form->getValidatedAt());
+        $this->assertSame($admin, $form->getReviewedBy());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $form->getReviewedAt());
         $this->assertInstanceOf(SendCoursWishesFormStatusEmailMessage::class, $dispatchedMessage);
         $this->assertSame(7, $dispatchedMessage->getFormId());
     }
@@ -95,5 +100,86 @@ class ValidateCoursWishesFormServiceTest extends TestCase
             'expectedStatus' => StatusCoursWishesFormEnum::A_CORRIGER->value,
             'expectedReason' => 'Créneau primaire déjà complet',
         ];
+    }
+
+    public function testApprovingAnAnonymousFormGeneratesARegistrationTokenAndIncludesItInTheDispatchedMessage(): void
+    {
+        $form = $this->createForm(7);
+        $admin = new User();
+
+        $dispatchedMessage = null;
+        $this->messageBus->method('dispatch')
+            ->willReturnCallback(function ($message) use (&$dispatchedMessage): Envelope {
+                $dispatchedMessage = $message;
+
+                return new Envelope($message);
+            });
+
+        $this->service->updateStatus($form, 'approve', $admin);
+
+        $this->assertSame('hashed-token', $form->getRegistrationTokenHash());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $form->getRegistrationTokenExpiresAt());
+        $this->assertSame('raw-token', $dispatchedMessage->getRegistrationToken());
+    }
+
+    public function testApprovingAFormAlreadyLinkedToAUserDoesNotGenerateAToken(): void
+    {
+        $form = $this->createForm(7);
+        $form->setUser(new User());
+        $admin = new User();
+
+        $this->service->updateStatus($form, 'approve', $admin);
+
+        $this->assertNull($form->getRegistrationTokenHash());
+        $this->assertNull($form->getRegistrationTokenExpiresAt());
+    }
+
+    public function testSendingBackForCorrectionDoesNotGenerateARegistrationToken(): void
+    {
+        $form = $this->createForm(7);
+        $admin = new User();
+
+        $this->service->updateStatus($form, 'correction', $admin, 'Motif');
+
+        $this->assertNull($form->getRegistrationTokenHash());
+        $this->assertNull($form->getRegistrationTokenExpiresAt());
+    }
+
+    public function testSendingBackForCorrectionGeneratesACorrectionTokenAndIncludesItInTheDispatchedMessage(): void
+    {
+        $form = $this->createForm(7);
+        $admin = new User();
+
+        $dispatchedMessage = null;
+        $this->messageBus->method('dispatch')
+            ->willReturnCallback(function ($message) use (&$dispatchedMessage): Envelope {
+                $dispatchedMessage = $message;
+
+                return new Envelope($message);
+            });
+
+        $this->service->updateStatus($form, 'correction', $admin, 'Motif');
+
+        $this->assertSame('hashed-token', $form->getCorrectionTokenHash());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $form->getCorrectionTokenExpiresAt());
+        $this->assertSame('raw-token', $dispatchedMessage->getCorrectionToken());
+    }
+
+    public function testApprovingDoesNotGenerateACorrectionToken(): void
+    {
+        $form = $this->createForm(7);
+        $admin = new User();
+
+        $dispatchedMessage = null;
+        $this->messageBus->method('dispatch')
+            ->willReturnCallback(function ($message) use (&$dispatchedMessage): Envelope {
+                $dispatchedMessage = $message;
+
+                return new Envelope($message);
+            });
+
+        $this->service->updateStatus($form, 'approve', $admin);
+
+        $this->assertNull($dispatchedMessage->getCorrectionToken());
     }
 }

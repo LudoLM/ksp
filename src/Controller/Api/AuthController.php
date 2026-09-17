@@ -6,12 +6,18 @@ use App\DTO\CreateUserDTO;
 use App\DTO\EditUserDTO;
 use App\DTO\ForgotPasswordDTO;
 use App\DTO\ResetPasswordDTO;
+use App\Entity\CoursWishesForm;
 use App\Entity\User;
 use App\Event\PasswordChangedEvent;
+use App\Exception\UnvalidatedWishesFormException;
 use App\Serializer\ResetPasswordDTOToUserDenormalizer;
+use App\Service\CoursWishesFormService\RegisterUserFromWishesFormService;
+use App\Service\CoursWishesFormService\ResolveWishesFormByTokenService;
+use App\Service\Security\RateLimitGuard;
 use App\Service\SendingEmail\ForgotPasswordService;
 use App\Service\UserControllerService\CreateOrEditUserService;
 use App\Service\UserControllerService\FetchUserService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -22,6 +28,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
@@ -40,19 +47,28 @@ class AuthController extends AbstractController
         private readonly FetchUserService $fetchUserService,
         private readonly RateLimiterFactory $forgotPasswordLimiter,
         private readonly RateLimiterFactory $resetPasswordLimiter,
+        private readonly RateLimiterFactory $registerLimiter,
+        private readonly RateLimiterFactory $registerPrefillLimiter,
         private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly ResolveWishesFormByTokenService $resolveWishesFormByTokenService,
+        private readonly RegisterUserFromWishesFormService $registerUserFromWishesFormService,
+        private readonly RateLimitGuard $rateLimitGuard,
     ) {
     }
 
     #[Route(path: 'api/register', name: 'api_app_register', methods: ['POST'])]
     public function register(
+        Request $request,
         #[MapRequestPayload]
         CreateUserDTO $createUserDTO,
     ): JsonResponse {
+        $rateLimitResponse = $this->rateLimitGuard->checkOrRespond($this->registerLimiter, $request->getClientIp(), 'Trop de tentatives. Veuillez réessayer dans 15 minutes.');
+        if ($rateLimitResponse instanceof JsonResponse) {
+            return $rateLimitResponse;
+        }
+
         try {
-            $user = $this->createOrEditUserService->createOrEditUser(null, $createUserDTO);
-            $this->em->persist($user);
-            $this->em->flush();
+            $user = $this->registerUserFromWishesFormService->register($createUserDTO);
             [$jwtCookie, $refreshCookie] = $this->createTokens($user);
 
             // Crée la réponse avec un message JSON
@@ -64,6 +80,16 @@ class AuthController extends AbstractController
             $response->headers->setCookie($refreshCookie);
 
             return $response;
+        } catch (UnvalidatedWishesFormException $exception) {
+            // Format 'detail' attendu par useValidationForm côté front (assets/src/utils/useValidationForm.ts) :
+            return new JsonResponse([
+                'detail' => "email: {$exception->getMessage()}",
+            ], Response::HTTP_FORBIDDEN);
+        } catch (UniqueConstraintViolationException) {
+            return new JsonResponse([
+                'type' => 'error',
+                'message' => 'Un compte existe déjà avec cet email.',
+            ], Response::HTTP_CONFLICT);
         } catch (\Exception $exception) {
             $message = $exception->getMessage();
             // Tente de décoder le message (au cas où c’est du JSON)
@@ -80,6 +106,28 @@ class AuthController extends AbstractController
                 'message' => $message,
             ], Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    #[Route(path: 'api/register/prefill', name: 'api_register_prefill', methods: ['GET'])]
+    public function prefill(Request $request, #[MapQueryParameter] string $token): JsonResponse
+    {
+        $rateLimitResponse = $this->rateLimitGuard->checkOrRespondWithErrorShape($this->registerPrefillLimiter, $request->getClientIp(), 'Trop de tentatives. Veuillez réessayer dans 15 minutes.');
+        if ($rateLimitResponse instanceof JsonResponse) {
+            return $rateLimitResponse;
+        }
+
+        $form = $this->resolveWishesFormByTokenService->resolveByRegistrationToken($token);
+
+        if (!$form instanceof CoursWishesForm) {
+            return new JsonResponse(['error' => 'Lien invalide ou expiré.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse([
+            'email' => $form->getEmail(),
+            'nom' => $form->getNom(),
+            'prenom' => $form->getPrenom(),
+            'telephone' => $form->getTelephone(),
+        ]);
     }
 
     #[Route(path: 'api/edit-user/{id<\d+>?}', name: 'api_app_edit_profile', methods: ['PUT'])]
@@ -112,12 +160,9 @@ class AuthController extends AbstractController
         ForgotPasswordDTO $forgotPasswordDTO,
     ): JsonResponse {
         // Rate limiting basé sur l'IP du client
-        $limiter = $this->forgotPasswordLimiter->create($request->getClientIp());
-        if (!$limiter->consume(1)->isAccepted()) {
-            return new JsonResponse([
-                'type' => 'error',
-                'message' => 'Trop de tentatives. Veuillez réessayer dans 15 minutes.',
-            ], Response::HTTP_TOO_MANY_REQUESTS);
+        $rateLimitResponse = $this->rateLimitGuard->checkOrRespond($this->forgotPasswordLimiter, $request->getClientIp(), 'Trop de tentatives. Veuillez réessayer dans 15 minutes.');
+        if ($rateLimitResponse instanceof JsonResponse) {
+            return $rateLimitResponse;
         }
 
         return $this->forgotPasswordService->handleForgotPassword($forgotPasswordDTO->email);
@@ -130,12 +175,9 @@ class AuthController extends AbstractController
         ResetPasswordDTO $resetPasswordDTO,
         ResetPasswordDTOToUserDenormalizer $resetPasswordDTOToUserDenormalizer,
     ): JsonResponse {
-        $limiter = $this->resetPasswordLimiter->create($request->getClientIp());
-        if (!$limiter->consume(1)->isAccepted()) {
-            return new JsonResponse([
-                'type' => 'error',
-                'message' => 'Trop de tentatives. Veuillez réessayer dans 15 minutes.',
-            ], Response::HTTP_TOO_MANY_REQUESTS);
+        $rateLimitResponse = $this->rateLimitGuard->checkOrRespond($this->resetPasswordLimiter, $request->getClientIp(), 'Trop de tentatives. Veuillez réessayer dans 15 minutes.');
+        if ($rateLimitResponse instanceof JsonResponse) {
+            return $rateLimitResponse;
         }
         // Utilisez le denormalizer pour convertir le DTO en entité User;
         $user = $resetPasswordDTOToUserDenormalizer->denormalize($resetPasswordDTO, User::class);

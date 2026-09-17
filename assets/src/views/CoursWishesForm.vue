@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { apiFetch } from "@/utils/useFetchInterceptor.ts";
 import { alertStore } from "@/store/alert.ts";
 import { useUserStore } from "@/store/user.ts";
@@ -29,11 +30,20 @@ const PAYMENT_OPTIONS = [
 ];
 
 const { userEmail, isAuthenticated } = storeToRefs(useUserStore());
+const route = useRoute();
 
 const creneaux = ref<Creneau[]>([]);
 const packs = ref<Pack[]>([]);
 const loading = ref(true);
 const submitting = ref(false);
+const submitted = ref(false);
+
+
+const requiresIdentityFields = ref(!isAuthenticated.value);
+
+const correctionToken = ref<string | null>(null);
+
+const tokenInvalid = ref(false);
 
 const email = ref(userEmail.value ?? "");
 const nom = ref("");
@@ -67,7 +77,6 @@ const toggleCreneau = (creneauId: number, column: "primaire" | "secondaire") => 
 };
 
 const loadOptions = async () => {
-    loading.value = true;
     try {
         const [creneauxRes, packsRes] = await Promise.all([
             apiFetch("/public/season-planning/current").then((r) => r.json()),
@@ -77,8 +86,27 @@ const loadOptions = async () => {
         packs.value = packsRes;
     } catch (error) {
         alertStore.setAlert("Erreur lors du chargement du formulaire", "error");
-    } finally {
-        loading.value = false;
+    }
+};
+
+const fetchPrefill = async (token: string): Promise<void> => {
+    try {
+        const res = await apiFetch(`/public/cours-wishes-form/prefill?token=${encodeURIComponent(token)}`);
+        if (!res.ok) {
+            tokenInvalid.value = true;
+            alertStore.setAlert("Lien invalide ou expiré.", "error");
+            return;
+        }
+        const data = await res.json();
+        email.value = data.email ?? email.value;
+        nom.value = data.nom ?? "";
+        prenom.value = data.prenom ?? "";
+        telephone.value = data.telephone ?? "";
+        requiresIdentityFields.value = !data.hasAccount;
+        correctionToken.value = token;
+    } catch (error) {
+        tokenInvalid.value = true;
+        alertStore.setAlert("Lien invalide ou expiré.", "error");
     }
 };
 
@@ -90,17 +118,19 @@ const submit = async () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 email: email.value,
-                nom: isAuthenticated.value ? null : nom.value,
-                prenom: isAuthenticated.value ? null : prenom.value,
-                telephone: isAuthenticated.value ? null : telephone.value,
+                nom: requiresIdentityFields.value ? nom.value : null,
+                prenom: requiresIdentityFields.value ? prenom.value : null,
+                telephone: requiresIdentityFields.value ? telephone.value : null,
                 creneauPrimaireId: creneauPrimaireId.value ? Number(creneauPrimaireId.value) : null,
                 creneauSecondaireId: creneauSecondaireId.value ? Number(creneauSecondaireId.value) : null,
                 packSouhaiteId: Number(packSouhaiteId.value),
                 modeReglement: modeReglement.value,
+                correctionToken: correctionToken.value,
             }),
         });
         if (res.ok) {
             alertStore.setAlert("Votre dossier a bien été envoyé, il sera examiné prochainement.", "success");
+            submitted.value = true;
         } else {
             const data = await res.json().catch(() => null);
             alertStore.setAlert(data?.error ?? "Erreur lors de l'envoi du dossier", "error");
@@ -112,7 +142,18 @@ const submit = async () => {
     }
 };
 
-onMounted(loadOptions);
+onMounted(async () => {
+    const tasks: Promise<unknown>[] = [loadOptions()];
+    if (route.query.token) {
+        tasks.push(fetchPrefill(String(route.query.token)));
+    }
+    // loading ne repasse à false qu'une fois loadOptions ET fetchPrefill (s'il y a
+    // un token) terminés : sinon le formulaire peut s'afficher et devenir
+    // soumissible avant que correctionToken soit renseigné (la requête part alors
+    // avec correctionToken: null et la correction est silencieusement perdue).
+    await Promise.all(tasks);
+    loading.value = false;
+});
 </script>
 
 <template>
@@ -137,6 +178,24 @@ onMounted(loadOptions);
                 Chargement du formulaire…
             </div>
 
+            <div v-else-if="tokenInvalid" class="wishes-form-error">
+                <div class="wishes-form-error__icon" aria-hidden="true">!</div>
+                <h2 class="wishes-form-error__title">Lien invalide ou expiré</h2>
+                <p class="wishes-form-error__text">
+                    Ce lien de correction n'est plus valide. Votre dossier a peut-être déjà été traité, ou le lien
+                    a déjà été utilisé. Contactez-nous si vous pensez qu'il s'agit d'une erreur.
+                </p>
+            </div>
+
+            <div v-else-if="submitted" class="wishes-form-success">
+                <div class="wishes-form-success__icon" aria-hidden="true">✓</div>
+                <h2 class="wishes-form-success__title">Dossier envoyé</h2>
+                <p class="wishes-form-success__text">
+                    Votre demande d'inscription a bien été transmise. Notre équipe l'étudie selon les places
+                    disponibles et revient vers vous pour finaliser votre inscription.
+                </p>
+            </div>
+
             <form v-else class="wishes-form" @submit.prevent="submit">
                 <label class="wishes-form-field">
                     <span class="wishes-form-label">Email<span class="wishes-form-required">*</span></span>
@@ -145,12 +204,16 @@ onMounted(loadOptions);
                         type="email"
                         name="email"
                         required
+                        :disabled="!!correctionToken"
                         class="wishes-form-input"
                         placeholder="vous@exemple.fr"
                     />
+                    <span v-if="correctionToken" class="wishes-form-hint">
+                        Cet email est associé à votre dossier et ne peut pas être modifié ici.
+                    </span>
                 </label>
 
-                <label v-if="!isAuthenticated" class="wishes-form-field">
+                <label v-if="requiresIdentityFields" class="wishes-form-field">
                     <span class="wishes-form-label">Nom<span class="wishes-form-required">*</span></span>
                     <input
                         v-model="nom"
@@ -162,7 +225,7 @@ onMounted(loadOptions);
                     />
                 </label>
 
-                <label v-if="!isAuthenticated" class="wishes-form-field">
+                <label v-if="requiresIdentityFields" class="wishes-form-field">
                     <span class="wishes-form-label">Prénom<span class="wishes-form-required">*</span></span>
                     <input
                         v-model="prenom"
@@ -174,7 +237,7 @@ onMounted(loadOptions);
                     />
                 </label>
 
-                <label v-if="!isAuthenticated" class="wishes-form-field">
+                <label v-if="requiresIdentityFields" class="wishes-form-field">
                     <span class="wishes-form-label">Téléphone<span class="wishes-form-required">*</span></span>
                     <input
                         v-model="telephone"
@@ -267,7 +330,7 @@ onMounted(loadOptions);
                 <button
                     type="submit"
                     class="wishes-form-submit"
-                    :disabled="submitting || !packSouhaiteId || !creneauPrimaireId || (!isAuthenticated && (!nom || !prenom || !telephone))"
+                    :disabled="submitting || !packSouhaiteId || !creneauPrimaireId || (requiresIdentityFields && (!nom || !prenom || !telephone))"
                 >
                     {{ submitting ? "Envoi en cours…" : "Envoyer mon dossier" }}
                 </button>
@@ -330,6 +393,80 @@ $color-text-muted: #6b7280;
     to { transform: rotate(360deg); }
 }
 
+.wishes-form-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 32px 12px;
+}
+
+.wishes-form-success__icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(71, 35, 113, 0.1);
+    color: $color-primary;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.wishes-form-success__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: $color-text;
+}
+
+.wishes-form-success__text {
+    margin: 0;
+    max-width: 420px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: $color-text-muted;
+}
+
+.wishes-form-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 32px 12px;
+}
+
+.wishes-form-error__icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(185, 28, 28, 0.1);
+    color: #b91c1c;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.wishes-form-error__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: $color-text;
+}
+
+.wishes-form-error__text {
+    margin: 0;
+    max-width: 420px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: $color-text-muted;
+}
+
 .wishes-form {
     display: flex;
     flex-direction: column;
@@ -374,6 +511,19 @@ $color-text-muted: #6b7280;
         border-color: $color-primary;
         box-shadow: 0 0 0 3px rgba(71, 35, 113, 0.12);
     }
+
+    &:disabled {
+        background: #f3f4f6;
+        color: $color-text-muted;
+        cursor: not-allowed;
+    }
+}
+
+.wishes-form-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: $color-text-muted;
 }
 
 .wishes-form-creneaux-hint {

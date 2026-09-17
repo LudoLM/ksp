@@ -25,6 +25,11 @@
             <p class="text-center">
                 <a href="{{ formUrl }}">Corriger mon dossier</a>
             </p>
+            {% if form.reviewedAt %}
+                <p class="block">
+                    Vous avez jusqu'au <strong>{{ form.reviewedAt|date_modify('+30 days')|date('d/m/Y') }}</strong> pour transmettre les corrections. Passé ce délai, le dossier sera automatiquement clôturé et vous devrez soumettre une nouvelle demande.
+                </p>
+            {% endif %}
             <p>
                 Cordialement,<br><br>
                 L'équipe Kiné Sport Santé

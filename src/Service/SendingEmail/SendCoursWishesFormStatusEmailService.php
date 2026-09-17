@@ -17,7 +17,7 @@ readonly class SendCoursWishesFormStatusEmailService
     ) {
     }
 
-    public function send(CoursWishesForm $form, ?string $registrationToken = null): void
+    public function send(CoursWishesForm $form, ?string $registrationToken = null, ?string $correctionToken = null): void
     {
         $notification = StatusCoursWishesFormEnum::VALIDE->value === $form->getStatus()
             ? $this->buildApprovedNotification($form, $registrationToken)
@@ -28,7 +28,7 @@ readonly class SendCoursWishesFormStatusEmailService
                 parameters: [
                     'form' => $form,
                     'reason' => $form->getCorrectionReason(),
-                    'formUrl' => $this->baseUrl.'/mon-dossier-inscription',
+                    'formUrl' => $this->baseUrl.'/demandeInscription'.(null !== $correctionToken ? '?token='.$correctionToken : ''),
                 ]
             );
 
@@ -44,6 +44,8 @@ readonly class SendCoursWishesFormStatusEmailService
             parameters: [
                 'form' => $form,
                 'registerUrl' => null !== $registrationToken ? $this->baseUrl.'/register?token='.$registrationToken : null,
+                'registrationExpiresAt' => $form->getRegistrationTokenExpiresAt(),
+                'formUrl' => $this->baseUrl.'/demandeInscription',
             ]
         );
     }

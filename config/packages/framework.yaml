@@ -25,6 +25,14 @@ framework:
             policy: 'sliding_window'
             limit: 5
             interval: '15 minutes'
+        register_limiter:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '15 minutes'
+        register_prefill_limiter:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '15 minutes'
         certificate_upload_limiter:
             policy: 'sliding_window'
             limit: 5
@@ -33,6 +41,10 @@ framework:
             policy: 'sliding_window'
             limit: 5
             interval: '1 hour'
+        cours_wishes_form_prefill_limiter:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '15 minutes'
 
 when@test:
     framework:

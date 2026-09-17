@@ -34,4 +34,6 @@ class SubmitCoursWishesFormDTO
     #[Assert\NotBlank(message: 'modeReglement est requis')]
     #[Assert\Choice(callback: [PaymentMethodEnum::class, 'values'], message: 'modeReglement invalide')]
     public string $modeReglement;
+
+    public ?string $correctionToken = null;
 }

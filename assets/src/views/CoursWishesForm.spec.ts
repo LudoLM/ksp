@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createRouter, createMemoryHistory, type Router } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 
 // store/user -> store/calendar -> useActionCours -> @/router, qui initialise Vuetify
@@ -21,6 +22,25 @@ vi.mock('@/store/alert.ts', () => ({
 }))
 
 const jsonResponse = (data: unknown) => ({ ok: true, json: async () => data })
+
+const mountForm = async (path = '/demandeInscription'): Promise<{ wrapper: ReturnType<typeof mount>; router: Router }> => {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/demandeInscription', name: 'CoursWishesForm', component: CoursWishesForm },
+      // Route stub : Banner.vue référence toujours un router-link vers 'Calendrier',
+      // il doit exister dans le routeur de test pour que la résolution du lien ne plante pas.
+      { path: '/calendrier', name: 'Calendrier', component: { template: '<div />' } },
+    ],
+  })
+  await router.push(path)
+  await router.isReady()
+
+  const wrapper = mount(CoursWishesForm, { global: { plugins: [router] } })
+  await new Promise((resolve) => setTimeout(resolve, 0))
+
+  return { wrapper, router }
+}
 
 describe('CoursWishesForm.vue', () => {
   beforeEach(() => {
@@ -49,8 +69,7 @@ describe('CoursWishesForm.vue', () => {
   })
 
   it('loads the available créneaux and packs on mount, listing alternating cours on one card', async () => {
-    const wrapper = mount(CoursWishesForm)
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    const { wrapper } = await mountForm()
 
     expect(apiFetch).toHaveBeenCalledWith(expect.stringContaining('/season-planning/current'))
     expect(apiFetch).toHaveBeenCalledWith(expect.stringContaining('/packs'))
@@ -59,8 +78,7 @@ describe('CoursWishesForm.vue', () => {
   })
 
   it('disables the submit button until a créneau prioritaire is selected', async () => {
-    const wrapper = mount(CoursWishesForm)
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    const { wrapper } = await mountForm()
 
     await wrapper.find('input[name="nom"]').setValue('Dupont')
     await wrapper.find('input[name="prenom"]').setValue('Jean')
@@ -75,8 +93,7 @@ describe('CoursWishesForm.vue', () => {
   })
 
   it('toggling prioritaire then secondaire on the same créneau is mutually exclusive', async () => {
-    const wrapper = mount(CoursWishesForm)
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    const { wrapper } = await mountForm()
 
     const primaireButton = wrapper.find('.wishes-form-toggle--primaire')
     const secondaireButton = wrapper.find('.wishes-form-toggle--secondaire')
@@ -90,9 +107,8 @@ describe('CoursWishesForm.vue', () => {
     expect(secondaireButton.attributes('aria-pressed')).toBe('true')
   })
 
-  it('submits the form with the selected créneau and values', async () => {
-    const wrapper = mount(CoursWishesForm)
-    await new Promise((resolve) => setTimeout(resolve, 0))
+  it('submits the form with the selected créneau and values, then shows a confirmation panel instead of the form', async () => {
+    const { wrapper } = await mountForm()
 
     await wrapper.find('input[name="nom"]').setValue('Dupont')
     await wrapper.find('input[name="prenom"]').setValue('Jean')
@@ -116,10 +132,14 @@ describe('CoursWishesForm.vue', () => {
           creneauSecondaireId: null,
           packSouhaiteId: 1,
           modeReglement: 'CbComptant',
+          correctionToken: null,
         }),
       }),
     )
     expect(alertStore.setAlert).toHaveBeenCalledWith(expect.stringContaining('envoyé'), 'success')
+    expect(wrapper.find('form').exists()).toBe(false)
+    expect(wrapper.find('.wishes-form-success').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Dossier envoyé')
   })
 
   it('hides nom/prenom/telephone fields for an authenticated submitter and omits them from the payload', async () => {
@@ -138,8 +158,7 @@ describe('CoursWishesForm.vue', () => {
       coursWishesForm: null,
     })
 
-    const wrapper = mount(CoursWishesForm)
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    const { wrapper } = await mountForm()
 
     expect(wrapper.find('input[name="nom"]').exists()).toBe(false)
     expect(wrapper.find('input[name="prenom"]').exists()).toBe(false)
@@ -163,8 +182,92 @@ describe('CoursWishesForm.vue', () => {
           creneauSecondaireId: null,
           packSouhaiteId: 1,
           modeReglement: 'CbComptant',
+          correctionToken: null,
         }),
       }),
     )
+  })
+
+  it('prefills the dossier owner data from the correction token, ignoring the currently authenticated session', async () => {
+    useUserStore().setUser({
+      id: 1,
+      email: 'admin-en-test@example.com',
+      nom: 'Admin',
+      prenom: 'Test',
+      telephone: '0600000000',
+      commune: '',
+      adresse: '',
+      codePostal: '',
+      nombreCours: 0,
+      roles: ['ROLE_ADMIN'],
+      certificatMedical: null,
+      coursWishesForm: null,
+    })
+
+    vi.mocked(apiFetch).mockImplementation((url: string) => {
+      if (url.includes('/cours-wishes-form/prefill')) {
+        return Promise.resolve(jsonResponse({
+          email: 'marie@example.com',
+          nom: 'Martin',
+          prenom: 'Marie',
+          telephone: '0698765432',
+          hasAccount: false,
+        })) as any
+      }
+      if (url.includes('/season-planning/current')) {
+        return Promise.resolve(jsonResponse([
+          { id: 1, daySelected: 4, timeSelected: '18:00:00', typeCoursOptions: [{ libelle: 'Pilates Début' }] },
+        ])) as any
+      }
+      if (url.includes('/packs')) {
+        return Promise.resolve(jsonResponse([{ id: 1, nom: 'Carte de 5 séances', tarif: 80 }])) as any
+      }
+      return Promise.resolve(jsonResponse({})) as any
+    })
+
+    const { wrapper } = await mountForm('/demandeInscription?token=raw-correction-token')
+
+    expect(apiFetch).toHaveBeenCalledWith(expect.stringContaining('/cours-wishes-form/prefill?token=raw-correction-token'))
+    expect((wrapper.find('input[name="email"]').element as HTMLInputElement).value).toBe('marie@example.com')
+    expect((wrapper.find('input[name="email"]').element as HTMLInputElement).disabled).toBe(true)
+    expect(wrapper.text()).toContain('ne peut pas être modifié')
+    expect((wrapper.find('input[name="nom"]').element as HTMLInputElement).value).toBe('Martin')
+    expect((wrapper.find('input[name="prenom"]').element as HTMLInputElement).value).toBe('Marie')
+    expect((wrapper.find('input[name="telephone"]').element as HTMLInputElement).value).toBe('0698765432')
+
+    await wrapper.find('.wishes-form-toggle--primaire').trigger('click')
+    await wrapper.find('select[name="packSouhaiteId"]').setValue('1')
+    await wrapper.find('form').trigger('submit.prevent')
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(apiFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/cours-wishes-form'),
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('"correctionToken":"raw-correction-token"'),
+      }),
+    )
+  })
+
+  it('shows a persistent error panel instead of the form when the correction token is invalid', async () => {
+    vi.mocked(apiFetch).mockImplementation((url: string) => {
+      if (url.includes('/cours-wishes-form/prefill')) {
+        return Promise.resolve({ ok: false, json: async () => ({ error: 'Lien invalide ou expiré.' }) }) as any
+      }
+      if (url.includes('/season-planning/current')) {
+        return Promise.resolve(jsonResponse([])) as any
+      }
+      if (url.includes('/packs')) {
+        return Promise.resolve(jsonResponse([])) as any
+      }
+      return Promise.resolve(jsonResponse({})) as any
+    })
+
+    const { wrapper } = await mountForm('/demandeInscription?token=expired-token')
+
+    expect(alertStore.setAlert).toHaveBeenCalledWith('Lien invalide ou expiré.', 'error')
+    expect(wrapper.find('form').exists()).toBe(false)
+    expect(wrapper.find('.wishes-form-error').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Lien invalide ou expiré')
   })
 })

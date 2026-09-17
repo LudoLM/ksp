@@ -24,6 +24,6 @@ final readonly class SendCoursWishesFormStatusEmailMessageHandler
             throw new \Exception('Dossier d\'inscription non trouvé');
         }
 
-        $this->sendCoursWishesFormStatusEmailService->send($form, $message->getRegistrationToken());
+        $this->sendCoursWishesFormStatusEmailService->send($form, $message->getRegistrationToken(), $message->getCorrectionToken());
     }
 }

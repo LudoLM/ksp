@@ -6,10 +6,12 @@ use App\DTO\ResetPasswordDTO;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Serializer\ResetPasswordDTOToUserDenormalizer;
+use App\Service\Security\SecureTokenService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 
 class ResetPasswordSecurityTest extends TestCase
 {
@@ -21,10 +23,12 @@ class ResetPasswordSecurityTest extends TestCase
     {
         $this->passwordHasher = $this->createMock(UserPasswordHasherInterface::class);
         $this->userRepository = $this->createMock(UserRepository::class);
+        $secureTokenService = new SecureTokenService($this->createMock(TokenGeneratorInterface::class));
 
         $this->denormalizer = new ResetPasswordDTOToUserDenormalizer(
             $this->passwordHasher,
-            $this->userRepository
+            $this->userRepository,
+            $secureTokenService
         );
     }
 

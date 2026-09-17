@@ -25,7 +25,9 @@ readonly class CreateUserDTOToUserDenormalizer implements DenormalizerInterface
             $user = new User();
             $user->setRoles(['ROLE_USER']);
             $user->setNombreCours(0);
-            $user->setEmail($data->email);
+            if (null !== $data->email) {
+                $user->setEmail($data->email);
+            }
             //         Hashage du mot de passe
             $hashedPassword = $this->userPasswordHasher->hashPassword(
                 $user,
@@ -35,9 +37,15 @@ readonly class CreateUserDTOToUserDenormalizer implements DenormalizerInterface
             $user->setIsPrioritized(false);
         }
 
-        $user->setPrenom($data->prenom);
-        $user->setNom($data->nom);
-        $user->setTelephone($data->telephone);
+        if (null !== $data->prenom) {
+            $user->setPrenom($data->prenom);
+        }
+        if (null !== $data->nom) {
+            $user->setNom($data->nom);
+        }
+        if (null !== $data->telephone) {
+            $user->setTelephone($data->telephone);
+        }
         $user->setAdresse($data->adresse);
         $user->setCodePostal($data->cp);
         $user->setCommune($data->commune);

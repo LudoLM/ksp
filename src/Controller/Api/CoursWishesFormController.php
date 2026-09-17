@@ -7,13 +7,15 @@ namespace App\Controller\Api;
 use App\DTO\SubmitCoursWishesFormDTO;
 use App\Entity\CoursWishesForm;
 use App\Entity\User;
+use App\Enum\StatusCoursWishesFormEnum;
+use App\Exception\InvalidCoursWishesFormSubmissionException;
 use App\Helper\SaisonHelper;
 use App\Repository\CoursWishesFormRepository;
-use App\Repository\PackRepository;
-use App\Repository\SeasonPlanningSlotRepository;
 use App\Service\CoursWishesFormService\FetchCoursWishesFormService;
-use App\Service\CoursWishesFormService\SubmitCoursWishesFormService;
+use App\Service\CoursWishesFormService\ResolveWishesFormByTokenService;
+use App\Service\CoursWishesFormService\SubmitCoursWishesFormRequestService;
 use App\Service\CoursWishesFormService\ValidateCoursWishesFormService;
+use App\Service\Security\RateLimitGuard;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,33 +32,43 @@ class CoursWishesFormController extends AbstractController
     private const int LIMIT_PER_PAGE = 15;
 
     public function __construct(
-        private readonly SubmitCoursWishesFormService $submitService,
+        private readonly SubmitCoursWishesFormRequestService $submitCoursWishesFormRequestService,
         private readonly FetchCoursWishesFormService $fetchService,
         private readonly ValidateCoursWishesFormService $validateService,
         private readonly CoursWishesFormRepository $repository,
-        private readonly PackRepository $packRepository,
-        private readonly SeasonPlanningSlotRepository $seasonPlanningSlotRepository,
+        private readonly ResolveWishesFormByTokenService $resolveWishesFormByTokenService,
         private readonly RateLimiterFactory $coursWishesFormSubmitLimiter,
+        private readonly RateLimiterFactory $coursWishesFormPrefillLimiter,
+        private readonly RateLimitGuard $rateLimitGuard,
     ) {
     }
 
     #[Route('api/public/cours-wishes-form', name: 'api_cours_wishes_form_submit', methods: ['POST'])]
     public function submit(#[MapRequestPayload] SubmitCoursWishesFormDTO $dto, Request $request): JsonResponse
     {
-        $user = $this->getUser();
+        $sessionUser = $this->getUser();
+        $effectiveUser = $sessionUser instanceof User ? $sessionUser : null;
+        $targetForm = null;
 
-        // Seules les soumissions anonymes (sans compte) sont limitées : une
-        // resoumission par un utilisateur déjà connecté n'a pas besoin d'être
-        // throttlée, elle est déjà protégée par l'authentification.
-        if (!$user instanceof User) {
-            $limiter = $this->coursWishesFormSubmitLimiter->create($request->getClientIp() ?? 'unknown');
-            if (!$limiter->consume(1)->isAccepted()) {
-                return new JsonResponse(['error' => 'Trop de tentatives. Veuillez réessayer plus tard.'], Response::HTTP_TOO_MANY_REQUESTS);
+        if (!$sessionUser instanceof User) {
+            $response = $this->rateLimitGuard->checkOrRespondWithErrorShape($this->coursWishesFormSubmitLimiter, $request->getClientIp() ?? 'unknown', 'Trop de tentatives. Veuillez réessayer plus tard.');
+            if ($response instanceof JsonResponse) {
+                return $response;
             }
         }
 
+        if (null !== $dto->correctionToken) {
+            $targetForm = $this->resolveWishesFormByTokenService->resolveByCorrectionToken($dto->correctionToken);
+            if (!$targetForm instanceof CoursWishesForm) {
+                return new JsonResponse(['error' => 'Lien invalide ou expiré.'], Response::HTTP_NOT_FOUND);
+            }
+            $effectiveUser = $targetForm->getUser();
+        }
+
         try {
-            return $this->submitForm($dto, $user instanceof User ? $user : null, filledByAdmin: false);
+            return $this->submitForm($dto, $effectiveUser, filledByAdmin: false, targetForm: $targetForm);
+        } catch (InvalidCoursWishesFormSubmissionException $exception) {
+            return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         } catch (UniqueConstraintViolationException) {
             return new JsonResponse(
                 ['error' => 'Un dossier existe déjà pour cet email pour cette saison. Contactez l\'administration pour le modifier.'],
@@ -71,6 +83,8 @@ class CoursWishesFormController extends AbstractController
     {
         try {
             return $this->submitForm($dto, $targetUser, filledByAdmin: true);
+        } catch (InvalidCoursWishesFormSubmissionException $exception) {
+            return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
         } catch (UniqueConstraintViolationException) {
             return new JsonResponse(
                 ['error' => 'Un dossier existe déjà pour cet email pour cette saison.'],
@@ -79,46 +93,40 @@ class CoursWishesFormController extends AbstractController
         }
     }
 
-    private function submitForm(SubmitCoursWishesFormDTO $dto, ?User $user, bool $filledByAdmin): JsonResponse
+    private function submitForm(SubmitCoursWishesFormDTO $dto, ?User $user, bool $filledByAdmin, ?CoursWishesForm $targetForm = null): JsonResponse
     {
-        $pack = $this->packRepository->find($dto->packSouhaiteId);
-        if (null === $pack) {
-            return new JsonResponse(['error' => 'Pack introuvable'], Response::HTTP_BAD_REQUEST);
+        $result = $this->submitCoursWishesFormRequestService->handle($dto, $user, $filledByAdmin, $targetForm);
+
+        if ($result->accountAlreadyExists) {
+            return $this->json(['id' => null, 'status' => StatusCoursWishesFormEnum::EN_ATTENTE->value], Response::HTTP_CREATED);
         }
 
-        if (!$user instanceof User) {
-            if (null === $dto->nom || '' === trim($dto->nom)) {
-                return new JsonResponse(['error' => 'Le nom est requis.'], Response::HTTP_BAD_REQUEST);
-            }
-            if (null === $dto->prenom || '' === trim($dto->prenom)) {
-                return new JsonResponse(['error' => 'Le prénom est requis.'], Response::HTTP_BAD_REQUEST);
-            }
-            if (null === $dto->telephone || '' === trim($dto->telephone)) {
-                return new JsonResponse(['error' => 'Le téléphone est requis.'], Response::HTTP_BAD_REQUEST);
-            }
+        return $this->json([
+            'id' => $user instanceof User ? $result->form()->getId() : null,
+            'status' => $result->form()->getStatus(),
+        ], Response::HTTP_CREATED);
+    }
+
+    #[Route('api/public/cours-wishes-form/prefill', name: 'api_cours_wishes_form_prefill', methods: ['GET'])]
+    public function prefill(Request $request, #[MapQueryParameter] string $token): JsonResponse
+    {
+        $response = $this->rateLimitGuard->checkOrRespondWithErrorShape($this->coursWishesFormPrefillLimiter, $request->getClientIp() ?? 'unknown', 'Trop de tentatives. Veuillez réessayer plus tard.');
+        if ($response instanceof JsonResponse) {
+            return $response;
         }
 
-        $creneauPrimaire = $this->seasonPlanningSlotRepository->find($dto->creneauPrimaireId);
-        if (null === $creneauPrimaire) {
-            return new JsonResponse(['error' => 'Créneau prioritaire introuvable'], Response::HTTP_BAD_REQUEST);
+        $form = $this->resolveWishesFormByTokenService->resolveByCorrectionToken($token);
+        if (!$form instanceof CoursWishesForm) {
+            return new JsonResponse(['error' => 'Lien invalide ou expiré.'], Response::HTTP_NOT_FOUND);
         }
 
-        $creneauSecondaire = null !== $dto->creneauSecondaireId ? $this->seasonPlanningSlotRepository->find($dto->creneauSecondaireId) : null;
-
-        $form = $this->submitService->submit(
-            email: $dto->email,
-            user: $user,
-            nom: $dto->nom,
-            prenom: $dto->prenom,
-            telephone: $dto->telephone,
-            creneauPrimaire: $creneauPrimaire,
-            creneauSecondaire: $creneauSecondaire,
-            packSouhaite: $pack,
-            modeReglement: $dto->modeReglement,
-            filledByAdmin: $filledByAdmin,
-        );
-
-        return $this->json(['id' => $form->getId(), 'status' => $form->getStatus()], Response::HTTP_CREATED);
+        return new JsonResponse([
+            'email' => $form->getEmail(),
+            'nom' => $form->getContactNom(),
+            'prenom' => $form->getContactPrenom(),
+            'telephone' => $form->getContactTelephone(),
+            'hasAccount' => $form->getUser() instanceof User,
+        ]);
     }
 
     #[Route('api/cours-wishes-form', name: 'api_cours_wishes_form_mine', methods: ['GET'])]

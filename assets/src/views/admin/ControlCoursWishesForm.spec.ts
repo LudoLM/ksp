@@ -16,6 +16,12 @@ vi.mock('@/store/alert.ts', () => ({
     },
 }));
 
+const daysAgo = (days: number): string => {
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    return date.toISOString();
+};
+
 const sampleForm = (overrides: Record<string, unknown> = {}) => ({
     id: 12,
     email: 'test@test.fr',
@@ -24,7 +30,7 @@ const sampleForm = (overrides: Record<string, unknown> = {}) => ({
     contactTelephone: '0612345678',
     saison: '2026-2027',
     status: 'EnAttente',
-    submittedAt: '2026-09-02 10:00:00',
+    submittedAt: daysAgo(1),
     creneauPrimaire: { id: 9, daySelected: 1, timeSelected: '18:04', cours: 'Pilates Début' },
     creneauSecondaire: { id: 10, daySelected: 2, timeSelected: '19:05', cours: 'Stretching/Postural Ball' },
     packSouhaite: 'Pack 3 cours',
@@ -112,6 +118,30 @@ describe('ControlCoursWishesForm.vue', () => {
         expect(wrapper.text()).toContain('Créneau prioritaire manquant');
         expect(wrapper.find('.wf-btn--success').attributes('disabled')).toBeDefined();
         expect(wrapper.find('.wf-btn--danger-outline').attributes('disabled')).toBeUndefined();
+    });
+
+    it('shows the default "En attente" badge for a recently submitted dossier', async () => {
+        vi.mocked(apiFetch).mockResolvedValue(jsonResponse({
+            data: [sampleForm({ submittedAt: daysAgo(1) })],
+            metadata: { total_items: 1, current_page: 1, total_pages: 1 },
+        }) as unknown as Response);
+
+        const { wrapper } = await mountControlWishesForm();
+
+        expect(wrapper.find('.wf-badge--pending').text()).toBe('En attente');
+        expect(wrapper.find('.wf-badge--stale').exists()).toBe(false);
+    });
+
+    it('shows a stale badge with the day count once a dossier has been pending 7+ days', async () => {
+        vi.mocked(apiFetch).mockResolvedValue(jsonResponse({
+            data: [sampleForm({ submittedAt: daysAgo(9) })],
+            metadata: { total_items: 1, current_page: 1, total_pages: 1 },
+        }) as unknown as Response);
+
+        const { wrapper } = await mountControlWishesForm();
+
+        expect(wrapper.find('.wf-badge--stale').text()).toContain('9 j');
+        expect(wrapper.find('.wf-badge--pending').exists()).toBe(false);
     });
 
     it('shows the empty state when there is nothing pending', async () => {

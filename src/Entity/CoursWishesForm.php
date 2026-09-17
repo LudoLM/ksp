@@ -74,14 +74,26 @@ class CoursWishesForm implements RecipientInterface
 
     #[ORM\Column(nullable: true)]
     #[Groups(['wishes_form:read'])]
-    private ?\DateTimeImmutable $validatedAt = null;
+    private ?\DateTimeImmutable $reviewedAt = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private ?User $validatedBy = null;
+    private ?User $reviewedBy = null;
 
     #[ORM\Column]
     private bool $filledByAdmin = false;
+
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $registrationTokenHash = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $registrationTokenExpiresAt = null;
+
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $correctionTokenHash = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $correctionTokenExpiresAt = null;
 
     public function getId(): ?int
     {
@@ -268,26 +280,26 @@ class CoursWishesForm implements RecipientInterface
         return $this;
     }
 
-    public function getValidatedAt(): ?\DateTimeImmutable
+    public function getReviewedAt(): ?\DateTimeImmutable
     {
-        return $this->validatedAt;
+        return $this->reviewedAt;
     }
 
-    public function setValidatedAt(?\DateTimeImmutable $validatedAt): static
+    public function setReviewedAt(?\DateTimeImmutable $reviewedAt): static
     {
-        $this->validatedAt = $validatedAt;
+        $this->reviewedAt = $reviewedAt;
 
         return $this;
     }
 
-    public function getValidatedBy(): ?User
+    public function getReviewedBy(): ?User
     {
-        return $this->validatedBy;
+        return $this->reviewedBy;
     }
 
-    public function setValidatedBy(?User $validatedBy): static
+    public function setReviewedBy(?User $reviewedBy): static
     {
-        $this->validatedBy = $validatedBy;
+        $this->reviewedBy = $reviewedBy;
 
         return $this;
     }
@@ -300,6 +312,54 @@ class CoursWishesForm implements RecipientInterface
     public function setFilledByAdmin(bool $filledByAdmin): static
     {
         $this->filledByAdmin = $filledByAdmin;
+
+        return $this;
+    }
+
+    public function getRegistrationTokenHash(): ?string
+    {
+        return $this->registrationTokenHash;
+    }
+
+    public function setRegistrationTokenHash(?string $registrationTokenHash): static
+    {
+        $this->registrationTokenHash = $registrationTokenHash;
+
+        return $this;
+    }
+
+    public function getRegistrationTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->registrationTokenExpiresAt;
+    }
+
+    public function setRegistrationTokenExpiresAt(?\DateTimeImmutable $registrationTokenExpiresAt): static
+    {
+        $this->registrationTokenExpiresAt = $registrationTokenExpiresAt;
+
+        return $this;
+    }
+
+    public function getCorrectionTokenHash(): ?string
+    {
+        return $this->correctionTokenHash;
+    }
+
+    public function setCorrectionTokenHash(?string $correctionTokenHash): static
+    {
+        $this->correctionTokenHash = $correctionTokenHash;
+
+        return $this;
+    }
+
+    public function getCorrectionTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->correctionTokenExpiresAt;
+    }
+
+    public function setCorrectionTokenExpiresAt(?\DateTimeImmutable $correctionTokenExpiresAt): static
+    {
+        $this->correctionTokenExpiresAt = $correctionTokenExpiresAt;
 
         return $this;
     }

@@ -40,7 +40,7 @@ class SendCoursWishesFormStatusEmailServiceTest extends TestCase
         return $form;
     }
 
-    private function captureNotificationAndRecipient(CoursWishesForm $form, ?string $registrationToken = null): array
+    private function captureNotificationAndRecipient(CoursWishesForm $form, ?string $registrationToken = null, ?string $correctionToken = null): array
     {
         $capturedNotification = null;
         $capturedRecipient = null;
@@ -53,7 +53,7 @@ class SendCoursWishesFormStatusEmailServiceTest extends TestCase
                 $capturedRecipient = $recipient;
             });
 
-        $this->service->send($form, $registrationToken);
+        $this->service->send($form, $registrationToken, $correctionToken);
 
         return [$capturedNotification, $capturedRecipient];
     }
@@ -61,6 +61,8 @@ class SendCoursWishesFormStatusEmailServiceTest extends TestCase
     public function testSendForAnAnonymousApprovedFormIncludesTheRegisterLink(): void
     {
         $form = $this->createForm(StatusCoursWishesFormEnum::VALIDE->value);
+        $expiresAt = new \DateTimeImmutable('+30 days');
+        $form->setRegistrationTokenExpiresAt($expiresAt);
 
         [$notification, $recipient] = $this->captureNotificationAndRecipient($form, 'raw-registration-token');
 
@@ -68,6 +70,8 @@ class SendCoursWishesFormStatusEmailServiceTest extends TestCase
         $this->assertSame('emails/coursWishesFormApproved.html.twig', $notification->getTemplate());
         $this->assertSame($form, $notification->getParameters()['form']);
         $this->assertSame('https://kine-sport-sante.fr/register?token=raw-registration-token', $notification->getParameters()['registerUrl']);
+        $this->assertSame($expiresAt, $notification->getParameters()['registrationExpiresAt']);
+        $this->assertSame('https://kine-sport-sante.fr/demandeInscription', $notification->getParameters()['formUrl']);
         $this->assertSame($form, $recipient);
     }
 
@@ -79,18 +83,28 @@ class SendCoursWishesFormStatusEmailServiceTest extends TestCase
         [$notification] = $this->captureNotificationAndRecipient($form);
 
         $this->assertNull($notification->getParameters()['registerUrl']);
+        $this->assertNull($notification->getParameters()['registrationExpiresAt']);
     }
 
-    public function testSendForAFormNeedingCorrectionIncludesTheReasonAndFormLink(): void
+    public function testSendForAFormNeedingCorrectionIncludesTheReasonAndFormLinkWithToken(): void
     {
         $form = $this->createForm(StatusCoursWishesFormEnum::A_CORRIGER->value);
         $form->setCorrectionReason('Créneau primaire déjà complet');
 
-        [$notification] = $this->captureNotificationAndRecipient($form);
+        [$notification] = $this->captureNotificationAndRecipient($form, correctionToken: 'raw-correction-token');
 
         $this->assertSame('emails/coursWishesFormCorrection.html.twig', $notification->getTemplate());
         $this->assertSame('Créneau primaire déjà complet', $notification->getParameters()['reason']);
-        $this->assertSame('https://kine-sport-sante.fr/mon-dossier-inscription', $notification->getParameters()['formUrl']);
+        $this->assertSame('https://kine-sport-sante.fr/demandeInscription?token=raw-correction-token', $notification->getParameters()['formUrl']);
+    }
+
+    public function testSendForAFormNeedingCorrectionWithNoTokenOmitsTheQueryString(): void
+    {
+        $form = $this->createForm(StatusCoursWishesFormEnum::A_CORRIGER->value);
+
+        [$notification] = $this->captureNotificationAndRecipient($form);
+
+        $this->assertSame('https://kine-sport-sante.fr/demandeInscription', $notification->getParameters()['formUrl']);
     }
 
     public function testSendPropagatesExceptionFromNotificationManager(): void

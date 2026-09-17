@@ -49,20 +49,6 @@ class CoursWishesFormRepository extends ServiceEntityRepository
         return new Paginator($query, fetchJoinCollection: true);
     }
 
-    public function findValidatedForEmail(string $email, string $saison): ?CoursWishesForm
-    {
-        return $this->createQueryBuilder('f')
-            ->andWhere('f.email = :email')
-            ->andWhere('f.saison = :saison')
-            ->andWhere('f.status = :status')
-            ->andWhere('f.user IS NULL')
-            ->setParameter('email', $email)
-            ->setParameter('saison', $saison)
-            ->setParameter('status', StatusCoursWishesFormEnum::VALIDE->value)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
     public function findCurrentForUser(User $user, string $saison): ?CoursWishesForm
     {
         return $this->createQueryBuilder('f')
@@ -135,6 +121,43 @@ class CoursWishesFormRepository extends ServiceEntityRepository
             ->getResult();
 
         return array_column($rows, 'cnt', 'slotId');
+    }
+
+    /**
+     * Dossiers validés d'un prospect sans compte dont le lien d'inscription
+     * (token) est expiré : personne n'a finalisé l'inscription dans le délai,
+     * les données n'ont plus d'utilité.
+     *
+     * @return CoursWishesForm[]
+     */
+    public function findExpiredApprovals(): array
+    {
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.status = :status')
+            ->andWhere('f.user IS NULL')
+            ->andWhere('f.registrationTokenExpiresAt < :now')
+            ->setParameter('status', StatusCoursWishesFormEnum::VALIDE->value)
+            ->setParameter('now', new \DateTimeImmutable())
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Dossiers renvoyés en correction depuis plus de 30 jours sans resoumission
+     * (anonyme ou compte lié : l'email de correction prévient tout le monde du
+     * même délai, cf. coursWishesFormCorrection.html.twig).
+     *
+     * @return CoursWishesForm[]
+     */
+    public function findStaleCorrections(): array
+    {
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.status = :status')
+            ->andWhere('f.reviewedAt < :threshold')
+            ->setParameter('status', StatusCoursWishesFormEnum::A_CORRIGER->value)
+            ->setParameter('threshold', new \DateTimeImmutable('-30 days'))
+            ->getQuery()
+            ->getResult();
     }
 
     public function hasValidatedFormForCurrentSaison(User $user): bool

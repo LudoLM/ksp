@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Vous avez déjà un compte</title>
+</head>
+<body>
+<div class="body">
+    <div class="container">
+        <div class="header text-center">
+        </div>
+        <div class="content">
+            <p class="text-center">Bonjour {{ user.prenom }}!</p>
+            <p class="block">
+                Vous avez fait une demande d'inscription, mais vous avez déjà un compte chez Kiné Sport Santé avec cette adresse email.
+            </p>
+            <p class="block">
+                Connectez-vous pour faire votre demande pour la nouvelle saison :
+            </p>
+            <p class="text-center">
+                <a href="{{ loginUrl }}">Me connecter</a>
+            </p>
+            <p>
+                Cordialement,<br><br>
+                L'équipe Kiné Sport Santé
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
