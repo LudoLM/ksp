@@ -95,6 +95,7 @@ const redirectToLogin = () => {
                 v-else
                 buy-button-id="buy_btn_1Q4N2pC6kEhASj1en2q72S6F"
                 publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
+                :client-reference-id="String(userId)"
             >
             </stripe-buy-button>
         </div>
@@ -128,6 +129,7 @@ const redirectToLogin = () => {
                 v-else
                 buy-button-id="buy_btn_1Q46sYC6kEhASj1eduGCytqN"
                 publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
+                :client-reference-id="String(userId)"
             >
             </stripe-buy-button>
         </div>
@@ -161,6 +163,7 @@ const redirectToLogin = () => {
               v-else
               buy-button-id="buy_btn_1Q4Mu7C6kEhASj1e5j6L1Tkm"
               publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
+              :client-reference-id="String(userId)"
            >
            </stripe-buy-button>
       </div>
@@ -194,6 +197,7 @@ const redirectToLogin = () => {
               v-else
               buy-button-id="buy_btn_1RfkFTC6kEhASj1enOcDtmph"
               publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
+              :client-reference-id="String(userId)"
           >
           </stripe-buy-button>
       </div>
@@ -227,6 +231,7 @@ const redirectToLogin = () => {
               v-else
               buy-button-id="buy_btn_1RfkTNC6kEhASj1edXN07ZtV"
               publishable-key="pk_test_51Q45O6C6kEhASj1e49iRAPuqTqdAIDafacfenfCYOQcF9vYhHJAL6CP9BsnAmLo975maHjDsZJloJX1okVSMMDX200uKVPVN6r"
+              :client-reference-id="String(userId)"
           >
           </stripe-buy-button>
       </div>

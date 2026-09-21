@@ -14,4 +14,5 @@ return [
     'MAILER_DSN' => null,
     'MERCURE_JWT_SECRET' => null,
     'STRIPE_PRIVATE_KEY' => null,
+    'STRIPE_WEBHOOK_SECRET' => null,
 ];

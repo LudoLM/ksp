@@ -21,7 +21,7 @@ const handleStripePayment = async () => {
 
     const data = await response.json();
     if (response.ok) {
-        userNombreCours.value = data.userQuantity;
+        userStore.updateUserNombreCours(data.userQuantity);
         alertStore.setAlert(data.message, "success");
     } else {
       alertStore.setAlert(data.message, "error");

@@ -7,6 +7,7 @@ parameters:
     timezone: 'Europe/Paris'
     app_url: '%env(APP_URL)%'
     app.cleanup_cron: '0 2 * * *' # Every day at 2:00 AM
+    app.stripe_webhook_secret: '%env(STRIPE_WEBHOOK_SECRET)%'
 
 services:
     # default configuration for services in *this* file
@@ -83,6 +84,10 @@ services:
     Stripe\StripeClient:
         arguments:
             - { api_key: '%env(STRIPE_PRIVATE_KEY)%' }
+
+    App\Controller\Api\StripeWebhookController:
+        arguments:
+            $webhookSecret: '%app.stripe_webhook_secret%'
     
     _instanceof:
         App\Service\Interface\Notification\NotificationSenderInterface:

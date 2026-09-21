@@ -118,6 +118,18 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return new Paginator($query->getQuery());
     }
 
+    public function addCredits(int $userId, int $credits): void
+    {
+        $this->createQueryBuilder('u')
+            ->update()
+            ->set('u.nombreCours', 'u.nombreCours + :credits')
+            ->where('u.id = :id')
+            ->setParameter('credits', $credits)
+            ->setParameter('id', $userId)
+            ->getQuery()
+            ->execute();
+    }
+
     public function resetAllUsersCounterCours()
     {
         $qb = $this->createQueryBuilder('u')

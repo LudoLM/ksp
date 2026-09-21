@@ -4,6 +4,10 @@ import CoursLineProfile from "./CoursLineProfile.vue";
 import {computed, ref} from "vue";
 import {useUnSubscription} from "../utils/useSubscribing";
 import SmartPagination from "./admin/SmartPagination.vue";
+import {useUserStore} from "../store/user";
+import {alertStore} from "../store/alert";
+
+const userStore = useUserStore();
 
 const props = defineProps({
     userCoursHistory: {
@@ -32,7 +36,7 @@ const handleUnsubscription = async (coursId) => {
 
         // Mettre à jour le store si c'est le profil de l'utilisateur connecté
         if (!props.isViewingOtherUser) {
-            userStore.userNombreCours = result.userCoursQuantity;
+            userStore.updateUserNombreCours(result.userCoursQuantity);
         }
 
         alertStore.setAlert("Désinscription réussie", "success");

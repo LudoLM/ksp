@@ -27,6 +27,7 @@ grumphp:
                 priority: 0
             configuration: 'phpstan.neon'
             memory_limit: '216M'
+            use_grumphp_paths: false
         #phpcsfixer2:
             #metadata:
                 #priority: 0
