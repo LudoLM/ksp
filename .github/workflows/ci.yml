@@ -34,14 +34,16 @@ jobs:
 
       - uses: php-actions/composer@v6
         with:
-          php_version: '8.4'
+          php_version: '8.5'
       - uses: php-actions/composer@v6
+        with:
+          php_version: '8.5'
         env:
           APP_SECRET: ${{ secrets.APP_SECRET }}
       - uses: php-actions/phpunit@master
         with:
           version: 11.5
-          php_version: '8.4'
+          php_version: '8.5'
           php_extensions: xdebug
           bootstrap: vendor/autoload.php
           configuration: phpunit.xml
@@ -69,12 +71,13 @@ jobs:
 
       - uses: php-actions/composer@v6 # or alternative dependency management
         with:
-          php_version: '8.4'
+          php_version: '8.5'
         env:
           APP_SECRET: ${{ secrets.APP_SECRET }}
       - uses: php-actions/phpstan@v3
         with:
           path: src/
+          php_version: '8.5'
           
   php-cs-fixer:
     name: PHP-CS-Fixer
@@ -102,7 +105,7 @@ jobs:
           echo "CADDY_MERCURE_JWT_SECRET=${{ secrets.CADDY_MERCURE_JWT_SECRET }}" >> .env
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           coverage: none
       - run: composer install --no-progress --ansi
         env:
