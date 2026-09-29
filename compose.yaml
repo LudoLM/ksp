@@ -21,7 +21,7 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
-      - /home/debian/projets/ksp/frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
       # Plus de montage de /home/debian/projets/caddy (conf.d) : le routage des
       # domaines vit désormais dans le projet reverse-proxy autonome.
     # Plus aucune publication de port hôte : php n'est joignable que par le
@@ -83,7 +83,7 @@ services:
     depends_on:
       - database
     healthcheck:
-      test: ["CMD", "pgrep", "-f", "messenger:consume"]
+      test: ["CMD-SHELL", "grep -q messenger:consume /proc/1/cmdline"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -104,7 +104,7 @@ services:
     depends_on:
       - database
     healthcheck:
-      test: ["CMD", "pgrep", "-f", "messenger:consume"]
+      test: ["CMD-SHELL", "grep -q messenger:consume /proc/1/cmdline"]
       interval: 30s
       timeout: 10s
       retries: 3

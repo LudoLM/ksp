@@ -1,5 +1,6 @@
 # Executables (local)
 DOCKER_COMP = docker compose
+DC_PROD = docker compose -f compose.yaml -f compose.prod.yaml --env-file .env --env-file .env.local
 
 # Docker containers
 PHP_CONT = $(DOCKER_COMP) exec php
@@ -11,7 +12,7 @@ SYMFONY  = $(PHP) bin/console
 
 # Misc
 .DEFAULT_GOAL = help
-.PHONY        : help build up start down logs sh composer vendor sf cc test
+.PHONY        : help build up start down deploy logs sh composer vendor sf cc test
 
 ## —— 🎵 🐳 The Symfony Docker Makefile 🐳 🎵 ——————————————————————————————————
 help: ## Outputs this help screen
@@ -22,7 +23,7 @@ build: ## Builds the Docker images
 	@$(DOCKER_COMP) build --pull --no-cache
 
 up: ## Start the docker hub in detached mode (no logs)
-	@$(DOCKER_COMP) --env-file .env.local up --detach
+	@$(DOCKER_COMP) --env-file .env --env-file .env.local up --detach
 
 down: ## Stop the docker hub
 	@$(DOCKER_COMP) down --remove-orphans
@@ -30,6 +31,10 @@ down: ## Stop the docker hub
 start: build up ## Build and start the containers
 
 restart: down start ## Restart the docker hub
+
+deploy: ## Build + (re)start prod stack
+	@$(DC_PROD) build --pull
+	@$(DC_PROD) up -d --wait
 
 logs: ## Show live logs
 	@$(DOCKER_COMP) logs --tail=0 --follow

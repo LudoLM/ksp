@@ -74,11 +74,12 @@ COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
 
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
 
-# Prod FrankenPHP image
-FROM frankenphp_base AS frankenphp_prod
+# Prod FrankenPHP image (base: vendor/ + sources, no front assets yet)
+FROM frankenphp_base AS frankenphp_prod_base
 
 ENV APP_ENV=prod
-ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
+
+# ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
@@ -94,9 +95,26 @@ RUN set -eux; \
 COPY --link . ./
 RUN rm -Rf frankenphp/
 
+FROM node:22-alpine AS node_build
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY --from=frankenphp_prod_base /app/vendor/symfony/stimulus-bundle/assets ./vendor/symfony/stimulus-bundle/assets
+COPY --from=frankenphp_prod_base /app/vendor/symfony/ux-vue/assets ./vendor/symfony/ux-vue/assets
+RUN npm ci
+
+COPY --from=frankenphp_prod_base /app ./
+RUN npm run build
+
+# Prod FrankenPHP image (final: vendor/ + sources + front assets)
+FROM frankenphp_prod_base AS frankenphp_prod
+
+COPY --from=node_build /app/public/build ./public/build
+
 RUN set -eux; \
 	mkdir -p var/cache var/log; \
-	composer dump-autoload --classmap-authoritative --no-dev; \
+	composer dump-autoload --no-dev; \
 	composer dump-env prod; \
-	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
+

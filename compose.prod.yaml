@@ -5,24 +5,38 @@ services:
       context: .
       target: frankenphp_prod
     environment:
+      APP_ENV: prod
       APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+    volumes:
+      - ./config/secrets/prod/prod.decrypt.private.php:/app/config/secrets/prod/prod.decrypt.private.php:ro
 
   messenger-worker:
     build:
       context: .
       target: frankenphp_prod
+    command: sh -c "php /app/bin/console cache:warmup --env=prod --no-interaction || true; exec php /app/bin/console messenger:consume async --time-limit=3600 -q"
     environment:
       APP_SECRET: ${APP_SECRET}
       APP_ENV: prod
-      LOG_LEVEL: -q
+      MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
+      MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}/.well-known/mercure}
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
+    volumes:
+      - ./config/secrets/prod/prod.decrypt.private.php:/app/config/secrets/prod/prod.decrypt.private.php:ro
 
   scheduler-worker:
     build:
       context: .
       target: frankenphp_prod
+    # cf. commentaire sur messenger-worker
+    command: sh -c "php /app/bin/console cache:warmup --env=prod --no-interaction || true; exec php /app/bin/console messenger:consume scheduler_default --time-limit=3600 -q"
     environment:
       APP_SECRET: ${APP_SECRET}
       APP_ENV: prod
-      LOG_LEVEL: -q
+      MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
+      MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}/.well-known/mercure}
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
+    volumes:
+      - ./config/secrets/prod/prod.decrypt.private.php:/app/config/secrets/prod/prod.decrypt.private.php:ro
